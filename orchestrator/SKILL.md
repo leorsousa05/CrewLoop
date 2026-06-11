@@ -203,15 +203,15 @@ Context gathered. Brief complete.
 ## Task Brief
 [complete brief content from Step 3]
 
-**O que você gostaria de fazer?**
+**What would you like to do?**
 
-- **[A] Enviar para Architect** — Criar specs e análise arquitetural (SEMPRE o primeiro passo)
+- **[A] Send to Architect** — Create specs and architectural analysis (ALWAYS the first step)
 ```
 
 After architect creates specs, navigation options will include:
-- **[D] Enviar para Designer** — Direção estética e especificação de design (se houver UI)
-- **[E] Enviar para Engineer** — Implementação (modo BUILD)
-- **[O] Voltar ao Orchestrator** — Ajustar escopo ou requisitos
+- **[D] Send to Designer** — Aesthetic direction and design specification (if there is UI)
+- **[E] Send to Engineer** — Implementation (BUILD mode)
+- **[O] Return to Orchestrator** — Adjust scope or requirements
 
 **Critical routing rules:**
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions. The specs folder is the single source of truth.
