@@ -25,7 +25,9 @@ O ponto de entrada de qualquer tarefa. O orchestrator não escreve código, não
 - Identifica o tipo de tarefa (feature, bug fix, redesign, refactor)
 - Pergunta sobre UI/UX quando relevante (estilo visual, animações, público-alvo)
 - Produz um **brief estruturado** com todos os requisitos
-- **Sempre roteia para o architect primeiro** — nenhuma tarefa pula a criação de specs
+- **SEMPRE roteia para o architect** — não há exceções, não há escolha
+
+**Regra de ouro:** O orchestrator NUNCA envia direto para designer ou engineer. Architect é sempre o próximo passo.
 
 **Quando ativa:** Sempre que o usuário pedir qualquer coisa relacionada a código, design, ou mudanças no projeto.
 
@@ -167,11 +169,12 @@ O coordenador de release. O shipper **empacota e envia** o trabalho feito.
 ```
 
 **Regras do fluxo:**
-1. **Architect é SEMPRE o primeiro passo** — nenhuma tarefa pula specs
-2. **Designer vem antes do engineer** — nada de UI é codado sem direção estética
-3. **Engineer nunca faz git** — shipper é o único que toca no repositório
-4. **Specs são arquivados** — `specs/changes/` vira `specs/archive/` no commit
-5. **Todas as skills voltam ao orchestrator** — ele é o hub central
+1. **Orchestrator SEMPRE envia para Architect primeiro** — nunca envia direto para Designer ou Engineer
+2. **Architect é o gatekeeper** — cria specs e decide se roteia para Designer (UI/frontend) ou Engineer (backend/código)
+3. **Designer atua ANTES do Engineer** — quando há UI, o designer cria a especificação visual antes do engineer implementar
+4. **Engineer nunca faz git** — shipper é o único que toca no repositório
+5. **Specs são arquivados** — `specs/changes/` vira `specs/archive/` no commit
+6. **Todas as skills voltam ao orchestrator** — ele é o hub central
 
 ## Instalação
 
