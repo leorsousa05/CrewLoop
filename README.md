@@ -11,7 +11,7 @@ So I decided to create a **team of specialized agents**, where each one has ONE 
 - **Nothing starts without context** — the orchestrator ensures all requirements are collected
 - **Nothing is implemented without specs** — the architect creates technical specifications for everything, even bug fixes
 - **Nothing is coded without design** — the designer defines aesthetic direction before the engineer touches the code
-- **Nothing is shipped without review** — the shipper validates commits, messages, and archives specs
+- **Nothing is shipped without review** — the reviewer inspects code quality, and the shipper validates commits and archives specs
 
 ## The Team
 
@@ -99,11 +99,36 @@ The hands of the team. The engineer **implements specs with precision** and noth
 
 **What it DOES NOT do:**
 - **Never does git operations** (commit, push, branch, merge) — that's the shipper's job
+- **Never reviews their own code** — that's the reviewer's job
 - Never redesigns architecture without architect approval
 - Never skips specs or invents contracts mid-implementation
 - Never writes vague pseudocode
 
 **When it activates:** After the architect (and designer, if there is UI). Receives ready specs and transforms them into code.
+
+---
+
+### 🔍 Reviewer — Code Review & Quality Gate
+**File:** `reviewer/SKILL.md`
+
+The quality gate of the team. The reviewer **inspects every change** before it reaches the repository.
+
+**What it does:**
+- Reads the diff and every changed file for full context
+- Checks **spec compliance** — does the code match the architect's specs?
+- Checks **code quality** — naming, complexity, duplication, consistency
+- Checks **test coverage** — are edge cases and error paths tested?
+- Checks **security** — secrets, injection risks, auth, exposure
+- Checks **performance** — N+1 queries, re-renders, memory leaks
+- Checks **error handling** — not just the happy path
+- Checks **AI artifacts** — removes "Written by AI", placeholders, console.log
+- Produces a structured review report with PASS/WARN/FAIL verdicts
+
+**What it DOES NOT do:**
+- **Never writes code** — reports issues, engineer fixes them
+- **Never runs git operations** — that's the shipper's job
+
+**When it activates:** After the engineer completes BUILD. Routes to shipper if clean, or back to engineer/architect if issues are found.
 
 ---
 
@@ -113,11 +138,10 @@ The hands of the team. The engineer **implements specs with precision** and noth
 The release coordinator. The shipper **packages and ships** the completed work.
 
 **What it does:**
+- Receives review report from reviewer (optional but helpful context)
 - Analyzes the diff and categorizes changes (feat, fix, refactor, docs, chore, etc.)
-- Generates **commit messages in the Conventional Commits standard** with rigorous validation
+- Generates **commit messages in the Conventional Commits standard** with detailed bodies derived from the diff
 - Creates branches in the `type/short-description` format
-- Detects and prevents secret commits (API keys, tokens, .env)
-- Scans and removes AI artifacts ("Written by AI" comments, placeholders)
 - **Archives specs** when committing: moves `specs/changes/` → `specs/archive/`
 - Generates PR links for GitHub/GitLab/Bitbucket
 
@@ -128,7 +152,7 @@ The release coordinator. The shipper **packages and ships** the completed work.
 - No trailing period
 - Breaking changes with `!`: `feat(api)!: remove endpoint`
 
-**When it activates:** After the engineer, when the user wants to commit, create a PR, or "ship" the work.
+**When it activates:** After the reviewer approves the code, when the user wants to commit, create a PR, or "ship" the work.
 
 ---
 
@@ -157,6 +181,12 @@ The release coordinator. The shipper **packages and ships** the completed work.
             └─────────────────┬─────────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
+│                        REVIEWER                                 │
+│   (Code review, quality gate, spec compliance, security)        │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
 │                         SHIPPER                                 │
 │   (Conventional commits, branch, push, PR, archives specs)      │
 └─────────────────────────────────────────────────────────────────┘
@@ -172,9 +202,11 @@ The release coordinator. The shipper **packages and ships** the completed work.
 1. **Orchestrator ALWAYS sends to Architect first** — never sends directly to Designer or Engineer
 2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend) or Engineer (backend/code)
 3. **Designer acts BEFORE Engineer** — when there is UI, the designer creates the visual specification before the engineer implements
-4. **Engineer never does git** — shipper is the only one who touches the repository
-5. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit
-6. **All skills return to orchestrator** — it is the central hub
+4. **Engineer never does git or review** — reviewer and shipper handle those
+5. **Reviewer is the quality gate** — no code reaches the repository without review
+6. **Shipper is the only one who touches git** — commit, branch, push, PR
+7. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit
+8. **All skills return to orchestrator** — it is the central hub
 
 ## Installation
 
@@ -196,9 +228,9 @@ cp -r loop-engineering-agents/* ~/.agents/skills/
 ## Team Principles
 
 - **Separation of responsibilities:** Each skill does ONE thing and does it well. Never invades another's territory.
-- **Specs as source of truth:** The architect documents, the designer specifies, the engineer implements, the shipper archives. Everything is traceable.
+- **Specs as source of truth:** The architect documents, the designer specifies, the engineer implements, the reviewer validates, the shipper archives. Everything is traceable.
 - **Quality over speed:** Nothing is skipped for being "fast". A 1-line bug fix still needs a lightweight spec.
-- **Letter-based navigation:** At the end of each skill, the user chooses the next step by letter (`[A] Architect`, `[D] Designer`, `[E] Engineer`, `[S] Shipper`, `[O] Orchestrator`).
+- **Letter-based navigation:** At the end of each skill, the user chooses the next step by letter (`[A] Architect`, `[D] Designer`, `[E] Engineer`, `[R] Reviewer`, `[S] Shipper`, `[O] Orchestrator`).
 - **Resistance to shortcuts:** The skills were tested with stress tests to ensure they don't give in to pressures like "just do it quickly", "skip the design", or "commit for me".
 
 ---

@@ -195,6 +195,7 @@ Determine the next step and explicitly state it:
 | User explicitly asked for design first | **architect** | Create spec, then route to designer |
 | User explicitly asked to code | **architect** | Create spec first, then route to engineer |
 | User explicitly asked for design + code | **architect** | Spec → designer → engineer |
+| User explicitly asked to review code | **reviewer** | Review existing changes |
 
 **Handoff message format:**
 ```
@@ -217,10 +218,13 @@ After architect creates specs, navigation options will include:
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions. The specs folder is the single source of truth.
 - **After architect creates specs:** route to designer (if UI/frontend involved) or engineer (if backend only).
 - **Frontend/UI tasks go through designer AFTER architect.** Architect creates specs → Designer creates design spec → Engineer implements.
+- **After engineer finishes:** route to reviewer for code review and quality check.
+- **After reviewer approves:** route to shipper for git operations.
 - The brief must be passed verbatim to the next skill. Do NOT summarize or omit sections.
 - Do NOT delegate to subagents — the next skill should activate in the SAME conversation thread so the user can see and interact with every step.
 - After designer finishes, it will route to engineer for implementation.
-- After engineer finishes, it will return here or route to shipper.
+- After engineer finishes, it will route to reviewer.
+- After reviewer approves, it will route to shipper.
 - After shipper finishes, it will return here.
 - You are the central hub. All roads lead back to orchestrator.
 

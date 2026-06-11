@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-This repository contains the **Loop Engineering Agents**: a team of AI skills designed to operate together as a complete software development flow. Each skill represents a specialized role — orchestrator, architect, designer, engineer, and shipper — and is distributed as an independent `SKILL.md` file.
+This repository contains the **Loop Engineering Agents**: a team of AI skills designed to operate together as a complete software development flow. Each skill represents a specialized role — orchestrator, architect, designer, engineer, reviewer, and shipper — and is distributed as an independent `SKILL.md` file.
 
 The skills are consumed by compatible AI agents (Claude Code, Kimi Code, etc.). The project has no executable code, build, automated tests, or runtime dependencies. All value lies in the documentation of processes, routing rules, and work conventions.
 
@@ -28,6 +28,8 @@ loop-engineering-agents/
 │   └── SKILL.md               # Implementation and tests
 ├── orchestrator/
 │   └── SKILL.md               # Requirement discovery and routing
+├── reviewer/
+│   └── SKILL.md               # Code review and quality gate
 └── shipper/
     └── SKILL.md               # Git workflow and PR
 ```
@@ -39,6 +41,7 @@ loop-engineering-agents/
 - `architect/SKILL.md`: creates mandatory specs in `specs/` for any change.
 - `designer/SKILL.md`: defines aesthetic direction and visual specification when there is UI.
 - `engineer/SKILL.md`: implements specs, writes tests, and verifies builds.
+- `reviewer/SKILL.md`: reviews code for quality, security, spec compliance, and AI artifacts.
 - `shipper/SKILL.md`: executes git operations, commits in the Conventional Commits standard, and prepares PRs.
 
 There are no build configuration files such as `pyproject.toml`, `package.json`, `Cargo.toml`, `Makefile`, etc.
@@ -51,7 +54,7 @@ There are no build configuration files such as `pyproject.toml`, `package.json`,
 - **Language:** Markdown.
 - **Stack:** none. There is no source code, scripts, packages, or services.
 - **Runtime:** not applicable.
-- **Architecture:** modular by role (orchestrator → architect → designer/engineer → shipper → orchestrator).
+- **Architecture:** modular by role (orchestrator → architect → designer/engineer → reviewer → shipper → orchestrator).
 
 Each skill is autonomous and describes:
 
@@ -68,7 +71,7 @@ Each skill is autonomous and describes:
 ### Mandatory Flow
 
 ```
-Orchestrator → Architect → (Designer, if UI) → Engineer → Shipper → Orchestrator
+Orchestrator → Architect → (Designer, if UI) → Engineer → Reviewer → Shipper → Orchestrator
 ```
 
 Critical rules:
@@ -76,9 +79,10 @@ Critical rules:
 - The orchestrator **always** sends to the architect first. Never directly to designer or engineer.
 - The architect creates specs for **any** change, including 1-line bug fixes.
 - Designer acts **before** the engineer when there is a visual interface.
-- Engineer **never** executes git operations.
+- Engineer **never** executes git operations or reviews their own code.
+- Reviewer **never** writes code or runs git operations.
 - Shipper is the only one responsible for commit, branch, push, and PR.
-- At the end of each skill, present letter-based navigation menu: `[A] Architect`, `[D] Designer`, `[E] Engineer`, `[S] Shipper`, `[O] Orchestrator`.
+- At the end of each skill, present letter-based navigation menu: `[A] Architect`, `[D] Designer`, `[E] Engineer`, `[R] Reviewer`, `[S] Shipper`, `[O] Orchestrator`.
 
 ### Standards Followed by the Skills
 
@@ -143,17 +147,18 @@ There is no deploy. The "installation" consists of copying the skill folders to 
 ## Security
 
 - Do not store secrets (API keys, tokens, passwords) in any repository file.
-- The shipper must scan diffs before committing for:
+- The reviewer must scan changes for:
   - Strings such as `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`, `PRIVATE_KEY`.
   - `.env` files.
   - Build/dependency directories (`node_modules/`, `.next/`, `dist/`, `build/`).
-- Remove AI artifacts before committing: "Written by AI" comments, placeholders, `TODO` without reference, `console.log`, `debugger`, empty `catch` blocks, etc.
+  - AI artifacts: "Written by AI" comments, placeholders, `TODO` without reference, `console.log`, `debugger`, empty `catch` blocks, etc.
+- The shipper must respect `.gitignore` and never commit secrets, `.env` files, or build/dependency directories.
 
 ---
 
 ## How to Contribute
 
-1. Any change must go through the full flow: orchestrator → architect → (designer, if there is UI) → engineer → shipper.
+1. Any change must go through the full flow: orchestrator → architect → (designer, if there is UI) → engineer → reviewer → shipper.
 2. Create or update specs in `specs/changes/NNN-name/` before modifying any `SKILL.md`.
 3. Keep `README.md` and `AGENTS.md` updated if you change the structure or team rules.
 4. Follow the Conventional Commits standard for all commit messages.
