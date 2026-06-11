@@ -105,6 +105,38 @@ Answer each in 2-3 sentences:
 
 ---
 
+## SUBAGENT PARALLELIZATION ANALYSIS
+
+After answering the 7 analysis questions, determine if the implementation can be split into **2+ independent sub-tasks** for parallel development via subagents.
+
+**When subagents are suitable:**
+- The spec defines **2+ clearly separable components** with NO shared files or circular dependencies
+- Each component is substantial (would take significant implementation time)
+- Components can be implemented independently and integrated afterward
+- Examples: "auth module + user profile page", "API endpoints + frontend components", "database migration + UI update"
+
+**When subagents are NOT suitable:**
+- Single-component task or heavy interdependencies (shared state, circular imports, tight coupling)
+- Components that must be built sequentially (each depends on the previous)
+- Bug fixes or tweaks under ~20 lines
+- Tasks where coordination overhead outweighs the speed-up
+
+**If subagents are suitable:**
+Ask the user: "Based on the spec, this task has [N] independent components that could be developed in parallel by subagents. Would you like me to enable parallel development?"
+
+If user says yes, include in the spec:
+```yaml
+subagents:
+  approved: true
+  components:
+    - name: "[component name]"
+      scope: "[what to build]"
+      files: "[files this component will create/modify]"
+      constraints: "[what NOT to touch]"
+```
+
+---
+
 ## DELIVERABLES
 
 1. **Specs folder** — Create `specs/` structure with NESTED directories
@@ -112,7 +144,8 @@ Answer each in 2-3 sentences:
 3. **Contracts/Interfaces** — types, schemas, signatures only (no implementation)
 4. **Test plan** — what to test and why
 5. **Risk assessment** — trade-offs, deferred items
-6. **Confirmation** — present navigation options:
+6. **Subagent plan** — parallelization analysis (if applicable)
+7. **Confirmation** — present navigation options:
    ```markdown
    **O que você gostaria de fazer?**
 
