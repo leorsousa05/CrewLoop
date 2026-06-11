@@ -196,12 +196,12 @@ flowchart TD
     R --> S["🚀 Shipper<br>Git & PR"]
     S --> O
 
-    style O fill:#e1f5fe
-    style A fill:#fff3e0
-    style D fill:#f3e5f5
-    style E fill:#e8f5e9
-    style R fill:#ffebee
-    style S fill:#e0f2f1
+    style O fill:#01579b,color:#fff
+    style A fill:#e65100,color:#fff
+    style D fill:#6a1b9a,color:#fff
+    style E fill:#1b5e20,color:#fff
+    style R fill:#b71c1c,color:#fff
+    style S fill:#00695c,color:#fff
 ```
 
 **Flow rules:**
