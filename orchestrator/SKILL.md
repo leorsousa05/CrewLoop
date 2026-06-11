@@ -107,31 +107,7 @@ Ask ALL relevant questions from the categories below. Skip only what is already 
 - Current testing framework?
 - Coverage requirements?
 
-### Step 3: Analyze Parallelization Potential (before brief)
-
-Before writing the brief, analyze if the task can be split into **2+ independent sub-tasks** that could run in parallel via subagents without conflicts.
-
-**Criteria for subagent suitability:**
-- The task has **2+ clearly separable components** (e.g., "auth module + user profile page", "API endpoint + frontend component")
-- Components are **independent** — they don't modify the same files or depend on each other's output to start
-- Components are **substantial enough** — each would take meaningful work (not just a 1-line change)
-- The user would benefit from **parallel execution** (speed-up)
-
-**When NOT to suggest subagents:**
-- Single-component task that can be done inline while the user watches
-- Tasks with heavy interdependencies (all components must be built sequentially)
-- Bug fixes or tweaks under ~20 lines
-- Tasks where coordination overhead outweighs the benefit
-
-**If subagents are suitable:**
-Ask the user: "This task has [N] independent components that could be developed in parallel. Would you like me to use subagents to speed up development?"
-
-If user says yes, note: `Subagents: approved for parallel development` in the brief.
-If user says no or doesn't respond, proceed normally without subagents.
-
----
-
-### Step 4: Consolidate into Structured Brief
+### Step 3: Consolidate into Structured Brief
 
 Once all questions are answered, produce a structured brief. Include EVERY section, even if empty:
 
@@ -200,10 +176,6 @@ Once all questions are answered, produce a structured brief. Include EVERY secti
 ### Deferred / Out of Scope
 [list anything explicitly excluded]
 
-### Subagents
-- **Approved:** [yes | no]
-- **Components for parallel development:** [list independent components if approved]
-- **Rationale:** [why subagents are/aren't suitable for this task]
 ```
 
 ### Step 4: Route to Next Skill
@@ -229,10 +201,7 @@ Determine the next step and explicitly state it:
 Context gathered. Brief complete.
 
 ## Task Brief
-[complete brief content from Step 4]
-
-**Subagents:** [approved | not applicable | not approved]
-[If approved: list components for parallel development]
+[complete brief content from Step 3]
 
 **O que você gostaria de fazer?**
 
