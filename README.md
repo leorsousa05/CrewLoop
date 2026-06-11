@@ -2,7 +2,7 @@
 
 A team of AI skills that work together as a complete software development flow — from requirements discovery to deploy — ensuring no step is skipped and every change is traceable.
 
-- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, and Shipper each own one phase and never invade another's territory.
+- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, and Docs-Writer each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line bug fix to a full feature, gets a lightweight spec in `specs/` before implementation starts.
 - **Design before code:** When there is a UI, the Designer defines the aesthetic direction before the Engineer writes a single line of HTML or CSS.
 - **Quality gate:** The Reviewer inspects every diff for spec compliance, security, performance, and AI artifacts before anything reaches the repository.
@@ -47,6 +47,7 @@ Each skill will be automatically detected and activated according to the convers
 | [`engineer`](skills/engineer/SKILL.md) | Build | Implements specs with tests, handles errors, and verifies builds — never touches git or review. |
 | [`reviewer`](skills/reviewer/SKILL.md) | Review | Audits diffs for quality, security, performance, and spec compliance before shipping. |
 | [`shipper`](skills/shipper/SKILL.md) | Ship | Commits with Conventional Commits, creates branches, archives specs, and prepares PRs. |
+| [`docs-writer`](skills/docs-writer/SKILL.md) | Docs | Writes and rewrites project documentation, READMEs, module docs, and feature docs tailored to the project type. |
 
 ## Workflow
 
@@ -55,10 +56,12 @@ flowchart TD
     O["🎯 Orchestrator<br>Discovery & Routing"] --> A["🏗️ Architect<br>Specs & Architecture"]
     A --> D["🎨 Designer<br>UI/UX Direction"]
     A --> E["🔧 Engineer<br>Implementation"]
+    A --> W["📝 Docs-Writer<br>Documentation"]
     D --> E
     E --> R["🔍 Reviewer<br>Quality Gate"]
     R --> S["🚀 Shipper<br>Git & PR"]
     S --> O
+    W --> O
 
     style O fill:#01579b,color:#fff
     style A fill:#e65100,color:#fff
@@ -66,18 +69,20 @@ flowchart TD
     style E fill:#1b5e20,color:#fff
     style R fill:#b71c1c,color:#fff
     style S fill:#00695c,color:#fff
+    style W fill:#5e35b1,color:#fff
 ```
 
 **Flow rules:**
 
-1. **Orchestrator always sends to Architect first** — never directly to Designer or Engineer.
-2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend) or Engineer (backend/code).
+1. **Orchestrator always sends to Architect first** — never directly to Designer, Engineer, or Docs-Writer.
+2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend), Engineer (backend/code), or Docs-Writer (documentation).
 3. **Designer acts before Engineer** — when there is UI, the designer creates the visual specification before the engineer implements.
 4. **Engineer never does git or review** — reviewer and shipper handle those.
 5. **Reviewer is the quality gate** — no code reaches the repository without review.
 6. **Shipper is the only one who touches git** — commit, branch, push, PR.
-7. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
-8. **All skills return to orchestrator** — it is the central hub.
+7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs. Called by orchestrator when the task is purely documentation.
+8. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
+9. **All skills return to orchestrator** — it is the central hub.
 
 ## Adding a New Skill
 
@@ -107,7 +112,8 @@ loop-engineering-agents/
 │   ├── designer/
 │   ├── engineer/
 │   ├── reviewer/
-│   └── shipper/
+│   ├── shipper/
+│   └── docs-writer/
 ├── scripts/                   # Helper scripts
 │   ├── install.sh
 │   ├── validate-skills.py
