@@ -217,7 +217,7 @@ When BUILD succeeds and all tests pass:
 2. **Archive the change:** Move `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`
 3. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
 4. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
-5. **Present navigation options:**
+5. **Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:**
    ```markdown
    **What would you like to do?**
 

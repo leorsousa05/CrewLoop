@@ -348,7 +348,7 @@ Extract owner/repo from remote URL:
 - **Never force push** — Always use safe git operations
 - **Never accept invented commit types** — If the diff doesn't fit any of the 11 types, analyze again until it fits
 - **Respect .gitignore** — Don't suggest committing ignored files
-- **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu:
+- **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
   ```markdown
   **What would you like to do?**
 

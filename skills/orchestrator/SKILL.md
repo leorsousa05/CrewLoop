@@ -215,6 +215,7 @@ After architect creates specs, navigation options will include:
 - **[O] Return to Orchestrator** — Adjust scope or requirements
 
 **Critical routing rules:**
+- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill. Do NOT invoke another skill without explicit user confirmation.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions. The specs folder is the single source of truth.
 - **After architect creates specs:** route to designer (if UI/frontend involved) or engineer (if backend only).
 - **Frontend/UI tasks go through designer AFTER architect.** Architect creates specs → Designer creates design spec → Engineer implements.

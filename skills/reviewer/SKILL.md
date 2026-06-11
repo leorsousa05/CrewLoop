@@ -205,7 +205,7 @@ Summarize findings in a structured report:
 
 **If overall is APPROVED or APPROVED WITH WARNINGS:**
 
-Present navigation options:
+Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
 ```markdown
 **What would you like to do?**
 
@@ -216,7 +216,7 @@ Present navigation options:
 
 **If overall is CHANGES REQUIRED:**
 
-Present navigation options:
+Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
 ```markdown
 **What would you like to do?**
 
@@ -227,6 +227,7 @@ Present navigation options:
 ```
 
 **Routing rules:**
+- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill.
 - **Engineer** — For code-level fixes (quality, tests, security, performance, error handling, AI artifacts)
 - **Architect** — For design-level issues (spec non-compliance, architectural mismatch, interface changes needed)
 - **Shipper** — Only when review is clean or user explicitly overrides
