@@ -145,11 +145,11 @@ subagents:
 4. **Test plan** — what to test and why
 5. **Risk assessment** — trade-offs, deferred items
 6. **Subagent plan** — parallelization analysis (if applicable)
-7. **Confirmation** — present navigation options:
+7. **Confirmation** — present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
    ```markdown
    **What would you like to do?**
 
-   - **[E] Proceed to Engineer** — Start implementation (BUILD mode)
+   - **[E] Send to Engineer** — Start implementation (BUILD mode)
    - **[D] Send to Designer** — Visual/UI design specification (if the project involves interface)
    - **[O] Return to Orchestrator** — Adjust scope or requirements
    ```

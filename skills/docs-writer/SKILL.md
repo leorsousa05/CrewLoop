@@ -148,7 +148,7 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - **Never ship a framework's default scaffold README** — replace it wholesale.
 - **Always run the quality checklist** before declaring done.
 - **Always ask the user** what problem the project solves and who the audience is if the code cannot reveal it.
-- **When done, present navigation options** — After completing work, show the menu:
+- **When done, present navigation options** — After completing work, show the menu and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
   ```markdown
   **What would you like to do?**
 

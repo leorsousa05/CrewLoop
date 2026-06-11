@@ -162,7 +162,7 @@ Produce a complete design specification:
 
 ## HANDOFF
 
-When the design spec is complete, present navigation options:
+When the design spec is complete, present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
 
 ```markdown
 **What would you like to do?**
@@ -173,6 +173,7 @@ When the design spec is complete, present navigation options:
 ```
 
 **Critical rules:**
+- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill.
 - Pass the complete design spec verbatim to the next skill.
 - Do NOT delegate to subagents — the next skill should activate in the SAME conversation thread.
 - The engineer skill is responsible for writing the implementation code.
