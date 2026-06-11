@@ -6,9 +6,9 @@
 
 ## Project Overview
 
-This repository contains the **Loop Engineering Agents**: a team of AI skills designed to operate together as a complete software development flow. Each skill represents a specialized role — orchestrator, architect, designer, engineer, reviewer, and shipper — and is distributed as an independent `SKILL.md` file.
+This repository contains the **Loop Engineering Agents**: a team of AI skills designed to operate together as a complete software development flow. Each skill represents a specialized role — orchestrator, architect, designer, engineer, reviewer, and shipper — and is distributed as an independent `SKILL.md` file inside `skills/`.
 
-The skills are consumed by compatible AI agents (Claude Code, Kimi Code, etc.). The project has no executable code, build, automated tests, or runtime dependencies. All value lies in the documentation of processes, routing rules, and work conventions.
+The skills are consumed by compatible AI agents (Claude Code, Kimi Code, etc.). The project has no executable runtime dependencies. All value lies in the documentation of processes, routing rules, and work conventions.
 
 The main documentation is in English, with technical terms in English (e.g., `specs/`, `brief`, `BUILD`).
 
@@ -20,39 +20,61 @@ The main documentation is in English, with technical terms in English (e.g., `sp
 loop-engineering-agents/
 ├── README.md                  # Public project documentation
 ├── AGENTS.md                  # This file
-├── architect/
-│   └── SKILL.md               # Technical specification and specs
-├── designer/
-│   └── SKILL.md               # Aesthetic direction and design specs
-├── engineer/
-│   └── SKILL.md               # Implementation and tests
-├── orchestrator/
-│   └── SKILL.md               # Requirement discovery and routing
-├── reviewer/
-│   └── SKILL.md               # Code review and quality gate
-└── shipper/
-    └── SKILL.md               # Git workflow and PR
+├── skills/                    # All team skills
+│   ├── orchestrator/
+│   │   └── SKILL.md           # Requirement discovery and routing
+│   ├── architect/
+│   │   ├── SKILL.md           # Technical specification and specs
+│   │   └── references/
+│   │       └── templates/     # Spec templates
+│   ├── designer/
+│   │   └── SKILL.md           # Aesthetic direction and design specs
+│   ├── engineer/
+│   │   └── SKILL.md           # Implementation and tests
+│   ├── reviewer/
+│   │   └── SKILL.md           # Code review and quality gate
+│   └── shipper/
+│       └── SKILL.md           # Git workflow and PR
+├── scripts/                   # Helper scripts
+│   ├── install.sh             # Install skills to agent skills dir
+│   ├── validate-skills.py     # Validate SKILL.md files
+│   └── package-skill.py       # Package a skill into .skill archive
+├── references/                # Shared reference documentation
+│   ├── conventions.md         # Conventional Commits, navigation, specs
+│   ├── skill-anatomy.md       # How to write a skill
+│   └── workflow.md            # Full team workflow
+├── assets/                    # Templates and static assets
+│   └── templates/
+│       └── skill-template.md  # Template for new SKILL.md files
+└── tests/                     # Manual testing notes
+    └── README.md
 ```
 
 ### Main Files
 
 - `README.md`: team presentation, installation, workflow, and principles.
-- `orchestrator/SKILL.md`: entry point for any task. Never writes code; collects context and routes mandatorily to the architect.
-- `architect/SKILL.md`: creates mandatory specs in `specs/` for any change.
-- `designer/SKILL.md`: defines aesthetic direction and visual specification when there is UI.
-- `engineer/SKILL.md`: implements specs, writes tests, and verifies builds.
-- `reviewer/SKILL.md`: reviews code for quality, security, spec compliance, and AI artifacts.
-- `shipper/SKILL.md`: executes git operations, commits in the Conventional Commits standard, and prepares PRs.
+- `skills/orchestrator/SKILL.md`: entry point for any task. Never writes code; collects context and routes mandatorily to the architect.
+- `skills/architect/SKILL.md`: creates mandatory specs in `specs/` for any change.
+- `skills/designer/SKILL.md`: defines aesthetic direction and visual specification when there is UI.
+- `skills/engineer/SKILL.md`: implements specs, writes tests, and verifies builds.
+- `skills/reviewer/SKILL.md`: reviews code for quality, security, spec compliance, and AI artifacts.
+- `skills/shipper/SKILL.md`: executes git operations, commits in the Conventional Commits standard, and prepares PRs.
+- `references/conventions.md`: shared conventions for commits, navigation, and specs.
+- `references/skill-anatomy.md`: guide for writing new skills.
+- `references/workflow.md`: complete workflow reference.
+- `scripts/install.sh`: installs skills into `~/.agents/skills/`.
+- `scripts/validate-skills.py`: validates all `SKILL.md` files.
+- `scripts/package-skill.py`: packages a single skill into a `.skill` archive.
 
-There are no build configuration files such as `pyproject.toml`, `package.json`, `Cargo.toml`, `Makefile`, etc.
+There are no runtime build configuration files such as `pyproject.toml`, `package.json`, `Cargo.toml`, or `Makefile`.
 
 ---
 
 ## Technology and Architecture
 
 - **Project type:** collection of skills/documentation for AI agents.
-- **Language:** Markdown.
-- **Stack:** none. There is no source code, scripts, packages, or services.
+- **Language:** Markdown, with helper scripts in Bash and Python.
+- **Stack:** none. There is no source code, services, or runtime dependencies.
 - **Runtime:** not applicable.
 - **Architecture:** modular by role (orchestrator → architect → designer/engineer → reviewer → shipper → orchestrator).
 
@@ -132,15 +154,15 @@ Rules:
 
 ### Build
 
-There is no build. The project consists exclusively of Markdown files.
+There is no build. The project consists primarily of Markdown files with small helper scripts.
 
 ### Tests
 
-There are no automated tests. The skills include TDD criteria to be applied by the engineer during implementations in other projects, but this repository itself has no test suite.
+There are no automated tests. Use `scripts/validate-skills.py` to check the structure and frontmatter of all skills. See `tests/README.md` for manual testing guidance.
 
 ### Deploy
 
-There is no deploy. The "installation" consists of copying the skill folders to the AI agent's skills directory (e.g., `~/.agents/skills/`).
+There is no deploy. The "installation" consists of copying the skill folders to the AI agent's skills directory (ex: `~/.agents/skills/`). Use `scripts/install.sh` to install all skills at once.
 
 ---
 
@@ -158,16 +180,19 @@ There is no deploy. The "installation" consists of copying the skill folders to 
 
 ## How to Contribute
 
-1. Any change must go through the full flow: orchestrator → architect → (designer, if there is UI) → engineer → reviewer → shipper.
+1. Any change must pass through the full flow: orchestrator → architect → (designer, if there is UI) → engineer → reviewer → shipper.
 2. Create or update specs in `specs/changes/NNN-name/` before modifying any `SKILL.md`.
 3. Keep `README.md` and `AGENTS.md` updated if you change the structure or team rules.
 4. Follow the Conventional Commits standard for all commit messages.
 5. Do not do git operations directly — use the shipper skill.
+6. Run `python scripts/validate-skills.py` after adding or editing a skill.
 
 ---
 
 ## Notes for Agents
 
-- This project is **documentation only**. Do not execute build commands, install dependencies, or create runtime configuration files unless an explicit spec requires it.
+- This project is **documentation-first**. Do not execute build commands, install dependencies, or create runtime configuration files unless an explicit spec requires it.
 - When editing `SKILL.md`, preserve the front matter structure (`--- name: ... description: ... ---`), the letter-based navigation rules, and the clear separation of responsibilities between skills.
 - The main language of the documentation is **English**. Keep technical terms in English when already established.
+- Place new skills in `skills/<skill-name>/SKILL.md`. Use `assets/templates/skill-template.md` as a starting point.
+- Shared conventions belong in `references/`. Skill-specific references belong in `skills/<skill-name>/references/`.

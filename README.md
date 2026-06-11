@@ -2,6 +2,8 @@
 
 A team of AI skills designed to work together as a complete software development flow. Each skill represents a specialized role — from requirements discovery to deploy — ensuring no step is skipped and work is done with professional quality.
 
+This repository is organized as a **skills workflow project**: all skills live under `skills/`, shared conventions live under `references/`, and helper scripts live under `scripts/`.
+
 ## Why I created this?
 
 Whenever I asked an AI to create code, I felt something was missing: **process**. The AI skipped important steps: it didn't ask enough before coding, didn't document decisions, didn't think about design before implementing, and sometimes committed code without reviewing. This led to rework, poorly structured code, and lack of traceability.
@@ -13,10 +15,36 @@ So I decided to create a **team of specialized agents**, where each one has ONE 
 - **Nothing is coded without design** — the designer defines aesthetic direction before the engineer touches the code
 - **Nothing is shipped without review** — the reviewer inspects code quality, and the shipper validates commits and archives specs
 
+## Repository Layout
+
+```
+loop-engineering-agents/
+├── skills/                    # All team skills
+│   ├── orchestrator/
+│   ├── architect/
+│   ├── designer/
+│   ├── engineer/
+│   ├── reviewer/
+│   └── shipper/
+├── scripts/                   # Helper scripts
+│   ├── install.sh
+│   ├── validate-skills.py
+│   └── package-skill.py
+├── references/                # Shared conventions and workflow docs
+│   ├── conventions.md
+│   ├── skill-anatomy.md
+│   └── workflow.md
+├── assets/                    # Templates and static assets
+│   └── templates/
+│       └── skill-template.md
+└── tests/                     # Manual testing notes
+    └── README.md
+```
+
 ## The Team
 
 ### 🎯 Orchestrator — Discovery and Routing
-**File:** `orchestrator/SKILL.md`
+**File:** `skills/orchestrator/SKILL.md`
 
 The entry point for any task. The orchestrator does not write code, design, or architect. It **asks, clarifies, and organizes**.
 
@@ -34,7 +62,7 @@ The entry point for any task. The orchestrator does not write code, design, or a
 ---
 
 ### 🏗️ Architect — Architecture and Specs
-**File:** `architect/SKILL.md`
+**File:** `skills/architect/SKILL.md`
 
 The technical brain of the team. The architect **thinks before building** and documents everything.
 
@@ -64,7 +92,7 @@ specs/
 ---
 
 ### 🎨 Designer — Aesthetic Direction and Design Specs
-**File:** `designer/SKILL.md`
+**File:** `skills/designer/SKILL.md`
 
 The creative eye of the team. The designer **rejects generic AI aesthetics** and creates memorable visual identities.
 
@@ -86,7 +114,7 @@ The creative eye of the team. The designer **rejects generic AI aesthetics** and
 ---
 
 ### 🔧 Engineer — Implementation and BUILD
-**File:** `engineer/SKILL.md`
+**File:** `skills/engineer/SKILL.md`
 
 The hands of the team. The engineer **implements specs with precision** and nothing more.
 
@@ -109,7 +137,7 @@ The hands of the team. The engineer **implements specs with precision** and noth
 ---
 
 ### 🔍 Reviewer — Code Review & Quality Gate
-**File:** `reviewer/SKILL.md`
+**File:** `skills/reviewer/SKILL.md`
 
 The quality gate of the team. The reviewer **inspects every change** before it reaches the repository.
 
@@ -133,7 +161,7 @@ The quality gate of the team. The reviewer **inspects every change** before it r
 ---
 
 ### 🚀 Shipper — Git Workflow and Deploy
-**File:** `shipper/SKILL.md`
+**File:** `skills/shipper/SKILL.md`
 
 The release coordinator. The shipper **packages and ships** the completed work.
 
@@ -217,13 +245,38 @@ The skills are `SKILL.md` files that can be used with compatible AI agents (Clau
 git clone https://github.com/leorsousa05/loop-engineering-agents.git
 ```
 
-2. Copy the skills to your agent's skills directory:
+2. Install all skills to your agent's skills directory:
 ```bash
-# Example for Kimi Code
-cp -r loop-engineering-agents/* ~/.agents/skills/
+./scripts/install.sh
 ```
 
-3. Each skill will be automatically detected and activated according to the conversation context.
+By default this copies `skills/*` to `~/.agents/skills/`. Pass a custom target if needed:
+```bash
+./scripts/install.sh /path/to/your/skills/dir
+```
+
+3. Validate that all skills are well-formed:
+```bash
+python scripts/validate-skills.py
+```
+
+4. Each skill will be automatically detected and activated according to the conversation context.
+
+## Adding a New Skill
+
+1. Copy the template:
+```bash
+cp assets/templates/skill-template.md skills/<skill-name>/SKILL.md
+```
+
+2. Fill in the frontmatter and body following `references/skill-anatomy.md`.
+
+3. Run the validator:
+```bash
+python scripts/validate-skills.py
+```
+
+4. Follow the full team workflow (orchestrator → architect → engineer → reviewer → shipper) to integrate it.
 
 ## Team Principles
 
