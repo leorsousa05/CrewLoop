@@ -1,207 +1,207 @@
 # Loop Engineering Agents
 
-Um time de skills de IA projetadas para trabalharem juntas como um fluxo completo de desenvolvimento de software. Cada skill representa um papel especializado — desde a descoberta de requisitos até o deploy — garantindo que nenhuma etapa seja pulada e que o trabalho seja feito com qualidade profissional.
+A team of AI skills designed to work together as a complete software development flow. Each skill represents a specialized role — from requirements discovery to deploy — ensuring no step is skipped and work is done with professional quality.
 
-## Por que eu criei isso?
+## Why I created this?
 
-Sempre que pedi para uma IA criar código, sentia que faltava **processo**. A IA pulava etapas importantes: não perguntava o suficiente antes de codar, não documentava decisões, não pensava em design antes de implementar, e às vezes commitava código sem revisar. Isso gerava retrabalho, código mal estruturado e falta de rastreabilidade.
+Whenever I asked an AI to create code, I felt something was missing: **process**. The AI skipped important steps: it didn't ask enough before coding, didn't document decisions, didn't think about design before implementing, and sometimes committed code without reviewing. This led to rework, poorly structured code, and lack of traceability.
 
-Então decidi criar um **time de agentes especializados**, onde cada um tem UMA responsabilidade clara e NUNCA invade o território do outro. O resultado é um fluxo onde:
+So I decided to create a **team of specialized agents**, where each one has ONE clear responsibility and NEVER invades another's territory. The result is a flow where:
 
-- **Nada começa sem contexto** — o orchestrator garante que todos os requisitos sejam coletados
-- **Nada é implementado sem specs** — o architect cria especificações técnicas para tudo, até bug fixes
-- **Nada é codado sem design** — o designer define direção estética antes do engineer tocar no código
-- **Nada é enviado sem revisão** — o shipper valida commits, mensagens e arquiva specs
+- **Nothing starts without context** — the orchestrator ensures all requirements are collected
+- **Nothing is implemented without specs** — the architect creates technical specifications for everything, even bug fixes
+- **Nothing is coded without design** — the designer defines aesthetic direction before the engineer touches the code
+- **Nothing is shipped without review** — the shipper validates commits, messages, and archives specs
 
-## O Time
+## The Team
 
-### 🎯 Orchestrator — Descoberta e Roteamento
-**Arquivo:** `orchestrator/SKILL.md`
+### 🎯 Orchestrator — Discovery and Routing
+**File:** `orchestrator/SKILL.md`
 
-O ponto de entrada de qualquer tarefa. O orchestrator não escreve código, não designa e não arquiteta. Ele **pergunta, esclarece e organiza**.
+The entry point for any task. The orchestrator does not write code, design, or architect. It **asks, clarifies, and organizes**.
 
-**O que faz:**
-- Coleta contexto do projeto (tecnologias, constraints, preferências)
-- Identifica o tipo de tarefa (feature, bug fix, redesign, refactor)
-- Pergunta sobre UI/UX quando relevante (estilo visual, animações, público-alvo)
-- Produz um **brief estruturado** com todos os requisitos
-- **SEMPRE roteia para o architect** — não há exceções, não há escolha
+**What it does:**
+- Collects project context (technologies, constraints, preferences)
+- Identifies the task type (feature, bug fix, redesign, refactor)
+- Asks about UI/UX when relevant (visual style, animations, target audience)
+- Produces a **structured brief** with all requirements
+- **ALWAYS routes to the architect** — no exceptions, no choice
 
-**Regra de ouro:** O orchestrator NUNCA envia direto para designer ou engineer. Architect é sempre o próximo passo.
+**Golden rule:** The orchestrator NEVER sends directly to designer or engineer. Architect is always the next step.
 
-**Quando ativa:** Sempre que o usuário pedir qualquer coisa relacionada a código, design, ou mudanças no projeto.
+**When it activates:** Whenever the user asks for anything related to code, design, or project changes.
 
 ---
 
-### 🏗️ Architect — Arquitetura e Specs
-**Arquivo:** `architect/SKILL.md`
+### 🏗️ Architect — Architecture and Specs
+**File:** `architect/SKILL.md`
 
-O cérebro técnico do time. O architect **pensa antes de construir** e documenta tudo.
+The technical brain of the team. The architect **thinks before building** and documents everything.
 
-**O que faz:**
-- Cria a pasta `specs/` com estrutura organizada (`changes/`, `archive/`, `living/`, `decisions/`)
-- Produz **specs obrigatórios para qualquer mudança** — desde um bug fix de 1 linha até uma feature complexa
-- Define contratos, interfaces, modelos de dados e APIs
-- Analisa trade-offs e registra decisões arquiteturais (ADRs)
-- Segue padrões: SDD (Spec-Driven), DDD (Domain-Driven), CDD (Contract-Driven), TDD
+**What it does:**
+- Creates the `specs/` folder with organized structure (`changes/`, `archive/`, `living/`, `decisions/`)
+- Produces **mandatory specs for any change** — from a 1-line bug fix to a complex feature
+- Defines contracts, interfaces, data models, and APIs
+- Analyzes trade-offs and records architectural decisions (ADRs)
+- Follows standards: SDD (Spec-Driven), DDD (Domain-Driven), CDD (Contract-Driven), TDD
 
-**Estrutura de specs:**
+**Spec structure:**
 ```
 specs/
 ├── changes/001-feature-name/
-│   ├── .spec.yaml          # status, datas, autor
-│   ├── proposal.md         # WHY: motivação e escopo
-│   ├── specs/              # WHAT: delta vs sistema atual
+│   ├── .spec.yaml          # status, dates, author
+│   ├── proposal.md         # WHY: motivation and scope
+│   ├── specs/              # WHAT: delta vs current system
 │   ├── design.md           # HOW: models, APIs, flows
 │   └── tasks.md            # ordered implementation checklist
-├── archive/                # specs completados
-├── living/                 # source of truth mergeado
+├── archive/                # completed specs
+├── living/                 # merged source of truth
 └── decisions/              # ADRs
 ```
 
-**Quando ativa:** Sempre após o orchestrator. É o **primeiro passo obrigatório** de qualquer tarefa.
+**When it activates:** Always after the orchestrator. It is the **mandatory first step** of any task.
 
 ---
 
-### 🎨 Designer — Direção Estética e Design Specs
-**Arquivo:** `designer/SKILL.md`
+### 🎨 Designer — Aesthetic Direction and Design Specs
+**File:** `designer/SKILL.md`
 
-O olho criativo do time. O designer **rejeita estéticas genéricas de IA** e cria identidades visuais memoráveis.
+The creative eye of the team. The designer **rejects generic AI aesthetics** and creates memorable visual identities.
 
-**O que faz:**
-- Escolhe uma **direção estética ousada** (brutalist, maximalist, luxury, organic, editorial, etc.)
-- Define tipografia distintiva (nunca Inter/Roboto como fonte principal)
-- Cria paletas de cores ousadas (nunca gradiente roxo clichê)
-- Especifica layouts inesperados, animações coreografadas e texturas atmosféricas
-- Aplica **guardrails técnicos**: acessibilidade (contraste 4.5:1), touch targets ≥44px, reduced motion
-- Produz **8 deliveráveis**: direção estética, sistema de cores, tipografia, componentes, layout, motion, assets, checklist
+**What it does:**
+- Chooses a **bold aesthetic direction** (brutalist, maximalist, luxury, organic, editorial, etc.)
+- Defines distinctive typography (never Inter/Roboto as the main font)
+- Creates bold color palettes (never cliché purple gradient)
+- Specifies unexpected layouts, choreographed animations, and atmospheric textures
+- Applies **technical guardrails**: accessibility (contrast 4.5:1), touch targets ≥44px, reduced motion
+- Produces **8 deliverables**: aesthetic direction, color system, typography, components, layout, motion, assets, checklist
 
-**O que NÃO faz:**
-- Não escreve código HTML/CSS/JS
-- Não usa fontes genéricas (Inter, Roboto, Arial, Space Grotesk, Poppins)
-- Não cria gradientes roxos clichê
+**What it DOES NOT do:**
+- Does not write HTML/CSS/JS code
+- Does not use generic fonts (Inter, Roboto, Arial, Space Grotesk, Poppins)
+- Does not create cliché purple gradients
 
-**Quando ativa:** Após o architect, quando a tarefa envolve UI, frontend, landing pages, dashboards, ou componentes visuais.
-
----
-
-### 🔧 Engineer — Implementação e BUILD
-**Arquivo:** `engineer/SKILL.md`
-
-As mãos do time. O engineer **implementa specs com precisão** e nada mais.
-
-**O que faz:**
-- Lê specs do architect antes de qualquer implementação
-- Segue contratos e interfaces definidos pelo architect
-- Escreve código de produção com testes, documentação e tratamento de erros
-- Verifica builds e testes — fail once, fix once, still fail → STOP
-- Aplica TDD (escreve testes antes ou junto com código)
-
-**O que NÃO faz:**
-- **Nunca faz git operations** (commit, push, branch, merge) — isso é do shipper
-- Nunca redesenha arquitetura sem aprovação do architect
-- Nunca pula specs ou inventa contratos no meio da implementação
-- Nunca escreve pseudocódigo vago
-
-**Quando ativa:** Após o architect (e designer, se houver UI). Recebe specs prontos e transforma em código.
+**When it activates:** After the architect, when the task involves UI, frontend, landing pages, dashboards, or visual components.
 
 ---
 
-### 🚀 Shipper — Git Workflow e Deploy
-**Arquivo:** `shipper/SKILL.md`
+### 🔧 Engineer — Implementation and BUILD
+**File:** `engineer/SKILL.md`
 
-O coordenador de release. O shipper **empacota e envia** o trabalho feito.
+The hands of the team. The engineer **implements specs with precision** and nothing more.
 
-**O que faz:**
-- Analiza o diff e categoriza mudanças (feat, fix, refactor, docs, chore, etc.)
-- Gera **mensagens de commit no padrão Conventional Commits** com validação rigorosa
-- Cria branches no formato `tipo/descricao-curta`
-- Detecta e previne commits de segredos (API keys, tokens, .env)
-- Escaneia e remove artefatos de IA (comentários "Written by AI", placeholders)
-- **Arquiva specs** ao commitar: move `specs/changes/` → `specs/archive/`
-- Gera links de PR para GitHub/GitLab/Bitbucket
+**What it does:**
+- Reads architect specs before any implementation
+- Follows contracts and interfaces defined by the architect
+- Writes production code with tests, documentation, and error handling
+- Verifies builds and tests — fail once, fix once, still fail → STOP
+- Applies TDD (writes tests before or alongside code)
 
-**Validação de commits:**
-- Tipo obrigatório: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
-- Descrição no imperativo: "add login" (não "added login")
-- Máximo 72 caracteres na descrição
-- Sem ponto final
-- Breaking changes com `!`: `feat(api)!: remove endpoint`
+**What it DOES NOT do:**
+- **Never does git operations** (commit, push, branch, merge) — that's the shipper's job
+- Never redesigns architecture without architect approval
+- Never skips specs or invents contracts mid-implementation
+- Never writes vague pseudocode
 
-**Quando ativa:** Após o engineer, quando o usuário quer commitar, criar PR, ou "shippar" o trabalho.
+**When it activates:** After the architect (and designer, if there is UI). Receives ready specs and transforms them into code.
 
 ---
 
-## Fluxo de Trabalho
+### 🚀 Shipper — Git Workflow and Deploy
+**File:** `shipper/SKILL.md`
+
+The release coordinator. The shipper **packages and ships** the completed work.
+
+**What it does:**
+- Analyzes the diff and categorizes changes (feat, fix, refactor, docs, chore, etc.)
+- Generates **commit messages in the Conventional Commits standard** with rigorous validation
+- Creates branches in the `type/short-description` format
+- Detects and prevents secret commits (API keys, tokens, .env)
+- Scans and removes AI artifacts ("Written by AI" comments, placeholders)
+- **Archives specs** when committing: moves `specs/changes/` → `specs/archive/`
+- Generates PR links for GitHub/GitLab/Bitbucket
+
+**Commit validation:**
+- Mandatory type: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- Description in imperative: "add login" (not "added login")
+- Maximum 72 characters in description
+- No trailing period
+- Breaking changes with `!`: `feat(api)!: remove endpoint`
+
+**When it activates:** After the engineer, when the user wants to commit, create a PR, or "ship" the work.
+
+---
+
+## Workflow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        ORCHESTRATOR                             │
-│              (Coleta contexto, cria brief)                      │
+│              (Collects context, creates brief)                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                         ARCHITECT                               │
-│         (Cria specs obrigatórios para QUALQUER mudança)         │
+│         (Creates mandatory specs for ANY change)                │
 └─────────────────────────────────────────────────────────────────┘
                               │
             ┌─────────────────┴─────────────────┐
             ▼                                   ▼
 ┌───────────────────────┐           ┌───────────────────────┐
 │       DESIGNER        │           │       ENGINEER        │
-│  (Direção estética +  │           │  (Implementa specs    │
-│   especificação UI)   │           │   em código)          │
+│  (Aesthetic direction +│           │  (Implements specs    │
+│   UI specification)   │           │   into code)          │
 └───────────────────────┘           └───────────────────────┘
             │                                   │
             └─────────────────┬─────────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                         SHIPPER                                 │
-│   (Conventional commits, branch, push, PR, arquiva specs)       │
+│   (Conventional commits, branch, push, PR, archives specs)      │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      ORCHESTRATOR                               │
-│                    (Próxima tarefa)                             │
+│                    (Next task)                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Regras do fluxo:**
-1. **Orchestrator SEMPRE envia para Architect primeiro** — nunca envia direto para Designer ou Engineer
-2. **Architect é o gatekeeper** — cria specs e decide se roteia para Designer (UI/frontend) ou Engineer (backend/código)
-3. **Designer atua ANTES do Engineer** — quando há UI, o designer cria a especificação visual antes do engineer implementar
-4. **Engineer nunca faz git** — shipper é o único que toca no repositório
-5. **Specs são arquivados** — `specs/changes/` vira `specs/archive/` no commit
-6. **Todas as skills voltam ao orchestrator** — ele é o hub central
+**Flow rules:**
+1. **Orchestrator ALWAYS sends to Architect first** — never sends directly to Designer or Engineer
+2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend) or Engineer (backend/code)
+3. **Designer acts BEFORE Engineer** — when there is UI, the designer creates the visual specification before the engineer implements
+4. **Engineer never does git** — shipper is the only one who touches the repository
+5. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit
+6. **All skills return to orchestrator** — it is the central hub
 
-## Instalação
+## Installation
 
-As skills são arquivos `SKILL.md` que podem ser usados com agentes de IA compatíveis (Claude Code, Kimi Code, etc.).
+The skills are `SKILL.md` files that can be used with compatible AI agents (Claude Code, Kimi Code, etc.).
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
 git clone https://github.com/leorsousa05/loop-engineering-agents.git
 ```
 
-2. Copie as skills para o diretório de skills do seu agente:
+2. Copy the skills to your agent's skills directory:
 ```bash
-# Exemplo para Kimi Code
+# Example for Kimi Code
 cp -r loop-engineering-agents/* ~/.agents/skills/
 ```
 
-3. Cada skill será automaticamente detectada e ativada conforme o contexto da conversa.
+3. Each skill will be automatically detected and activated according to the conversation context.
 
-## Princípios do Time
+## Team Principles
 
-- **Separação de responsabilidades:** Cada skill faz UMA coisa e faz bem. Nunca invade o território de outra.
-- **Specs como source of truth:** O architect documenta, o designer especifica, o engineer implementa, o shipper arquiva. Tudo rastreável.
-- **Qualidade sobre velocidade:** Nada é pulado por ser "rápido". Um bug fix de 1 linha ainda precisa de um spec lightweight.
-- **Navegação por letras:** Ao final de cada skill, o usuário escolhe o próximo passo por letra (`[A] Architect`, `[D] Designer`, `[E] Engineer`, `[S] Shipper`, `[O] Orchestrator`).
-- **Resistência a atalhos:** As skills foram testadas com stress tests para garantir que não cedam a pressões como "só faz rápido", "pula o design", ou "commita pra mim".
+- **Separation of responsibilities:** Each skill does ONE thing and does it well. Never invades another's territory.
+- **Specs as source of truth:** The architect documents, the designer specifies, the engineer implements, the shipper archives. Everything is traceable.
+- **Quality over speed:** Nothing is skipped for being "fast". A 1-line bug fix still needs a lightweight spec.
+- **Letter-based navigation:** At the end of each skill, the user chooses the next step by letter (`[A] Architect`, `[D] Designer`, `[E] Engineer`, `[S] Shipper`, `[O] Orchestrator`).
+- **Resistance to shortcuts:** The skills were tested with stress tests to ensure they don't give in to pressures like "just do it quickly", "skip the design", or "commit for me".
 
 ---
 
-**Autor:** @leorsousa05  
-**Licença:** MIT
+**Author:** @leorsousa05  
+**License:** MIT

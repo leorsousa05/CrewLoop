@@ -217,12 +217,12 @@ When BUILD succeeds and all tests pass:
 4. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
 5. **Present navigation options:**
    ```markdown
-   **O que você gostaria de fazer?**
+   **What would you like to do?**
 
-   - **[S] Usar o Shipper** — Commitar, criar branch e dar push
-   - **[O] Voltar ao Orchestrator** — Nova tarefa ou ajustes
-   - **[D] Voltar ao Designer** — Ajustar design ou especificação visual
-   - **[A] Voltar ao Architect** — Re-analisar ou ajustar specs
+   - **[S] Use the Shipper** — Commit, create branch, and push
+   - **[O] Return to Orchestrator** — New task or adjustments
+   - **[D] Return to Designer** — Adjust design or visual specification
+   - **[A] Return to Architect** — Re-analyze or adjust specs
    ```
 
 ---
