@@ -147,11 +147,11 @@ subagents:
 6. **Subagent plan** — parallelization analysis (if applicable)
 7. **Confirmation** — present navigation options:
    ```markdown
-   **O que você gostaria de fazer?**
+   **What would you like to do?**
 
-   - **[E] Prosseguir para Engineer** — Iniciar implementação (modo BUILD)
-   - **[D] Enviar para Designer** — Especificação de design visual/UI (se o projeto envolve interface)
-   - **[O] Voltar ao Orchestrator** — Ajustar escopo ou requisitos
+   - **[E] Proceed to Engineer** — Start implementation (BUILD mode)
+   - **[D] Send to Designer** — Visual/UI design specification (if the project involves interface)
+   - **[O] Return to Orchestrator** — Adjust scope or requirements
    ```
 
 ---

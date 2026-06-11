@@ -246,8 +246,8 @@ Closes #42
 - **[P] Commit, Push & Open PR** — All of the above + PR link
 - **[E] Edit** — Change commit message, branch name, or scope
 - **[R] Review** — Go back to review the changes
-- **[O] Voltar ao Orchestrator** — Nova tarefa ou continuar trabalhando
-- **[N] Cancelar** — Não fazer nada, manter alterações unstaged
+- **[O] Back to Orchestrator** — New task or continue working
+- **[N] Cancel** — Do nothing, keep changes unstaged
 ```
 
 ---
@@ -313,9 +313,9 @@ Extract owner/repo from remote URL:
 - **Check for secrets** — If diff contains API keys, passwords, or tokens, WARN the user immediately
 - **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu:
   ```markdown
-  **O que você gostaria de fazer?**
+  **What would you like to do?**
 
-  - **[O] Voltar ao Orchestrator** — Nova tarefa ou continuar trabalhando
+  - **[O] Back to Orchestrator** — New task or continue working
   ```
 
 ---
