@@ -3,6 +3,25 @@
 ## Overview
 [High-level summary of the approach]
 
+## Proposed Directory & File Structure
+```
+[Insert a complete ASCII tree of the proposed directories and files to be added, modified, or removed.
+Example:
+my-project/
+├── src/
+│   ├── components/
+│   │   └── NewComponent.tsx  (New)
+│   └── hooks/
+│   │   └── useHook.ts        (Modified)
+└── tests/
+    └── NewComponent.test.tsx (New)
+]
+```
+
+## Code Architecture & Design Patterns
+- **Architecture Model:** [Describe the architecture of the solution, clean code boundaries, separation of concerns, e.g. Clean Architecture, Modular, DDD context]
+- **Design Patterns Used:** [Name and justify the design patterns applied, e.g. Factory, Strategy, Observer, Repository pattern]
+
 ## Data Model
 ```typescript
 // Core entities, value objects, types

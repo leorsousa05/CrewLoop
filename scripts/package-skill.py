@@ -7,6 +7,7 @@ Example: python scripts/package-skill.py shipper
 
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
@@ -17,6 +18,10 @@ def package_skill(skill_name: str, output_dir: Path | None = None) -> Path:
     if not skill_path.exists():
         raise FileNotFoundError(f"Skill not found: {skill_path}")
 
+    project_root = SKILLS_DIR.parent
+    global_references = project_root / "references"
+    global_assets = project_root / "assets"
+
     output_dir = output_dir or Path.cwd()
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -24,11 +29,25 @@ def package_skill(skill_name: str, output_dir: Path | None = None) -> Path:
     if output_file.exists():
         output_file.unlink()
 
-    archive_path = shutil.make_archive(
-        base_name=str(output_dir / skill_name),
-        format="zip",
-        root_dir=skill_path,
-    )
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+
+        # Copy skill-specific files
+        shutil.copytree(skill_path, tmp_path, dirs_exist_ok=True)
+
+        # Copy shared references if they exist
+        if global_references.exists():
+            shutil.copytree(global_references, tmp_path / "references", dirs_exist_ok=True)
+
+        # Copy shared assets if they exist
+        if global_assets.exists():
+            shutil.copytree(global_assets, tmp_path / "assets", dirs_exist_ok=True)
+
+        archive_path = shutil.make_archive(
+            base_name=str(output_dir / skill_name),
+            format="zip",
+            root_dir=tmp_path,
+        )
 
     zip_file = Path(archive_path)
     final_file = zip_file.with_suffix(".skill")

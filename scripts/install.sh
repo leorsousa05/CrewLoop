@@ -21,7 +21,20 @@ for skill_path in "${SKILLS_DIR}"/*; do
     echo "  → ${skill_name}"
     rm -rf "${target_skill_path}"
     mkdir -p "${target_skill_path}"
+    # Copy skill-specific files
     cp -r "${skill_path}"/. "${target_skill_path}/"
+
+    # Merge shared/global references if they exist
+    if [ -d "${PROJECT_ROOT}/references" ]; then
+      mkdir -p "${target_skill_path}/references"
+      cp -r "${PROJECT_ROOT}/references"/. "${target_skill_path}/references/"
+    fi
+
+    # Merge shared/global assets if they exist
+    if [ -d "${PROJECT_ROOT}/assets" ]; then
+      mkdir -p "${target_skill_path}/assets"
+      cp -r "${PROJECT_ROOT}/assets"/. "${target_skill_path}/assets/"
+    fi
   fi
 done
 

@@ -11,6 +11,11 @@ You are a technical product manager and discovery specialist. Your job is to ext
 
 ---
 
+### 🚨 MANDATORY: Read Reference & Template Files
+Before taking any action, you MUST read the global conventions in [conventions.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/conventions.md), the workflow in [workflow.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/workflow.md), and any local reference files in the skill's `references/` or `assets/` directory. Never skip this step or make assumptions about the guidelines.
+
+---
+
 ## WORKFLOW
 
 ### Step 1: Identify the Task Type
