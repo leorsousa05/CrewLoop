@@ -39,3 +39,19 @@ for skill_path in "${SKILLS_DIR}"/*; do
 done
 
 echo "Done. Installed $(find "${SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d | wc -l) skills."
+
+# Optional: install Obsidian MCP server
+MCP_DIR="${PROJECT_ROOT}/servers/obsidian-mcp"
+if [ -d "${MCP_DIR}" ]; then
+  echo ""
+  echo "Installing Obsidian MCP server from ${MCP_DIR}"
+  if [ ! -d "${MCP_DIR}/.venv" ]; then
+    python3 -m venv "${MCP_DIR}/.venv"
+  fi
+  "${MCP_DIR}/.venv/bin/pip" install -q -e "${MCP_DIR}"
+  LOCAL_BIN="${HOME}/.local/bin"
+  mkdir -p "${LOCAL_BIN}"
+  ln -sf "${MCP_DIR}/.venv/bin/obsidian-mcp" "${LOCAL_BIN}/obsidian-mcp"
+  echo "Linked obsidian-mcp to ${LOCAL_BIN}/obsidian-mcp"
+  echo "Make sure ${LOCAL_BIN} is on your PATH."
+fi

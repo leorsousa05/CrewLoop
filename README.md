@@ -37,6 +37,13 @@ python scripts/validate-skills.py
 
 Each skill will be automatically detected and activated according to the conversation context.
 
+## Obsidian Second Brain (MCP)
+
+This repository also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
+
+- [`servers/obsidian-mcp/README.md`](servers/obsidian-mcp/README.md) — installation and configuration
+- [`references/obsidian-mcp-usage.md`](references/obsidian-mcp-usage.md) — how agents/skills should use it
+
 ## Skills
 
 | Skill | Phase | What it does |
@@ -48,6 +55,7 @@ Each skill will be automatically detected and activated according to the convers
 | [`reviewer`](skills/reviewer/SKILL.md) | Review | Audits diffs for quality, security, performance, and spec compliance before shipping. |
 | [`shipper`](skills/shipper/SKILL.md) | Ship | Commits with Conventional Commits, creates branches, archives specs, and prepares PRs. |
 | [`docs-writer`](skills/docs-writer/SKILL.md) | Docs | Writes and rewrites project documentation, READMEs, module docs, and feature docs tailored to the project type. |
+| [`obsidian-second-brain`](skills/obsidian-second-brain/SKILL.md) | Memory | Uses the local Obsidian MCP server to retrieve prior knowledge and persist new concepts/decisions automatically. |
 
 ## Workflow
 
@@ -113,7 +121,10 @@ loop-engineering-agents/
 │   ├── engineer/
 │   ├── reviewer/
 │   ├── shipper/
-│   └── docs-writer/
+│   ├── docs-writer/
+│   └── obsidian-second-brain/
+├── servers/                   # Optional MCP servers
+│   └── obsidian-mcp/          # Local Obsidian second-brain server
 ├── scripts/                   # Helper scripts
 │   ├── install.sh
 │   ├── validate-skills.py
@@ -121,7 +132,13 @@ loop-engineering-agents/
 ├── references/                # Shared conventions and workflow docs
 │   ├── conventions.md
 │   ├── skill-anatomy.md
-│   └── workflow.md
+│   ├── workflow.md
+│   └── obsidian-mcp-usage.md
+├── specs/                     # Spec-driven change records
+│   ├── changes/
+│   ├── archive/
+│   ├── living/
+│   └── decisions/
 ├── assets/                    # Templates and static assets
 │   └── templates/
 │       └── skill-template.md
