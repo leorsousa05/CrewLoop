@@ -2,6 +2,19 @@
 
 Local MCP server that connects the `loop-engineering-agents` skill bundle to an Obsidian vault at `~/.lea`, acting as a second brain / RAG for AI agents.
 
+## Vault Architecture
+
+The vault at `~/.lea` follows a three-layer memory architecture. Agents should read `AGENT.md` on first use and `MEMORY.md` at the start of major tasks. Notes are organized into:
+
+- `memory/` — raw working-memory session logs
+- `Memory/` — durable user profile and preferences
+- `Knowledge/` — long-lived technical guides and decisions
+- `Journal/` — important session logs and dashboards
+- `Notes/` — temporary notes and drafts
+- `_Inbox/` — agent proposals before promotion
+
+See [`references/obsidian-mcp-usage.md`](../../references/obsidian-mcp-usage.md) for the full usage guide.
+
 ## Installation
 
 ```bash
