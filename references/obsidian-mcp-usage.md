@@ -134,15 +134,17 @@ Every skill in the bundle should follow this pattern when the local Obsidian vau
 
 ### Before acting
 
-Use the `obsidian-second-brain` skill to:
+Invoke the `obsidian-second-brain` skill via the `Skill` tool. That skill will:
 
 1. Read `AGENT.md` once per session if not already loaded.
 2. Read `MEMORY.md` at the start of the task.
 3. Search the layers relevant to this skill's role (see table below).
 
+If the vault or MCP server is unavailable, continue without memory.
+
 ### After acting
 
-Persist outcomes to the correct layer:
+Use the `obsidian-second-brain` skill to persist outcomes to the correct layer:
 
 - Reusable guides, conventions, or architecture notes → `Knowledge/`
 - Session outcomes, decisions, or findings → `Journal/`

@@ -70,7 +70,7 @@ Translate requirements into verifiable statements. Example:
 
 ## MEMORY & CONTEXT
 
-Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`. Invoke the `obsidian-second-brain` skill via the `Skill` tool to execute the pattern.
 
 This skill's targets:
 - **Read at start:** `Knowledge/`, `Journal/bugs*`
