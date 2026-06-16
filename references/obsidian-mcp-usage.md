@@ -72,6 +72,25 @@ Every 2-4 sessions (or at the end of a significant task), the agent should:
 
 Keep `MEMORY.md` under ~500 words. If it grows, move long-lived facts to `Knowledge/` or `Memory/` and keep only active context in `MEMORY.md`.
 
+## Frontmatter Rules
+
+The MCP server manages note frontmatter automatically. Callers should **not** include YAML frontmatter delimiters (`---`) inside `content`.
+
+### Server-managed fields
+
+| Field | Source | Behavior |
+|-------|--------|----------|
+| `title` | `title` parameter or derived from path | Always present; server value wins over any embedded value. |
+| `tags` | `tags` parameter plus any embedded tags | Union of caller tags and embedded tags, sorted, deduplicated. |
+| `created` | First save timestamp | Preserved across updates. |
+| `updated` | Current save timestamp | Refreshed on every save. |
+
+### Caller responsibilities
+
+- Pass `title` and `tags` as top-level parameters of `create_note` / `update_note`.
+- Keep `content` as the Markdown body only.
+- If `content` accidentally contains a frontmatter block, the server extracts it, merges the fields, and writes a single valid block.
+
 ## Available MCP Tools
 
 | Tool | Purpose |

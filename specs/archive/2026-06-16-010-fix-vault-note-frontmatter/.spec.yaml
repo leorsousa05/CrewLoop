@@ -1,0 +1,6 @@
+id: "010"
+name: fix-vault-note-frontmatter
+status: completed
+created: 2026-06-16
+author: architect
+summary: Fix duplicated/conflicting YAML frontmatter when create_note content contains frontmatter, causing Obsidian to ignore tags.
