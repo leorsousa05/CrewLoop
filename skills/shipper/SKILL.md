@@ -16,6 +16,21 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before shipping, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/conventions*` and `Memory/preferences.md` for commit, branch, and project conventions.
+
+After shipping, persist outcomes:
+- Shipping log and release notes → `Journal/`
+- Updated conventions → `Knowledge/`
+- Active context → update `MEMORY.md`
+
+---
+
 ## WORKFLOW
 
 ### Step 1: Verify Git State

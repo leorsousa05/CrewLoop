@@ -69,7 +69,20 @@ Present a concise comparison:
 
 ---
 
-## MCP Tools Reference
+## MEMORY & CONTEXT
+
+Before research, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/` and `Journal/` for prior research, technology decisions, and experiment results.
+
+After research, persist outcomes:
+- Research summaries and technology comparisons → `Knowledge/` or `_Inbox/`
+- Experiment results → `Journal/`
+- Active context → update `MEMORY.md`
+
+### MCP Tools Reference
 
 | Tool | When to use |
 |------|-------------|

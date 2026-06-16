@@ -16,6 +16,20 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before discovery, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Memory/preferences.md` for user preferences and active priorities.
+
+After gathering requirements, persist useful context:
+- Confirmed user priorities and constraints → update `MEMORY.md`
+- Unclear items that may become canonical later → `_Inbox/`
+
+---
+
 ## WORKFLOW
 
 ### Step 1: Identify the Task Type

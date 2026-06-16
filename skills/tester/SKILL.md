@@ -68,7 +68,20 @@ Translate requirements into verifiable statements. Example:
 
 ---
 
-## MCP Tools Reference
+## MEMORY & CONTEXT
+
+Before testing, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/` and `Journal/bugs*` for prior testing decisions, bug patterns, and acceptance criteria.
+
+After testing, persist outcomes:
+- Test strategies and heuristics → `Knowledge/`
+- Bug reproductions and test plans → `Journal/`
+- Active context → update `MEMORY.md`
+
+### MCP Tools Reference
 
 | Tool | When to use |
 |------|-------------|

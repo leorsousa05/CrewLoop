@@ -16,6 +16,21 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before implementation, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/`, `Journal/`, and `Memory/` for relevant conventions, patterns, and prior implementations.
+
+After BUILD, persist outcomes:
+- Implementation notes and session outcomes → `Journal/`
+- Reusable patterns and technical guides → `Knowledge/`
+- Active context → update `MEMORY.md`
+
+---
+
 ## MODE
 
 **BUILD only.** Implementation, tests, verification, local refactoring. No architectural redesign. No contract changes. No new bounded contexts.

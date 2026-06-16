@@ -16,6 +16,21 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before analysis, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/`, `Memory/`, and `Journal/decisions*` for existing specs, ADRs, and architectural context.
+
+After analysis, persist outcomes:
+- Spec rationale and reusable architecture notes → `Knowledge/`
+- ADRs → `Knowledge/`
+- Active project context → update `MEMORY.md`
+
+---
+
 ## MODE
 
 **ANALYZE only.** Design, contracts, architecture, test plans, risk assessment, specs folder creation. No implementation. No config values. No "just a quick prototype."

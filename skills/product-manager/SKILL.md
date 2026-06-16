@@ -68,7 +68,19 @@ Suggest what to build now, later, or not at all. Use frameworks like:
 
 ---
 
-## MCP Tools Reference
+## MEMORY & CONTEXT
+
+Before framing, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Memory/preferences.md`, `Journal/`, and `Knowledge/` for prior product decisions, success metrics, and user feedback.
+
+After framing, persist outcomes:
+- Product decisions and success metrics → `Knowledge/` or `Journal/`
+- Active context → update `MEMORY.md`
+
+### MCP Tools Reference
 
 | Tool | When to use |
 |------|-------------|
