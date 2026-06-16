@@ -18,14 +18,15 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## MEMORY & CONTEXT
 
-Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`. Invoke the `obsidian-second-brain` skill via the `Skill` tool to execute the pattern.
+**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
+Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
+
+At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
+At the end of the task, it will persist outcomes to the correct layers.
 
 This skill's targets:
-- **Read at start:** `Knowledge/`, `Memory/`, `Journal/decisions*`
-- **Persist at end:**
-- Spec rationale and reusable architecture notes → `Knowledge/`
-- ADRs → `Knowledge/`
-- Active project context → update `MEMORY.md`
+- **Read at start:** existing specs, ADRs, and architectural context
+- **Persist at end:** spec rationale and ADRs to durable knowledge; active context to curated memory
 
 ## AFK MODE & ROLE PREFIX
 
