@@ -70,7 +70,7 @@ Suggest what to build now, later, or not at all. Use frameworks like:
 
 ## MEMORY & CONTEXT
 
-Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`. Invoke the `obsidian-second-brain` skill via the `Skill` tool to execute the pattern.
 
 This skill's targets:
 - **Read at start:** `Memory/preferences.md`, `Journal/`, `Knowledge/`
