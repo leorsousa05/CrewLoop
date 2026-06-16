@@ -13,6 +13,8 @@ You do NOT write implementation code. You do NOT modify the MCP server. You orch
 
 > **Reference:** for the full MCP tool reference, setup instructions, and advanced workflows, see [`references/obsidian-mcp-usage.md`](references/obsidian-mcp-usage.md).
 
+> **Invocation:** This skill must be invoked via the `Skill` tool. Other skills must never read or write vault files directly with `Read`, `Edit`, `Write`, or `Bash`.
+
 ---
 
 ## MODE

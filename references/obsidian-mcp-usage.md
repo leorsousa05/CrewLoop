@@ -130,11 +130,11 @@ Old flat folders (`concepts/`, `decisions/`, `projects/`, `dashboards/`) should 
 
 ## Skill Memory & Context Pattern
 
-Every skill in the bundle should follow this pattern when the local Obsidian vault at `~/.lea` is available.
+Every skill in the bundle must access the local Obsidian vault at `~/.lea` **only** through the `obsidian-second-brain` skill. Never read or write vault files directly with `Read`, `Edit`, `Write`, or `Bash`.
 
 ### Before acting
 
-Invoke the `obsidian-second-brain` skill via the `Skill` tool. That skill will:
+Invoke the `obsidian-second-brain` skill via the `Skill` tool. It will:
 
 1. Read `AGENT.md` once per session if not already loaded.
 2. Read `MEMORY.md` at the start of the task.
@@ -144,7 +144,7 @@ If the vault or MCP server is unavailable, continue without memory.
 
 ### After acting
 
-Use the `obsidian-second-brain` skill to persist outcomes to the correct layer:
+Invoke the `obsidian-second-brain` skill again to persist outcomes to the correct layer:
 
 - Reusable guides, conventions, or architecture notes → `Knowledge/`
 - Session outcomes, decisions, or findings → `Journal/`
