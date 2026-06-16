@@ -202,15 +202,16 @@ Agent (during heartbeat):
 
 ## Dashboard Schema
 
-Dashboards are Markdown notes in `Journal/` with this frontmatter:
+Dashboards are Markdown notes in `Journal/` with server-managed frontmatter. Pass `title` and `tags` as `create_note` parameters, not inside `content`:
 
-```yaml
----
-type: journal
-title: project status
-tags: [dashboard, auto-generated]
-updated: 2026-06-15T14:00:00Z
----
+```markdown
+mcp__obsidian-mcp__create_note(
+  path="Journal/project-status.md",
+  title="project status",
+  tags=["dashboard", "auto-generated"],
+  content="# Project Status\n\n## Active priorities\n...",
+  overwrite=true
+)
 ```
 
 Common dashboards:
@@ -218,7 +219,7 @@ Common dashboards:
 - `Journal/decisions-pending.md` — decisions with `status: pending`.
 - `Journal/recent-concepts.md` — concepts from the last 30 days.
 
-Use `create_note` with `overwrite: true` to refresh an existing dashboard.
+**Important:** Do not include YAML frontmatter delimiters (`---`) inside `content`. The MCP server manages `title`, `tags`, `created`, and `updated` automatically.
 
 ---
 
