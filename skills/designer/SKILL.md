@@ -18,6 +18,21 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before designing, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Memory/preferences.md`, `Journal/design*`, and `Knowledge/brand*` for prior design decisions, brand direction, and user preferences.
+
+After design, persist outcomes:
+- Design direction and session outcomes → `Journal/`
+- Reusable design systems and brand notes → `Knowledge/`
+- Active context → update `MEMORY.md`
+
+---
+
 **Read specs first.** Before designing, check for existing specs in `specs/changes/NNN-name/`. If specs exist, your design must align with the architect's constraints, contracts, and technical boundaries. If no specs exist, ask the orchestrator to route to architect first.
 
 ---

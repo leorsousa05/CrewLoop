@@ -81,8 +81,27 @@ Old flat folders map to the new layers as follows:
 - `projects/` → `Journal/` (active) or `Knowledge/` (reference)
 - `dashboards/` → `Journal/`
 
+## Per-Skill Memory Targets
+
+Each skill reads from and writes to layers relevant to its role.
+
+| Skill | Read at start | Persist at end |
+|-------|---------------|----------------|
+| `orchestrator` | `MEMORY.md`, `Memory/preferences.md` | User priorities/context to `MEMORY.md`; unclear items to `_Inbox/` |
+| `architect` | `Knowledge/`, `Memory/`, `Journal/decisions*` | Specs rationale to `Knowledge/`; ADRs to `Knowledge/` |
+| `designer` | `Memory/preferences.md`, `Journal/design*`, `Knowledge/brand*` | Design direction to `Journal/`; reusable systems to `Knowledge/` |
+| `engineer` | `Knowledge/`, `Journal/`, `Memory/` | Implementation notes to `Journal/`; reusable patterns to `Knowledge/` |
+| `reviewer` | `Knowledge/conventions*`, `Journal/decisions*`, `Memory/` | Review findings to `Journal/`; process updates to `Knowledge/` |
+| `shipper` | `Knowledge/conventions*`, `Memory/preferences.md` | Shipping log to `Journal/` |
+| `docs-writer` | `Knowledge/`, `Memory/preferences.md`, `Journal/` | New/updated docs to `Knowledge/` |
+| `researcher` | `Knowledge/`, `Journal/` | Research summaries to `Knowledge/` or `_Inbox/` |
+| `maintainer` | `Knowledge/`, `Journal/incidents*` | Incident/debt notes to `Journal/`; runbooks to `Knowledge/` |
+| `product-manager` | `Memory/preferences.md`, `Journal/`, `Knowledge/` | Decisions/metrics to `Knowledge/` or `Journal/` |
+| `tester` | `Knowledge/`, `Journal/bugs*` | Test strategies/heuristics to `Knowledge/` |
+
 ## References
 
 - `references/obsidian-mcp-usage.md` — agent usage guide
 - `skills/obsidian-second-brain/SKILL.md` — skill instructions
 - `specs/decisions/002-three-layer-memory-architecture.md` — ADR
+- `specs/decisions/003-cross-skill-obsidian-integration.md` — ADR

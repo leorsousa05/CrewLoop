@@ -16,6 +16,20 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before writing, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/`, `Memory/preferences.md`, and `Journal/` for existing docs, style decisions, and project context.
+
+After writing, persist outcomes:
+- New or updated documentation → `Knowledge/`
+- Active context → update `MEMORY.md`
+
+---
+
 ## MODE
 
 **WRITE only.** Read project context, detect type, select sections, write documentation, validate quality. No implementation. No architecture. No git.

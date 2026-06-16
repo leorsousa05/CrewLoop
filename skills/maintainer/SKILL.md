@@ -72,7 +72,21 @@ Propose a concrete next step:
 
 ---
 
-## MCP Tools Reference
+## MEMORY & CONTEXT
+
+Before diagnosis, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/` and `Journal/incidents*` for prior incidents, debt decisions, and runbooks.
+
+After diagnosis, persist outcomes:
+- Incident or debt notes → `Journal/`
+- Runbooks and reusable remediation guides → `Knowledge/`
+- Root-cause analyses → `Knowledge/` or `_Inbox/`
+- Active context → update `MEMORY.md`
+
+### MCP Tools Reference
 
 | Tool | When to use |
 |------|-------------|

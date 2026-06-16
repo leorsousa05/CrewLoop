@@ -16,6 +16,21 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
+## MEMORY & CONTEXT
+
+Before review, use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search `Knowledge/conventions*`, `Journal/decisions*`, and `Memory/` for project conventions and prior decisions.
+
+After review, persist outcomes:
+- Significant review findings → `Journal/`
+- Process updates and conventions → `Knowledge/`
+- Active context → update `MEMORY.md`
+
+---
+
 ## MODE
 
 **REVIEW only.** Read, analyze, judge, report. No fixes. No commits. No implementation.
