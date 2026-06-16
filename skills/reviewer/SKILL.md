@@ -18,16 +18,31 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## MEMORY & CONTEXT
 
-Before review, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/conventions*`, `Journal/decisions*`, and `Memory/` for project conventions and prior decisions.
-
-After review, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/conventions*`, `Journal/decisions*`, `Memory/`
+- **Persist at end:**
 - Significant review findings → `Journal/`
 - Process updates and conventions → `Knowledge/`
 - Active context → update `MEMORY.md`
+
+## AFK MODE & ROLE PREFIX
+
+**Role prefix:** [REVIEWER REVIEWING]
+
+Print this prefix on its own line before the first line of every response.
+
+**AFK mode activation:**
+- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
+- `MEMORY.md` contains `afk: true`.
+
+**AFK mode behavior:**
+- Skip the navigation menu at the end.
+- State the next skill being activated.
+- Load the next skill via the Skill tool (do not wait for user choice).
+
+**Next skill:** Shipper (when review is approved or approved with warnings; if changes are required, route back to Engineer instead).
 
 ---
 
