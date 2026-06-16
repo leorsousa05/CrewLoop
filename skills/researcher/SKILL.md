@@ -71,13 +71,11 @@ Present a concise comparison:
 
 ## MEMORY & CONTEXT
 
-Before research, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/` and `Journal/` for prior research, technology decisions, and experiment results.
-
-After research, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/`, `Journal/`
+- **Persist at end:**
 - Research summaries and technology comparisons → `Knowledge/` or `_Inbox/`
 - Experiment results → `Journal/`
 - Active context → update `MEMORY.md`

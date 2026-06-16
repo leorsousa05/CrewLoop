@@ -70,13 +70,11 @@ Translate requirements into verifiable statements. Example:
 
 ## MEMORY & CONTEXT
 
-Before testing, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/` and `Journal/bugs*` for prior testing decisions, bug patterns, and acceptance criteria.
-
-After testing, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/`, `Journal/bugs*`
+- **Persist at end:**
 - Test strategies and heuristics → `Knowledge/`
 - Bug reproductions and test plans → `Journal/`
 - Active context → update `MEMORY.md`

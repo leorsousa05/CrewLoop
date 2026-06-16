@@ -128,6 +128,28 @@ Old flat folders (`concepts/`, `decisions/`, `projects/`, `dashboards/`) should 
 - `projects/` → `Journal/` (active) or `Knowledge/` (reference)
 - `dashboards/` → `Journal/`
 
+## Skill Memory & Context Pattern
+
+Every skill in the bundle should follow this pattern when the local Obsidian vault at `~/.lea` is available.
+
+### Before acting
+
+Use the `obsidian-second-brain` skill to:
+
+1. Read `AGENT.md` once per session if not already loaded.
+2. Read `MEMORY.md` at the start of the task.
+3. Search the layers relevant to this skill's role (see table below).
+
+### After acting
+
+Persist outcomes to the correct layer:
+
+- Reusable guides, conventions, or architecture notes → `Knowledge/`
+- Session outcomes, decisions, or findings → `Journal/`
+- User profile facts or preferences → `Memory/`
+- Proposed canonical notes awaiting review → `_Inbox/`
+- Active context and priorities → update `MEMORY.md`
+
 ## Per-Skill Memory Targets
 
 Each skill in the bundle should read from and write to the layers relevant to its role. See `skills/obsidian-second-brain/SKILL.md` for tool usage details.

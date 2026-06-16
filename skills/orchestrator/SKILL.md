@@ -18,15 +18,30 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## MEMORY & CONTEXT
 
-Before discovery, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Memory/preferences.md` for user preferences and active priorities.
-
-After gathering requirements, persist useful context:
+This skill's targets:
+- **Read at start:** `MEMORY.md`, `Memory/preferences.md`
+- **Persist at end:**
 - Confirmed user priorities and constraints → update `MEMORY.md`
 - Unclear items that may become canonical later → `_Inbox/`
+
+## AFK MODE & ROLE PREFIX
+
+**Role prefix:** [ORCHESTRATOR TALKING]
+
+Print this prefix on its own line before the first line of every response.
+
+**AFK mode activation:**
+- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
+- `MEMORY.md` contains `afk: true`.
+
+**AFK mode behavior:**
+- Skip the navigation menu at the end.
+- State the next skill being activated.
+- Load the next skill via the Skill tool (do not wait for user choice).
+
+**Next skill:** Architect (if UI/frontend is involved, route to Designer first; otherwise route directly to Architect).
 
 ---
 

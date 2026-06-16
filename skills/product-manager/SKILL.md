@@ -70,13 +70,11 @@ Suggest what to build now, later, or not at all. Use frameworks like:
 
 ## MEMORY & CONTEXT
 
-Before framing, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Memory/preferences.md`, `Journal/`, and `Knowledge/` for prior product decisions, success metrics, and user feedback.
-
-After framing, persist outcomes:
+This skill's targets:
+- **Read at start:** `Memory/preferences.md`, `Journal/`, `Knowledge/`
+- **Persist at end:**
 - Product decisions and success metrics → `Knowledge/` or `Journal/`
 - Active context → update `MEMORY.md`
 

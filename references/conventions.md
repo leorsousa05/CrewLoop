@@ -91,6 +91,39 @@ Critical rules:
 
 ---
 
+## AFK Mode
+
+When the user explicitly activates AFK mode, skills route automatically through the workflow without presenting navigation menus.
+
+### Activation phrases
+
+Case-insensitive matches: `AFK`, `estarei AFK`, `modo AFK`, `vou ficar AFK`.
+
+When activated, set `afk: true` in `MEMORY.md` so subsequent skills know the mode is active. AFK mode resets when the workflow returns to Orchestrator after shipping, or when the user explicitly disables it.
+
+### Role prefixes
+
+Every skill response must start with its prefix on its own line:
+
+| Skill | Prefix |
+|-------|--------|
+| Orchestrator | `[ORCHESTRATOR TALKING]` |
+| Architect | `[ARCHITECT ANALYZING]` |
+| Designer | `[DESIGNER DESIGNING]` |
+| Engineer | `[ENGINEER BUILDING]` |
+| Reviewer | `[REVIEWER REVIEWING]` |
+| Shipper | `[SHIPPER SHIPPING]` |
+
+### Automatic routing
+
+When AFK mode is active, each skill proceeds to the next role in the standard workflow without waiting for user confirmation:
+
+```
+Orchestrator → Architect → (Designer, if UI) → Engineer → Reviewer → Shipper → Orchestrator
+```
+
+---
+
 ## Patterns We Follow
 
 | Pattern | How We Apply It |

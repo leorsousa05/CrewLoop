@@ -18,16 +18,31 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## MEMORY & CONTEXT
 
-Before shipping, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/conventions*` and `Memory/preferences.md` for commit, branch, and project conventions.
-
-After shipping, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/conventions*`, `Memory/preferences.md`
+- **Persist at end:**
 - Shipping log and release notes → `Journal/`
 - Updated conventions → `Knowledge/`
 - Active context → update `MEMORY.md`
+
+## AFK MODE & ROLE PREFIX
+
+**Role prefix:** [SHIPPER SHIPPING]
+
+Print this prefix on its own line before the first line of every response.
+
+**AFK mode activation:**
+- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
+- `MEMORY.md` contains `afk: true`.
+
+**AFK mode behavior:**
+- Skip the navigation menu at the end.
+- State the next skill being activated.
+- Load the next skill via the Skill tool (do not wait for user choice).
+
+**Next skill:** Orchestrator (always).
 
 ---
 

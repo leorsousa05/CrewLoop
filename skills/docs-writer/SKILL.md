@@ -18,13 +18,11 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## MEMORY & CONTEXT
 
-Before writing, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/`, `Memory/preferences.md`, and `Journal/` for existing docs, style decisions, and project context.
-
-After writing, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/`, `Memory/preferences.md`, `Journal/`
+- **Persist at end:**
 - New or updated documentation → `Knowledge/`
 - Active context → update `MEMORY.md`
 

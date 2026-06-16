@@ -74,13 +74,11 @@ Propose a concrete next step:
 
 ## MEMORY & CONTEXT
 
-Before diagnosis, use the `obsidian-second-brain` skill to:
+Follow the pattern in `references/obsidian-mcp-usage.md#skill-memory--context-pattern`.
 
-1. Read `AGENT.md` once per session if not already loaded.
-2. Read `MEMORY.md` at the start of the task.
-3. Search `Knowledge/` and `Journal/incidents*` for prior incidents, debt decisions, and runbooks.
-
-After diagnosis, persist outcomes:
+This skill's targets:
+- **Read at start:** `Knowledge/`, `Journal/incidents*`
+- **Persist at end:**
 - Incident or debt notes → `Journal/`
 - Runbooks and reusable remediation guides → `Knowledge/`
 - Root-cause analyses → `Knowledge/` or `_Inbox/`
