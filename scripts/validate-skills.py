@@ -8,30 +8,29 @@ Checks:
 - name matches the directory name
 """
 
-import re
 import sys
 from pathlib import Path
+
+import yaml
 
 REQUIRED_FIELDS = {"name", "description"}
 SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
 
 
-def parse_frontmatter(content: str) -> dict:
+def parse_frontmatter(content: str) -> dict | None:
     if not content.startswith("---"):
         return {}
 
     end = content.find("---", 3)
     if end == -1:
-        return {}
+        return None
 
     frontmatter = content[3:end].strip()
-    result = {}
-    for line in frontmatter.splitlines():
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        result[key.strip()] = value.strip()
-    return result
+    try:
+        parsed = yaml.safe_load(frontmatter)
+        return parsed if isinstance(parsed, dict) else {}
+    except yaml.YAMLError:
+        return None
 
 
 def validate_skill(skill_dir: Path) -> list[str]:
@@ -45,6 +44,10 @@ def validate_skill(skill_dir: Path) -> list[str]:
 
     content = skill_file.read_text(encoding="utf-8")
     frontmatter = parse_frontmatter(content)
+
+    if frontmatter is None:
+        errors.append("Frontmatter is present but is not valid YAML")
+        return errors
 
     missing = REQUIRED_FIELDS - set(frontmatter.keys())
     if missing:
