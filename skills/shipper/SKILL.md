@@ -26,7 +26,7 @@ At the end of the task, it will persist outcomes to the correct layers.
 
 This skill's targets:
 - **Read at start:** commit, branch, and project conventions
-- **Persist at end:** shipping log to journal; updated conventions to knowledge; active context to curated memory
+- **Persist at end:** shipping log to journal; archived spec links updated in `Journal/loop-engineering-agents.md`; updated conventions to knowledge; active context to curated memory
 
 ## AFK MODE & ROLE PREFIX
 
@@ -341,6 +341,15 @@ git stash pop
 
 # Archive specs before committing (move from changes/ to archive/)
 # Example: mv specs/changes/001-auth-jwt specs/archive/2024-01-15-001-auth-jwt/
+
+# Update Journal spec links after archiving
+# 1. Invoke obsidian-second-brain skill.
+# 2. Move the spec link from `## Specs / ### Active` to `## Specs / ### Archived`
+#    in `Journal/loop-engineering-agents.md`, updating the path to the archive location:
+#    ```markdown
+#    - [2024-01-15-001-auth-jwt](../../specs/archive/2024-01-15-001-auth-jwt/specs/spec.md)
+#    ```
+# 3. Do NOT read or write ~/.lea files directly — use only obsidian-second-brain.
 
 # Stage all changes
 git add -A

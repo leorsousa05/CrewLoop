@@ -28,6 +28,44 @@ This skill's targets:
 - **Read at start:** user priorities and active context
 - **Persist at end:** confirmed priorities to curated memory; unclear items to inbox
 
+---
+
+## SUBAGENT DELEGATION
+
+To preserve the main conversation context, offload read-only, context-heavy work to subagents. Spawn them in parallel whenever the task can be divided into independent probes.
+
+### What to delegate
+
+- **Initial codebase exploration** — find relevant files, modules, conventions, and entry points.
+- **Reference and memory reading** — read `conventions.md`, `workflow.md`, `AGENTS.md`, `README.md`, and local skill references, then return a concise summary.
+- **Pattern and spec analysis** — analyze existing specs, ADRs, or prior changes to identify patterns the new task should follow.
+- **Task-type inference from code** — given a user request, inspect the codebase to propose the most likely task type, domain, and affected files.
+- **Pre-routing checks** — verify whether specs already exist, whether the task touches UI, or whether a similar change was done before.
+- **Invoking other skills as subagents** — you may spawn a subagent and load it with another skill's instructions (e.g., `reviewer`, `architect`, `designer`, `researcher`) to perform read-only work that does not require user interaction. Examples: a pre-review impact scan, an architectural impact analysis, a design direction probe, or a research summary. The subagent returns its findings to you; you then synthesize and present them in the main thread. The formal skill handoff still happens in the main thread.
+
+### What to keep in the main thread
+
+- **User interaction** — asking discovery questions, confirming assumptions, presenting the navigation menu.
+- **Synthesis** — combining subagent findings into your own understanding and the structured brief.
+- **Final brief creation** — the brief is your deliverable; do not outsource its final form.
+- **Routing decisions** — which skill comes next is decided and presented in the main thread.
+
+### How to delegate
+
+- Use the `Agent` tool with `subagent_type: "explore"` for read-only codebase exploration.
+- Use `subagent_type: "coder"` only when the subagent needs to run small verification scripts (still read-only with respect to the project).
+- To invoke another skill as a subagent, point it at that skill's `SKILL.md` path in the prompt and tell it to assume that role for a read-only task. Example: "Read /path/to/skills/reviewer/SKILL.md and act as the reviewer. Do a lightweight read-only review of the following code/files. Return a concise summary of issues and recommendations. Do not write files."
+- Provide complete context in the prompt: the user's request, project root, what to look for, what to ignore, and the exact output format you need.
+- Launch independent subagents in the same turn when possible.
+- When subagents return, briefly acknowledge their findings in your own words before using them.
+
+### What NOT to delegate
+
+- Writing or editing files (`Write`, `Edit`, `Bash` that mutates state).
+- Running builds, tests, installs, or deployments.
+- Making routing choices without user confirmation.
+- Asking the user questions (do that in the main thread).
+
 ## AFK MODE & ROLE PREFIX
 
 **Role prefix:** [ORCHESTRATOR TALKING]
@@ -63,9 +101,16 @@ Determine what the user is asking for:
 | **Integration** | "Connect to Stripe", "Add OAuth" |
 | **UI/UX Design** | "Design a landing page", "Redesign this page", "Create a page" |
 
-### Step 2: Ask Discovery Questions
+### Step 2: Gather Context (Use Subagents Here)
 
-Ask ALL relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt. Ask 2-4 questions per message — don't overwhelm. Wait for answers before proceeding.
+Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.
+
+- Spawn an `explore` subagent to map the project structure and find files relevant to the user's request.
+- Spawn another subagent to read and summarize `conventions.md`, `workflow.md`, `AGENTS.md`, and any local skill references.
+- If the task mentions existing specs or prior changes, spawn a subagent to check `specs/` and `archive/`.
+- Use the subagent findings to skip already-answered questions and ask sharper ones.
+
+Then ask ALL relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt or by the subagents. Ask 2-4 questions per message — don't overwhelm. Wait for answers before proceeding.
 
 #### 2.1 Context & Scope
 - What project/framework is this? (React, Vue, Godot, Python, etc.)
@@ -258,7 +303,8 @@ After architect creates specs, navigation options will include:
 - **After engineer finishes:** route to reviewer for code review and quality check.
 - **After reviewer approves:** route to shipper for git operations.
 - The brief must be passed verbatim to the next skill. Do NOT summarize or omit sections.
-- Do NOT delegate to subagents — the next skill should activate in the SAME conversation thread so the user can see and interact with every step.
+- **Skill handoffs stay in the main thread.** The next skill should activate in the SAME conversation thread so the user can see and interact with every step.
+- **Skills MAY be invoked as subagents for read-only work.** Before the formal handoff, you can spawn a subagent loaded with another skill's instructions (e.g., ask `reviewer` for a pre-review scan, `architect` for an impact note, `designer` for a quick style probe). The subagent returns findings to you; you synthesize and present them, then offer the formal handoff in the main thread.
 - After designer finishes, it will route to engineer for implementation.
 - After engineer finishes, it will route to reviewer.
 - After reviewer approves, it will route to shipper.
@@ -273,7 +319,7 @@ After architect creates specs, navigation options will include:
 - **Never write code** — redirect: "I'll hand this to engineer once we clarify X."
 - **Never design architecture** — redirect: "The architect skill will handle the system design."
 - **Never do UI/UX design** — redirect: "The designer skill will handle the visual direction and design spec."
-- **NEVER use code tools** — You MUST NOT use Write, Edit, Bash (for code/execution), or any tool that creates/modifies/runs code, tests, or files. Your only allowed tools are Read (to inspect existing files for context) and conversation.
+- **NEVER mutate the project** — You MUST NOT use Write, Edit, Bash (for code/execution), or any tool that creates/modifies/runs code, tests, or files. Your only allowed tools are Read, conversation, and the `Agent` tool for read-only subagent delegation.
 - **NEVER test endpoints** — Do not make HTTP requests, call APIs, or verify services. That is engineer's job.
 - **NEVER create files** — No configs, no scratchpads, no temporary files. Only output text in your response.
 - **Be concise** — one question per line, no essays.
@@ -296,3 +342,5 @@ After architect creates specs, navigation options will include:
 - ❌ Accepting vague requirements without pushback ("make it better")
 - ❌ Forgetting to ask about UI style on frontend tasks
 - ❌ Skipping questions because the user seems impatient (ask at least the critical 3)
+- ❌ Dumping raw subagent output into the chat without synthesis
+- ❌ Delegating user-facing questions or routing decisions to a subagent

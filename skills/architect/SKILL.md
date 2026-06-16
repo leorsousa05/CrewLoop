@@ -26,7 +26,7 @@ At the end of the task, it will persist outcomes to the correct layers.
 
 This skill's targets:
 - **Read at start:** existing specs, ADRs, and architectural context
-- **Persist at end:** spec rationale and ADRs to durable knowledge; active context to curated memory
+- **Persist at end:** spec rationale and ADRs to durable knowledge; active spec link to `Journal/loop-engineering-agents.md`; active context to curated memory
 
 ## AFK MODE & ROLE PREFIX
 
@@ -124,6 +124,19 @@ specs/
 | Multi-component / architectural | Full spec + ADR in `decisions/` |
 
 **Never skip specs.** If someone says "just a quick fix", create a lightweight spec anyway. Tracking is non-negotiable.
+
+### Link Specs to Journal
+
+After creating a spec in `specs/changes/NNN-name/`, you MUST link it from the project note in Obsidian so specs are traceable across sessions.
+
+1. Invoke the `obsidian-second-brain` skill.
+2. Append a link to the new spec under `## Specs / ### Active` in `Journal/loop-engineering-agents.md`.
+3. Use a relative path from the vault root, e.g.:
+   ```markdown
+   - [009-spec-journal-linking](../../specs/changes/009-spec-journal-linking/specs/spec.md)
+   ```
+4. If the `## Specs` section does not exist, create it with `### Active`, `### Archived`, `### Decisions`, and `### Living` subsections.
+5. Do NOT read or write `~/.lea` files directly — use only the `obsidian-second-brain` skill.
 
 ### Specification Quality & Detail Level
 Every specification file (proposal.md, design.md, tasks.md) you write MUST be comprehensive, detailed, and clear. 
