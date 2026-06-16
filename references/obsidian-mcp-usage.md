@@ -11,14 +11,66 @@ A local MCP server exposes a vault at `~/.lea` as a second brain. The AI can:
 - Create and update notes.
 - Learn from conversation text automatically via `learn_from_text`.
 
-## When to Use
+## Vault Architecture
 
-Use these tools whenever context would be useful across sessions or tasks:
+The vault follows a **three-layer memory architecture**. Every skill in the bundle that reads from or writes to `~/.lea` must use these layers.
 
-- Before answering, search for relevant prior knowledge.
-- After making a decision, create or update a decision note.
-- After discovering a new concept, call `learn_from_text`.
-- When a user refers to something that may exist in the vault, use `search_notes`.
+```
+~/.lea/
+├── AGENT.md              # Entry point: read this first
+├── MEMORY.md             # Curated memory: read at session start
+├── memory/               # Working memory: raw session logs
+├── Memory/               # Durable user profile and preferences
+├── Knowledge/            # Long-lived technical guides and decisions
+├── Journal/              # Session logs and dashboards worth keeping
+├── Notes/                # Temporary notes, drafts, and research
+└── _Inbox/               # Agent proposals before promotion
+```
+
+### Layer Semantics
+
+| Layer | Path | When to Use |
+|-------|------|-------------|
+| Agent entry | `AGENT.md` | Read once per session before using the vault. |
+| Curated memory | `MEMORY.md` | Read at the start of every major task. Soft cap ~500 words. |
+| Working memory | `memory/` | Append raw, timestamped session logs. Pattern: `YYYY-MM-DD-HHMM.md`. |
+| User profile | `Memory/` | Durable facts about the user: role, preferences, goals. |
+| Knowledge | `Knowledge/` | Durable technical guides, architectural decisions, reusable docs. |
+| Journal | `Journal/` | Important session outcomes, project briefs, dashboards. |
+| Notes | `Notes/` | Temporary scratchpads, drafts, research not yet canonical. |
+| Inbox | `_Inbox/` | Proposed new canonical notes. Auto-promotion is allowed. |
+
+### Session Start
+
+1. Call `sync_from_bundle` once per session.
+2. Read `AGENT.md`.
+3. Read `MEMORY.md`.
+4. Search targeted layers based on the user's question.
+
+### Layer Selection Rules
+
+```
+User asks a question
+    ↓
+Read AGENT.md and MEMORY.md
+    ↓
+Durable concept or guide?       → search Knowledge/
+User preference or identity?    → search Memory/
+Recent session or decision?     → search Journal/
+Raw log of current conversation? → append to memory/
+Proposing new canonical knowledge? → create in _Inbox/
+```
+
+### Heartbeat / Distillation
+
+Every 2-4 sessions (or at the end of a significant task), the agent should:
+
+1. Read recent files in `memory/`.
+2. Update `MEMORY.md` with distilled, short-term-relevant facts.
+3. Promote durable facts from `_Inbox/` to `Memory/`, `Knowledge/`, `Journal/`, or `Notes/`.
+4. Archive or delete obsolete raw logs.
+
+Keep `MEMORY.md` under ~500 words. If it grows, move long-lived facts to `Knowledge/` or `Memory/` and keep only active context in `MEMORY.md`.
 
 ## Available MCP Tools
 
@@ -26,38 +78,23 @@ Use these tools whenever context would be useful across sessions or tasks:
 |------|---------|
 | `search_notes` | Find relevant notes. Prefer `mode: "hybrid"`. |
 | `read_note` | Read a specific note by path. |
-| `create_note` | Create a new note. Use folders like `concepts/`, `decisions/`, `projects/`. |
+| `create_note` | Create a new note in the correct layer. |
 | `update_note` | Append or replace content. Use `append` to preserve history. |
 | `delete_note` | Remove a note. Use sparingly. |
 | `list_notes` | List notes, optionally filtered by folder. |
 | `get_related_notes` | Explore graph relationships from a note. |
-| `sync_from_bundle` | Re-index the skill bundle as the knowledge base. |
+| `sync_from_bundle` | Re-index the skill bundle and local vault. |
 | `learn_from_text` | Detect concepts/decisions in text and auto-create notes. |
 
-## Recommended Workflow
+## Note Paths
 
-1. **Onboarding / after installation:** call `sync_from_bundle` once to index the bundle.
-2. **During a task:**
-   - Call `search_notes` with the user's topic.
-   - If a relevant note exists, `read_note` it.
-   - If a new concept or decision emerges, call `learn_from_text`.
-3. **At the end of a significant task:**
-   - Summarize decisions or concepts.
-   - Use `create_note` or `learn_from_text` to persist them.
+Use English folder names and English note content:
 
-## Note Organization
-
-Use English folder names:
-
-- `concepts/` — ideas, patterns, definitions
-- `decisions/` — architectural or process decisions
-- `projects/` — project-specific notes
-
-Example paths:
-
-- `concepts/graph-rag.md`
-- `decisions/vault-local-path.md`
-- `projects/mcp-integration.md`
+- `Memory/profile-user.md`
+- `Knowledge/obsidian-mcp-setup.md`
+- `Journal/2026-06-15-project-brief.md`
+- `Notes/2026-06-15-ml-concepts.md`
+- `_Inbox/proposed-knowledge-2026-06-15.md`
 
 ## Privacy Rules
 
@@ -68,7 +105,7 @@ Never persist in the vault:
 - `.env` contents
 - Personal identifiable information (PII)
 
-The server has a privacy filter, but avoid sensitive input regardless.
+The server has a privacy filter, but avoid sensitive input regardless. Review working memory before promoting anything to curated or structured layers.
 
 ## Configuration Reminder
 
@@ -81,3 +118,12 @@ args = ["-m", "obsidian_mcp.main"]
 ```
 
 See `servers/obsidian-mcp/README.md` for full setup instructions.
+
+## Migration from Flat Folders
+
+Old flat folders (`concepts/`, `decisions/`, `projects/`, `dashboards/`) should be migrated to the new layers:
+
+- `concepts/` → `Knowledge/` (durable) or `Notes/` (transient)
+- `decisions/` → `Knowledge/`
+- `projects/` → `Journal/` (active) or `Knowledge/` (reference)
+- `dashboards/` → `Journal/`
