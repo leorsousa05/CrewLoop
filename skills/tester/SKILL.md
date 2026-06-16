@@ -84,7 +84,7 @@ This skill's targets:
 
 | Tool | When to use |
 |------|-------------|
-| `search_notes` | Find prior testing decisions or bug patterns in `~/.lea`. |
+| `search_notes` | Find prior testing heuristics in `Knowledge/` and bug patterns in `Journal/bugs*`. |
 | `learn_from_text` | Persist a testing heuristic or decision discovered during review. |
 
 ---

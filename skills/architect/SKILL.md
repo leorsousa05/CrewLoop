@@ -28,6 +28,8 @@ This skill's targets:
 - **Read at start:** existing specs, ADRs, and architectural context
 - **Persist at end:** spec rationale and ADRs to durable knowledge; active spec link to `Journal/loop-engineering-agents.md`; active context to curated memory
 
+> **Note:** Project ADRs live in the repository's `specs/decisions/`; vault decisions and durable knowledge live in `Knowledge/`.
+
 ## AFK MODE & ROLE PREFIX
 
 **Role prefix:** [ARCHITECT ANALYZING]
@@ -284,7 +286,7 @@ Before analyzing an existing codebase:
 3. **Identify bounded contexts** — folder names, module boundaries
 4. **Examine test patterns** — framework, location, coverage
 5. **Check current conventions** — naming, file organization
-6. **Look for ADRs** — existing decisions in `docs/decisions/` or similar
+6. **Look for ADRs** — existing decisions in `specs/decisions/` for project ADRs and `Knowledge/` for vault decisions
 
 Adapt SDD/DDD to what's already there. Don't force a new structure if the existing one is functional.
 

@@ -85,7 +85,7 @@ This skill's targets:
 
 | Tool | When to use |
 |------|-------------|
-| `search_notes` | Find prior research or technology decisions in `~/.lea`. |
+| `search_notes` | Find prior research and technology decisions in `Knowledge/` and experiment results in `Journal/`. |
 | `learn_from_text` | Persist a research finding or decision rationale. |
 
 ---
