@@ -63,7 +63,7 @@ const config = {
         title: 'CrewLoop',
         logo: {
           alt: 'CrewLoop Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           {
