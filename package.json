@@ -1,0 +1,26 @@
+{
+  "name": "@crewloop/skills",
+  "version": "0.1.0",
+  "description": "CrewLoop AI agent skills bundle",
+  "license": "MIT",
+  "author": "leorsousa05",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leorsousa05/CrewLoop.git"
+  },
+  "homepage": "https://leorsousa05.github.io/CrewLoop/",
+  "files": [
+    "skills/",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "workspaces": [
+    "packages/cli"
+  ],
+  "keywords": [
+    "ai-agent",
+    "skills",
+    "crewloop",
+    "cli"
+  ]
+}

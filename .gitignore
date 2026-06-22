@@ -27,8 +27,12 @@ venv/
 *.log
 
 # Docusaurus / Node.js
+node_modules/
+packages/cli/node_modules/
+packages/cli/dist/
 docs/node_modules/
 docs/.docusaurus/
 docs/build/
 docs/.cache/
+*.tgz
 

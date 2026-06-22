@@ -1,0 +1,42 @@
+{
+  "name": "@crewloop/cli",
+  "version": "0.1.0",
+  "description": "CLI for installing CrewLoop skills",
+  "license": "MIT",
+  "author": "leorsousa05",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leorsousa05/CrewLoop.git"
+  },
+  "homepage": "https://leorsousa05.github.io/CrewLoop/",
+  "bin": {
+    "crewloop": "bin/crewloop.js"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@crewloop/skills": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "ai-agent",
+    "skills",
+    "crewloop",
+    "cli"
+  ]
+}
