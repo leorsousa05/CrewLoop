@@ -83,17 +83,17 @@ Options:
 
 function resolvePackageRoot(): string {
   try {
-    const skillsPackageJson = require.resolve('@crewloop/skills/package.json');
+    const skillsPackageJson = require.resolve('@archznn/crewloop-skills/package.json');
     return path.dirname(skillsPackageJson);
   } catch {
-    const cwdNodeModules = path.join(process.cwd(), 'node_modules', '@crewloop', 'skills');
+    const cwdNodeModules = path.join(process.cwd(), 'node_modules', '@archznn', 'crewloop-skills');
     if (fs.existsSync(path.join(cwdNodeModules, 'package.json'))) {
       return cwdNodeModules;
     }
   }
 
   throw new Error(
-    'Could not find @crewloop/skills. Install it with: npm install @crewloop/skills'
+    'Could not find @archznn/crewloop-skills. Install it with: npm install @archznn/crewloop-skills'
   );
 }
 

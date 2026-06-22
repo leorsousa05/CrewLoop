@@ -23,7 +23,7 @@ An AI agent crew that runs the complete software development flow — from disco
 ### Option 1: Install from npm (recommended)
 
 ```bash
-npm install -g @crewloop/cli
+npm install -g @archznn/crewloop-cli
 crewloop install
 ```
 
@@ -211,6 +211,28 @@ CrewLoop/
 └── tests/                     # Manual testing notes
     └── README.md
 ```
+
+## Releasing
+
+Packages are published automatically by GitHub Actions when a semantic-version tag is pushed.
+
+1. Make sure `package.json` and `packages/cli/package.json` versions are updated and aligned.
+2. Make sure `packages/cli/package.json` depends on `@archznn/crewloop-skills` with `^<version>`.
+3. Create and push a tag:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The workflow will:
+
+- Validate that the tag matches both `package.json` versions and the CLI dependency.
+- Publish `@archznn/crewloop-skills`.
+- Wait until the new version is visible on npm.
+- Publish `@archznn/crewloop-cli`.
+
+You need an npm automation token with publish rights for the `@archznn` scope configured as the `NPM_TOKEN` repository secret.
 
 ## Contributing
 

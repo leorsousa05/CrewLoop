@@ -1,5 +1,5 @@
 {
-  "name": "@crewloop/cli",
+  "name": "@archznn/crewloop-cli",
   "version": "0.1.0",
   "description": "CLI for installing CrewLoop skills",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@crewloop/skills": "file:../.."
+    "@archznn/crewloop-skills": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
