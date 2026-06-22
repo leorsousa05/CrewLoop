@@ -104,7 +104,8 @@ Critical rules:
 - Engineer **never** executes git operations or reviews their own code.
 - Reviewer **never** writes code or runs git operations.
 - Shipper is the only one responsible for commit, branch, push, and PR.
-- At the end of each skill, present letter-based navigation menu: `[A] Architect`, `[D] Designer`, `[E] Engineer`, `[R] Reviewer`, `[S] Shipper`, `[O] Orchestrator`.
+- At the end of each skill, present a letter-based navigation menu using the standard identifiers: `[A] Architect`, `[D] Designer`, `[E] Engineer`, `[R] Reviewer`, `[S] Shipper`, `[O] Orchestrator`. Each skill may include only the subset that is relevant for its next handoff; the menu must remain letter-based and must not proceed automatically without user confirmation.
+- **AFK mode exception:** When the user has explicitly activated AFK mode (or `MEMORY.md` contains `afk: true`), the skill may skip the navigation menu and load the next skill automatically via the `Skill` tool, as documented in the individual `SKILL.md`.
 
 ### Standards Followed by the Skills
 

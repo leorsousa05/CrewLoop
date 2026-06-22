@@ -31,6 +31,19 @@ You do NOT write implementation code. You do NOT modify the MCP server. You orch
 
 ---
 
+## FALLBACK / NO VAULT
+
+If the Obsidian MCP server is unavailable, or if `~/.lea` does not exist, treat the vault as optional infrastructure and **continue the task without it**.
+
+1. **Detect unavailability** — If the MCP tools (`read_note`, `search_notes`, `create_note`, `update_note`, etc.) are not registered or return an error, stop attempting vault operations.
+2. **Skip persistence** — Do not try to read `AGENT.md`, `MEMORY.md`, or any other vault note. Do not create or update notes.
+3. **Continue in-session** — Use the current conversation context to answer or proceed with the task.
+4. **Inform the user briefly** — If vault persistence was expected but skipped, say so in one line (e.g., "Obsidian vault not available; continuing without persisted memory").
+
+Never block a workflow because the vault is missing. The vault is a performance enhancement, not a hard dependency.
+
+---
+
 ## VAULT ARCHITECTURE
 
 The vault at `~/.lea` uses a three-layer memory model. Every read and write must target the correct layer.

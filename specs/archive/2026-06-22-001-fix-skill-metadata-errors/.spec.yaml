@@ -1,0 +1,10 @@
+id: 001-fix-skill-metadata-errors
+status: completed
+title: Fix skill metadata errors (absolute paths, duplicated section number, navigation inconsistencies)
+author: agent
+created: 2026-06-22
+updated: 2026-06-22
+tags:
+  - skills
+  - documentation
+  - quality
