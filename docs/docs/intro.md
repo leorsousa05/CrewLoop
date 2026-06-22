@@ -4,7 +4,7 @@ CrewLoop is a team of AI skills that work together as a complete software develo
 
 ## What is CrewLoop?
 
-CrewLoop distributes responsibilities across specialized AI skills. Each skill owns one phase of the workflow and never invades another's territory:
+Instead of asking a single AI to "build this feature", CrewLoop distributes responsibilities across specialized skills. Each skill owns one phase of the workflow and never invades another's territory:
 
 - **Orchestrator** — discovers context and routes every task.
 - **Architect** — creates mandatory specs and contracts.
@@ -12,15 +12,22 @@ CrewLoop distributes responsibilities across specialized AI skills. Each skill o
 - **Engineer** — implements specs with tests.
 - **Reviewer** — audits quality, security, and spec compliance.
 - **Shipper** — handles git operations and PRs.
-- **Docs-Writer, Tester, Product-Manager, Maintainer, Researcher** — support the core flow.
+
+Supporting skills extend the flow: **Docs-Writer**, **Tester**, **Product-Manager**, **Maintainer**, **Researcher**, and **Obsidian Second Brain**.
+
+## Who is this for?
+
+- Developers who want structured AI assistance instead of ad-hoc code generation.
+- Teams that need traceability, specs, and review gates.
+- Anyone building non-trivial software where skipping steps leads to bugs and rework.
 
 ## Quick Start
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/leorsousa05/loop-engineering-agents.git
-cd loop-engineering-agents
+git clone https://github.com/leorsousa05/CrewLoop.git
+cd CrewLoop
 ```
 
 2. Install all skills to your agent's skills directory:
@@ -43,9 +50,17 @@ python scripts/validate-skills.py
 
 Each skill will be automatically detected and activated according to the conversation context.
 
+## What happens after installation?
+
+Once the skills are installed, start any task by describing what you want:
+
+> "Add a login page to my React app."
+
+The **Orchestrator** will take over, ask clarifying questions, and route the task through the crew.
+
 ## Optional: Obsidian Second Brain
 
 CrewLoop also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
 
-- [`servers/obsidian-mcp/README.md`](https://github.com/leorsousa05/loop-engineering-agents/tree/main/servers/obsidian-mcp) — installation and configuration
-- [`references/obsidian-mcp-usage.md`](https://github.com/leorsousa05/loop-engineering-agents/tree/main/references/obsidian-mcp-usage.md) — how agents/skills should use it
+- [`servers/obsidian-mcp/README.md`](https://github.com/leorsousa05/CrewLoop/tree/main/servers/obsidian-mcp) — installation and configuration
+- [`references/obsidian-mcp-usage.md`](https://github.com/leorsousa05/CrewLoop/tree/main/references/obsidian-mcp-usage.md) — how agents/skills should use it

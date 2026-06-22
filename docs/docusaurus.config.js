@@ -68,7 +68,7 @@ const config = {
         items: [
           {
             type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            sidebarId: 'docsSidebar',
             position: 'left',
             label: 'Docs',
           },
@@ -95,7 +95,7 @@ const config = {
               },
               {
                 label: 'Workflow',
-                to: '/docs/workflow',
+                to: '/docs/workflow/overview',
               },
             ],
           },
