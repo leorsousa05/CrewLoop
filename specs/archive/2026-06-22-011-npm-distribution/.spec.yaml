@@ -1,0 +1,12 @@
+id: 011-npm-distribution
+status: completed
+title: Distribute CrewLoop skills via npm with an installer CLI
+author: agent
+created: 2026-06-22
+updated: 2026-06-22
+tags:
+  - distribution
+  - npm
+  - cli
+  - skills
+  - packaging

@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Install Loop Engineering Agents skills into the agent's skills directory.
+# Install CrewLoop skills into the agent's skills directory.
 # Usage: ./scripts/install.sh [target-dir]
 # Default target: ~/.agents/skills/
+#
+# Prefer npm? Install via:
+#   npm install -g @crewloop/cli
+#   crewloop install
 
 set -euo pipefail
 
@@ -10,7 +14,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SKILLS_DIR="${PROJECT_ROOT}/skills"
 TARGET_DIR="${1:-${HOME}/.agents/skills}"
 
-echo "Installing Loop Engineering Agents skills to: ${TARGET_DIR}"
+echo "Installing CrewLoop skills to: ${TARGET_DIR}"
 mkdir -p "${TARGET_DIR}"
 
 for skill_path in "${SKILLS_DIR}"/*; do

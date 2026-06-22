@@ -20,6 +20,28 @@ An AI agent crew that runs the complete software development flow — from disco
 
 ## Quick Start
 
+### Option 1: Install from npm (recommended)
+
+```bash
+npm install -g @crewloop/cli
+crewloop install
+```
+
+Install only the skills you need:
+
+```bash
+crewloop install --skill architect --skill engineer
+```
+
+Install to a custom directory or for another agent:
+
+```bash
+crewloop install --target /path/to/your/skills/dir
+crewloop install --agent claude
+```
+
+### Option 2: Install from source
+
 1. Clone the repository:
 
 ```bash
