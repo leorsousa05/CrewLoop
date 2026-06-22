@@ -1,0 +1,11 @@
+id: 003-add-obsidian-fallback
+status: completed
+title: Add fallback instructions when Obsidian vault or MCP is unavailable
+author: agent
+created: 2026-06-22
+updated: 2026-06-22
+tags:
+  - skills
+  - obsidian-second-brain
+  - fallback
+  - documentation
