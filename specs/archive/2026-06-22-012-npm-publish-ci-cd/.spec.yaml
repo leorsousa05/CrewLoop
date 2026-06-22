@@ -1,0 +1,15 @@
+---
+id: 012-npm-publish-ci-cd
+status: completed
+title: Automate npm publishing with GitHub Actions
+author: agent
+created: 2026-06-22
+updated: 2026-06-22
+tags:
+  - ci
+  - cd
+  - npm
+  - github-actions
+  - publishing
+  - automation
+---

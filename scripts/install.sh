@@ -4,7 +4,7 @@
 # Default target: ~/.agents/skills/
 #
 # Prefer npm? Install via:
-#   npm install -g @crewloop/cli
+#   npm install -g @archznn/crewloop-cli
 #   crewloop install
 
 set -euo pipefail
