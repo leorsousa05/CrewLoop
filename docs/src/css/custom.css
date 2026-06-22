@@ -29,12 +29,4 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-/* Increase navbar logo size */
-.navbar__logo img {
-  height: 48px;
-}
 
-/* Adjust navbar height to accommodate larger logo */
-.navbar {
-  min-height: 72px;
-}

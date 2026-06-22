@@ -8,7 +8,6 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'CrewLoop',
   tagline: 'An AI agent crew for the complete software development flow.',
-  favicon: 'img/favicon.ico',
 
   future: {
     v4: true,
@@ -55,16 +54,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/docusaurus-social-card.jpg',
       colorMode: {
         respectPrefersColorScheme: true,
       },
       navbar: {
         title: 'CrewLoop',
-        logo: {
-          alt: 'CrewLoop Logo',
-          src: 'img/logo.png',
-        },
         items: [
           {
             type: 'docSidebar',
