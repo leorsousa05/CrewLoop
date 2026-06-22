@@ -1,20 +1,30 @@
-# Loop Engineering Agents
+# CrewLoop
 
-A team of AI skills that work together as a complete software development flow — from requirements discovery to deploy — ensuring no step is skipped and every change is traceable.
+An AI agent crew that runs the complete software development flow — from discovery to deploy — with clear roles, mandatory specs, and no skipped steps.
+
+[![Docs](https://img.shields.io/github/deployments/leorsousa05/CrewLoop/github-pages?label=docs&logo=github)](https://leorsousa05.github.io/CrewLoop/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+[![Skills](https://img.shields.io/badge/skills-12-blueviolet)](#whats-in-the-box)
+[![Validation](https://img.shields.io/badge/validate--skills-passing-brightgreen)](scripts/validate-skills.py)
+
+📚 **Read the full documentation at [leorsousa05.github.io/CrewLoop](https://leorsousa05.github.io/CrewLoop/)**
+
+## Highlights
 
 - **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, Docs-Writer, Tester, Product-Manager, Maintainer, and Researcher each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line bug fix to a full feature, gets a lightweight spec in `specs/` before implementation starts.
 - **Design before code:** When there is a UI, the Designer defines the aesthetic direction before the Engineer writes a single line of HTML or CSS.
+- **Docs by docs-writer:** READMEs, module docs, feature docs, and changelogs are owned by the docs-writer skill — the engineer focuses on code and tests.
 - **Quality gate:** The Reviewer inspects every diff for spec compliance, security, performance, and AI artifacts before anything reaches the repository.
-- **Conventional Commits:** The Shipper generates commit messages, branches, and PRs following the Conventional Commits standard with archived specs.
+- **Conventional Commits:** The Shipper generates commit messages, branches, archives specs, and prepares PRs following the Conventional Commits standard.
 
 ## Quick Start
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/leorsousa05/loop-engineering-agents.git
-cd loop-engineering-agents
+git clone https://github.com/leorsousa05/CrewLoop.git
+cd CrewLoop
 ```
 
 2. Install all skills to your agent's skills directory:
@@ -37,29 +47,29 @@ python scripts/validate-skills.py
 
 Each skill will be automatically detected and activated according to the conversation context.
 
-## Obsidian Second Brain (MCP)
+## What's in the Box?
 
-This repository also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
+### Core Crew
 
-- [`servers/obsidian-mcp/README.md`](servers/obsidian-mcp/README.md) — installation and configuration
-- [`references/obsidian-mcp-usage.md`](references/obsidian-mcp-usage.md) — how agents/skills should use it
+| Skill | Emoji | Phase | Learn more |
+|-------|-------|-------|------------|
+| [`orchestrator`](skills/orchestrator/SKILL.md) | 🎯 | Discovery | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/orchestrator) |
+| [`architect`](skills/architect/SKILL.md) | 🏗️ | Specs | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/architect) |
+| [`designer`](skills/designer/SKILL.md) | 🎨 | Design | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/designer) |
+| [`engineer`](skills/engineer/SKILL.md) | 🔧 | Build | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/engineer) |
+| [`reviewer`](skills/reviewer/SKILL.md) | 🔍 | Review | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/reviewer) |
+| [`shipper`](skills/shipper/SKILL.md) | 🚀 | Ship | [Docs](https://leorsousa05.github.io/CrewLoop/docs/core/shipper) |
 
-## Skills
+### Supporting Crew
 
-| Skill | Phase | What it does |
-|-------|-------|-------------|
-| [`orchestrator`](skills/orchestrator/SKILL.md) | Discovery | Collects context, clarifies requirements, and routes every task to the architect first. |
-| [`architect`](skills/architect/SKILL.md) | Specs | Creates mandatory specs, contracts, and ADRs in `specs/` before any code is written. |
-| [`designer`](skills/designer/SKILL.md) | Design | Defines bold aesthetic direction, color systems, typography, and motion specs for UI work. |
-| [`engineer`](skills/engineer/SKILL.md) | Build | Implements specs with tests, handles errors, and verifies builds — never touches git or review. |
-| [`reviewer`](skills/reviewer/SKILL.md) | Review | Audits diffs for quality, security, performance, and spec compliance before shipping. |
-| [`shipper`](skills/shipper/SKILL.md) | Ship | Commits with Conventional Commits, creates branches, archives specs, and prepares PRs. |
-| [`docs-writer`](skills/docs-writer/SKILL.md) | Docs | Writes and rewrites project documentation, READMEs, module docs, and feature docs tailored to the project type. |
-| [`obsidian-second-brain`](skills/obsidian-second-brain/SKILL.md) | Memory | Uses the local Obsidian MCP server to retrieve prior knowledge and persist new concepts/decisions automatically. |
-| [`tester`](skills/tester/SKILL.md) | QA | Designs test strategies, identifies missing coverage, and reproduces bugs. |
-| [`product-manager`](skills/product-manager/SKILL.md) | Product | Frames requirements in terms of user value, success metrics, and prioritization. |
-| [`maintainer`](skills/maintainer/SKILL.md) | Upkeep | Diagnoses issues, classifies technical debt, and plans dependency updates. |
-| [`researcher`](skills/researcher/SKILL.md) | Research | Evaluates technologies, compares alternatives, and runs proofs of concept. |
+| Skill | Emoji | Phase | Learn more |
+|-------|-------|-------|------------|
+| [`docs-writer`](skills/docs-writer/SKILL.md) | 📝 | Docs | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/docs-writer) |
+| [`obsidian-second-brain`](skills/obsidian-second-brain/SKILL.md) | 🧠 | Memory | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/obsidian-second-brain) |
+| [`tester`](skills/tester/SKILL.md) | 🧪 | QA | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/tester) |
+| [`product-manager`](skills/product-manager/SKILL.md) | 📊 | Product | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/product-manager) |
+| [`maintainer`](skills/maintainer/SKILL.md) | 🛠️ | Upkeep | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/maintainer) |
+| [`researcher`](skills/researcher/SKILL.md) | 🔬 | Research | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/researcher) |
 
 ## Workflow
 
@@ -105,7 +115,7 @@ flowchart TD
 1. **Orchestrator always sends to Architect first** — never directly to Designer, Engineer, or Docs-Writer. Optional pre-routing to Product-Manager, Researcher, Maintainer, or Tester is allowed.
 2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend), Engineer (backend/code), or Docs-Writer (documentation).
 3. **Designer acts before Engineer** — when there is UI, the designer creates the visual specification before the engineer implements.
-4. **Engineer never does git or review** — reviewer and shipper handle those.
+4. **Engineer never does git, review, or docs** — reviewer, shipper, and docs-writer handle those.
 5. **Reviewer is the quality gate** — no code reaches the repository without review.
 6. **Shipper is the only one who touches git** — commit, branch, push, PR.
 7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs. Called by orchestrator when the task is purely documentation.
@@ -113,6 +123,13 @@ flowchart TD
 9. **Product-Manager, Researcher, and Maintainer are optional advisors** — framing, technology evaluation, and upkeep before or alongside the core flow.
 10. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
 11. **All skills return to orchestrator** — it is the central hub.
+
+## Obsidian Second Brain (MCP)
+
+This repository also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
+
+- [`servers/obsidian-mcp/README.md`](servers/obsidian-mcp/README.md) — installation and configuration
+- [`references/obsidian-mcp-usage.md`](references/obsidian-mcp-usage.md) — how agents/skills should use it
 
 ## Adding a New Skill
 
@@ -135,7 +152,7 @@ python scripts/validate-skills.py
 ## Repository Layout
 
 ```
-loop-engineering-agents/
+CrewLoop/
 ├── skills/                    # All team skills
 │   ├── orchestrator/
 │   ├── architect/
@@ -160,6 +177,7 @@ loop-engineering-agents/
 │   ├── skill-anatomy.md
 │   ├── workflow.md
 │   └── obsidian-mcp-usage.md
+├── docs/                      # Docusaurus documentation site
 ├── specs/                     # Spec-driven change records
 │   ├── changes/
 │   ├── archive/
