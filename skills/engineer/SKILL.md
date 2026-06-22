@@ -61,6 +61,8 @@ Print this prefix on its own line before the first line of every response.
 
 **NEVER do code review** — Code review is the reviewer's job. After BUILD completes, route to reviewer for inspection. Do not self-review or approve your own code.
 
+**NEVER write documentation** — READMEs, module docs, feature docs, API docs, and changelogs belong to the `docs-writer` skill. Focus on code and tests. If a task requires docs, redirect to docs-writer.
+
 **When done, present navigation options** — After BUILD completes (or if user wants changes), present the navigation menu instead of instructing to invoke another skill:
 
 ---
@@ -287,6 +289,7 @@ Verification fails after 1 fix:
 - ❌ Writing implementation code without reading the spec first
 - ❌ Inventing new requirements or contracts not in the spec
 - ❌ Claiming tests pass without running them
+- ❌ Writing or updating READMEs, module docs, feature docs, API docs, or changelogs — redirect to docs-writer
 
 ---
 
