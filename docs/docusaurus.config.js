@@ -16,10 +16,10 @@ const config = {
 
   // GitHub Pages deployment config
   url: 'https://leorsousa05.github.io',
-  baseUrl: '/loop-engineering-agents/',
+  baseUrl: '/CrewLoop/',
 
   organizationName: 'leorsousa05',
-  projectName: 'loop-engineering-agents',
+  projectName: 'CrewLoop',
 
   onBrokenLinks: 'throw',
 
@@ -36,7 +36,7 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           editUrl:
-            'https://github.com/leorsousa05/loop-engineering-agents/tree/main/docs/',
+            'https://github.com/leorsousa05/CrewLoop/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -67,7 +67,7 @@ const config = {
             label: 'Docs',
           },
           {
-            href: 'https://github.com/leorsousa05/loop-engineering-agents',
+            href: 'https://github.com/leorsousa05/CrewLoop',
             label: 'GitHub',
             position: 'right',
           },
@@ -98,7 +98,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/leorsousa05/loop-engineering-agents',
+                href: 'https://github.com/leorsousa05/CrewLoop',
               },
             ],
           },
