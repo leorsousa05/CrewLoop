@@ -25,3 +25,10 @@ venv/
 
 # Logs
 *.log
+
+# Docusaurus / Node.js
+docs/node_modules/
+docs/.docusaurus/
+docs/build/
+docs/.cache/
+

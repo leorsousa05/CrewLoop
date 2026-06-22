@@ -1,0 +1,11 @@
+id: 004-landing-page
+status: completed
+title: Add Docusaurus landing page and documentation site in docs/
+author: agent
+created: 2026-06-22
+updated: 2026-06-22
+tags:
+  - docs
+  - website
+  - docusaurus
+  - github-pages
