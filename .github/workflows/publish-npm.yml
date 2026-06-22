@@ -42,14 +42,10 @@ jobs:
             exit 1
           fi
 
-      - name: Assert CLI depends on matching skills version
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
+      - name: Assert CLI depends on skills package
         run: |
-          expected="^$VERSION"
-          actual=$(node -p "require('./packages/cli/package.json').dependencies['@archznn/crewloop-skills']")
-          if [ "$actual" != "$expected" ]; then
-            echo "CLI dependency on @archznn/crewloop-skills is '$actual', expected '$expected'"
+          if [ -z "$(node -p "require('./packages/cli/package.json').dependencies['@archznn/crewloop-skills']")" ]; then
+            echo "CLI is missing dependency on @archznn/crewloop-skills"
             exit 1
           fi
 
@@ -109,6 +105,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Pin CLI dependency to matching skills version
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          npm pkg set dependencies.@archznn/crewloop-skills="^$VERSION" \
+            --workspace=@archznn/crewloop-cli
 
       - name: Build CLI
         run: npm run build --workspace=@archznn/crewloop-cli
