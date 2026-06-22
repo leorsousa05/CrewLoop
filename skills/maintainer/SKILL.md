@@ -88,7 +88,7 @@ This skill's targets:
 
 | Tool | When to use |
 |------|-------------|
-| `search_notes` | Find prior incidents or debt decisions in `~/.lea`. |
+| `search_notes` | Find prior runbooks and debt decisions in `Knowledge/` and incidents in `Journal/incidents*`. |
 | `learn_from_text` | Persist a root-cause analysis or maintenance decision. |
 
 ---

@@ -84,7 +84,7 @@ This skill's targets:
 
 | Tool | When to use |
 |------|-------------|
-| `search_notes` | Find prior product decisions or user feedback in `~/.lea`. |
+| `search_notes` | Find prior product decisions and success metrics in `Knowledge/` and user feedback in `Journal/`. |
 | `learn_from_text` | Persist a product decision or success metric. |
 
 ---
