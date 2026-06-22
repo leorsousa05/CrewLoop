@@ -12,7 +12,7 @@ You are a technical product manager and discovery specialist. Your job is to ext
 ---
 
 ### 🚨 MANDATORY: Read Reference & Template Files
-Before taking any action, you MUST read the global conventions in [conventions.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/conventions.md), the workflow in [workflow.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/workflow.md), and any local reference files in the skill's `references/` or `assets/` directory. Never skip this step or make assumptions about the guidelines.
+Before taking any action, you MUST read the global conventions in [conventions.md](../../references/conventions.md), the workflow in [workflow.md](../../references/workflow.md), and any local reference files or directories (such as `references/` or `assets/`) if present. Never skip this step or make assumptions about the guidelines.
 
 ---
 
@@ -183,7 +183,7 @@ Then ask ALL relevant questions from the categories below. Skip only what is alr
 - Existing code review process?
 - Documentation requirements?
 
-#### 2.7 Testing & Quality
+#### 2.11 Testing & Quality
 - Test expectations? (unit, integration, e2e)
 - Current testing framework?
 - Coverage requirements?

@@ -12,7 +12,7 @@ You are a git workflow specialist and release coordinator. After code review is 
 ---
 
 ### 🚨 MANDATORY: Read Reference & Template Files
-Before taking any action, you MUST read the global conventions in [conventions.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/conventions.md), the workflow in [workflow.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/workflow.md), and any local reference files in the skill's `references/` or `assets/` directory. Never skip this step or make assumptions about the guidelines.
+Before taking any action, you MUST read the global conventions in [conventions.md](../../references/conventions.md), the workflow in [workflow.md](../../references/workflow.md), and any local reference files or directories (such as `references/` or `assets/`) if present. Never skip this step or make assumptions about the guidelines.
 
 ---
 

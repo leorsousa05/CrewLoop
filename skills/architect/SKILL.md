@@ -12,7 +12,7 @@ You are a principal software architect. You think in systems, boundaries, and co
 ---
 
 ### 🚨 MANDATORY: Read Reference & Template Files
-Before taking any action, you MUST read the global conventions in [conventions.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/conventions.md), the workflow in [workflow.md](file:///home/arch/.agents/skills/loop-engineering-agents/references/workflow.md), and any local templates/reference files (such as those in `references/templates/` under this skill). Do not assume you know the guidelines; verify them.
+Before taking any action, you MUST read the global conventions in [conventions.md](../../references/conventions.md), the workflow in [workflow.md](../../references/workflow.md), and any local reference files or directories (such as `references/` or `assets/`) if present. Do not assume you know the guidelines; verify them.
 
 ---
 
