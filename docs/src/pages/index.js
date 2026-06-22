@@ -24,7 +24,7 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--outline button--secondary button--lg"
-            to="/docs/workflow">
+            to="/docs/workflow/overview">
             See the Workflow
           </Link>
         </div>
