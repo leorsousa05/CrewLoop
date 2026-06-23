@@ -6,7 +6,7 @@ CrewLoop is distributed through npm as two public packages under the `@archznn` 
 
 | Package | Location | Contents |
 |---------|----------|----------|
-| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/` directory with all `SKILL.md` files |
+| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/`, `references/`, `assets/`, and `servers/obsidian-mcp/` |
 | `@archznn/crewloop-cli` | `packages/cli/package.json` | `crewloop` CLI installer |
 
 ## Installation
@@ -55,7 +55,3 @@ Preview what would be published without uploading:
 ```bash
 ./scripts/npm-publish-dry-run.sh
 ```
-
-## Source Fallback
-
-Users who do not use npm can still run `./scripts/install.sh` to copy skills from a git clone.

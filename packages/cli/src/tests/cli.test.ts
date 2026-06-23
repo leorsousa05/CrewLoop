@@ -74,4 +74,10 @@ describe('cli', () => {
     assert.ok(help.includes('list'));
     assert.ok(help.includes('--target'));
   });
+
+  it('help text does not change command surface', () => {
+    const help = printHelp();
+    assert.ok(!help.includes('doctor'));
+    assert.ok(!help.includes('validate'));
+  });
 });

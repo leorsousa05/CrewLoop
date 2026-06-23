@@ -47,10 +47,34 @@ export interface InstallResult {
   errors: Error[];
 }
 
+export function mergeSharedDirs(
+  targetSkillPath: string,
+  sharedRoot: string,
+  options: { dryRun?: boolean }
+): void {
+  const sharedDirs = ['references', 'assets'];
+
+  for (const dir of sharedDirs) {
+    const sourceDir = path.join(sharedRoot, dir);
+    if (!fs.existsSync(sourceDir)) {
+      continue;
+    }
+
+    const targetDir = path.join(targetSkillPath, dir);
+
+    if (options.dryRun) {
+      continue;
+    }
+
+    copyDir(sourceDir, targetDir);
+  }
+}
+
 export function installSkills(
   skills: SkillManifest[],
   targetDir: string,
-  options: InstallOptions
+  options: InstallOptions,
+  sharedRoot?: string
 ): InstallResult {
   const result: InstallResult = { installed: [], skipped: [], errors: [] };
 
@@ -85,6 +109,10 @@ export function installSkills(
         createSymlink(skill.sourcePath, targetPath);
       } else {
         copyDir(skill.sourcePath, targetPath);
+      }
+
+      if (sharedRoot && !options.symlink) {
+        mergeSharedDirs(targetPath, sharedRoot, { dryRun: options.dryRun });
       }
 
       result.installed.push(skill.name);

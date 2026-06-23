@@ -4,14 +4,14 @@ An AI agent crew that runs the complete software development flow — from disco
 
 [![Docs](https://img.shields.io/github/deployments/leorsousa05/CrewLoop/github-pages?label=docs&logo=github)](https://leorsousa05.github.io/CrewLoop/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
-[![Skills](https://img.shields.io/badge/skills-12-blueviolet)](#whats-in-the-box)
+[![Skills](https://img.shields.io/badge/skills-14-blueviolet)](#whats-in-the-box)
 [![Validation](https://img.shields.io/badge/validate--skills-passing-brightgreen)](scripts/validate-skills.py)
 
 📚 **Read the full documentation at [leorsousa05.github.io/CrewLoop](https://leorsousa05.github.io/CrewLoop/)**
 
 ## Highlights
 
-- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, Docs-Writer, Tester, Product-Manager, Maintainer, and Researcher each own one phase and never invade another's territory.
+- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, Docs-Writer, Tester, Product-Manager, Maintainer, Researcher, Security-Guard, and Accessibility-Auditor each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line bug fix to a full feature, gets a lightweight spec in `specs/` before implementation starts.
 - **Design before code:** When there is a UI, the Designer defines the aesthetic direction before the Engineer writes a single line of HTML or CSS.
 - **Docs by docs-writer:** READMEs, module docs, feature docs, and changelogs are owned by the docs-writer skill — the engineer focuses on code and tests.
@@ -19,8 +19,6 @@ An AI agent crew that runs the complete software development flow — from disco
 - **Conventional Commits:** The Shipper generates commit messages, branches, archives specs, and prepares PRs following the Conventional Commits standard.
 
 ## Quick Start
-
-### Option 1: Install from npm (recommended)
 
 ```bash
 npm install -g @archznn/crewloop-cli
@@ -40,28 +38,7 @@ crewloop install --target /path/to/your/skills/dir
 crewloop install --agent claude
 ```
 
-### Option 2: Install from source
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/leorsousa05/CrewLoop.git
-cd CrewLoop
-```
-
-2. Install all skills to your agent's skills directory:
-
-```bash
-./scripts/install.sh
-```
-
-By default this copies `skills/*` to `~/.agents/skills/`. Pass a custom target if needed:
-
-```bash
-./scripts/install.sh /path/to/your/skills/dir
-```
-
-3. Validate that all skills are well-formed:
+Validate that all skills are well-formed:
 
 ```bash
 python scripts/validate-skills.py
@@ -92,6 +69,8 @@ Each skill will be automatically detected and activated according to the convers
 | [`product-manager`](skills/product-manager/SKILL.md) | 📊 | Product | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/product-manager) |
 | [`maintainer`](skills/maintainer/SKILL.md) | 🛠️ | Upkeep | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/maintainer) |
 | [`researcher`](skills/researcher/SKILL.md) | 🔬 | Research | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/researcher) |
+| [`security-guard`](skills/security-guard/SKILL.md) | 🛡️ | Security Review | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/security-guard) |
+| [`accessibility-auditor`](skills/accessibility-auditor/SKILL.md) | ♿ | Accessibility Review | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/accessibility-auditor) |
 
 ## Workflow
 
@@ -117,6 +96,12 @@ flowchart TD
     S --> O
     W --> O
     OB["🧠 Obsidian Second Brain<br>Memory & RAG"] -.-> O
+    SG["🛡️ Security-Guard<br>Security Review"] -.-> R
+    AA["♿ Accessibility-Auditor<br>Accessibility Review"] -.-> R
+    R --> SG
+    R --> AA
+    SG --> E
+    AA --> E
 
     style O fill:#01579b,color:#fff
     style A fill:#e65100,color:#fff
@@ -130,6 +115,8 @@ flowchart TD
     style RS fill:#006064,color:#fff
     style MN fill:#37474f,color:#fff
     style OB fill:#4a148c,color:#fff
+    style SG fill:#b71c1c,color:#fff
+    style AA fill:#6a1b9a,color:#fff
 ```
 
 **Flow rules:**
@@ -143,8 +130,9 @@ flowchart TD
 7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs. Called by orchestrator when the task is purely documentation.
 8. **Tester designs QA strategy** — reviews coverage, reproduces bugs, and complements engineer tests.
 9. **Product-Manager, Researcher, and Maintainer are optional advisors** — framing, technology evaluation, and upkeep before or alongside the core flow.
-10. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
-11. **All skills return to orchestrator** — it is the central hub.
+10. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back to the Engineer or Reviewer and do not touch git.
+11. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
+12. **All skills return to orchestrator** — it is the central hub.
 
 ## Obsidian Second Brain (MCP)
 
@@ -187,13 +175,15 @@ CrewLoop/
 │   ├── tester/
 │   ├── product-manager/
 │   ├── maintainer/
-│   └── researcher/
+│   ├── researcher/
+│   ├── security-guard/
+│   └── accessibility-auditor/
 ├── servers/                   # Optional MCP servers
 │   └── obsidian-mcp/          # Local Obsidian second-brain server
 ├── scripts/                   # Helper scripts
-│   ├── install.sh
 │   ├── validate-skills.py
-│   └── package-skill.py
+│   ├── package-skill.py
+│   └── npm-publish-dry-run.sh
 ├── references/                # Shared conventions and workflow docs
 │   ├── conventions.md
 │   ├── skill-anatomy.md
