@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { resolveSkills } from './resolver';
 import { resolveAgentDir, listSupportedAgents } from './agents';
 import { installSkills } from './installer';
+import { installMcpServer, type McpInstallResult } from './mcp';
 
 function requireValue(arg: string, next: string | undefined): string {
   if (next === undefined || next.startsWith('-')) {
@@ -135,14 +136,19 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
     }
   }
 
-  const result = installSkills(skills, targetDir, {
-    target: args.target,
-    skills: args.skills,
-    agent: args.agent,
-    symlink: args.symlink,
-    force: args.force,
-    dryRun: args.dryRun,
-  });
+  const result = installSkills(
+    skills,
+    targetDir,
+    {
+      target: args.target,
+      skills: args.skills,
+      agent: args.agent,
+      symlink: args.symlink,
+      force: args.force,
+      dryRun: args.dryRun,
+    },
+    packageRoot
+  );
 
   if (!args.dryRun) {
     console.log(`Installed ${result.installed.length} skill(s) to ${targetDir}`);
@@ -164,6 +170,23 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
       console.error(`  ! ${error.message}`);
     }
     return 1;
+  }
+
+  const mcpDir = path.join(packageRoot, 'servers', 'obsidian-mcp');
+  let mcpResult: McpInstallResult | undefined;
+  if (fs.existsSync(mcpDir)) {
+    mcpResult = installMcpServer(mcpDir, {
+      dryRun: args.dryRun,
+      force: args.force,
+    });
+
+    if (mcpResult.error) {
+      console.error(`MCP install warning: ${mcpResult.error.message}`);
+    } else if (mcpResult.installed) {
+      console.log(`Installed Obsidian MCP server at ${mcpResult.binaryPath}`);
+    } else if (mcpResult.skipped) {
+      console.log(`Obsidian MCP server already installed at ${mcpResult.binaryPath}`);
+    }
   }
 
   return 0;

@@ -11,6 +11,9 @@
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
   "files": [
     "skills/",
+    "references/",
+    "assets/",
+    "servers/obsidian-mcp/",
     "README.md",
     "LICENSE.md"
   ],
