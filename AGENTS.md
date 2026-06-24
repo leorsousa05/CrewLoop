@@ -14,6 +14,20 @@ The main documentation is in English, with technical terms in English (e.g., `sp
 
 ---
 
+## Second-Brain Memory
+
+The project includes an Obsidian-based second brain for long-term context:
+
+- **Skill:** `skills/obsidian-second-brain/SKILL.md`
+- **Server:** `servers/obsidian-mcp/`
+- **Vault:** `~/.lea`
+
+Every skill in the bundle must invoke the `obsidian-second-brain` skill at the start of a task (to read prior context) and at the end (to persist outcomes). Skills must never read or write files in `~/.lea` directly.
+
+See `references/obsidian-mcp-usage.md` for the full layer map and tool reference.
+
+---
+
 ## Repository Structure
 
 ```
@@ -39,6 +53,8 @@ loop-engineering-agents/
 │   ├── install.sh             # Install skills to agent skills dir
 │   ├── validate-skills.py     # Validate SKILL.md files
 │   └── package-skill.py       # Package a skill into .skill archive
+├── servers/                   # Optional MCP servers
+│   └── obsidian-mcp/          # Local Obsidian second-brain server
 ├── references/                # Shared reference documentation
 │   ├── conventions.md         # Conventional Commits, navigation, specs
 │   ├── skill-anatomy.md       # How to write a skill

@@ -1,7 +1,10 @@
+import logging
 from collections import deque
 
 from obsidian_mcp.indexer.store import IndexStore
 from obsidian_mcp.models import SearchResult
+
+logger = logging.getLogger(__name__)
 
 
 class GraphSearch:
@@ -10,6 +13,7 @@ class GraphSearch:
 
     def related(self, note_path: str, depth: int = 1) -> list[SearchResult]:
         edges = self.store.get_all_edges()
+        logger.debug("graph related search: %s depth=%d edges=%d", note_path, depth, len(edges))
         adjacency = {}
         for edge in edges:
             adjacency.setdefault(edge.source, []).append((edge.target, edge.weight))
@@ -37,6 +41,7 @@ class GraphSearch:
         if not terms:
             return []
         edges = self.store.get_all_edges()
+        logger.debug("graph search: query=%r edges=%d", query, len(edges))
         scores = {}
         for edge in edges:
             for node in (edge.source, edge.target):

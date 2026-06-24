@@ -30,15 +30,18 @@ def test_tool_create_note_title_from_path(config):
     assert "My Great Note" in text
 
 
-def test_tool_read_note_renders_frontmatter_lists(config):
+def test_tool_read_note_returns_raw_content(config, temp_vault):
     VaultRepository(config)
     dispatch(
         "create_note",
         {"path": "fm.md", "title": "FM", "content": "body", "tags": ["a", "b"]},
         config,
     )
+    raw = (temp_vault / "fm.md").read_text(encoding="utf-8")
     text = dispatch("read_note", {"path": "fm.md"}, config)
-    assert "tags: a, b" in text or "tags:\n  - a\n  - b" in text
+    assert text == raw
+    assert "body" in text
+    assert "FM" in text
 
 
 def test_tool_search(config):

@@ -1,5 +1,9 @@
+import logging
+
 from obsidian_mcp.indexer.store import IndexStore
 from obsidian_mcp.models import SearchResult
+
+logger = logging.getLogger(__name__)
 
 
 class TextSearch:
@@ -9,6 +13,7 @@ class TextSearch:
     def search(self, query: str, limit: int = 10) -> list[SearchResult]:
         query_lower = query.lower()
         chunks = self.store.get_all_chunks()
+        logger.debug("text search over %d chunks", len(chunks))
         scored = []
         for chunk in chunks:
             text_lower = chunk.text.lower()

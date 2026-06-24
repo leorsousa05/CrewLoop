@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 
 from obsidian_mcp.config import Config
 from obsidian_mcp.models import Note
 from obsidian_mcp.privacy.filter import PrivacyFilter
 from obsidian_mcp.vault.repository import VaultRepository
+
+logger = logging.getLogger(__name__)
 
 
 def handle_create_note(arguments: dict, config: Config) -> dict:
@@ -32,6 +35,7 @@ def handle_create_note(arguments: dict, config: Config) -> dict:
         tags=tags,
     )
     vault.save(note)
+    logger.info("created note: %s", path)
     return {"status": "created", "path": path}
 
 

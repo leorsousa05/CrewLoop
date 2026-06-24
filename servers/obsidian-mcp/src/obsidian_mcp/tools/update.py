@@ -1,8 +1,11 @@
+import logging
 from datetime import datetime, timezone
 
 from obsidian_mcp.config import Config
 from obsidian_mcp.privacy.filter import PrivacyFilter
 from obsidian_mcp.vault.repository import VaultRepository
+
+logger = logging.getLogger(__name__)
 
 
 def handle_update_note(arguments: dict, config: Config) -> dict:
@@ -27,4 +30,5 @@ def handle_update_note(arguments: dict, config: Config) -> dict:
         note.tags = tags
     note.frontmatter["updated"] = datetime.now(timezone.utc).isoformat()
     vault.save(note)
+    logger.info("updated note: %s", path)
     return {"status": "updated", "path": path}
