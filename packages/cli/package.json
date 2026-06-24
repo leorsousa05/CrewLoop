@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CLI for installing CrewLoop skills",
   "license": "MIT",
   "author": "leorsousa05",
