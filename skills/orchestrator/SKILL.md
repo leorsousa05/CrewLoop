@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Context discovery and requirement gathering orchestrator for software development tasks. Use this skill whenever the user asks to build, create, modify, fix, refactor, change, design, or implement anything in a codebase — even if they don't explicitly ask for 'requirements gathering' or 'context'. This skill MUST run FIRST on any task. It collects project context, goals, constraints, UI/UX preferences, animation style, design patterns, and architecture preferences, then produces a structured brief and ALWAYS routes to architect to create specs. There are NO exceptions — every task, bug fix, feature, design, or refactor goes to architect first. The architect then routes to designer (if UI/frontend) or engineer (if backend). Never route directly to designer or engineer from orchestrator. Trigger on 'build', 'create', 'make', 'add', 'fix', 'refactor', 'change', 'implement', 'update', 'modify', 'design', 'redesign', 'landing page', 'dashboard', 'frontend', 'UI', or any task that involves code changes. Also trigger when the user has a vague idea and needs help scoping it.
+description: Context discovery orchestrator for software tasks. Run FIRST for build, create, modify, fix, refactor, design, or implement requests. Gathers context and routes to architect for specs. Trigger: build, create, fix, refactor, design, implement, UI, frontend, dashboard, landing page, or code changes.
 ---
 
 # Orchestrator — Context Discovery & Requirement Gathering

@@ -1,6 +1,6 @@
 ---
 name: docs-writer
-description: Write or rewrite project documentation tailored to the project type and audience. Use this skill whenever the user asks to create, rewrite, update, or improve a README, module documentation, feature documentation, capability docs, or any project documentation. Trigger on 'write a README', 'rewrite README', 'create documentation', 'document this module', 'document this feature', 'docs for', 'update docs', or when the orchestrator has gathered context and the task is purely documentation with no code changes. This skill is invoked by the orchestrator only — no other skill calls it directly. If documentation requires architectural context that does not exist, route to architect first.
+description: Write or rewrite project documentation tailored to type and audience. Use for READMEs, module/feature/capability docs, or any project docs, and when orchestrator routes pure documentation tasks without code changes. Invoked by orchestrator only; route to architect if context is missing.
 ---
 
 # Docs-Writer — Documentation Authoring

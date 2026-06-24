@@ -1,6 +1,6 @@
 ---
 name: tester
-description: Use this skill whenever the conversation involves testing strategy, QA, test coverage, bug reproduction, edge cases, test plans, or verification of existing tests. Trigger even if the user does not say the word "test" but is asking about how to verify, reproduce, or break a feature. Competes with engineer on implementation details but wins on test design and coverage analysis.
+description: Use this skill whenever the conversation involves testing strategy, QA, test coverage, bug reproduction, edge cases, test plans, or verification of existing tests. Trigger also when the user asks how to verify, reproduce, or break a feature. Wins over engineer on test design and coverage analysis.
 ---
 
 # Tester — Quality Assurance & Test Strategy

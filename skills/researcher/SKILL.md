@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Use this skill whenever the conversation involves technology evaluation, library or framework comparison, proof-of-concepts, unknown domains, or choosing between alternatives. Trigger even if the user does not say "research" but is asking "should we use X or Y?", "what is the best tool for Z?", or "how does this technology work?". Competes with architect on decisions but wins on gathering and comparing options before a decision is made.
+description: Use for technology evaluation, library/framework comparison, proofs-of-concept, unknown domains, or choosing alternatives. Trigger on "should we use X or Y?", "what is the best tool for Z?", or "how does this technology work?". Gathers and compares options before the architect decides.
 ---
 
 # Researcher — Technology Evaluation & Proofs of Concept

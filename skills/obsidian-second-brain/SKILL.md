@@ -1,6 +1,6 @@
 ---
 name: obsidian-second-brain
-description: Use this skill whenever the user is working with the loop-engineering-agents bundle and there is a local Obsidian vault at ~/.lea connected via the obsidian-mcp server. Trigger aggressively on tasks involving knowledge retrieval, memory, RAG, second brain, Obsidian, prior decisions in Knowledge/ or Journal/, durable knowledge in Knowledge/, session outcomes in Journal/, user profile facts in Memory/, temporary drafts in Notes/, summaries, dashboards, or anything where persisted context would improve the answer. Even if the user does not explicitly mention the vault, Obsidian, or MCP, use this skill when the answer may depend on previously saved notes, decisions, or concepts. This skill ensures the agent searches the vault, reads relevant notes, learns from new information, persists learnings and decisions automatically, and generates dashboards when asked.
+description: Memory and RAG skill for the loop-engineering-agents bundle. Use when a local Obsidian vault at ~/.lea is connected via obsidian-mcp. Trigger on knowledge retrieval, prior decisions, durable knowledge, session outcomes, user profiles, summaries, dashboards, or any task needing persisted context.
 ---
 
 # Obsidian Second Brain — Layered Memory & RAG

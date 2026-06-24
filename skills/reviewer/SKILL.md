@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Code review and quality gatekeeper skill. Use this skill whenever the engineer has completed BUILD and the user wants to proceed to review, or when the user says 'review', 'check the code', 'code review', 'quality check', 'inspect changes', or any variation. This skill reads the diff and changed files, checks for spec compliance, code quality, test coverage, security issues, performance concerns, and AI artifacts. It produces a structured review report and routes to shipper if clean, or back to engineer/architect if issues are found. Never use for git operations — those go to shipper. Never use for implementation — those go to engineer.
+description: Code review and quality gatekeeper. Use when the user says 'review', 'check the code', 'code review', 'quality check', or after BUILD. Inspects diffs for spec compliance, quality, tests, security, performance and AI artifacts. Produces a report. Never for git operations or implementation.
 ---
 
 # Reviewer — Code Review & Quality Gate
