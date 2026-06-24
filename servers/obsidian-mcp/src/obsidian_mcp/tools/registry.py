@@ -1,3 +1,5 @@
+import asyncio
+
 from obsidian_mcp.config import Config
 from obsidian_mcp.tools.create import handle_create_note
 from obsidian_mcp.tools.delete import handle_delete_note
@@ -116,3 +118,13 @@ def dispatch(name: str, arguments: dict, config: Config):
     if tool is None:
         raise ValueError(f"unknown tool: {name}")
     return tool["handler"](arguments, config)
+
+
+async def dispatch_async(name: str, arguments: dict, config: Config):
+    tool = TOOLS.get(name)
+    if tool is None:
+        raise ValueError(f"unknown tool: {name}")
+    handler = tool["handler"]
+    if asyncio.iscoroutinefunction(handler):
+        return await handler(arguments, config)
+    return await asyncio.to_thread(handler, arguments, config)

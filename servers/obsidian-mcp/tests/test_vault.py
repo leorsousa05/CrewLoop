@@ -80,3 +80,24 @@ def test_vault_blocks_symlink_escape(config, temp_vault):
     assert "escape.md" not in repo.list_notes()
     with pytest.raises(ValueError):
         repo.read("escape.md")
+
+
+def test_vault_read_raw_returns_exact_content(config):
+    repo = VaultRepository(config)
+    raw = "---\ntitle: Raw\ntags:\n  - a\n---\n\nbody"
+    (repo.root / "raw.md").write_text(raw, encoding="utf-8")
+    assert repo.read_raw("raw.md") == raw
+
+
+def test_vault_read_raw_missing_raises(config):
+    repo = VaultRepository(config)
+    with pytest.raises(FileNotFoundError):
+        repo.read_raw("missing.md")
+
+
+def test_vault_read_raw_replaces_non_utf8(config, temp_vault):
+    repo = VaultRepository(config)
+    (repo.root / "binary.md").write_bytes(b"\xff\xfeHello\xfaworld")
+    text = repo.read_raw("binary.md")
+    assert "Hello" in text
+    assert "world" in text

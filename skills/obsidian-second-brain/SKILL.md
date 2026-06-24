@@ -52,13 +52,15 @@ The vault at `~/.lea` uses a three-layer memory model. Every read and write must
 ~/.lea/
 ├── AGENT.md              # Entry point: read first
 ├── MEMORY.md             # Curated memory: read at task start
-├── memory/               # Working memory: raw session logs
+├── logs/                 # Working logs: raw session logs
 ├── Memory/               # Durable user profile and preferences
 ├── Knowledge/            # Long-lived technical guides and decisions
 ├── Journal/              # Important session logs and dashboards
 ├── Notes/                # Temporary notes and drafts
 └── _Inbox/               # Agent proposals before promotion
 ```
+
+> **Note:** `logs/` (lowercase) holds raw, short-lived session logs. `Memory/` (capital M) holds curated, durable user profile facts and preferences. `logs/` is created automatically when the first log note is written, so it may not exist in a freshly initialized vault.
 
 ### Layer Selection Decision Tree
 
@@ -97,7 +99,7 @@ User asks...
   │   → confirm path
   │
   ├─ Current conversation log / raw context
-  │   → append to memory/YYYY-MM-DD-HHMM.md
+  │   → append to logs/YYYY-MM-DD-HHMM.md
   │
   ├─ "dashboard/status/summary of project"
   │   → read_note("MEMORY.md")
@@ -115,7 +117,7 @@ User asks...
 |-------|------|------------|----------------|----------|
 | Agent entry | `AGENT.md` | Low | Once per session | Navigation rules for the vault. |
 | Curated memory | `MEMORY.md` | Medium | Every major task | Distilled user/project context, ~500 words. |
-| Working memory | `memory/` | High | Last 1-2 days | Raw session logs (`YYYY-MM-DD-HHMM.md`). |
+| Working logs | `logs/` | High | Last 1-2 days | Raw session logs (`YYYY-MM-DD-HHMM.md`). |
 | User profile | `Memory/` | Low | On demand | User facts, preferences, goals. |
 | Knowledge | `Knowledge/` | Low | On demand | Technical guides, decisions, reusable docs. |
 | Journal | `Journal/` | Medium | On demand | Session outcomes, briefs, dashboards. |
@@ -126,7 +128,7 @@ User asks...
 
 Every 2-4 sessions, or at the end of a significant task:
 
-1. Read recent files in `memory/`.
+1. Read recent files in `logs/`.
 2. Identify durable facts and short-term context.
 3. Update `MEMORY.md` (keep under ~500 words).
 4. Promote `_Inbox/` notes to `Memory/`, `Knowledge/`, `Journal/`, or `Notes/`.
@@ -138,14 +140,21 @@ Every 2-4 sessions, or at the end of a significant task:
 
 | Tool | When to use |
 |------|-------------|
-| `sync_from_bundle` | Once per session, before first search. |
+| `sync_from_bundle` | Re-indexes the skill bundle and local vault; call once per session before the first search. |
 | `read_note` | Read `AGENT.md`, `MEMORY.md`, or a specific note. |
 | `search_notes` | Before answering substantive questions. Prefer `mode: "hybrid"`. |
 | `learn_from_text` | After a new concept or decision emerges. Review target layer. |
 | `create_note` | Create a new note in the correct layer. |
-| `update_note` | Append or replace content. Use `append` for working memory and `MEMORY.md`. |
+| `update_note` | Append or replace content. Use `append` for working logs (`logs/`) and `MEMORY.md`. |
 | `get_related_notes` | Explore links and graph relationships. |
 | `list_notes` | Discover existing note collections or build dashboards. |
+
+### Definitions
+
+- `sync_from_bundle`: re-indexes the skill bundle and the local vault. Call once per session before the first substantive search. Takes no arguments.
+- Search score: a normalized relevance score returned by `search_notes`. Matches above `0.3` are usually worth reading; lower scores are typically noise.
+- Major task: any task involving specs, architecture, implementation, durable knowledge, or multi-step reasoning.
+- Heartbeat: a distillation routine run every 2-4 sessions (or at the end of a significant task) to promote raw logs into `MEMORY.md` and structured layers.
 
 ---
 
@@ -168,10 +177,11 @@ Every 2-4 sessions, or at the end of a significant task:
 ### Example 1 — retrieve a decision
 User: "What did we decide about the vault path?"
 Agent:
-1. `read_note("MEMORY.md")`
-2. `search_notes("vault path", mode="hybrid")` targeting `Knowledge/`
-3. `read_note("Knowledge/vault-local-path.md")` if it exists.
-4. Answer: "We kept the vault local at `~/.lea` with SQLite for the index. (Source: `Knowledge/vault-local-path.md`)"
+1. `read_note("AGENT.md")`
+2. `read_note("MEMORY.md")`
+3. `search_notes("vault path", mode="hybrid")` targeting `Knowledge/`
+4. `read_note("Knowledge/vault-local-path.md")` if it exists.
+5. Answer: "We kept the vault local at `~/.lea` with SQLite for the index. (Source: `Knowledge/vault-local-path.md`)"
 
 ### Example 2 — persist a concept
 User: "Graph RAG combines vector search with navigation through Obsidian links."
@@ -205,11 +215,34 @@ Agent:
 
 ### Example 5 — heartbeat distillation
 Agent (during heartbeat):
-1. `list_notes("memory/")`
-2. Read last 1-2 `memory/YYYY-MM-DD-HHMM.md` files.
+1. `list_notes("logs/")`
+2. Read last 1-2 `logs/YYYY-MM-DD-HHMM.md` files.
 3. Update `MEMORY.md` with distilled active context.
 4. Process `_Inbox/` notes and promote durable ones.
 5. Answer: "Heartbeat complete. Updated `MEMORY.md` and promoted 2 notes from `_Inbox/`."
+
+### Example 6 — persist a user preference
+User: "I prefer Portuguese for conversation but English for vault notes."
+Agent:
+1. Privacy check (safe).
+2. Decide layer: user profile → `Memory/`.
+3. `create_note("Memory/user-language-preferences.md", content)`.
+4. Answer: "Preference saved to `Memory/user-language-preferences.md`."
+
+### Example 7 — temporary research scratchpad
+User: "Collect articles about vector databases for now."
+Agent:
+1. Privacy check (safe).
+2. Decide layer: temporary → `Notes/`.
+3. `create_note("Notes/vector-database-research.md", content)`.
+4. Answer: "Scratchpad created at `Notes/vector-database-research.md`."
+
+### Example 8 — propose a canonical note
+Agent:
+1. Privacy check (safe).
+2. Decide layer: uncertain → `_Inbox/`.
+3. `create_note("_Inbox/proposed-decision-2026-06-24.md", content)`.
+4. Answer: "Proposal saved to `_Inbox/proposed-decision-2026-06-24.md` for review during the next heartbeat."
 
 ---
 
@@ -259,5 +292,7 @@ Before calling `learn_from_text`, `create_note`, or `update_note`, verify the co
 
 - **[O] Return to Orchestrator** — Main task routing
 - **[A] Return to Architect** — Design or spec questions
+- **[D] Return to Designer** — Visual/UI design direction
 - **[E] Return to Engineer** — Implementation work
 - **[R] Return to Reviewer** — Quality review
+- **[S] Return to Shipper** — Commit, branch, push, PR

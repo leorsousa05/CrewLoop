@@ -60,3 +60,5 @@ flowchart TD
 6. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back to the Engineer or Reviewer and do not touch git.
 7. **Shipper is the only one who touches git** — commit, branch, push, PR.
 8. **All skills return to Orchestrator** — it is the central hub.
+
+Each skill reads from the second brain at the start of a task and persists outcomes at the end. The Orchestrator initiates memory reads during discovery; the Shipper updates `Journal/loop-engineering-agents.md` with active/archived spec links.

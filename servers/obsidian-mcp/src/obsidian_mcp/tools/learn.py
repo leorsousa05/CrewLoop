@@ -1,3 +1,5 @@
+import logging
+
 from obsidian_mcp.config import Config
 from obsidian_mcp.indexer.indexer import Indexer
 from obsidian_mcp.indexer.store import IndexStore
@@ -5,6 +7,8 @@ from obsidian_mcp.learning.detector import LearningDetector
 from obsidian_mcp.learning.note_generator import NoteGenerator
 from obsidian_mcp.privacy.filter import PrivacyFilter
 from obsidian_mcp.vault.repository import VaultRepository
+
+logger = logging.getLogger(__name__)
 
 
 def handle_learn_from_text(arguments: dict, config: Config) -> dict:
@@ -32,5 +36,7 @@ def handle_learn_from_text(arguments: dict, config: Config) -> dict:
         created.append(note.path)
 
     if not created:
+        logger.info("no new learnings created from text")
         return {"status": "duplicate", "created_notes": []}
+    logger.info("learned from text, created notes: %s", created)
     return {"status": "learned", "created_notes": created}

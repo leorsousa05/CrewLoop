@@ -25,6 +25,27 @@ You do NOT write production fixes. You do NOT run git operations. You do not rep
 
 ---
 
+## MEMORY & CONTEXT
+
+**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
+Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
+
+At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
+At the end of the task, it will persist outcomes to the correct layers.
+
+This skill's targets:
+- **Read at start:** prior security decisions, vulnerability patterns, and accepted risks
+- **Persist at end:** security findings to journal; threat patterns to knowledge; active context to curated memory
+
+### MCP Tools Reference
+
+| Tool | When to use |
+|------|-------------|
+| `search_notes` | Find prior security decisions and vulnerability patterns in `Knowledge/` and `Journal/`. |
+| `learn_from_text` | Persist a security finding, threat pattern, or remediation decision. |
+
+---
+
 ## WORKFLOW
 
 ### Step 1: Understand the Context
@@ -90,27 +111,6 @@ Include concrete remediation steps and route appropriately.
 - ❌ Reporting vague findings without concrete evidence.
 - ❌ Ignoring infrastructure, dependencies, or CI security.
 - ❌ Skipping AI artifact checks for hardcoded credentials or placeholder secrets.
-
----
-
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** prior security decisions, vulnerability patterns, and accepted risks
-- **Persist at end:** security findings to journal; threat patterns to knowledge; active context to curated memory
-
-### MCP Tools Reference
-
-| Tool | When to use |
-|------|-------------|
-| `search_notes` | Find prior security decisions and vulnerability patterns in `Knowledge/` and `Journal/`. |
-| `learn_from_text` | Persist a security finding, threat pattern, or remediation decision. |
 
 ---
 

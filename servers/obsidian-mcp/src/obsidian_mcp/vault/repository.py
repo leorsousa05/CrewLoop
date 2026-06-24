@@ -45,6 +45,12 @@ class VaultRepository:
             raise FileNotFoundError(f"note not found: {path}")
         return parse_note(path, full)
 
+    def read_raw(self, path: str) -> str:
+        full = self._resolve(path)
+        if not full.exists():
+            raise FileNotFoundError(f"note not found: {path}")
+        return full.read_text(encoding="utf-8", errors="replace")
+
     def read_all(self) -> list[Note]:
         return [self.read(p) for p in self.list_notes()]
 
