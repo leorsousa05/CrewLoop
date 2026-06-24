@@ -1,6 +1,6 @@
 ---
 name: maintainer
-description: Use this skill whenever the conversation involves bug triage, technical debt, dependency updates, refactoring, production incidents, or long-term upkeep of a codebase. Trigger even if the user does not say "maintainer" but is asking about flaky tests, outdated libraries, performance degradation, or recurring issues. Competes with engineer on fixes but wins on diagnosis and maintenance strategy.
+description: Use this skill for bug triage, technical debt, dependency updates, refactoring, production incidents, and codebase upkeep. Trigger for flaky tests, outdated libraries, performance degradation, or recurring issues — even if the user does not say "maintainer".
 ---
 
 # Maintainer — Upkeep, Debt & Incident Triage

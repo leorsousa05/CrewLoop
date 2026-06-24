@@ -1,6 +1,6 @@
 ---
 name: shipper
-description: Git commit, branch creation, and PR preparation skill. Use this skill whenever the reviewer has approved the code and the user wants to ship, or when the user says 'commit', 'create PR', 'ship it', 'push changes', 'prepare for review', or any variation. This skill receives an optional review report from the reviewer, analyzes the diff to generate a Conventional Commit message, creates a properly named branch, commits the code, pushes to remote, and generates a PR link. Never use for code review — that goes to reviewer. Never use for implementation — only for git operations and PR preparation.
+description: Git commit, branch creation, and PR preparation skill. Use whenever reviewer-approved code is ready to ship or the user says 'commit', 'create PR', 'ship it', 'push changes', 'prepare for review', or similar. Creates branches, commits, pushes, and prepares PRs. Not for review or implementation.
 ---
 
 # Shipper — Commit, Branch & PR Preparation

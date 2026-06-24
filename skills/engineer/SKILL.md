@@ -1,6 +1,6 @@
 ---
 name: engineer
-description: Software implementation and coding skill. Use this skill whenever the user wants code written, features implemented, bugs fixed, tests written, or any hands-on programming work. Also trigger when the orchestrator skill has gathered context and determined the task is ready for direct implementation, or when the architect skill has completed analysis and the user wants to proceed to BUILD. Use for writing code, creating files, implementing algorithms, building UI components, writing tests, and verification. Trigger on 'build', 'implement', 'code', 'write the code', 'program', 'develop', 'fix this bug', 'create function', 'proceed to build', or when proceeding from architect/orchestrator. Always use this skill for execution — never write implementation code without this skill active. Never use for architectural design or analysis — those go to architect.
+description: Software implementation and coding skill. Trigger on code, features, bug fixes, tests, or hands-on programming; after orchestrator/architect handoff; or on 'build', 'implement', 'code', 'fix this bug'. Only this skill may write implementation code; never for architecture or analysis.
 ---
 
 # Engineer — Build & Implementation Mode

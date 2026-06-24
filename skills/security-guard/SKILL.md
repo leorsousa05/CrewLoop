@@ -1,6 +1,6 @@
 ---
 name: security-guard
-description: Use this skill whenever the conversation involves security review, security audit, scanning for secrets, dependency audit, supply chain risk, authentication, authorization, vulnerability, handling PII or payment data, adding external services, or exposing endpoints. Trigger even if the user does not say "security" but is asking about API keys, tokens, passwords, private keys, OAuth, JWT, sessions, CORS, CSP, headers, or production deployment. Competes with reviewer on general quality but wins on deep-dive security analysis.
+description: Use this skill for security reviews, audits, secret scanning, dependency/supply-chain risk, auth, authorization, vulnerabilities, PII/payment data, external services, or exposed endpoints. Also trigger on API keys, tokens, passwords, OAuth, JWT, CORS, CSP, or production deployment.
 ---
 
 # Security Guard — Security Review & Audit

@@ -1,6 +1,6 @@
 ---
 name: product-manager
-description: Use this skill whenever the conversation involves prioritization, success metrics, user stories, product decisions, roadmap, feature scope, or measurable outcomes. Trigger even if the user does not say "product manager" but is debating what to build, why to build it, or how to measure success. Competes with orchestrator on requirement discovery but wins on business value framing and prioritization.
+description: Use this skill for prioritization, success metrics, user stories, product decisions, roadmap, scope, or measurable outcomes. Trigger it when the user debates what to build, why to build it, or how to measure success, even without saying 'product manager'.
 ---
 
 # Product Manager — Prioritization & Value Framing

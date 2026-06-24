@@ -1,6 +1,6 @@
 ---
 name: designer
-description: UI/UX design skill that creates distinctive, production-grade interfaces with bold aesthetic direction. Use this skill whenever the user asks to design, build, create, or improve any frontend interface, page, component, or visual experience. This skill combines bold creative vision (unique typography, unexpected layouts, atmospheric textures, choreographed motion) with essential technical guardrails (accessibility, responsive behavior, touch targets, performance). Trigger on 'design', 'build a page', 'create a landing page', 'make a dashboard', 'improve this UI', 'redesign', 'frontend', 'interface', 'component', or any visual/UI task. When implementation is needed, this skill produces design specs and hands off to the engineer skill for coding.
+description: UI/UX design skill for bold, production-grade interfaces. Use when the user asks to design, build, create, or improve any frontend interface, page, component, or visual experience. Trigger on 'design', 'frontend', 'interface', 'component', 'landing page', 'dashboard', or 'redesign'.
 ---
 
 # Designer — Bold UI/UX Design

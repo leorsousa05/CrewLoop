@@ -1,6 +1,6 @@
 ---
 name: accessibility-auditor
-description: Use this skill whenever the conversation involves accessibility audits, a11y checks, a11y reviews, WCAG compliance, screen readers, keyboard navigation, focus management, color contrast, prefers-reduced-motion, or accessible design. Trigger even if the user does not say "accessibility" but is asking about semantic HTML, ARIA usage, alt text, form labels, heading hierarchy, touch targets, responsive behavior, or disability inclusion for UI work. Competes with reviewer on general quality but wins on deep accessibility analysis.
+description: Use this skill for accessibility/a11y audits, WCAG compliance, screen reader support, keyboard/focus management, color contrast, motion preferences, and accessible design. Also trigger on semantic HTML, ARIA, alt text, labels, headings, touch targets, responsive behavior, or disability inclusion.
 ---
 
 # Accessibility Auditor — WCAG & Inclusive UI Review
