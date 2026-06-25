@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -10,7 +10,8 @@
   },
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
   "bin": {
-    "crewloop-dashboard": "bin/crewloop-dashboard.js"
+    "crewloop-dashboard": "bin/crewloop-dashboard.js",
+    "crewloop-shim": "bin/crewloop-shim.js"
   },
   "files": [
     "bin/",

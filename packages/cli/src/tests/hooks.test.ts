@@ -40,6 +40,7 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(first.status, 'configured');
     assert.ok(first.configPath);
     assert.ok(fs.existsSync(first.configPath));
+    assert.strictEqual(first.backupPath, undefined);
 
     const content = fs.readFileSync(first.configPath, 'utf8');
     assert.ok(content.includes('before_tool_use = "crewloop-shim kimi --default-skill orchestrator"'));
@@ -47,12 +48,32 @@ describe('installHooksForAgent', () => {
 
     const second = installHooksForAgent(agent, { backup: true });
     assert.strictEqual(second.status, 'configured');
+    assert.strictEqual(second.backupPath, undefined);
 
     const updatedContent = fs.readFileSync(first.configPath, 'utf8');
     const beforeMatches = updatedContent.match(/before_tool_use/g);
     const afterMatches = updatedContent.match(/after_tool_use/g);
     assert.strictEqual(beforeMatches?.length, 1);
     assert.strictEqual(afterMatches?.length, 1);
+  });
+
+  it('does not create a backup when the config is already correct', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
+    fs.writeFileSync(
+      agent.hooks.configPath,
+      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill orchestrator"\nafter_tool_use = "crewloop-shim kimi --default-skill orchestrator"\n',
+      'utf8'
+    );
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+    assert.strictEqual(result.backupPath, undefined);
+
+    const updatedContent = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.strictEqual(updatedContent.split('\n').filter((line) => line.startsWith('before_tool_use')).length, 1);
+    assert.strictEqual(updatedContent.split('\n').filter((line) => line.startsWith('after_tool_use')).length, 1);
   });
 
   it('configures JSON hooks idempotently for codex', () => {

@@ -186,7 +186,7 @@ npm install -g @archznn/crewloop-skills
 crewloop install
 ```
 
-`crewloop install` copies the skills to the default agent directory (`~/.agents/skills/`), installs the Obsidian MCP server, and automatically configures dashboard hooks for supported agents (Kimi, Claude, Codex, AGY). Use `--no-hooks` to skip hook configuration.
+`crewloop install` copies the skills to the default agent directory (`~/.agents/skills/`), ensures the Obsidian MCP server is installed, and automatically configures dashboard hooks for supported agents (Kimi, Claude, Codex, AGY). The `crewloop-shim` binary is installed globally as part of the bundle and is the command the hooks invoke to send events to the dashboard. Use `--no-hooks` to skip hook configuration.
 
 ---
 
