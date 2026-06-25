@@ -1,0 +1,12 @@
+title: Add crewloop doctor / health checks for Codex Windows sandbox
+id: 011
+status: completed
+start_date: 2026-06-25
+end_date: 2026-06-25
+author: architect
+labels:
+  - cli
+  - codex
+  - windows
+  - health-check
+  - known-issue

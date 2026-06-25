@@ -15,9 +15,10 @@ export class StateStore {
 
   applyEvent(event: DashboardEvent): Session {
     let session = this.sessions.get(event.session_id);
+    const isNewSession = !session;
 
     if (!session) {
-      session = this.createSession(event.session_id, event.source);
+      session = this.createSession(event.session_id, event.source, event.default_skill);
     }
 
     session.source = event.source;
@@ -38,6 +39,9 @@ export class StateStore {
     } else if (event.skill) {
       session.active_skill = event.skill;
       session.active_confidence = event.event_type === 'skill_change' ? 'explicit' : 'heuristic';
+    } else if (isNewSession && event.default_skill) {
+      session.active_skill = event.default_skill;
+      session.active_confidence = 'heuristic';
     }
 
     if (event.event_type === 'session_end') {
@@ -92,7 +96,11 @@ export class StateStore {
     return removed;
   }
 
-  private createSession(id: string, source: AgentSource): Session {
+  private createSession(
+    id: string,
+    source: AgentSource,
+    defaultSkill?: string
+  ): Session {
     const now = Date.now();
     const session: Session = {
       id,
@@ -102,6 +110,8 @@ export class StateStore {
       lifecycle: 'starting',
       started_at: now,
       last_event_at: now,
+      active_skill: defaultSkill,
+      active_confidence: defaultSkill ? 'heuristic' : undefined,
     };
     this.sessions.set(id, session);
     return session;

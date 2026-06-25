@@ -40,6 +40,6 @@ describe('shim binary', () => {
     const { exitCode, stderr } = await runBin(['unknown']);
     assert.strictEqual(exitCode, 1);
     assert.ok(stderr.includes('unknown source'));
-    assert.ok(stderr.includes('crewloop-shim <kimi|codex>'));
+    assert.ok(stderr.includes('crewloop-shim <kimi|codex|agy|opencode|log-watcher>'));
   });
 });

@@ -55,7 +55,12 @@ export function createEventHandler(deps: EventHandlerDependencies) {
     const session = deps.state.applyEvent(event);
     const inferred = deps.inference.infer(event, session);
 
-    if (inferred.skill !== session.active_skill || inferred.confidence !== session.active_confidence) {
+    if (inferred.confidence === 'explicit') {
+      deps.state.setActiveSkill(session.id, inferred.skill, inferred.confidence);
+    } else if (!event.default_skill && inferred.skill) {
+      // Only apply heuristic tool-to-skill mapping when the source did not
+      // declare a default skill. This keeps AGY sessions on the default skill
+      // until an explicit skill signal arrives.
       deps.state.setActiveSkill(session.id, inferred.skill, inferred.confidence);
     }
 

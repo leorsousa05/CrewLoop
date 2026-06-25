@@ -18,6 +18,11 @@ describe('cli', () => {
     assert.strictEqual(args.command, 'dashboard');
   });
 
+  it('parses doctor command', () => {
+    const args = parseArgs(['node', 'crewloop', 'doctor']);
+    assert.strictEqual(args.command, 'doctor');
+  });
+
   it('parses --version flag', () => {
     const args = parseArgs(['node', 'crewloop', '--version']);
     assert.strictEqual(args.command, 'version');
@@ -117,6 +122,7 @@ describe('cli', () => {
     assert.ok(help.includes('install'));
     assert.ok(help.includes('list'));
     assert.ok(help.includes('dashboard'));
+    assert.ok(help.includes('doctor'));
     assert.ok(help.includes('--target'));
     assert.ok(help.includes('--port'));
     assert.ok(help.includes('--version'));
@@ -143,12 +149,12 @@ describe('cli', () => {
     assert.ok(help.includes('crewloop install --dry-run'));
     assert.ok(help.includes('crewloop list'));
     assert.ok(help.includes('crewloop dashboard --port 8080'));
+    assert.ok(help.includes('crewloop doctor'));
     assert.ok(help.includes('crewloop --version'));
   });
 
-  it('help text does not change command surface', () => {
+  it('help text documents known commands only', () => {
     const help = printHelp();
-    assert.ok(!help.includes('doctor'));
     assert.ok(!help.includes('validate'));
   });
 });

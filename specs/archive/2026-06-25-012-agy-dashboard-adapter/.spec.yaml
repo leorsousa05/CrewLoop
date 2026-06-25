@@ -1,0 +1,12 @@
+title: AGY dashboard adapter and hook config alignment
+id: 012
+status: completed
+start_date: 2026-06-25
+end_date: 2026-06-25
+author: engineer
+labels:
+  - cli
+  - dashboard
+  - agy
+  - hooks
+  - adapter

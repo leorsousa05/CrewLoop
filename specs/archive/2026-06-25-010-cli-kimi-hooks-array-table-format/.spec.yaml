@@ -1,0 +1,11 @@
+title: Write Kimi hooks as [[hooks]] array-of-tables per official docs
+id: 010
+status: completed
+start_date: 2026-06-25
+end_date: 2026-06-25
+author: architect
+labels:
+  - cli
+  - hooks
+  - kimi
+  - bugfix

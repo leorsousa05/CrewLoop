@@ -2,13 +2,27 @@
   "$schema": "https://example.com/codex-hooks-schema.json",
   "description": "Codex CLI hook configuration for CrewLoop dashboard.",
   "hooks": {
-    "before_tool_use": {
-      "command": "crewloop-shim",
-      "args": ["codex"]
-    },
-    "after_tool_use": {
-      "command": "crewloop-shim",
-      "args": ["codex"]
-    }
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "crewloop-shim",
+            "args": ["codex", "--default-skill", "orchestrator"]
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "crewloop-shim",
+            "args": ["codex", "--default-skill", "orchestrator"]
+          }
+        ]
+      }
+    ]
   }
 }

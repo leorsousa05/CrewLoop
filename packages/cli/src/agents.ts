@@ -6,9 +6,13 @@ export type HookFormat = 'toml' | 'json' | 'none';
 export interface AgentHookConfig {
   supported: boolean;
   configPath: string;
+  fallbackConfigPath?: string;
   format: HookFormat;
   beforeToolUseCommand?: string;
   afterToolUseCommand?: string;
+  beforeToolUseEventName?: string;
+  afterToolUseEventName?: string;
+  legacyEventNames?: string[];
 }
 
 export interface AgentConfig {
@@ -27,6 +31,9 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'toml',
       beforeToolUseCommand: 'crewloop-shim kimi --default-skill orchestrator',
       afterToolUseCommand: 'crewloop-shim kimi --default-skill orchestrator',
+      beforeToolUseEventName: 'PreToolUse',
+      afterToolUseEventName: 'PostToolUse',
+      legacyEventNames: ['before_tool_use', 'after_tool_use'],
     },
   },
   {
@@ -38,6 +45,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
       afterToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
+      beforeToolUseEventName: 'before_tool_use',
+      afterToolUseEventName: 'after_tool_use',
     },
   },
   {
@@ -49,6 +58,9 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
       afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+      beforeToolUseEventName: 'PreToolUse',
+      afterToolUseEventName: 'PostToolUse',
+      legacyEventNames: ['before_tool_use', 'after_tool_use'],
     },
   },
   {
@@ -56,10 +68,13 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
     skillsDir: path.join(os.homedir(), '.agy', 'skills'),
     hooks: {
       supported: true,
-      configPath: path.join(os.homedir(), '.agy', 'config.json'),
+      configPath: path.join(os.homedir(), '.gemini', 'config', 'hooks.json'),
+      fallbackConfigPath: path.join(os.homedir(), '.gemini', 'antigravity-cli', 'hooks.json'),
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
       afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+      beforeToolUseEventName: 'PreToolUse',
+      afterToolUseEventName: 'PostToolUse',
     },
   },
   {

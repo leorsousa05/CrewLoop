@@ -2,10 +2,11 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { resolveSkills } from './resolver';
-import { resolveAgentDir, listSupportedAgents } from './agents';
+import { resolveAgentDir, listSupportedAgents, type AgentConfig } from './agents';
 import { installSkills } from './installer';
 import { installMcpServer, type McpInstallResult } from './mcp';
 import { installHooks, type HookWriterResult } from './hooks';
+import { checkAgentHealth, checkAllAgentsHealth, type HealthCheckResult } from './health';
 
 function requireValue(arg: string, next: string | undefined): string {
   if (next === undefined || next.startsWith('-')) {
@@ -99,14 +100,16 @@ Commands:
   install              Install CrewLoop skills and configure agent hooks
   list                 List available skills
   dashboard            Start the real-time skill dashboard
+  doctor               Check agent hook health and report known issues
   version              Show version
   help                 Show this help message
 
 Hooks:
   Supported agents: kimi, claude, codex, agy
-  Running "crewloop install" registers before_tool_use and after_tool_use hooks in
-  each agent's config file. The hooks send events to the CrewLoop dashboard so it
-  can track the active skill and session state. Use --no-hooks to skip this step.
+  Running "crewloop install" registers agent-specific hooks (PreToolUse/PostToolUse
+  for kimi/codex, before_tool_use/after_tool_use for claude/agy) in each agent's
+  config file. The hooks send events to the CrewLoop dashboard so it can track the
+  active skill and session state. Use --no-hooks to skip this step.
 
 Options:
   --target <dir>       Install to a custom directory
@@ -129,6 +132,7 @@ Examples:
   crewloop install --dry-run
   crewloop list
   crewloop dashboard --port 8080
+  crewloop doctor
   crewloop --version
 `;
 }
@@ -293,9 +297,58 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
       }
       console.log('Run "crewloop dashboard" to start receiving hook events.');
     }
+
+    const agentsById = new Map<string, AgentConfig>(
+      listSupportedAgents().map((a) => [a.id, a])
+    );
+    const healthIssues: HealthCheckResult[] = [];
+    for (const result of hookResults) {
+      if (result.status !== 'configured') continue;
+      const agent = agentsById.get(result.agent);
+      if (!agent) continue;
+      healthIssues.push(...checkAgentHealth(agent).filter((r) => r.severity !== 'ok'));
+    }
+
+    if (healthIssues.length > 0) {
+      console.log('\nHealth warnings for configured agents:');
+      for (const issue of healthIssues) {
+        console.log(`  ${severitySymbol(issue.severity)} ${issue.agent}: ${issue.message}`);
+        if (issue.docUrl) {
+          console.log(`      Docs: ${issue.docUrl}`);
+        }
+      }
+    }
   }
 
   return 0;
+}
+
+function severitySymbol(severity: HealthCheckResult['severity']): string {
+  switch (severity) {
+    case 'ok':
+      return '✓';
+    case 'warning':
+      return '⚠';
+    case 'error':
+      return '✗';
+  }
+}
+
+async function handleDoctor(): Promise<number> {
+  const results = checkAllAgentsHealth();
+
+  console.log('Agent hook health:');
+  for (const result of results) {
+    const isUnsupported = result.message.includes('not supported');
+    const symbol = isUnsupported ? '-' : severitySymbol(result.severity);
+    const label = isUnsupported ? 'unsupported' : result.severity;
+    console.log(`  ${symbol} ${result.agent} (${label}): ${result.message}`);
+    if (result.docUrl) {
+      console.log(`      Docs: ${result.docUrl}`);
+    }
+  }
+
+  return results.some((r) => r.severity === 'error') ? 1 : 0;
 }
 
 function checkDashboardDependencies(packageRoot: string): string[] {
@@ -371,6 +424,8 @@ export async function run(argv: string[]): Promise<number> {
       return handleList();
     case 'dashboard':
       return handleDashboard(args);
+    case 'doctor':
+      return handleDoctor();
     case 'version':
       return handleVersion();
     case 'help':

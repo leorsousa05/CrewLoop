@@ -1,6 +1,10 @@
 # Kimi Code configuration snippet for CrewLoop dashboard integration.
 # Place in your Kimi Code config file and ensure crewloop-shim is on PATH.
 
-[hooks]
-before_tool_use = "crewloop-shim kimi"
-after_tool_use = "crewloop-shim kimi"
+[[hooks]]
+event = "PreToolUse"
+command = "crewloop-shim kimi --default-skill orchestrator"
+
+[[hooks]]
+event = "PostToolUse"
+command = "crewloop-shim kimi --default-skill orchestrator"

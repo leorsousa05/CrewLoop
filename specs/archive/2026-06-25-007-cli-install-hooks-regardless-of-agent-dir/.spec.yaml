@@ -1,0 +1,11 @@
+title: Fix Codex/Claude/AGY hook command format and relax agent detection
+id: 007
+status: completed
+start_date: 2026-06-25
+end_date: 2026-06-25
+author: architect
+labels:
+  - cli
+  - hooks
+  - codex
+  - bugfix

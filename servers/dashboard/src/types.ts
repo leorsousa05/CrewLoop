@@ -1,4 +1,4 @@
-export type AgentSource = 'kimi' | 'codex' | 'opencode' | 'log-watcher';
+export type AgentSource = 'kimi' | 'codex' | 'agy' | 'opencode' | 'log-watcher';
 
 export type EventType =
   | 'session_start'
@@ -16,6 +16,7 @@ export interface DashboardEvent {
   session_id: string;
   event_type: EventType;
   skill?: string;
+  default_skill?: string;
   tool?: string;
   detail?: string;
   status?: EventStatus;

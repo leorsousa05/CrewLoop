@@ -26,6 +26,9 @@ function createAgentConfig(
       format: format ?? 'toml',
       beforeToolUseCommand: `crewloop-shim ${id} --default-skill orchestrator`,
       afterToolUseCommand: `crewloop-shim ${id} --default-skill orchestrator`,
+      beforeToolUseEventName: id === 'kimi' || id === 'codex' || id === 'agy' ? 'PreToolUse' : 'before_tool_use',
+      afterToolUseEventName: id === 'kimi' || id === 'codex' || id === 'agy' ? 'PostToolUse' : 'after_tool_use',
+      legacyEventNames: id === 'kimi' || id === 'codex' ? ['before_tool_use', 'after_tool_use'] : undefined,
       ...hookOverrides,
     },
   };
@@ -43,21 +46,39 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(first.backupPath, undefined);
 
     const content = fs.readFileSync(first.configPath, 'utf8');
-    assert.ok(content.includes('before_tool_use = "crewloop-shim kimi --default-skill orchestrator"'));
-    assert.ok(content.includes('after_tool_use = "crewloop-shim kimi --default-skill orchestrator"'));
+    assert.ok(content.includes('event = "PreToolUse"'));
+    assert.ok(content.includes('event = "PostToolUse"'));
+    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill orchestrator"'));
 
     const second = installHooksForAgent(agent, { backup: true });
     assert.strictEqual(second.status, 'configured');
     assert.strictEqual(second.backupPath, undefined);
 
     const updatedContent = fs.readFileSync(first.configPath, 'utf8');
-    const beforeMatches = updatedContent.match(/before_tool_use/g);
-    const afterMatches = updatedContent.match(/after_tool_use/g);
-    assert.strictEqual(beforeMatches?.length, 1);
-    assert.strictEqual(afterMatches?.length, 1);
+    const hookBlockMatches = updatedContent.match(/\[\[hooks\]\]/g);
+    assert.strictEqual(hookBlockMatches?.length, 2);
   });
 
   it('does not create a backup when the config is already correct', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
+    fs.writeFileSync(
+      agent.hooks.configPath,
+      '[[hooks]]\nevent = "PreToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n\n[[hooks]]\nevent = "PostToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n',
+      'utf8'
+    );
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+    assert.strictEqual(result.backupPath, undefined);
+
+    const updatedContent = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    const hookBlockMatches = updatedContent.match(/\[\[hooks\]\]/g);
+    assert.strictEqual(hookBlockMatches?.length, 2);
+  });
+
+  it('removes a legacy [hooks] table and replaces it with [[hooks]] blocks', () => {
     const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
     fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
     fs.writeFileSync(
@@ -69,11 +90,81 @@ describe('installHooksForAgent', () => {
 
     const result = installHooksForAgent(agent, { backup: true });
     assert.strictEqual(result.status, 'configured');
-    assert.strictEqual(result.backupPath, undefined);
+    assert.ok(result.backupPath);
 
-    const updatedContent = fs.readFileSync(agent.hooks.configPath, 'utf8');
-    assert.strictEqual(updatedContent.split('\n').filter((line) => line.startsWith('before_tool_use')).length, 1);
-    assert.strictEqual(updatedContent.split('\n').filter((line) => line.startsWith('after_tool_use')).length, 1);
+    const content = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.ok(!content.split('\n').some((line) => line.trim() === '[hooks]'));
+    assert.ok(!content.includes('before_tool_use'));
+    assert.ok(!content.includes('after_tool_use'));
+    assert.strictEqual(content.match(/\[\[hooks\]\]/g)?.length, 2);
+    assert.ok(content.includes('event = "PreToolUse"'));
+    assert.ok(content.includes('event = "PostToolUse"'));
+  });
+
+  it('removes a legacy [hooks] table when new [[hooks]] blocks already exist', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
+    fs.writeFileSync(
+      agent.hooks.configPath,
+      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill orchestrator"\nafter_tool_use = "crewloop-shim kimi --default-skill orchestrator"\n\n[[hooks]]\nevent = "PreToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n\n[[hooks]]\nevent = "PostToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n',
+      'utf8'
+    );
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+
+    const content = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.ok(!content.split('\n').some((line) => line.trim() === '[hooks]'));
+    assert.ok(!content.includes('before_tool_use'));
+    assert.ok(!content.includes('after_tool_use'));
+    assert.strictEqual(content.match(/\[\[hooks\]\]/g)?.length, 2);
+  });
+
+  it('is idempotent when starting from a legacy [hooks] table', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
+    fs.writeFileSync(
+      agent.hooks.configPath,
+      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill orchestrator"\nafter_tool_use = "crewloop-shim kimi --default-skill orchestrator"\n',
+      'utf8'
+    );
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const first = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(first.status, 'configured');
+    assert.ok(first.backupPath);
+
+    const firstContent = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.strictEqual(firstContent.match(/\[\[hooks\]\]/g)?.length, 2);
+
+    const second = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(second.status, 'configured');
+    assert.strictEqual(second.backupPath, undefined);
+
+    const secondContent = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.strictEqual(secondContent.match(/\[\[hooks\]\]/g)?.length, 2);
+    assert.ok(!secondContent.split('\n').some((line) => line.trim() === '[hooks]'));
+  });
+
+  it('preserves non-legacy keys inside a [hooks] table', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });
+    fs.writeFileSync(
+      agent.hooks.configPath,
+      '[hooks]\nsome_future_hook = "do-something"\nbefore_tool_use = "crewloop-shim kimi --default-skill orchestrator"\n\n[[hooks]]\nevent = "PreToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n\n[[hooks]]\nevent = "PostToolUse"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n',
+      'utf8'
+    );
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+
+    const content = fs.readFileSync(agent.hooks.configPath, 'utf8');
+    assert.ok(content.includes('some_future_hook = "do-something"'));
+    assert.ok(content.split('\n').some((line) => line.trim() === '[hooks]'));
+    assert.ok(!content.includes('before_tool_use'));
+    assert.strictEqual(content.match(/\[\[hooks\]\]/g)?.length, 2);
   });
 
   it('configures JSON hooks idempotently for codex', () => {
@@ -97,15 +188,157 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(first.status, 'configured');
 
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    assert.strictEqual(config.hooks.before_tool_use, agent.hooks.beforeToolUseCommand);
-    assert.strictEqual(config.hooks.after_tool_use, agent.hooks.afterToolUseCommand);
+    assert.ok(Array.isArray(config.hooks.PreToolUse));
+    assert.strictEqual(config.hooks.PreToolUse.length, 1);
+    assert.deepStrictEqual(config.hooks.PreToolUse[0].hooks[0], {
+      type: 'command',
+      command: 'crewloop-shim',
+      args: ['codex', '--default-skill', 'orchestrator'],
+    });
+    assert.ok(Array.isArray(config.hooks.PostToolUse));
+    assert.strictEqual(config.hooks.PostToolUse.length, 1);
+    assert.deepStrictEqual(config.hooks.PostToolUse[0].hooks[0], {
+      type: 'command',
+      command: 'crewloop-shim',
+      args: ['codex', '--default-skill', 'orchestrator'],
+    });
 
     const second = installHooksForAgent(agent, { backup: true });
     assert.strictEqual(second.status, 'configured');
+    assert.strictEqual(second.backupPath, undefined);
 
     const updatedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    assert.strictEqual(updatedConfig.hooks.before_tool_use, agent.hooks.beforeToolUseCommand);
-    assert.strictEqual(updatedConfig.hooks.after_tool_use, agent.hooks.afterToolUseCommand);
+    assert.strictEqual(updatedConfig.hooks.PreToolUse.length, 1);
+    assert.strictEqual(updatedConfig.hooks.PostToolUse.length, 1);
+  });
+
+  it('upgrades legacy string JSON hooks to Codex matcher-array format', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-codex-legacy-')),
+      'hooks.json'
+    );
+    const agent = createAgentConfig({
+      id: 'codex',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+      },
+    });
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        hooks: {
+          before_tool_use: 'crewloop-shim codex --default-skill orchestrator',
+          after_tool_use: 'crewloop-shim codex --default-skill orchestrator',
+        },
+      }),
+      'utf8'
+    );
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+    assert.ok(result.backupPath);
+
+    const updatedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(Array.isArray(updatedConfig.hooks.PreToolUse));
+    assert.deepStrictEqual(updatedConfig.hooks.PreToolUse[0].hooks[0], {
+      type: 'command',
+      command: 'crewloop-shim',
+      args: ['codex', '--default-skill', 'orchestrator'],
+    });
+    assert.ok(Array.isArray(updatedConfig.hooks.PostToolUse));
+    assert.strictEqual('before_tool_use' in updatedConfig.hooks, false);
+    assert.strictEqual('after_tool_use' in updatedConfig.hooks, false);
+  });
+
+  it('replaces legacy flat-object Codex hooks with matcher arrays', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-codex-flat-')),
+      'hooks.json'
+    );
+    const agent = createAgentConfig({
+      id: 'codex',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+      },
+    });
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        hooks: {
+          PreToolUse: { command: 'crewloop-shim', args: ['codex', '--default-skill', 'orchestrator'] },
+          PostToolUse: { command: 'crewloop-shim', args: ['codex', '--default-skill', 'orchestrator'] },
+        },
+      }),
+      'utf8'
+    );
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+
+    const updatedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(Array.isArray(updatedConfig.hooks.PreToolUse));
+    assert.ok(Array.isArray(updatedConfig.hooks.PostToolUse));
+    assert.strictEqual(updatedConfig.hooks.PreToolUse.length, 1);
+    assert.strictEqual(updatedConfig.hooks.PostToolUse.length, 1);
+  });
+
+  it('configures AGY hooks with matcher, command string, and event-type override', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-')),
+      'hooks.json'
+    );
+    const agent = createAgentConfig({
+      id: 'agy',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseEventName: 'PreToolUse',
+        afterToolUseEventName: 'PostToolUse',
+      },
+    });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(Array.isArray(config.hooks.PreToolUse));
+    assert.ok(Array.isArray(config.hooks.PostToolUse));
+
+    const preHook = config.hooks.PreToolUse[0];
+    assert.strictEqual(preHook.matcher, '*');
+    assert.strictEqual(preHook.hooks[0].type, 'command');
+    assert.ok(preHook.hooks[0].command.includes('crewloop-shim.js'));
+    assert.ok(preHook.hooks[0].command.includes('agy'));
+    assert.ok(preHook.hooks[0].command.includes('--event-type tool_start'));
+
+    const postHook = config.hooks.PostToolUse[0];
+    assert.strictEqual(postHook.matcher, '*');
+    assert.ok(postHook.hooks[0].command.includes('--event-type tool_end'))
+
+    // Idempotency: running again should not duplicate the hook group.
+    const second = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(second.status, 'configured');
+    const updated = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.strictEqual(updated.hooks.PreToolUse.length, 1);
+    assert.strictEqual(updated.hooks.PreToolUse[0].hooks.length, 1);
+    assert.strictEqual(updated.hooks.PostToolUse.length, 1);
+    assert.strictEqual(updated.hooks.PostToolUse[0].hooks.length, 1);
   });
 
   it('creates a backup before modifying an existing config', () => {
@@ -140,19 +373,29 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(result.status, 'unsupported');
   });
 
-  it('returns skipped when agent is not installed', () => {
+  it('configures hooks even when the agent config directory does not exist', () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-claude-missing-'));
+    const configPath = path.join(baseDir, 'nonexistent', 'config.json');
     const agent = createAgentConfig({
       id: 'claude',
+      skillsDir: path.join(baseDir, 'skills'),
       hooks: {
         supported: true,
         format: 'json',
-        configPath: path.join(os.tmpdir(), 'nonexistent-claude', 'config.json'),
+        configPath,
       },
     });
     // Neither skillsDir nor config dir exists.
 
     const result = installHooksForAgent(agent);
-    assert.strictEqual(result.status, 'skipped');
+    assert.strictEqual(result.status, 'configured');
+    assert.ok(fs.existsSync(configPath));
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.deepStrictEqual(config.hooks.before_tool_use, {
+      command: 'crewloop-shim',
+      args: ['claude', '--default-skill', 'orchestrator'],
+    });
   });
 
   it('returns error for malformed JSON config', () => {

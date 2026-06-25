@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { AgentConfig, HookFormat } from './agents';
 
 export interface HookEntry {
-  event: 'before_tool_use' | 'after_tool_use';
+  event: string;
   command: string;
 }
 
@@ -29,6 +29,7 @@ export interface AgentHookConfigWriter {
   buildDefaultConfig(): AgentHookConfigFile;
   addHook(config: AgentHookConfigFile, hook: HookEntry): AgentHookConfigFile;
   hasHook(config: AgentHookConfigFile, hook: HookEntry): boolean;
+  removeLegacyHooks?(config: AgentHookConfigFile): AgentHookConfigFile;
 }
 
 function backupPathFor(configPath: string): string {
@@ -36,18 +37,20 @@ function backupPathFor(configPath: string): string {
   return `${configPath}.crewloop-backup-${timestamp}`;
 }
 
-function agentIsInstalled(agent: AgentConfig): boolean {
-  return (
-    fs.existsSync(agent.skillsDir) ||
-    Boolean(
-      agent.hooks.supported && agent.hooks.configPath && fs.existsSync(path.dirname(agent.hooks.configPath))
-    )
-  );
+function configRawChanged(a: AgentHookConfigFile, b: AgentHookConfigFile): boolean {
+  if (typeof a.raw === 'string' && typeof b.raw === 'string') {
+    return a.raw !== b.raw;
+  }
+  return JSON.stringify(a.raw) !== JSON.stringify(b.raw);
+}
+
+function agentIsSupported(agent: AgentConfig): boolean {
+  return agent.hooks.supported;
 }
 
 /**
- * Minimal TOML writer for Kimi Code's [hooks] table.
- * Preserves comments and other keys outside the [hooks] table.
+ * Minimal TOML writer for Kimi Code's [[hooks]] array-of-tables.
+ * Preserves comments and other keys outside [[hooks]] blocks.
  */
 class KimiHookWriter implements AgentHookConfigWriter {
   readonly agentId = 'kimi';
@@ -55,7 +58,7 @@ class KimiHookWriter implements AgentHookConfigWriter {
   constructor(private agent: AgentConfig) {}
 
   isApplicable(): boolean {
-    return agentIsInstalled(this.agent);
+    return agentIsSupported(this.agent);
   }
 
   readConfig(): AgentHookConfigFile | undefined {
@@ -76,91 +79,124 @@ class KimiHookWriter implements AgentHookConfigWriter {
   }
 
   buildDefaultConfig(): AgentHookConfigFile {
+    const beforeEvent = this.agent.hooks.beforeToolUseEventName || 'PreToolUse';
+    const afterEvent = this.agent.hooks.afterToolUseEventName || 'PostToolUse';
     return {
       path: this.agent.hooks.configPath,
       format: 'toml',
-      raw: `[hooks]\nbefore_tool_use = "${this.agent.hooks.beforeToolUseCommand}"\nafter_tool_use = "${this.agent.hooks.afterToolUseCommand}"\n`,
+      raw: `[[hooks]]\nevent = "${beforeEvent}"\ncommand = "${this.agent.hooks.beforeToolUseCommand}"\n\n[[hooks]]\nevent = "${afterEvent}"\ncommand = "${this.agent.hooks.afterToolUseCommand}"\n`,
     };
   }
 
   addHook(config: AgentHookConfigFile, hook: HookEntry): AgentHookConfigFile {
-    const content = String(config.raw);
-    const updated = this.setHookCommand(content, hook.event, hook.command);
-    return { ...config, raw: updated };
+    const content = this.removeLegacyHookTable(String(config.raw));
+    if (this.hasHook({ ...config, raw: content }, hook)) {
+      return { ...config, raw: content };
+    }
+    return { ...config, raw: content + `\n[[hooks]]\nevent = "${hook.event}"\ncommand = "${hook.command}"\n` };
   }
 
   hasHook(config: AgentHookConfigFile, hook: HookEntry): boolean {
-    const content = String(config.raw);
-    return this.getHookCommand(content, hook.event) === hook.command;
+    const blocks = this.parseHookBlocks(String(config.raw));
+    return blocks.some(
+      (block) => block.event === hook.event && block.command === hook.command
+    );
   }
 
-  private getHookCommand(content: string, event: HookEntry['event']): string | undefined {
+  removeLegacyHooks(config: AgentHookConfigFile): AgentHookConfigFile {
+    return { ...config, raw: this.removeLegacyHookTable(String(config.raw)) };
+  }
+
+  private removeLegacyHookTable(content: string): string {
+    const legacyNames = this.agent.hooks.legacyEventNames;
+    if (!legacyNames || legacyNames.length === 0) {
+      return content;
+    }
+    const legacyRegex = new RegExp(`^(${legacyNames.join('|')})\\s*=`);
     const lines = content.split('\n');
+    const result: string[] = [];
     let inHooksTable = false;
+    const hooksBuffer: string[] = [];
+
     for (const line of lines) {
       const trimmed = line.trim();
       if (trimmed === '[hooks]') {
         inHooksTable = true;
-        continue;
-      }
-      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-        inHooksTable = false;
+        hooksBuffer.length = 0;
         continue;
       }
       if (inHooksTable) {
-        const match = new RegExp(`^${event}\\s*=\\s*"(.*)"$`).exec(trimmed);
-        if (match) {
-          return match[1];
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          if (hooksBuffer.length > 0) {
+            result.push('[hooks]');
+            result.push(...hooksBuffer);
+          }
+          inHooksTable = false;
+          result.push(line);
+          continue;
         }
+        if (trimmed === '') {
+          continue;
+        }
+        if (!legacyRegex.test(trimmed)) {
+          hooksBuffer.push(line);
+        }
+        continue;
       }
+      result.push(line);
     }
-    return undefined;
+
+    if (inHooksTable && hooksBuffer.length > 0) {
+      result.push('[hooks]');
+      result.push(...hooksBuffer);
+    }
+
+    return result.join('\n');
   }
 
-  private setHookCommand(content: string, event: HookEntry['event'], command: string): string {
+  private parseHookBlocks(content: string): Array<{ event: string; command: string }> {
+    const blocks: Array<{ event: string; command: string }> = [];
     const lines = content.split('\n');
-    let inHooksTable = false;
-    let inserted = false;
+    let currentEvent: string | undefined;
+    let currentCommand: string | undefined;
 
-    for (let i = 0; i < lines.length; i++) {
-      const trimmed = lines[i].trim();
-      if (trimmed === '[hooks]') {
-        inHooksTable = true;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed === '[[hooks]]') {
+        if (currentEvent && currentCommand) {
+          blocks.push({ event: currentEvent, command: currentCommand });
+        }
+        currentEvent = undefined;
+        currentCommand = undefined;
         continue;
       }
-      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-        if (inHooksTable && !inserted) {
-          lines.splice(i, 0, `${event} = "${command}"`);
-          return lines.join('\n');
-        }
-        inHooksTable = false;
+      const eventMatch = /^event\s*=\s*"(.*)"$/.exec(trimmed);
+      if (eventMatch) {
+        currentEvent = eventMatch[1];
         continue;
       }
-      if (inHooksTable) {
-        const match = new RegExp(`^${event}\\s*=\\s*".*"$`).exec(trimmed);
-        if (match) {
-          lines[i] = `${event} = "${command}"`;
-          return lines.join('\n');
-        }
+      const commandMatch = /^command\s*=\s*"(.*)"$/.exec(trimmed);
+      if (commandMatch) {
+        currentCommand = commandMatch[1];
       }
     }
 
-    if (inHooksTable) {
-      lines.push(`${event} = "${command}"`);
-      return lines.join('\n');
+    if (currentEvent && currentCommand) {
+      blocks.push({ event: currentEvent, command: currentCommand });
     }
 
-    return content + `\n[hooks]\n${event} = "${command}"\n`;
+    return blocks;
   }
 }
 
 interface JsonHooksShape {
-  hooks?: {
-    before_tool_use?: { command: string; args?: string[] } | string;
-    after_tool_use?: { command: string; args?: string[] } | string;
-    [key: string]: unknown;
-  };
+  hooks?: Record<string, unknown>;
   [key: string]: unknown;
+}
+
+function commandToObject(command: string): { command: string; args: string[] } {
+  const parts = command.trim().split(/\s+/).filter(Boolean);
+  return { command: parts[0] || '', args: parts.slice(1) };
 }
 
 function jsonCommandMatches(
@@ -185,16 +221,16 @@ function setJsonCommand(
   if (!config.hooks) {
     config.hooks = {};
   }
-  config.hooks[event] = command;
+  config.hooks[event] = commandToObject(command);
 }
 
 abstract class JsonHookWriter implements AgentHookConfigWriter {
   abstract readonly agentId: string;
 
-  constructor(private agent: AgentConfig) {}
+  constructor(protected agent: AgentConfig) {}
 
   isApplicable(): boolean {
-    return agentIsInstalled(this.agent);
+    return agentIsSupported(this.agent);
   }
 
   readConfig(): AgentHookConfigFile | undefined {
@@ -218,13 +254,19 @@ abstract class JsonHookWriter implements AgentHookConfigWriter {
   }
 
   buildDefaultConfig(): AgentHookConfigFile {
+    const beforeEvent = this.agent.hooks.beforeToolUseEventName || 'before_tool_use';
+    const afterEvent = this.agent.hooks.afterToolUseEventName || 'after_tool_use';
     return {
       path: this.agent.hooks.configPath,
       format: 'json',
       raw: {
         hooks: {
-          before_tool_use: this.agent.hooks.beforeToolUseCommand,
-          after_tool_use: this.agent.hooks.afterToolUseCommand,
+          [beforeEvent]: commandToObject(
+            this.agent.hooks.beforeToolUseCommand || `crewloop-shim ${this.agent.id}`
+          ),
+          [afterEvent]: commandToObject(
+            this.agent.hooks.afterToolUseCommand || `crewloop-shim ${this.agent.id}`
+          ),
         },
       },
     };
@@ -239,20 +281,283 @@ abstract class JsonHookWriter implements AgentHookConfigWriter {
   hasHook(config: AgentHookConfigFile, hook: HookEntry): boolean {
     const raw = config.raw as JsonHooksShape;
     const existing = raw.hooks?.[hook.event];
-    return jsonCommandMatches(existing, hook.command);
+    // Match only object-formatted entries; string entries are upgraded on write.
+    return (
+      typeof existing === 'object' &&
+      existing !== null &&
+      !Array.isArray(existing) &&
+      jsonCommandMatches(existing as { command: string; args?: string[] } | string, hook.command)
+    );
   }
 }
 
+interface CodexHookCommand {
+  type: 'command';
+  command: string;
+  args?: string[];
+  timeout?: number;
+  statusMessage?: string;
+}
+
+interface CodexMatcherGroup {
+  matcher?: string;
+  if?: string;
+  hooks: CodexHookCommand[];
+}
+
+interface CodexHooksConfig {
+  hooks?: Record<string, CodexMatcherGroup[]>;
+  [key: string]: unknown;
+}
+
+function commandToCodexCommand(command: string): CodexHookCommand {
+  const parts = command.trim().split(/\s+/).filter(Boolean);
+  return {
+    type: 'command',
+    command: parts[0] || '',
+    args: parts.slice(1),
+  };
+}
+
+function codexCommandMatches(a: CodexHookCommand, b: CodexHookCommand): boolean {
+  if (a.command !== b.command) return false;
+  const aArgs = a.args || [];
+  const bArgs = b.args || [];
+  if (aArgs.length !== bArgs.length) return false;
+  return aArgs.every((arg, i) => arg === bArgs[i]);
+}
+
 class CodexHookWriter extends JsonHookWriter {
-  readonly agentId = 'codex';
+  readonly agentId: string = 'codex';
+
+  buildDefaultConfig(): AgentHookConfigFile {
+    const beforeEvent = this.agent.hooks.beforeToolUseEventName || 'before_tool_use';
+    const afterEvent = this.agent.hooks.afterToolUseEventName || 'after_tool_use';
+    return {
+      path: this.agent.hooks.configPath,
+      format: 'json',
+      raw: {
+        hooks: {
+          [beforeEvent]: [
+            {
+              hooks: [
+                commandToCodexCommand(
+                  this.agent.hooks.beforeToolUseCommand || `crewloop-shim ${this.agent.id}`
+                ),
+              ],
+            },
+          ],
+          [afterEvent]: [
+            {
+              hooks: [
+                commandToCodexCommand(
+                  this.agent.hooks.afterToolUseCommand || `crewloop-shim ${this.agent.id}`
+                ),
+              ],
+            },
+          ],
+        },
+      },
+    };
+  }
+
+  addHook(config: AgentHookConfigFile, hook: HookEntry): AgentHookConfigFile {
+    const clone = JSON.parse(JSON.stringify(config.raw)) as CodexHooksConfig;
+    if (!clone.hooks) {
+      clone.hooks = {};
+    }
+    const groups = clone.hooks[hook.event];
+    const expected = commandToCodexCommand(hook.command);
+
+    if (!Array.isArray(groups)) {
+      clone.hooks[hook.event] = [{ hooks: [expected] }];
+      return { ...config, raw: clone };
+    }
+
+    for (const group of groups) {
+      if (group.hooks.some((cmd) => codexCommandMatches(cmd, expected))) {
+        return { ...config, raw: clone };
+      }
+    }
+
+    groups.push({ hooks: [expected] });
+    return { ...config, raw: clone };
+  }
+
+  hasHook(config: AgentHookConfigFile, hook: HookEntry): boolean {
+    const raw = config.raw as CodexHooksConfig;
+    const groups = raw.hooks?.[hook.event];
+    if (!Array.isArray(groups)) {
+      return false;
+    }
+    const expected = commandToCodexCommand(hook.command);
+    return groups.some((group) => group.hooks.some((cmd) => codexCommandMatches(cmd, expected)));
+  }
 }
 
 class ClaudeHookWriter extends JsonHookWriter {
   readonly agentId = 'claude';
 }
 
+function extractShimScriptPath(command: string): string | undefined {
+  const normalized = normalizePathSeparators(command);
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  for (const token of tokens) {
+    const unquoted = token.replace(/^["']|["']$/g, '');
+    if (/crewloop-shim\.js$/i.test(unquoted)) {
+      return unquoted;
+    }
+  }
+  return undefined;
+}
+
+function resolveCommandPath(command: string): string | undefined {
+  const shimPath = extractShimScriptPath(command);
+  if (!shimPath) return undefined;
+  try {
+    return normalizePathSeparators(fs.realpathSync(shimPath));
+  } catch {
+    return normalizePathSeparators(shimPath);
+  }
+}
+
+function commandsUseSameShim(a: string, b: string): boolean {
+  const aReal = resolveCommandPath(a);
+  const bReal = resolveCommandPath(b);
+  if (!aReal || !bReal) return false;
+  return aReal === bReal;
+}
+
+interface AgyHookCommand {
+  type: 'command';
+  command: string;
+  timeout?: number;
+}
+
+interface AgyMatcherGroup {
+  matcher?: string;
+  hooks: AgyHookCommand[];
+}
+
+interface AgyHooksConfig {
+  hooks?: Record<string, AgyMatcherGroup[]>;
+  [key: string]: unknown;
+}
+
+function quoteArg(arg: string): string {
+  return arg.includes(' ') ? `"${arg}"` : arg;
+}
+
+function resolveShimScriptPath(): string {
+  // In a global install __dirname points to .../@archznn/crewloop-skills/packages/cli/dist.
+  // The shim script lives in .../@archznn/crewloop-skills/servers/dashboard/bin.
+  return path.resolve(__dirname, '..', '..', '..', 'servers', 'dashboard', 'bin', 'crewloop-shim.js');
+}
+
+function normalizePathSeparators(arg: string): string {
+  return arg.replace(/\\/g, '/');
+}
+
+function buildAgyShimCommand(agentId: string, eventType: 'tool_start' | 'tool_end'): string {
+  const nodePath = quoteArg(normalizePathSeparators(process.execPath));
+  const shimPath = quoteArg(normalizePathSeparators(resolveShimScriptPath()));
+  return `${nodePath} ${shimPath} ${agentId} --default-skill orchestrator --event-type ${eventType}`;
+}
+
 class AgyHookWriter extends JsonHookWriter {
   readonly agentId = 'agy';
+
+  private expectedCommand(event: string): string {
+    const beforeEvent = this.agent.hooks.beforeToolUseEventName || 'PreToolUse';
+    const afterEvent = this.agent.hooks.afterToolUseEventName || 'PostToolUse';
+    if (event === beforeEvent) {
+      return buildAgyShimCommand(this.agent.id, 'tool_start');
+    }
+    if (event === afterEvent) {
+      return buildAgyShimCommand(this.agent.id, 'tool_end');
+    }
+    return '';
+  }
+
+  buildDefaultConfig(): AgentHookConfigFile {
+    const beforeEvent = this.agent.hooks.beforeToolUseEventName || 'PreToolUse';
+    const afterEvent = this.agent.hooks.afterToolUseEventName || 'PostToolUse';
+
+    return {
+      path: this.agent.hooks.configPath,
+      format: 'json',
+      raw: {
+        hooks: {
+          [beforeEvent]: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: this.expectedCommand(beforeEvent), timeout: 10 }],
+            },
+          ],
+          [afterEvent]: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: this.expectedCommand(afterEvent), timeout: 10 }],
+            },
+          ],
+        },
+      },
+    };
+  }
+
+  addHook(config: AgentHookConfigFile, hook: HookEntry): AgentHookConfigFile {
+    const expected = this.expectedCommand(hook.event);
+    const expectedCmd: AgyHookCommand = {
+      type: 'command',
+      command: expected,
+      timeout: 10,
+    };
+    const clone = JSON.parse(JSON.stringify(config.raw)) as AgyHooksConfig;
+    if (!clone.hooks) {
+      clone.hooks = {};
+    }
+    const groups = clone.hooks[hook.event];
+    if (!Array.isArray(groups)) {
+      clone.hooks[hook.event] = [{ matcher: '*', hooks: [expectedCmd] }];
+      return { ...config, raw: clone };
+    }
+
+    const survivingGroups = groups
+      .map((group) => ({
+        ...group,
+        hooks: group.hooks.filter(
+          (cmd) => !commandsUseSameShim(cmd.command, expected)
+        ),
+      }))
+      .filter((group) => group.hooks.length > 0);
+
+    if (survivingGroups.length > 0) {
+      survivingGroups[0].hooks.push(expectedCmd);
+    } else {
+      survivingGroups.push({ matcher: '*', hooks: [expectedCmd] });
+    }
+
+    clone.hooks[hook.event] = survivingGroups;
+    return { ...config, raw: clone };
+  }
+
+  hasHook(config: AgentHookConfigFile, hook: HookEntry): boolean {
+    const expected = normalizePathSeparators(this.expectedCommand(hook.event));
+    const raw = config.raw as AgyHooksConfig;
+    const groups = raw.hooks?.[hook.event];
+    if (!Array.isArray(groups)) {
+      return false;
+    }
+    const entries = groups.flatMap((group) => group.hooks);
+    const shimEntries = entries.filter((cmd) =>
+      commandsUseSameShim(cmd.command, expected)
+    );
+    const exact = shimEntries.some(
+      (cmd) => normalizePathSeparators(cmd.command) === expected
+    );
+    const hasEmptyGroups = groups.some((group) => group.hooks.length === 0);
+    return exact && shimEntries.length === 1 && !hasEmptyGroups;
+  }
 }
 
 function createWriter(agent: AgentConfig): AgentHookConfigWriter | undefined {
@@ -297,12 +602,15 @@ export function installHooksForAgent(
   try {
     let config = writer.readConfig();
 
+    const beforeEvent = agent.hooks.beforeToolUseEventName || 'before_tool_use';
+    const afterEvent = agent.hooks.afterToolUseEventName || 'after_tool_use';
+
     const beforeHook: HookEntry = {
-      event: 'before_tool_use',
+      event: beforeEvent,
       command: agent.hooks.beforeToolUseCommand || `crewloop-shim ${agent.id}`,
     };
     const afterHook: HookEntry = {
-      event: 'after_tool_use',
+      event: afterEvent,
       command: agent.hooks.afterToolUseCommand || `crewloop-shim ${agent.id}`,
     };
 
@@ -312,6 +620,14 @@ export function installHooksForAgent(
       config = writer.buildDefaultConfig();
       needsWrite = true;
     } else {
+      if (agent.hooks.legacyEventNames && writer.removeLegacyHooks) {
+        const cleaned = writer.removeLegacyHooks(config);
+        if (configRawChanged(cleaned, config)) {
+          needsWrite = true;
+        }
+        config = cleaned;
+      }
+
       if (!writer.hasHook(config, beforeHook)) {
         config = writer.addHook(config, beforeHook);
         needsWrite = true;
@@ -319,6 +635,18 @@ export function installHooksForAgent(
       if (!writer.hasHook(config, afterHook)) {
         config = writer.addHook(config, afterHook);
         needsWrite = true;
+      }
+    }
+
+    if (agent.hooks.legacyEventNames && config) {
+      const raw = config.raw as JsonHooksShape;
+      if (raw.hooks) {
+        for (const legacy of agent.hooks.legacyEventNames) {
+          if (legacy in raw.hooks) {
+            delete raw.hooks[legacy];
+            needsWrite = true;
+          }
+        }
       }
     }
 
@@ -336,6 +664,36 @@ export function installHooksForAgent(
 
     if (needsWrite) {
       writer.writeConfig(config);
+    }
+
+    // Mirror to the agent's fallback config path if one is defined (e.g. AGY
+    // may read hooks from an alternate location due to a known path bug).
+    const fallbackPath = agent.hooks.fallbackConfigPath;
+    if (fallbackPath && fallbackPath !== config.path && !options.dryRun) {
+      let fallbackNeedsWrite = false;
+      let fallbackRaw: unknown;
+      if (fs.existsSync(fallbackPath)) {
+        try {
+          fallbackRaw = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+        } catch {
+          fallbackRaw = {};
+          fallbackNeedsWrite = true;
+        }
+      } else {
+        fallbackRaw = {};
+        fallbackNeedsWrite = true;
+      }
+      if (JSON.stringify(fallbackRaw) !== JSON.stringify(config.raw)) {
+        fallbackNeedsWrite = true;
+      }
+      if (fallbackNeedsWrite) {
+        fs.mkdirSync(path.dirname(fallbackPath), { recursive: true });
+        fs.writeFileSync(
+          fallbackPath,
+          JSON.stringify(config.raw, null, 2) + '\n',
+          'utf8'
+        );
+      }
     }
 
     return {
