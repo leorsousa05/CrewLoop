@@ -153,17 +153,37 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     });
   }
 
+  function formatListenError(err: NodeJS.ErrnoException): Error {
+    if (err.code === 'EADDRINUSE') {
+      return new Error(`Port ${config.port} is already in use. Use --port <number> to choose another port.`);
+    }
+    if (err.code === 'EACCES') {
+      return new Error(`Permission denied to use port ${config.port}. Try a port above 1024 or use --port <number>.`);
+    }
+    return new Error(`Failed to start dashboard server: ${err.message}`);
+  }
+
   return {
     httpServer,
     wss,
     state,
     start: () =>
       new Promise<void>((resolve, reject) => {
+        const onError = (err: Error) => {
+          httpServer.off('error', onError);
+          wss.off('error', onError);
+          reject(formatListenError(err as NodeJS.ErrnoException));
+        };
+
+        httpServer.once('error', onError);
+        wss.once('error', onError);
+
         httpServer.listen(config.port, config.host, () => {
+          httpServer.off('error', onError);
+          wss.off('error', onError);
           console.log(`CrewLoop dashboard running at http://${config.host}:${config.port}`);
           resolve();
         });
-        httpServer.on('error', reject);
       }),
     stop: () =>
       new Promise<void>((resolve) => {

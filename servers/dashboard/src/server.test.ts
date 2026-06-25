@@ -120,4 +120,10 @@ describe('DashboardServer', () => {
     const status = await httpGetStatus(port, '/../../package.json');
     assert.equal(status, 403);
   });
+
+  it('reports a friendly error when the port is already in use', async () => {
+    const secondServer = createDashboardServer(makeConfig(port, process.cwd()));
+    await assert.rejects(secondServer.start(), /already in use/);
+    await secondServer.stop();
+  });
 });

@@ -1,6 +1,20 @@
 import { loadConfig } from './config';
 import { createDashboardServer } from './server';
 
+function handleFatalError(err: unknown): void {
+  if (err instanceof Error) {
+    console.error(err.message);
+  } else {
+    console.error('An unexpected error occurred while starting the dashboard.');
+  }
+  process.exit(1);
+}
+
+process.on('uncaughtException', handleFatalError);
+process.on('unhandledRejection', (reason) => {
+  handleFatalError(reason);
+});
+
 async function main(): Promise<void> {
   const config = loadConfig();
   const server = createDashboardServer(config);
@@ -18,7 +32,4 @@ async function main(): Promise<void> {
   await server.start();
 }
 
-main().catch((err) => {
-  console.error('Failed to start dashboard:', err);
-  process.exit(1);
-});
+main().catch(handleFatalError);
