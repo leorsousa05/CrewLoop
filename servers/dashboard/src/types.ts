@@ -28,10 +28,12 @@ export interface Session {
   active_skill?: string;
   active_confidence?: 'explicit' | 'heuristic' | 'unknown';
   status?: EventStatus;
+  lifecycle: 'starting' | 'running' | 'ended';
   events: DashboardEvent[];
   tool_counts: Record<string, number>;
   started_at: number;
   last_event_at: number;
+  ended_at?: number;
 }
 
 export interface DashboardState {
@@ -60,9 +62,11 @@ export interface ClientSession {
   skill?: string;
   activeSkill?: ClientActiveSkill;
   status?: EventStatus;
+  lifecycle: 'starting' | 'running' | 'ended';
   events: ClientEvent[];
   startTime: number;
   lastActivity: number;
+  endedAt?: number;
   toolCounts: Record<string, number>;
 }
 

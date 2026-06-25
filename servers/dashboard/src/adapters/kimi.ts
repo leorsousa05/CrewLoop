@@ -9,6 +9,7 @@ export interface KimiHookPayload {
   tool_response?: Record<string, unknown>;
   stop_reason?: string;
   usage?: unknown;
+  skill?: string;
 }
 
 const EVENT_MAP: Record<string, EventType> = {
@@ -32,6 +33,7 @@ export function normalizeKimi(payload: KimiHookPayload): DashboardEvent | undefi
     session_id: payload.session_id || 'unknown',
     event_type,
     tool: payload.tool_name,
+    skill: payload.skill,
   };
 }
 

@@ -219,27 +219,89 @@
     renderActivityGraph(session);
   }
 
+  let lifecycleBadgeEl = null;
+  let emptyStateEl = null;
+
+  function getActiveSkillContent() {
+    return activeSkillName.parentElement;
+  }
+
+  function setChildrenVisibility(visible) {
+    const content = getActiveSkillContent();
+    if (!content) return;
+    Array.from(content.children).forEach((child) => {
+      if (child === emptyStateEl) return;
+      child.style.display = visible ? '' : 'none';
+    });
+  }
+
+  function renderEmptyState() {
+    if (!emptyStateEl) {
+      emptyStateEl = document.createElement('div');
+      emptyStateEl.className = 'empty-state';
+      emptyStateEl.innerHTML = `
+        <div class="empty-state-icon"><i class="ph ph-monitor-play"></i></div>
+        <h2 class="empty-state-title">NO ACTIVE SESSION</h2>
+        <p class="empty-state-body">Start an agent session to see it here.</p>
+      `;
+      getActiveSkillContent()?.appendChild(emptyStateEl);
+    }
+    emptyStateEl.style.display = 'flex';
+    setChildrenVisibility(false);
+  }
+
+  function hideEmptyState() {
+    if (emptyStateEl) {
+      emptyStateEl.style.display = 'none';
+    }
+    setChildrenVisibility(true);
+  }
+
+  function renderLifecycleBadge(session) {
+    if (!lifecycleBadgeEl) {
+      lifecycleBadgeEl = document.createElement('span');
+      lifecycleBadgeEl.className = 'lifecycle-badge';
+      statusBadge.parentNode?.insertBefore(lifecycleBadgeEl, statusBadge.nextSibling);
+    }
+    const lifecycle = session.lifecycle || 'starting';
+    lifecycleBadgeEl.className = 'lifecycle-badge ' + lifecycle;
+    lifecycleBadgeEl.innerHTML = `<span class="lifecycle-dot"></span>${lifecycle.toUpperCase()}`;
+    lifecycleBadgeEl.style.display = 'inline-flex';
+  }
+
+  function hideLifecycleBadge() {
+    if (lifecycleBadgeEl) {
+      lifecycleBadgeEl.style.display = 'none';
+    }
+  }
+
   function renderActiveSkill(session) {
     if (!session) {
-      activeSkillName.textContent = 'IDLE';
-      activeSkillIcon.className = 'ph ph-circle';
+      renderEmptyState();
       activeStrip.className = 'panel-accent-strip';
-      statusDot.className = 'status-dot';
-      statusText.textContent = 'IDLE';
-      confidenceBadge.textContent = 'unknown';
-      activeSkillSource.innerHTML = '<i class="ph ph-monitor"></i><span>waiting for events</span>';
+      hideLifecycleBadge();
       return;
     }
+
+    hideEmptyState();
 
     const skill = session.activeSkill || { name: 'UNKNOWN', confidence: 'low' };
     const iconClass = skillIcon(skill.name);
     activeSkillName.textContent = skill.name.toUpperCase();
     activeSkillIcon.className = 'ph ' + iconClass;
 
-    const running = session.status === 'running';
-    activeStrip.className = 'panel-accent-strip' + (running ? ' running' : '');
-    statusDot.className = 'status-dot ' + (running ? 'running' : session.status || '');
-    statusText.textContent = running ? 'RUNNING' : (session.status ? session.status.toUpperCase() : 'IDLE');
+    const lifecycle = session.lifecycle || 'starting';
+    activeStrip.className = 'panel-accent-strip ' + lifecycle;
+
+    if (lifecycle === 'ended') {
+      statusDot.className = 'status-dot ' + (session.status || '');
+      statusText.textContent = session.status ? session.status.toUpperCase() : 'ENDED';
+    } else {
+      statusDot.className = 'status-dot ' + lifecycle;
+      statusText.textContent = lifecycle.toUpperCase();
+    }
+
+    renderLifecycleBadge(session);
     confidenceBadge.textContent = skill.confidence || 'low';
 
     activeSkillSource.innerHTML = `<i class="ph ph-${sourceIcon(session.source)}"></i><span>${session.source || 'unknown'}</span>`;
@@ -265,7 +327,8 @@
     const events = session.events || [];
     const toolEvents = events.filter((e) => e.event_type === 'tool_start' || e.event_type === 'tool_end');
     toolCount.textContent = String(Math.ceil(toolEvents.length / 2));
-    const dur = session.lastActivity && session.startTime ? session.lastActivity - session.startTime : 0;
+    const endTime = session.endedAt || session.lastActivity;
+    const dur = endTime && session.startTime ? endTime - session.startTime : 0;
     durationEl.textContent = formatDuration(dur);
     updateEventRate();
   }
@@ -383,8 +446,14 @@
       li.className = 'session-item' + (s.id === state.selectedSessionId ? ' active' : '');
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', String(s.id === state.selectedSessionId));
+      const duration = s.endedAt
+        ? `ended after ${formatDuration(s.endedAt - s.startTime)}`
+        : formatDuration(Date.now() - s.startTime);
       li.innerHTML = `
-        <span class="session-item-id">${truncate(s.id, 16)}</span>
+        <div class="session-item-main">
+          <span class="session-item-id">${truncate(s.id, 16)}</span>
+          <span class="session-item-meta">${formatTime(s.startTime)} · ${duration}</span>
+        </div>
         <span class="session-item-source">${s.source || 'unknown'}</span>
       `;
       li.addEventListener('click', () => {

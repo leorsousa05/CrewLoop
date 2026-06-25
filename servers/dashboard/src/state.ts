@@ -32,10 +32,18 @@ export class StateStore {
       session.tool_counts[event.tool] = (session.tool_counts[event.tool] || 0) + 1;
     }
 
-    if (event.skill) {
+    if (event.event_type === 'session_start' && event.skill) {
+      session.active_skill = event.skill;
+      session.active_confidence = 'explicit';
+    } else if (event.skill) {
       session.active_skill = event.skill;
       session.active_confidence = event.event_type === 'skill_change' ? 'explicit' : 'heuristic';
     }
+
+    if (event.event_type === 'session_end') {
+      session.ended_at = event.timestamp;
+    }
+    session.lifecycle = deriveLifecycle(event, session);
 
     session.status = deriveSessionStatus(event);
 
@@ -91,12 +99,23 @@ export class StateStore {
       source,
       events: [],
       tool_counts: {},
+      lifecycle: 'starting',
       started_at: now,
       last_event_at: now,
     };
     this.sessions.set(id, session);
     return session;
   }
+}
+
+function deriveLifecycle(event: DashboardEvent, session: Session): 'starting' | 'running' | 'ended' {
+  if (event.event_type === 'session_end' || session.ended_at) {
+    return 'ended';
+  }
+  if (event.event_type === 'session_start' && session.events.length <= 1) {
+    return 'starting';
+  }
+  return 'running';
 }
 
 function deriveSessionStatus(event: DashboardEvent): EventStatus | undefined {

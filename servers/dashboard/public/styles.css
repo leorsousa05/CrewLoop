@@ -16,6 +16,14 @@
   --warning: #facc15;
   --running: #38bdf8;
 
+  /* lifecycle tokens */
+  --lifecycle-starting: var(--warning);
+  --lifecycle-running: var(--running);
+  --lifecycle-ended: var(--text-muted);
+  --lifecycle-starting-bg: rgba(250, 204, 21, 0.12);
+  --lifecycle-running-bg: rgba(56, 189, 248, 0.12);
+  --lifecycle-ended-bg: rgba(148, 163, 184, 0.10);
+
   --font-display: 'Bebas Neue', 'Oswald', sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -237,6 +245,121 @@ html, body {
   text-transform: uppercase;
 }
 
+.session-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.session-item-meta {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* Lifecycle badge */
+.lifecycle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  animation: lifecycle-enter 0.2s ease-out;
+}
+
+.lifecycle-badge.starting {
+  color: var(--lifecycle-starting);
+  background: var(--lifecycle-starting-bg);
+  border-color: rgba(250, 204, 21, 0.35);
+}
+
+.lifecycle-badge.running {
+  color: var(--lifecycle-running);
+  background: var(--lifecycle-running-bg);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.lifecycle-badge.ended {
+  color: var(--lifecycle-ended);
+  background: var(--lifecycle-ended-bg);
+  border-color: var(--border-default);
+}
+
+@keyframes lifecycle-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  animation: empty-state-enter 0.25s ease-out;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.empty-state-icon i {
+  font-size: 2rem;
+}
+
+.empty-state-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.empty-state-body {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+@keyframes empty-state-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Main layout */
 .main {
   display: flex;
@@ -294,12 +417,24 @@ html, body {
   right: 0;
   height: 4px;
   background: var(--text-muted);
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panel-accent-strip.starting {
+  background: var(--lifecycle-starting);
+  box-shadow: 0 0 12px var(--lifecycle-starting);
+  animation: lifecycle-glow 2s ease-in-out infinite;
 }
 
 .panel-accent-strip.running {
-  background: var(--accent);
-  box-shadow: 0 0 16px var(--accent-dim);
+  background: var(--lifecycle-running);
+  box-shadow: 0 0 12px var(--lifecycle-running);
+  animation: lifecycle-glow 2s ease-in-out infinite;
+}
+
+.panel-accent-strip.ended {
+  background: var(--border-strong);
+  box-shadow: none;
 }
 
 .active-skill-content {
@@ -363,8 +498,16 @@ html, body {
   background: var(--text-muted);
 }
 
+.status-dot.starting {
+  background: var(--lifecycle-starting);
+}
+
 .status-dot.running {
-  background: var(--running);
+  background: var(--lifecycle-running);
+}
+
+.status-dot.ended {
+  background: var(--lifecycle-ended);
 }
 
 .status-dot.error {
@@ -561,31 +704,43 @@ html, body {
   }
 }
 
-@keyframes pulse {
+.status-dot.running,
+.status-dot.starting {
+  animation: lifecycle-pulse 1.5s ease-in-out infinite;
+}
+
+.lifecycle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.lifecycle-badge.starting .lifecycle-dot,
+.lifecycle-badge.running .lifecycle-dot {
+  animation: lifecycle-pulse 1.5s ease-in-out infinite;
+}
+
+.panel-accent-strip.starting,
+.panel-accent-strip.running {
+  animation: lifecycle-glow 2s ease-in-out infinite;
+}
+
+@keyframes lifecycle-pulse {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
-    opacity: 0.4;
-    transform: scale(1.2);
+    opacity: 0.5;
   }
 }
 
-.status-dot.running {
-  animation: pulse 1.2s ease-in-out infinite;
-}
-
-.panel-accent-strip.running {
-  animation: glow 2s ease-in-out infinite;
-}
-
-@keyframes glow {
+@keyframes lifecycle-glow {
   0%, 100% {
-    box-shadow: 0 0 0 transparent;
+    box-shadow: 0 0 8px currentColor;
   }
   50% {
-    box-shadow: 0 0 16px var(--accent-dim);
+    box-shadow: 0 0 16px currentColor;
   }
 }
 

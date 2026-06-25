@@ -50,9 +50,9 @@ loop-engineering-agents/
 │   └── shipper/
 │       └── SKILL.md           # Git workflow and PR
 ├── scripts/                   # Helper scripts
-│   ├── install.sh             # Install skills to agent skills dir
 │   ├── validate-skills.py     # Validate SKILL.md files
-│   └── package-skill.py       # Package a skill into .skill archive
+│   ├── package-skill.py       # Package a skill into .skill archive
+│   └── npm-publish-dry-run.sh # Dry-run npm publish workflow
 ├── servers/                   # Optional MCP servers
 │   └── obsidian-mcp/          # Local Obsidian second-brain server
 ├── references/                # Shared reference documentation
@@ -78,9 +78,9 @@ loop-engineering-agents/
 - `references/conventions.md`: shared conventions for commits, navigation, and specs.
 - `references/skill-anatomy.md`: guide for writing new skills.
 - `references/workflow.md`: complete workflow reference.
-- `scripts/install.sh`: installs skills into `~/.agents/skills/`.
 - `scripts/validate-skills.py`: validates all `SKILL.md` files.
 - `scripts/package-skill.py`: packages a single skill into a `.skill` archive.
+- `packages/cli/`: TypeScript CLI that installs skills and configures agent hooks.
 
 There are no runtime build configuration files such as `pyproject.toml`, `package.json`, `Cargo.toml`, or `Makefile`.
 
@@ -179,7 +179,14 @@ There are no automated tests. Use `scripts/validate-skills.py` to check the stru
 
 ### Deploy
 
-There is no deploy. The "installation" consists of copying the skill folders to the AI agent's skills directory (ex: `~/.agents/skills/`). Use `scripts/install.sh` to install all skills at once.
+There is no deploy. Install the CLI and run it to set up skills and dashboard hooks:
+
+```bash
+npm install -g @archznn/crewloop-skills
+crewloop install
+```
+
+`crewloop install` copies the skills to the default agent directory (`~/.agents/skills/`), installs the Obsidian MCP server, and automatically configures dashboard hooks for supported agents (Kimi, Claude, Codex, AGY). Use `--no-hooks` to skip hook configuration.
 
 ---
 
@@ -203,6 +210,7 @@ There is no deploy. The "installation" consists of copying the skill folders to 
 4. Follow the Conventional Commits standard for all commit messages.
 5. Do not do git operations directly — use the shipper skill.
 6. Run `python scripts/validate-skills.py` after adding or editing a skill.
+7. To test the installation flow, run `crewloop install` from the CLI package; use `--no-hooks` to verify the legacy skill-copy path.
 
 ---
 

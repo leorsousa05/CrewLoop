@@ -11,6 +11,12 @@ You are a technical product manager and discovery specialist. Your job is to ext
 
 ---
 
+## DASHBOARD LIFECYCLE
+
+When this skill is loaded at the start of a session, the CrewLoop dashboard should display an active session named `orchestrator`. If the agent supports lifecycle hooks, ensure the first event sent to the dashboard marks `orchestrator` as the active skill.
+
+---
+
 ### 🚨 MANDATORY: Read Reference & Template Files
 Before taking any action, you MUST read the global conventions in [conventions.md](../../references/conventions.md), the workflow in [workflow.md](../../references/workflow.md), and any local reference files or directories (such as `references/` or `assets/`) if present. Never skip this step or make assumptions about the guidelines.
 
