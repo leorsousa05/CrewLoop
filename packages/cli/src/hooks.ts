@@ -296,7 +296,6 @@ export function installHooksForAgent(
 
   try {
     let config = writer.readConfig();
-    const backupPath = config && options.backup ? backupPathFor(config.path) : undefined;
 
     const beforeHook: HookEntry = {
       event: 'before_tool_use',
@@ -307,14 +306,19 @@ export function installHooksForAgent(
       command: agent.hooks.afterToolUseCommand || `crewloop-shim ${agent.id}`,
     };
 
+    let needsWrite = false;
+
     if (!config) {
       config = writer.buildDefaultConfig();
+      needsWrite = true;
     } else {
       if (!writer.hasHook(config, beforeHook)) {
         config = writer.addHook(config, beforeHook);
+        needsWrite = true;
       }
       if (!writer.hasHook(config, afterHook)) {
         config = writer.addHook(config, afterHook);
+        needsWrite = true;
       }
     }
 
@@ -322,17 +326,23 @@ export function installHooksForAgent(
       return { agent: agent.id, status: 'configured', configPath: config.path };
     }
 
+    const backupPath = needsWrite && config && options.backup ? backupPathFor(config.path) : undefined;
+    let backupCreated = false;
+
     if (backupPath && fs.existsSync(config.path)) {
       fs.copyFileSync(config.path, backupPath);
+      backupCreated = true;
     }
 
-    writer.writeConfig(config);
+    if (needsWrite) {
+      writer.writeConfig(config);
+    }
 
     return {
       agent: agent.id,
       status: 'configured',
       configPath: config.path,
-      backupPath,
+      backupPath: backupCreated ? backupPath : undefined,
     };
   } catch (error) {
     return {

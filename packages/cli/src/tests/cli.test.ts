@@ -123,6 +123,29 @@ describe('cli', () => {
     assert.ok(help.includes('version'));
   });
 
+  it('help text documents hooks section', () => {
+    const help = printHelp();
+    assert.ok(help.includes('Hooks:'));
+    assert.ok(help.includes('Supported agents:'));
+    assert.ok(help.includes('kimi'));
+    assert.ok(help.includes('claude'));
+    assert.ok(help.includes('codex'));
+    assert.ok(help.includes('agy'));
+    assert.ok(help.includes('--no-hooks'));
+  });
+
+  it('help text includes usage examples', () => {
+    const help = printHelp();
+    assert.ok(help.includes('Examples:'));
+    assert.ok(help.includes('crewloop install'));
+    assert.ok(help.includes('crewloop install --skill architect --skill engineer'));
+    assert.ok(help.includes('crewloop install --agent claude --no-hooks'));
+    assert.ok(help.includes('crewloop install --dry-run'));
+    assert.ok(help.includes('crewloop list'));
+    assert.ok(help.includes('crewloop dashboard --port 8080'));
+    assert.ok(help.includes('crewloop --version'));
+  });
+
   it('help text does not change command surface', () => {
     const help = printHelp();
     assert.ok(!help.includes('doctor'));

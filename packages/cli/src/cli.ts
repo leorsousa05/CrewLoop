@@ -96,11 +96,17 @@ export function printHelp(): string {
   return `crewloop <command> [options]
 
 Commands:
-  install              Install CrewLoop skills
+  install              Install CrewLoop skills and configure agent hooks
   list                 List available skills
   dashboard            Start the real-time skill dashboard
   version              Show version
   help                 Show this help message
+
+Hooks:
+  Supported agents: kimi, claude, codex, agy
+  Running "crewloop install" registers before_tool_use and after_tool_use hooks in
+  each agent's config file. The hooks send events to the CrewLoop dashboard so it
+  can track the active skill and session state. Use --no-hooks to skip this step.
 
 Options:
   --target <dir>       Install to a custom directory
@@ -115,6 +121,15 @@ Options:
   --no-hooks           Skip agent hook configuration
   -v, --version        Show version
   -h, --help           Show help
+
+Examples:
+  crewloop install
+  crewloop install --skill architect --skill engineer
+  crewloop install --agent claude --no-hooks
+  crewloop install --dry-run
+  crewloop list
+  crewloop dashboard --port 8080
+  crewloop --version
 `;
 }
 
@@ -234,7 +249,7 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
   const mcpDir = path.join(packageRoot, 'servers', 'obsidian-mcp');
   let mcpResult: McpInstallResult | undefined;
   if (fs.existsSync(mcpDir)) {
-    console.error('Installing Obsidian MCP server...');
+    console.error('Ensuring Obsidian MCP server is installed...');
 
     mcpResult = installMcpServer(mcpDir, {
       dryRun: args.dryRun,
@@ -262,14 +277,21 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
 
   if (args.hooks !== false) {
     const hookResults = installHooks({ dryRun: args.dryRun, backup: true });
-    console.log('Configured agent hooks:');
-    for (const result of hookResults) {
-      const symbol =
-        result.status === 'configured' ? '✓' : result.status === 'error' ? '✗' : '-';
-      const reason = result.error
-        ? `error: ${result.error.message}`
-        : `(${result.status})`;
-      console.log(`  ${symbol} ${result.agent} ${reason}`);
+    const configuredCount = hookResults.filter((r) => r.status === 'configured').length;
+
+    if (configuredCount === 0) {
+      console.log('Agent hooks: no supported agents detected (skipped)');
+    } else {
+      console.log('Configured agent hooks:');
+      for (const result of hookResults) {
+        const symbol =
+          result.status === 'configured' ? '✓' : result.status === 'error' ? '✗' : '-';
+        const reason = result.error
+          ? `error: ${result.error.message}`
+          : `(${result.status})`;
+        console.log(`  ${symbol} ${result.agent} ${reason}`);
+      }
+      console.log('Run "crewloop dashboard" to start receiving hook events.');
     }
   }
 
