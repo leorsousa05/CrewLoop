@@ -9,9 +9,27 @@ permissions:
   contents: read
 
 jobs:
+  assert-main:
+    name: Assert tag is on main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag points to a commit on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "Tag $GITHUB_REF_NAME points to a commit that is not on main. Aborting publish."
+            exit 1
+          fi
+
   validate:
     name: Validate versions
     runs-on: ubuntu-latest
+    needs: assert-main
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
