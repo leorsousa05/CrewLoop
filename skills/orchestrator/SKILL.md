@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Context discovery orchestrator for software tasks. Run FIRST for build, create, modify, fix, refactor, design, or implement requests. Gathers context and routes to architect for specs. Trigger: build, create, fix, refactor, design, implement, UI, frontend, dashboard, landing page, or code changes.
+description: "Context discovery orchestrator for software tasks. Run FIRST for build, create, modify, fix, refactor, design, or implement requests. Gathers context and routes to architect for specs. Trigger: build, create, fix, refactor, design, implement, UI, frontend, dashboard, landing page, or code changes."
 ---
 
 # Orchestrator — Context Discovery & Requirement Gathering

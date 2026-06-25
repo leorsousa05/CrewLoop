@@ -1,7 +1,7 @@
 {
-  "name": "@archznn/crewloop-cli",
-  "version": "0.4.0",
-  "description": "CLI for installing CrewLoop skills",
+  "name": "@archznn/crewloop-dashboard",
+  "version": "0.2.0",
+  "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
   "repository": {
@@ -10,14 +10,17 @@
   },
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
   "bin": {
-    "crewloop": "bin/crewloop.js"
+    "crewloop-dashboard": "bin/crewloop-dashboard.js"
   },
   "files": [
     "bin/",
     "dist/",
+    "public/",
+    "config-examples/",
     "README.md"
   ],
   "scripts": {
+    "start": "node dist/index.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "node --test dist/**/*.test.js",
@@ -27,16 +30,17 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@archznn/crewloop-skills": "file:../.."
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.0",
     "typescript": "^5.4.0"
   },
   "keywords": [
     "ai-agent",
-    "skills",
     "crewloop",
-    "cli"
+    "dashboard",
+    "observability"
   ]
 }

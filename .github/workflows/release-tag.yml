@@ -1,0 +1,58 @@
+name: release-tag
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect version bumps and create tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          declare -A TAG_OVERRIDES=(
+            ["package.json"]="v"
+            ["packages/cli/package.json"]="cli@"
+            ["servers/dashboard/package.json"]="dashboard@"
+            ["servers/obsidian-mcp/package.json"]="obsidian-mcp@"
+          )
+
+          for pkg in "${!TAG_OVERRIDES[@]}"; do
+            if [ ! -f "$pkg" ]; then
+              continue
+            fi
+
+            prev_version=$(git show HEAD~1:"$pkg" 2>/dev/null | jq -r .version || echo "")
+            curr_version=$(jq -r .version "$pkg")
+
+            if [ -z "$prev_version" ] || [ "$prev_version" = "$curr_version" ]; then
+              continue
+            fi
+
+            tag="${TAG_OVERRIDES[$pkg]}${curr_version}"
+
+            if git rev-parse "$tag" >/dev/null 2>&1; then
+              echo "Tag $tag already exists, skipping"
+              continue
+            fi
+
+            echo "Creating tag $tag for $pkg ($prev_version -> $curr_version)"
+            git tag -a "$tag" -m "Release $tag"
+            git push origin "$tag"
+          done

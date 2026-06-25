@@ -13,6 +13,40 @@ describe('cli', () => {
     assert.strictEqual(args.command, 'list');
   });
 
+  it('parses dashboard command', () => {
+    const args = parseArgs(['node', 'crewloop', 'dashboard']);
+    assert.strictEqual(args.command, 'dashboard');
+  });
+
+  it('parses dashboard flags', () => {
+    const args = parseArgs([
+      'node',
+      'crewloop',
+      'dashboard',
+      '--port',
+      '8080',
+      '--host',
+      '0.0.0.0',
+    ]);
+    assert.strictEqual(args.command, 'dashboard');
+    assert.strictEqual(args.port, 8080);
+    assert.strictEqual(args.host, '0.0.0.0');
+  });
+
+  it('throws when dashboard --port has no value', () => {
+    assert.throws(
+      () => parseArgs(['node', 'crewloop', 'dashboard', '--port']),
+      /--port requires a value/
+    );
+  });
+
+  it('throws when dashboard --host has no value', () => {
+    assert.throws(
+      () => parseArgs(['node', 'crewloop', 'dashboard', '--host']),
+      /--host requires a value/
+    );
+  });
+
   it('parses all flags', () => {
     const args = parseArgs([
       'node',
@@ -72,7 +106,9 @@ describe('cli', () => {
     const help = printHelp();
     assert.ok(help.includes('install'));
     assert.ok(help.includes('list'));
+    assert.ok(help.includes('dashboard'));
     assert.ok(help.includes('--target'));
+    assert.ok(help.includes('--port'));
   });
 
   it('help text does not change command surface', () => {

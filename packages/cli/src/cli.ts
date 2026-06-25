@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { resolveSkills } from './resolver';
 import { resolveAgentDir, listSupportedAgents } from './agents';
 import { installSkills } from './installer';
@@ -20,6 +21,8 @@ export function parseArgs(argv: string[]): {
   symlink?: boolean;
   force?: boolean;
   dryRun?: boolean;
+  port?: number;
+  host?: string;
 } {
   const args = argv.slice(2);
   const command = args[0];
@@ -42,6 +45,14 @@ export function parseArgs(argv: string[]): {
         break;
       case '--agent':
         result.agent = requireValue(arg, next);
+        i++;
+        break;
+      case '--port':
+        result.port = parseInt(requireValue(arg, next), 10);
+        i++;
+        break;
+      case '--host':
+        result.host = requireValue(arg, next);
         i++;
         break;
       case '--symlink':
@@ -69,12 +80,15 @@ export function printHelp(): string {
 Commands:
   install              Install CrewLoop skills
   list                 List available skills
+  dashboard            Start the real-time skill dashboard
   help                 Show this help message
 
 Options:
   --target <dir>       Install to a custom directory
   --skill <name>       Install only a specific skill (repeatable)
   --agent <agent>      Target agent convention (kimi, claude, codex, cursor, windsurf)
+  --port <number>      Dashboard port (default: 7890)
+  --host <address>     Dashboard host (default: 127.0.0.1)
   --symlink            Create symlinks instead of copying
   --force              Overwrite existing skills
   --dry-run            Print actions without installing
@@ -192,6 +206,37 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
   return 0;
 }
 
+async function handleDashboard(args: ReturnType<typeof parseArgs>): Promise<number> {
+  const packageRoot = resolvePackageRoot();
+  const dashboardBin = path.join(packageRoot, 'servers', 'dashboard', 'bin', 'crewloop-dashboard.js');
+
+  if (!fs.existsSync(dashboardBin)) {
+    console.error('Dashboard server not found. Build the dashboard package first:');
+    console.error('  cd servers/dashboard && npm install && npm run build');
+    return 1;
+  }
+
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  if (args.port !== undefined) {
+    env.CREWLOOP_DASHBOARD_PORT = String(args.port);
+  }
+  if (args.host !== undefined) {
+    env.CREWLOOP_DASHBOARD_HOST = args.host;
+  }
+
+  console.log(`Starting CrewLoop dashboard from ${dashboardBin}`);
+  const child = spawn(process.execPath, [dashboardBin], {
+    env,
+    stdio: 'inherit',
+  });
+
+  return new Promise((resolve) => {
+    child.on('close', (code) => {
+      resolve(code ?? 0);
+    });
+  });
+}
+
 export async function run(argv: string[]): Promise<number> {
   const args = parseArgs(['node', 'crewloop', ...argv]);
 
@@ -200,6 +245,8 @@ export async function run(argv: string[]): Promise<number> {
       return handleInstall(args);
     case 'list':
       return handleList();
+    case 'dashboard':
+      return handleDashboard(args);
     case 'help':
     default:
       console.log(printHelp());

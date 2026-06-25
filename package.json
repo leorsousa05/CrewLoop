@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CrewLoop AI agent skills bundle",
   "license": "MIT",
   "author": "leorsousa05",
@@ -14,6 +14,7 @@
     "references/",
     "assets/",
     "servers/obsidian-mcp/",
+    "servers/dashboard/",
     "README.md",
     "LICENSE.md"
   ],
