@@ -3,8 +3,14 @@ name: Deploy CrewLoop site to GitHub Pages
 on:
   push:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy.yml'
 
 permissions:
   contents: read
