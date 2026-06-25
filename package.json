@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-skills",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "CrewLoop AI agent skills bundle and CLI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -28,6 +28,9 @@
     "build": "npm run build --workspaces",
     "test": "npm test --workspaces",
     "prepublishOnly": "npm run build --workspaces"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
   },
   "workspaces": [
     "packages/cli",
