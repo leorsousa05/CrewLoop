@@ -25,7 +25,13 @@ export function parseArgs(argv: string[]): {
   host?: string;
 } {
   const args = argv.slice(2);
-  const command = args[0];
+  let command = args[0];
+
+  if (command === '--version' || command === '-v') {
+    command = 'version';
+  } else if (command === '--help' || command === '-h') {
+    command = 'help';
+  }
 
   const result: ReturnType<typeof parseArgs> = { command };
 
@@ -64,6 +70,10 @@ export function parseArgs(argv: string[]): {
       case '--dry-run':
         result.dryRun = true;
         break;
+      case '--version':
+      case '-v':
+        result.command = 'version';
+        break;
       case '--help':
       case '-h':
         result.command = 'help';
@@ -81,6 +91,7 @@ Commands:
   install              Install CrewLoop skills
   list                 List available skills
   dashboard            Start the real-time skill dashboard
+  version              Show version
   help                 Show this help message
 
 Options:
@@ -92,6 +103,7 @@ Options:
   --symlink            Create symlinks instead of copying
   --force              Overwrite existing skills
   --dry-run            Print actions without installing
+  -v, --version        Show version
   -h, --help           Show help
 `;
 }
@@ -116,6 +128,23 @@ function resolvePackageRoot(): string {
   throw new Error(
     'Could not find CrewLoop package root. Reinstall with: npm install -g @archznn/crewloop-cli'
   );
+}
+
+function getVersion(): string {
+  try {
+    const packageRoot = resolvePackageRoot();
+    const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+    return pkg.version as string;
+  } catch {
+    const fallback = path.resolve(__dirname, '..', '..', '..');
+    const pkg = JSON.parse(fs.readFileSync(path.join(fallback, 'package.json'), 'utf8'));
+    return pkg.version as string;
+  }
+}
+
+async function handleVersion(): Promise<number> {
+  console.log(getVersion());
+  return 0;
 }
 
 async function handleList(): Promise<number> {
@@ -253,6 +282,8 @@ export async function run(argv: string[]): Promise<number> {
       return handleList();
     case 'dashboard':
       return handleDashboard(args);
+    case 'version':
+      return handleVersion();
     case 'help':
     default:
       console.log(printHelp());
