@@ -27,7 +27,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@archznn/crewloop-skills": "file:../.."
+    "@archznn/crewloop-skills": "^0.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

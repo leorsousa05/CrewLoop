@@ -18,8 +18,14 @@
     "README.md",
     "LICENSE.md"
   ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces",
+    "prepublishOnly": "npm run build --workspaces"
+  },
   "workspaces": [
-    "packages/cli"
+    "packages/cli",
+    "servers/dashboard"
   ],
   "keywords": [
     "ai-agent",
