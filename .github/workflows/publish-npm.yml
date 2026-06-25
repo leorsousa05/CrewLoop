@@ -1,52 +1,81 @@
 name: Publish CrewLoop to npm
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_run:
+    workflows: [release-tag]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
-  assert-main:
-    name: Assert tag is on main
+  check-tag:
+    name: Check version tag on main
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    outputs:
+      should_publish: ${{ steps.check.outputs.should_publish }}
+      version: ${{ steps.check.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
+
+      - name: Verify exact version tag exists on this commit
+        id: check
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          tag=$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")
+          if [ "$tag" = "v${version}" ]; then
+            echo "Found matching tag $tag"
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No matching version tag on this commit (found: ${tag:-none}, expected: v${version}). Skipping publish."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  assert-main:
+    name: Assert tag is on main
+    runs-on: ubuntu-latest
+    needs: check-tag
+    if: needs.check-tag.outputs.should_publish == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Verify tag points to a commit on main
         run: |
           git fetch origin main
           if ! git merge-base --is-ancestor HEAD origin/main; then
-            echo "Tag $GITHUB_REF_NAME points to a commit that is not on main. Aborting publish."
+            echo "Tag points to a commit that is not on main. Aborting publish."
             exit 1
           fi
 
   validate:
     name: Validate version
     runs-on: ubuntu-latest
-    needs: assert-main
+    needs: [check-tag, assert-main]
+    if: needs.check-tag.outputs.should_publish == 'true'
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ needs.check-tag.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
       - name: Assert root package version matches tag
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.check-tag.outputs.version }}
         run: |
           pkg_version=$(node -p "require('./package.json').version")
           if [ "$pkg_version" != "$VERSION" ]; then
-            echo "Root package.json version ($pkg_version) does not match tag ($VERSION)"
+            echo "Root package.json version ($pkg_version) does not match expected version ($VERSION)"
             exit 1
           fi
 
@@ -66,7 +95,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build all workspaces
         run: npm run build --workspaces
