@@ -18,6 +18,16 @@ describe('cli', () => {
     assert.strictEqual(args.command, 'dashboard');
   });
 
+  it('parses --version flag', () => {
+    const args = parseArgs(['node', 'crewloop', '--version']);
+    assert.strictEqual(args.command, 'version');
+  });
+
+  it('parses -v flag', () => {
+    const args = parseArgs(['node', 'crewloop', '-v']);
+    assert.strictEqual(args.command, 'version');
+  });
+
   it('parses dashboard flags', () => {
     const args = parseArgs([
       'node',
@@ -109,6 +119,8 @@ describe('cli', () => {
     assert.ok(help.includes('dashboard'));
     assert.ok(help.includes('--target'));
     assert.ok(help.includes('--port'));
+    assert.ok(help.includes('--version'));
+    assert.ok(help.includes('version'));
   });
 
   it('help text does not change command surface', () => {
