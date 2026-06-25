@@ -101,6 +101,12 @@ function resolvePackageRoot(): string {
     const skillsPackageJson = require.resolve('@archznn/crewloop-skills/package.json');
     return path.dirname(skillsPackageJson);
   } catch {
+    // Fallback for when the CLI is bundled inside the skills package itself.
+    const bundledRoot = path.resolve(__dirname, '..', '..');
+    if (fs.existsSync(path.join(bundledRoot, 'skills', 'orchestrator', 'SKILL.md'))) {
+      return bundledRoot;
+    }
+
     const cwdNodeModules = path.join(process.cwd(), 'node_modules', '@archznn', 'crewloop-skills');
     if (fs.existsSync(path.join(cwdNodeModules, 'package.json'))) {
       return cwdNodeModules;
@@ -108,7 +114,7 @@ function resolvePackageRoot(): string {
   }
 
   throw new Error(
-    'Could not find @archznn/crewloop-skills. Install it with: npm install @archznn/crewloop-skills'
+    'Could not find CrewLoop package root. Reinstall with: npm install -g @archznn/crewloop-cli'
   );
 }
 
