@@ -1,4 +1,4 @@
-name: Publish CrewLoop packages to npm
+name: Publish CrewLoop to npm
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
           fi
 
   validate:
-    name: Validate versions
+    name: Validate version
     runs-on: ubuntu-latest
     needs: assert-main
     outputs:
@@ -50,24 +50,7 @@ jobs:
             exit 1
           fi
 
-      - name: Assert CLI package version matches tag
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          pkg_version=$(node -p "require('./packages/cli/package.json').version")
-          if [ "$pkg_version" != "$VERSION" ]; then
-            echo "packages/cli/package.json version ($pkg_version) does not match tag ($VERSION)"
-            exit 1
-          fi
-
-      - name: Assert CLI depends on skills package
-        run: |
-          if [ -z "$(node -p "require('./packages/cli/package.json').dependencies['@archznn/crewloop-skills']")" ]; then
-            echo "CLI is missing dependency on @archznn/crewloop-skills"
-            exit 1
-          fi
-
-  publish-skills:
+  publish:
     name: Publish @archznn/crewloop-skills
     runs-on: ubuntu-latest
     needs: validate
@@ -85,12 +68,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Publish skills package
+      - name: Build all workspaces
+        run: npm run build --workspaces
+
+      - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
 
-      - name: Wait for skills package to be available
+      - name: Wait for package to be available
         env:
           VERSION: ${{ needs.validate.outputs.version }}
         run: |
@@ -104,53 +90,4 @@ jobs:
             sleep 5
           done
           echo "Timeout waiting for @archznn/crewloop-skills@$VERSION"
-          exit 1
-
-  publish-cli:
-    name: Publish @archznn/crewloop-cli
-    runs-on: ubuntu-latest
-    needs: publish-skills
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Pin CLI dependency to matching skills version
-        env:
-          VERSION: ${{ needs.validate.outputs.version }}
-        run: |
-          npm pkg set dependencies.@archznn/crewloop-skills="^$VERSION" \
-            --workspace=@archznn/crewloop-cli
-
-      - name: Build CLI
-        run: npm run build --workspace=@archznn/crewloop-cli
-
-      - name: Publish CLI package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@archznn/crewloop-cli --access public
-
-      - name: Wait for CLI package to be available
-        env:
-          VERSION: ${{ needs.validate.outputs.version }}
-        run: |
-          for i in $(seq 1 12); do
-            published=$(npm view @archznn/crewloop-cli@"$VERSION" version 2>/dev/null || true)
-            if [ "$published" = "$VERSION" ]; then
-              echo "@archznn/crewloop-cli@$VERSION is available on npm"
-              exit 0
-            fi
-            echo "Waiting for @archznn/crewloop-cli@$VERSION... ($i/12)"
-            sleep 5
-          done
-          echo "Timeout waiting for @archznn/crewloop-cli@$VERSION"
           exit 1

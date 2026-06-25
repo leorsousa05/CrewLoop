@@ -1,7 +1,7 @@
 {
   "name": "@archznn/crewloop-skills",
   "version": "0.4.0",
-  "description": "CrewLoop AI agent skills bundle",
+  "description": "CrewLoop AI agent skills bundle and CLI",
   "license": "MIT",
   "author": "leorsousa05",
   "repository": {
@@ -9,12 +9,18 @@
     "url": "https://github.com/leorsousa05/CrewLoop.git"
   },
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
+  "bin": {
+    "crewloop": "packages/cli/bin/crewloop.js"
+  },
   "files": [
     "skills/",
     "references/",
     "assets/",
     "servers/obsidian-mcp/",
     "servers/dashboard/",
+    "packages/cli/bin/",
+    "packages/cli/dist/",
+    "packages/cli/README.md",
     "README.md",
     "LICENSE.md"
   ],
