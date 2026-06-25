@@ -15,7 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Detect root version bump and create release tag
         env:
@@ -26,14 +27,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          prev_version=$(git show HEAD~1:package.json 2>/dev/null | jq -r .version || echo "")
           curr_version=$(jq -r .version package.json)
-
-          if [ -z "$prev_version" ] || [ "$prev_version" = "$curr_version" ]; then
-            echo "No root version bump detected"
-            exit 0
-          fi
-
           tag="v${curr_version}"
 
           if git rev-parse "$tag" >/dev/null 2>&1; then
@@ -41,6 +35,6 @@ jobs:
             exit 0
           fi
 
-          echo "Creating release tag $tag ($prev_version -> $curr_version)"
+          echo "Creating release tag $tag"
           git tag -a "$tag" -m "Release $tag"
           git push origin "$tag"
