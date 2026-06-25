@@ -30,9 +30,15 @@ venv/
 node_modules/
 packages/cli/node_modules/
 packages/cli/dist/
+servers/dashboard/dist/
+servers/dashboard/package-lock.json
 docs/node_modules/
 docs/.docusaurus/
 docs/build/
 docs/.cache/
 *.tgz
+
+# Test / demo artifacts
+.playwright-mcp/
+dashboard-demo.png
 

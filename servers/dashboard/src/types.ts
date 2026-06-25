@@ -1,0 +1,110 @@
+export type AgentSource = 'kimi' | 'codex' | 'opencode' | 'log-watcher';
+
+export type EventType =
+  | 'session_start'
+  | 'session_end'
+  | 'tool_start'
+  | 'tool_end'
+  | 'skill_change';
+
+export type EventStatus = 'running' | 'success' | 'error';
+
+export interface DashboardEvent {
+  id: string;
+  timestamp: number;
+  source: AgentSource;
+  session_id: string;
+  event_type: EventType;
+  skill?: string;
+  tool?: string;
+  detail?: string;
+  status?: EventStatus;
+  duration_ms?: number;
+}
+
+export interface Session {
+  id: string;
+  source: AgentSource;
+  active_skill?: string;
+  active_confidence?: 'explicit' | 'heuristic' | 'unknown';
+  status?: EventStatus;
+  events: DashboardEvent[];
+  tool_counts: Record<string, number>;
+  started_at: number;
+  last_event_at: number;
+}
+
+export interface DashboardState {
+  sessions: Record<string, Session>;
+}
+
+export interface ClientActiveSkill {
+  name: string;
+  confidence: 'explicit' | 'heuristic' | 'unknown';
+}
+
+export interface ClientEvent {
+  id: string;
+  timestamp: number;
+  event_type: EventType;
+  tool?: string;
+  detail?: string;
+  status?: EventStatus;
+  duration_ms?: number;
+  skill?: string;
+}
+
+export interface ClientSession {
+  id: string;
+  source: AgentSource;
+  skill?: string;
+  activeSkill?: ClientActiveSkill;
+  status?: EventStatus;
+  events: ClientEvent[];
+  startTime: number;
+  lastActivity: number;
+  toolCounts: Record<string, number>;
+}
+
+export interface ClientSnapshotMessage {
+  type: 'snapshot';
+  sessions: ClientSession[];
+}
+
+export interface ClientUpdateMessage {
+  type: 'update';
+  session: ClientSession;
+  isActive: boolean;
+}
+
+export interface ClientPongMessage {
+  type: 'pong';
+}
+
+export type ClientWebSocketMessage =
+  | ClientSnapshotMessage
+  | ClientUpdateMessage
+  | ClientPongMessage;
+
+export interface SkillMeta {
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export type ToolToSkillMap = Record<string, string | undefined>;
+
+export interface SkillInferenceResult {
+  skill: string | undefined;
+  confidence: 'explicit' | 'heuristic' | 'unknown';
+}
+
+export interface ServerConfig {
+  port: number;
+  host: string;
+  packageRoot: string;
+  maxEventsPerSession: number;
+  sessionMaxAgeMs: number;
+  pruneIntervalMs: number;
+}
+
