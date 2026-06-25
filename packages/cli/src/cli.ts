@@ -114,7 +114,7 @@ function resolvePackageRoot(): string {
     return path.dirname(skillsPackageJson);
   } catch {
     // Fallback for when the CLI is bundled inside the skills package itself.
-    const bundledRoot = path.resolve(__dirname, '..', '..');
+    const bundledRoot = path.resolve(__dirname, '..', '..', '..');
     if (fs.existsSync(path.join(bundledRoot, 'skills', 'orchestrator', 'SKILL.md'))) {
       return bundledRoot;
     }
@@ -126,7 +126,7 @@ function resolvePackageRoot(): string {
   }
 
   throw new Error(
-    'Could not find CrewLoop package root. Reinstall with: npm install -g @archznn/crewloop-cli'
+    'Could not find CrewLoop package root. Reinstall with: npm install -g @archznn/crewloop-skills'
   );
 }
 
@@ -241,6 +241,28 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
   return 0;
 }
 
+function checkDashboardDependencies(packageRoot: string): string[] {
+  const dashboardPkgPath = path.join(packageRoot, 'servers', 'dashboard', 'package.json');
+  if (!fs.existsSync(dashboardPkgPath)) {
+    return [];
+  }
+
+  const pkg = JSON.parse(fs.readFileSync(dashboardPkgPath, 'utf8'));
+  const deps = Object.keys(pkg.dependencies || {});
+  const dashboardDir = path.dirname(dashboardPkgPath);
+  const missing: string[] = [];
+
+  for (const dep of deps) {
+    try {
+      require.resolve(dep, { paths: [dashboardDir] });
+    } catch {
+      missing.push(dep);
+    }
+  }
+
+  return missing;
+}
+
 async function handleDashboard(args: ReturnType<typeof parseArgs>): Promise<number> {
   const packageRoot = resolvePackageRoot();
   const dashboardBin = path.join(packageRoot, 'servers', 'dashboard', 'bin', 'crewloop-dashboard.js');
@@ -248,6 +270,16 @@ async function handleDashboard(args: ReturnType<typeof parseArgs>): Promise<numb
   if (!fs.existsSync(dashboardBin)) {
     console.error('Dashboard server not found. Build the dashboard package first:');
     console.error('  cd servers/dashboard && npm install && npm run build');
+    return 1;
+  }
+
+  const missing = checkDashboardDependencies(packageRoot);
+  if (missing.length > 0) {
+    console.error('Dashboard is missing required dependencies:');
+    for (const dep of missing) {
+      console.error(`  - ${dep}`);
+    }
+    console.error('Reinstall CrewLoop to fix this: npm install -g @archznn/crewloop-skills');
     return 1;
   }
 
