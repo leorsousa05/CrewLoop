@@ -14,6 +14,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     active_skill: 'architect',
     active_confidence: 'explicit',
     status: 'running',
+    lifecycle: 'running',
     ...overrides,
   };
 }
@@ -28,9 +29,16 @@ describe('presenter', () => {
     assert.equal(client.skill, 'architect');
     assert.deepEqual(client.activeSkill, { name: 'architect', confidence: 'explicit' });
     assert.equal(client.status, 'running');
+    assert.equal(client.lifecycle, 'running');
     assert.equal(client.startTime, 1000);
     assert.equal(client.lastActivity, 2000);
     assert.deepEqual(client.toolCounts, { Read: 2 });
+  });
+
+  it('includes lifecycle and endedAt', () => {
+    const client = presentSession(makeSession({ lifecycle: 'ended', ended_at: 5000 }));
+    assert.equal(client.lifecycle, 'ended');
+    assert.equal(client.endedAt, 5000);
   });
 
   it('omits active skill when not set', () => {

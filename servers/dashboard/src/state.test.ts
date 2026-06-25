@@ -15,6 +15,7 @@ function makeEvent(overrides: Partial<DashboardEvent> = {}): DashboardEvent {
   };
 }
 
+
 describe('StateStore', () => {
   it('creates session on first event', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
@@ -51,6 +52,14 @@ describe('StateStore', () => {
     assert.equal(session.active_confidence, 'explicit');
   });
 
+  it('sets explicit active skill from session_start event', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ skill: 'orchestrator', event_type: 'session_start' }));
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.active_skill, 'orchestrator');
+    assert.equal(session.active_confidence, 'explicit');
+  });
+
   it('derives running status from tool_start', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
     store.applyEvent(makeEvent({ event_type: 'tool_start' }));
@@ -84,5 +93,39 @@ describe('StateStore', () => {
     const sessions = store.getAllSessions();
     assert.equal(sessions[0].id, 'b');
     assert.equal(sessions[1].id, 'a');
+  });
+
+  it('starts with lifecycle starting on session_start', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ event_type: 'session_start' }));
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.lifecycle, 'starting');
+  });
+
+  it('transitions to running on first tool event', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ event_type: 'session_start' }));
+    store.applyEvent(makeEvent({ event_type: 'tool_start', tool: 'Read' }));
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.lifecycle, 'running');
+  });
+
+  it('sets lifecycle ended and ended_at on session_end', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ event_type: 'session_start' }));
+    const endTs = Date.now() + 1000;
+    store.applyEvent(makeEvent({ event_type: 'session_end', timestamp: endTs }));
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.lifecycle, 'ended');
+    assert.equal(session.ended_at, endTs);
+  });
+
+  it('keeps session ended after subsequent tool events', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ event_type: 'session_start' }));
+    store.applyEvent(makeEvent({ event_type: 'session_end' }));
+    store.applyEvent(makeEvent({ event_type: 'tool_start', tool: 'Read' }));
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.lifecycle, 'ended');
   });
 });

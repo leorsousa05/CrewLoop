@@ -5,6 +5,7 @@ import { resolveSkills } from './resolver';
 import { resolveAgentDir, listSupportedAgents } from './agents';
 import { installSkills } from './installer';
 import { installMcpServer, type McpInstallResult } from './mcp';
+import { installHooks, type HookWriterResult } from './hooks';
 
 function requireValue(arg: string, next: string | undefined): string {
   if (next === undefined || next.startsWith('-')) {
@@ -21,6 +22,7 @@ export function parseArgs(argv: string[]): {
   symlink?: boolean;
   force?: boolean;
   dryRun?: boolean;
+  hooks?: boolean;
   port?: number;
   host?: string;
 } {
@@ -70,6 +72,12 @@ export function parseArgs(argv: string[]): {
       case '--dry-run':
         result.dryRun = true;
         break;
+      case '--hooks':
+        result.hooks = true;
+        break;
+      case '--no-hooks':
+        result.hooks = false;
+        break;
       case '--version':
       case '-v':
         result.command = 'version';
@@ -103,6 +111,8 @@ Options:
   --symlink            Create symlinks instead of copying
   --force              Overwrite existing skills
   --dry-run            Print actions without installing
+  --hooks              Configure agent hooks (default)
+  --no-hooks           Skip agent hook configuration
   -v, --version        Show version
   -h, --help           Show help
 `;
@@ -224,17 +234,42 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
   const mcpDir = path.join(packageRoot, 'servers', 'obsidian-mcp');
   let mcpResult: McpInstallResult | undefined;
   if (fs.existsSync(mcpDir)) {
+    console.error('Installing Obsidian MCP server...');
+
     mcpResult = installMcpServer(mcpDir, {
       dryRun: args.dryRun,
       force: args.force,
+      onProgress: (progress) => {
+        const icon = progress.step === 'complete' ? '✓' : '•';
+        console.error(`  ${icon} ${progress.message}`);
+      },
     });
 
     if (mcpResult.error) {
       console.error(`MCP install warning: ${mcpResult.error.message}`);
-    } else if (mcpResult.installed) {
-      console.log(`Installed Obsidian MCP server at ${mcpResult.binaryPath}`);
-    } else if (mcpResult.skipped) {
-      console.log(`Obsidian MCP server already installed at ${mcpResult.binaryPath}`);
+    } else if (mcpResult.durationMs) {
+      console.error(`  ✓ Done (${(mcpResult.durationMs / 1000).toFixed(1)}s)`);
+    }
+
+    if (!mcpResult.error) {
+      if (mcpResult.installed) {
+        console.log(`Installed Obsidian MCP server at ${mcpResult.binaryPath}`);
+      } else if (mcpResult.skipped) {
+        console.log(`Obsidian MCP server already installed at ${mcpResult.binaryPath}`);
+      }
+    }
+  }
+
+  if (args.hooks !== false) {
+    const hookResults = installHooks({ dryRun: args.dryRun, backup: true });
+    console.log('Configured agent hooks:');
+    for (const result of hookResults) {
+      const symbol =
+        result.status === 'configured' ? '✓' : result.status === 'error' ? '✗' : '-';
+      const reason = result.error
+        ? `error: ${result.error.message}`
+        : `(${result.status})`;
+      console.log(`  ${symbol} ${result.agent} ${reason}`);
     }
   }
 

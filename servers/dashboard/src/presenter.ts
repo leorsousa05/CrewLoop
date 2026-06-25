@@ -26,9 +26,11 @@ export function presentSession(session: Session): ClientSession {
           }
         : undefined,
     status: session.status,
+    lifecycle: session.lifecycle,
     events: session.events.map(presentEvent),
     startTime: session.started_at,
     lastActivity: session.last_event_at,
+    endedAt: session.ended_at,
     toolCounts: session.tool_counts,
   };
 }

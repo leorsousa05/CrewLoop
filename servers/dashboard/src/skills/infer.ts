@@ -9,6 +9,14 @@ export class SkillInferenceEngine {
   }
 
   infer(event: DashboardEvent, session: Session): SkillInferenceResult {
+    const explicitSignal =
+      (event.event_type === 'skill_change' && event.skill) ||
+      (event.tool === 'Skill' && event.detail && this.normalizeSkillName(event.detail));
+
+    if (session.active_confidence === 'explicit' && !explicitSignal) {
+      return { skill: session.active_skill, confidence: 'explicit' };
+    }
+
     if (event.event_type === 'skill_change' && event.skill) {
       return { skill: event.skill, confidence: 'explicit' };
     }

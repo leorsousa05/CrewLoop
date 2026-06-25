@@ -3,6 +3,18 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
+export type McpInstallStep =
+  | 'check_python'
+  | 'create_venv'
+  | 'install_package'
+  | 'expose_binary'
+  | 'complete';
+
+export interface McpInstallProgress {
+  step: McpInstallStep;
+  message: string;
+}
+
 export interface McpInstallOptions {
   dryRun?: boolean;
   force?: boolean;
@@ -10,6 +22,7 @@ export interface McpInstallOptions {
   pythonCmd?: string;
   /** Directory where the obsidian-mcp wrapper/symlink is placed. Default: <homedir>/.local/bin */
   localBinDir?: string;
+  onProgress?: (progress: McpInstallProgress) => void;
 }
 
 export interface McpInstallResult {
@@ -21,6 +34,8 @@ export interface McpInstallResult {
   binaryPath?: string;
   /** Error that did not block skill installation. */
   error?: Error;
+  /** Wall-clock duration of the installation in milliseconds. */
+  durationMs?: number;
 }
 
 function defaultPythonCmd(): string {
@@ -133,47 +148,77 @@ function exposeBinary(
   return { binaryPath: targetBinary, created };
 }
 
+function emitProgress(
+  onProgress: McpInstallOptions['onProgress'],
+  step: McpInstallStep,
+  message: string
+): void {
+  if (onProgress) {
+    onProgress({ step, message });
+  }
+}
+
 export function installMcpServer(
   mcpSourceDir: string,
   options: McpInstallOptions = {}
 ): McpInstallResult {
+  const startTime = Date.now();
   const pythonCmd = options.pythonCmd || defaultPythonCmd();
   const localBinDir = options.localBinDir || defaultLocalBinDir();
+  const onProgress = options.onProgress;
+
+  emitProgress(onProgress, 'check_python', 'Checking Python installation...');
 
   if (!commandExists(pythonCmd)) {
     return {
       installed: false,
       skipped: false,
       error: new Error(`Python not found: ${pythonCmd}`),
+      durationMs: Date.now() - startTime,
     };
   }
 
   if (options.dryRun) {
     const binaryName = os.platform() === 'win32' ? 'obsidian-mcp.cmd' : 'obsidian-mcp';
+    const binaryPath = path.join(localBinDir, binaryName);
+    emitProgress(
+      onProgress,
+      'complete',
+      `Would install Obsidian MCP server at ${binaryPath}`
+    );
     return {
       installed: true,
       skipped: false,
-      binaryPath: path.join(localBinDir, binaryName),
+      binaryPath,
+      durationMs: Date.now() - startTime,
     };
   }
 
   try {
+    emitProgress(onProgress, 'create_venv', 'Creating Python virtual environment...');
     ensureVenv(mcpSourceDir, pythonCmd, options.force || false);
+
+    emitProgress(onProgress, 'install_package', 'Installing Obsidian MCP server package...');
     const pip = venvPip(mcpSourceDir);
     runCommand(pip, ['install', '-q', '-e', mcpSourceDir]);
 
+    emitProgress(onProgress, 'expose_binary', 'Exposing obsidian-mcp binary...');
     const { binaryPath, created } = exposeBinary(mcpSourceDir, localBinDir, options.force || false);
+
+    emitProgress(onProgress, 'complete', 'Obsidian MCP server ready.');
 
     return {
       installed: created,
       skipped: !created,
       binaryPath,
+      durationMs: Date.now() - startTime,
     };
   } catch (error) {
     return {
       installed: false,
       skipped: false,
       error: error instanceof Error ? error : new Error(String(error)),
+      durationMs: Date.now() - startTime,
     };
   }
 }

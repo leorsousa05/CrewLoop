@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { detectSource, buildEvent } from './shim';
+import { detectSource, buildEvent, getDefaultSkill } from './shim';
 import type { AgentSource, DashboardEvent } from '../types';
 
 describe('detectSource', () => {
@@ -17,6 +17,22 @@ describe('detectSource', () => {
 
   it('returns undefined when unknown', () => {
     assert.equal(detectSource(['node', 'shim', 'unknown']), undefined);
+  });
+});
+
+describe('getDefaultSkill', () => {
+  it('reads default skill from argv', () => {
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi', '--default-skill', 'orchestrator']), 'orchestrator');
+  });
+
+  it('falls back to env var', () => {
+    process.env.CREWLOOP_DEFAULT_SKILL = 'architect';
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi']), 'architect');
+    delete process.env.CREWLOOP_DEFAULT_SKILL;
+  });
+
+  it('returns undefined when not configured', () => {
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi']), undefined);
   });
 });
 
@@ -70,5 +86,52 @@ describe('buildEvent', () => {
       cwd: '/project',
     });
     assert.equal(event, undefined);
+  });
+
+  it('attaches default skill to session_start events', () => {
+    const event = buildEvent(
+      'kimi' as AgentSource,
+      { hook_event_name: 'SessionStart', session_id: 'sess-1', cwd: '/project' },
+      'orchestrator'
+    );
+    assert.equal(event?.event_type, 'session_start');
+    assert.equal(event?.skill, 'orchestrator');
+  });
+
+  it('does not attach default skill to tool events', () => {
+    const startEvent = buildEvent(
+      'kimi' as AgentSource,
+      { hook_event_name: 'PreToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
+      'orchestrator'
+    );
+    assert.equal(startEvent?.event_type, 'tool_start');
+    assert.equal(startEvent?.skill, undefined);
+
+    const endEvent = buildEvent(
+      'kimi' as AgentSource,
+      { hook_event_name: 'PostToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
+      'orchestrator'
+    );
+    assert.equal(endEvent?.event_type, 'tool_end');
+    assert.equal(endEvent?.skill, undefined);
+  });
+
+  it('forwards explicit payload skill for kimi', () => {
+    const event = buildEvent('kimi' as AgentSource, {
+      hook_event_name: 'SessionStart',
+      session_id: 'sess-1',
+      cwd: '/project',
+      skill: 'architect',
+    });
+    assert.equal(event?.skill, 'architect');
+  });
+
+  it('forwards explicit payload skill for codex', () => {
+    const event = buildEvent('codex' as AgentSource, {
+      sessionId: 'sess-2',
+      hook_event_name: 'SessionStart',
+      skill: 'engineer',
+    });
+    assert.equal(event?.skill, 'engineer');
   });
 });

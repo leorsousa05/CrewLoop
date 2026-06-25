@@ -6,6 +6,15 @@ import { sanitize } from '../filters/sanitize';
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:7890';
 
+export function getDefaultSkill(argv: string[]): string | undefined {
+  const idx = argv.indexOf('--default-skill');
+  if (idx !== -1 && argv[idx + 1]) {
+    return argv[idx + 1];
+  }
+  const env = process.env.CREWLOOP_DEFAULT_SKILL;
+  return env || undefined;
+}
+
 export function detectSource(argv: string[]): AgentSource | undefined {
   const arg = argv[2];
   if (arg === 'kimi' || arg === 'codex' || arg === 'opencode' || arg === 'log-watcher') {
@@ -42,11 +51,16 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
 
 export function buildEvent(
   source: AgentSource,
-  raw: Record<string, unknown>
+  raw: Record<string, unknown>,
+  defaultSkill?: string
 ): DashboardEvent | undefined {
   const base = normalizePayload(source, raw);
   if (!base) {
     return undefined;
+  }
+
+  if (base.event_type === 'session_start' && defaultSkill) {
+    base.skill = defaultSkill;
   }
 
   const isPost = base.event_type === 'tool_end';
@@ -100,6 +114,8 @@ export function runShim(): void {
     process.exit(1);
   }
 
+  const defaultSkill = getDefaultSkill(process.argv);
+
   let raw = '';
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (chunk) => {
@@ -108,7 +124,7 @@ export function runShim(): void {
   process.stdin.on('end', () => {
     try {
       const payload = JSON.parse(raw);
-      const event = buildEvent(source, payload);
+      const event = buildEvent(source, payload, defaultSkill);
       if (event) {
         postEvent(event);
       }

@@ -19,6 +19,7 @@ export interface CodexHookPayload {
   executed?: boolean;
   success?: boolean;
   durationMs?: number;
+  skill?: string;
 }
 
 const EVENT_MAP: Record<string, EventType> = {
@@ -42,6 +43,7 @@ export function normalizeCodex(payload: CodexHookPayload): DashboardEvent | unde
     session_id: payload.sessionId || payload.session_id || 'unknown',
     event_type,
     tool: payload.toolName,
+    skill: payload.skill,
   };
 }
 

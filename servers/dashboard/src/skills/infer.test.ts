@@ -9,6 +9,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     source: 'kimi',
     events: [],
     tool_counts: {},
+    lifecycle: 'running',
     started_at: Date.now(),
     last_event_at: Date.now(),
     ...overrides,
@@ -74,6 +75,15 @@ describe('SkillInferenceEngine', () => {
     const result = engine.infer(event, session);
     assert.equal(result.skill, 'architect');
     assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('preserves explicit active skill when no new explicit signal arrives', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const session = makeSession({ active_skill: 'orchestrator', active_confidence: 'explicit' });
+    const event = makeEvent({ tool: 'Read', detail: 'README.md' });
+    const result = engine.infer(event, session);
+    assert.equal(result.skill, 'orchestrator');
+    assert.equal(result.confidence, 'explicit');
   });
 
   it('returns unknown when nothing matches', () => {

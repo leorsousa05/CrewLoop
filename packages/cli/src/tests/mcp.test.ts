@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { installMcpServer } from '../mcp';
+import { installMcpServer, type McpInstallStep } from '../mcp';
 
 function createFakePython(baseDir: string): { pythonCmd: string } {
   const isWindows = os.platform() === 'win32';
@@ -166,5 +166,99 @@ describe('mcp', () => {
     assert.strictEqual(result.installed, false);
     assert.strictEqual(result.skipped, true);
     assert.ok(result.binaryPath);
+  });
+
+  it('emits progress steps in order on successful install', () => {
+    const { pythonCmd } = createFakePython(fakePythonDir);
+    const steps: McpInstallStep[] = [];
+
+    const result = installMcpServer(mcpSourceDir, {
+      pythonCmd,
+      localBinDir,
+      force: true,
+      onProgress: (progress) => steps.push(progress.step),
+    });
+
+    assert.strictEqual(result.error, undefined);
+    assert.deepStrictEqual(steps, [
+      'check_python',
+      'create_venv',
+      'install_package',
+      'expose_binary',
+      'complete',
+    ]);
+  });
+
+  it('dry-run emits check_python and complete only', () => {
+    const { pythonCmd } = createFakePython(fakePythonDir);
+    const steps: McpInstallStep[] = [];
+
+    // Ensure a previous test did not leave a venv behind.
+    const venvDir = path.join(mcpSourceDir, '.venv');
+    if (fs.existsSync(venvDir)) {
+      fs.rmSync(venvDir, { recursive: true, force: true });
+    }
+
+    const result = installMcpServer(mcpSourceDir, {
+      pythonCmd,
+      localBinDir,
+      dryRun: true,
+      onProgress: (progress) => steps.push(progress.step),
+    });
+
+    assert.strictEqual(result.error, undefined);
+    assert.deepStrictEqual(steps, ['check_python', 'complete']);
+    assert.ok(!fs.existsSync(venvDir));
+  });
+
+  it('missing Python emits only check_python and returns error', () => {
+    const steps: McpInstallStep[] = [];
+
+    const result = installMcpServer(mcpSourceDir, {
+      pythonCmd: path.join(fakePythonDir, 'missing-python'),
+      localBinDir,
+      onProgress: (progress) => steps.push(progress.step),
+    });
+
+    assert.ok(result.error);
+    assert.deepStrictEqual(steps, ['check_python']);
+  });
+
+  it('pip failure emits through install_package and returns error', () => {
+    const { pythonCmd } = createFakePython(fakePythonDir);
+    process.env.CREWLOOP_PIP_FAIL = '1';
+
+    try {
+      const steps: McpInstallStep[] = [];
+      const result = installMcpServer(mcpSourceDir, {
+        pythonCmd,
+        localBinDir,
+        force: true,
+        onProgress: (progress) => steps.push(progress.step),
+      });
+
+      assert.ok(result.error);
+      assert.deepStrictEqual(steps, [
+        'check_python',
+        'create_venv',
+        'install_package',
+      ]);
+    } finally {
+      delete process.env.CREWLOOP_PIP_FAIL;
+    }
+  });
+
+  it('reports duration in milliseconds', () => {
+    const { pythonCmd } = createFakePython(fakePythonDir);
+
+    const result = installMcpServer(mcpSourceDir, {
+      pythonCmd,
+      localBinDir,
+      force: true,
+    });
+
+    assert.strictEqual(result.error, undefined);
+    assert.ok(typeof result.durationMs === 'number');
+    assert.ok(result.durationMs >= 0);
   });
 });
