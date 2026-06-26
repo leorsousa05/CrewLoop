@@ -61,4 +61,4 @@ flowchart TD
 7. **Shipper is the only one who touches git** — commit, branch, push, PR.
 8. **All skills return to Orchestrator** — it is the central hub.
 
-Each skill reads from the second brain at the start of a task and persists outcomes at the end. The Orchestrator initiates memory reads during discovery; the Shipper updates `Journal/loop-engineering-agents.md` with active/archived spec links.
+Each skill ends with the standard navigation menu. The Orchestrator initiates discovery; the Shipper updates `Journal/loop-engineering-agents.md` with active/archived spec links.

@@ -64,7 +64,6 @@ Each skill will be automatically detected and activated according to the convers
 | Skill | Emoji | Phase | Learn more |
 |-------|-------|-------|------------|
 | [`docs-writer`](skills/docs-writer/SKILL.md) | 📝 | Docs | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/docs-writer) |
-| [`obsidian-second-brain`](skills/obsidian-second-brain/SKILL.md) | 🧠 | Memory | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/obsidian-second-brain) |
 | [`tester`](skills/tester/SKILL.md) | 🧪 | QA | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/tester) |
 | [`product-manager`](skills/product-manager/SKILL.md) | 📊 | Product | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/product-manager) |
 | [`maintainer`](skills/maintainer/SKILL.md) | 🛠️ | Upkeep | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/maintainer) |
@@ -95,7 +94,6 @@ flowchart TD
     R --> S["🚀 Shipper<br>Git & PR"]
     S --> O
     W --> O
-    OB["🧠 Obsidian Second Brain<br>Memory & RAG"] -.-> O
     SG["🛡️ Security-Guard<br>Security Review"] -.-> R
     AA["♿ Accessibility-Auditor<br>Accessibility Review"] -.-> R
     R --> SG
@@ -134,13 +132,6 @@ flowchart TD
 11. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
 12. **All skills return to orchestrator** — it is the central hub.
 
-## Obsidian Second Brain (MCP)
-
-This repository also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
-
-- [`servers/obsidian-mcp/README.md`](servers/obsidian-mcp/README.md) — installation and configuration
-- [`references/obsidian-mcp-usage.md`](references/obsidian-mcp-usage.md) — how agents/skills should use it
-
 ## Adding a New Skill
 
 1. Copy the template:
@@ -171,7 +162,6 @@ CrewLoop/
 │   ├── reviewer/
 │   ├── shipper/
 │   ├── docs-writer/
-│   ├── obsidian-second-brain/
 │   ├── tester/
 │   ├── product-manager/
 │   ├── maintainer/
@@ -179,7 +169,6 @@ CrewLoop/
 │   ├── security-guard/
 │   └── accessibility-auditor/
 ├── servers/                   # Optional MCP servers
-│   └── obsidian-mcp/          # Local Obsidian second-brain server
 ├── scripts/                   # Helper scripts
 │   ├── validate-skills.py
 │   ├── package-skill.py
@@ -188,7 +177,6 @@ CrewLoop/
 │   ├── conventions.md
 │   ├── skill-anatomy.md
 │   ├── workflow.md
-│   └── obsidian-mcp-usage.md
 ├── docs/                      # Docusaurus documentation site
 ├── specs/                     # Spec-driven change records
 │   ├── changes/

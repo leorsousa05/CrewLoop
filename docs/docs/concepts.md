@@ -66,24 +66,13 @@ Each skill shows only the options relevant to its handoff. The agent waits for e
 
 ## AFK mode
 
-**AFK mode** lets the workflow continue without manual menu selection. When activated (by the user saying "AFK" or by `MEMORY.md` containing `afk: true`), the skill:
+**AFK mode** lets the workflow continue without manual menu selection. When activated by the user saying "AFK", the skill:
 
 - Skips the navigation menu.
 - States the next skill.
 - Loads the next skill automatically.
 
 This is the only exception to the "never route automatically" rule.
-
-## Second brain
-
-The **Obsidian Second Brain** is an optional memory layer powered by a local Obsidian vault (`~/.lea`) and the `obsidian-mcp` server. It stores:
-
-- User priorities in `MEMORY.md`.
-- Durable knowledge in `Knowledge/`.
-- Session outcomes in `Journal/`.
-- Temporary drafts in `Notes/`.
-
-If the vault is unavailable, CrewLoop continues without it.
 
 ## Conventional Commits
 

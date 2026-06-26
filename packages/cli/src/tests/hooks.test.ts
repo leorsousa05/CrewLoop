@@ -341,6 +341,132 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(updated.hooks.PostToolUse[0].hooks.length, 1);
   });
 
+  it('deduplicates AGY hooks that point to the same shim via different paths', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-paths-')),
+      'hooks.json'
+    );
+    const agent = createAgentConfig({
+      id: 'agy',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseEventName: 'PreToolUse',
+        afterToolUseEventName: 'PostToolUse',
+      },
+    });
+
+    // Resolve the real shim path and create an alternate symlink to it.
+    const realShimPath = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'servers',
+      'dashboard',
+      'bin',
+      'crewloop-shim.js'
+    );
+    const symlinkDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-shim-link-'));
+    const symlinkShimPath = path.join(symlinkDir, 'crewloop-shim.js');
+    try {
+      fs.symlinkSync(realShimPath, symlinkShimPath, 'file');
+    } catch {
+      // Symlinks may not be available on this Windows environment; skip the test.
+      return;
+    }
+
+    const nodePath = process.execPath;
+    const alternateShimPath = symlinkShimPath;
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: '*',
+              hooks: [
+                {
+                  type: 'command',
+                  command: `${nodePath} ${alternateShimPath} agy --default-skill orchestrator --event-type tool_start`,
+                  timeout: 10,
+                },
+              ],
+            },
+          ],
+          PostToolUse: [
+            {
+              matcher: '*',
+              hooks: [
+                {
+                  type: 'command',
+                  command: `${nodePath} ${alternateShimPath} agy --default-skill orchestrator --event-type tool_end`,
+                  timeout: 10,
+                },
+              ],
+            },
+          ],
+        },
+      }),
+      'utf8'
+    );
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+
+    const updated = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.strictEqual(updated.hooks.PreToolUse.length, 1);
+    assert.strictEqual(updated.hooks.PreToolUse[0].hooks.length, 1);
+    assert.strictEqual(updated.hooks.PostToolUse.length, 1);
+    assert.strictEqual(updated.hooks.PostToolUse[0].hooks.length, 1);
+    assert.ok(
+      updated.hooks.PreToolUse[0].hooks[0].command.includes('crewloop-shim.js')
+    );
+    assert.ok(
+      !updated.hooks.PreToolUse[0].hooks[0].command.includes(alternateShimPath)
+    );
+  });
+
+  it('mirrors AGY config to fallbackConfigPath', () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-fallback-'));
+    const configPath = path.join(baseDir, 'config', 'hooks.json');
+    const fallbackPath = path.join(baseDir, 'fallback', 'hooks.json');
+    const agent = createAgentConfig({
+      id: 'agy',
+      skillsDir: path.join(baseDir, 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        fallbackConfigPath: fallbackPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseEventName: 'PreToolUse',
+        afterToolUseEventName: 'PostToolUse',
+      },
+    });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(result.status, 'configured');
+    assert.ok(fs.existsSync(configPath));
+    assert.ok(fs.existsSync(fallbackPath));
+
+    const primary = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    const fallback = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    assert.deepStrictEqual(fallback, primary);
+
+    // Running again should be idempotent and not create new backups.
+    const second = installHooksForAgent(agent, { backup: true });
+    assert.strictEqual(second.status, 'configured');
+    assert.strictEqual(second.backupPath, undefined);
+    const fallbackAfter = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    assert.deepStrictEqual(fallbackAfter, primary);
+  });
+
   it('creates a backup before modifying an existing config', () => {
     const agent = createAgentConfig({ id: 'kimi' });
     fs.mkdirSync(path.dirname(agent.hooks.configPath), { recursive: true });

@@ -6,7 +6,7 @@ import type { AgentSource, DashboardEvent, EventType } from '../types';
 import { normalizeKimi, type KimiHookPayload } from './kimi';
 import { normalizeCodex, type CodexHookPayload } from './codex';
 import { normalizeAgy, type AgyHookPayload } from './agy';
-import { sanitize } from '../filters/sanitize';
+import { sanitize, type SanitizedToolData } from '../filters/sanitize';
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:7890';
 
@@ -121,11 +121,11 @@ export function buildEvent(
   }
 
   const isPost = base.event_type === 'tool_end';
-  const sanitized = sanitize(
+  const sanitized: SanitizedToolData = sanitize(
     {
       tool_name: base.tool || '',
       tool_input: (raw.tool_input || raw.toolInput) as Record<string, unknown> | undefined,
-      tool_response: (raw.tool_response || raw.toolResponse) as Record<string, unknown> | undefined,
+      tool_response: (raw.tool_response || raw.toolResponse || raw.tool_output || raw.toolOutput) as Record<string, unknown> | undefined,
     },
     isPost ? 'post' : 'pre'
   );
@@ -135,6 +135,8 @@ export function buildEvent(
     detail: sanitized.detail,
     status: sanitized.status,
     duration_ms: sanitized.duration_ms,
+    input: sanitized.input,
+    output: sanitized.output,
   };
 }
 

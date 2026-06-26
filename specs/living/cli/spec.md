@@ -169,4 +169,3 @@ This is an upstream Codex issue; see <https://github.com/openai/codex/issues/284
 - Hook config writers live in `packages/cli/src/hooks.ts`.
 - Agent metadata lives in `packages/cli/src/agents.ts`.
 - Shim normalization lives in `servers/dashboard/src/adapters/shim.ts`.
-- The Obsidian MCP server is installed/ensured during `crewloop install` when the `servers/obsidian-mcp` directory is present.

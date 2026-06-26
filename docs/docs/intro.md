@@ -13,7 +13,7 @@ Instead of asking a single AI to "build this feature", CrewLoop distributes resp
 - **Reviewer** — audits quality, security, and spec compliance.
 - **Shipper** — handles git operations and PRs.
 
-Supporting skills extend the flow: **Docs-Writer**, **Tester**, **Product-Manager**, **Maintainer**, **Researcher**, and **Obsidian Second Brain**.
+Supporting skills extend the flow: **Docs-Writer**, **Tester**, **Product-Manager**, **Maintainer**, **Researcher**, **Security-Guard**, and **Accessibility-Auditor**.
 
 ## Who is this for?
 
@@ -57,10 +57,3 @@ Once the skills are installed, start any task by describing what you want:
 > "Add a login page to my React app."
 
 The **Orchestrator** will take over, ask clarifying questions, and route the task through the crew.
-
-## Optional: Obsidian Second Brain
-
-CrewLoop also includes an optional MCP server that turns a local Obsidian vault (`~/.lea`) into a second brain / RAG for AI agents.
-
-- [`servers/obsidian-mcp/README.md`](https://github.com/leorsousa05/CrewLoop/tree/main/servers/obsidian-mcp) — installation and configuration
-- [`references/obsidian-mcp-usage.md`](https://github.com/leorsousa05/CrewLoop/tree/main/references/obsidian-mcp-usage.md) — how agents/skills should use it

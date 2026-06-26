@@ -399,33 +399,44 @@ class ClaudeHookWriter extends JsonHookWriter {
   readonly agentId = 'claude';
 }
 
-function extractShimScriptPath(command: string): string | undefined {
+function parseShimCommand(command: string): { node?: string; shim?: string; args: string[] } | undefined {
   const normalized = normalizePathSeparators(command);
   const tokens = normalized.split(/\s+/).filter(Boolean);
-  for (const token of tokens) {
-    const unquoted = token.replace(/^["']|["']$/g, '');
-    if (/crewloop-shim\.js$/i.test(unquoted)) {
-      return unquoted;
+  let shimIndex = -1;
+  for (let i = 0; i < tokens.length; i++) {
+    const unquoted = tokens[i].replace(/^["']|["']$/g, '');
+    if (/crewloop-shim(\.js)?$/i.test(unquoted)) {
+      shimIndex = i;
+      break;
     }
   }
-  return undefined;
+  if (shimIndex === -1) return undefined;
+  return {
+    node: shimIndex > 0 ? tokens[0] : undefined,
+    shim: tokens[shimIndex],
+    args: tokens.slice(shimIndex + 1),
+  };
 }
 
-function resolveCommandPath(command: string): string | undefined {
-  const shimPath = extractShimScriptPath(command);
-  if (!shimPath) return undefined;
+function resolveShimPath(command: string): string | undefined {
+  const parsed = parseShimCommand(command);
+  if (!parsed?.shim) return undefined;
+  const unquoted = parsed.shim.replace(/^["']|["']$/g, '');
   try {
-    return normalizePathSeparators(fs.realpathSync(shimPath));
+    return normalizePathSeparators(fs.realpathSync(unquoted));
   } catch {
-    return normalizePathSeparators(shimPath);
+    return normalizePathSeparators(unquoted);
   }
 }
 
-function commandsUseSameShim(a: string, b: string): boolean {
-  const aReal = resolveCommandPath(a);
-  const bReal = resolveCommandPath(b);
-  if (!aReal || !bReal) return false;
-  return aReal === bReal;
+function commandMatchesIntent(a: string, b: string): boolean {
+  const parsedA = parseShimCommand(a);
+  const parsedB = parseShimCommand(b);
+  if (!parsedA || !parsedB) return false;
+  const realA = resolveShimPath(a);
+  const realB = resolveShimPath(b);
+  if (!realA || !realB || realA !== realB) return false;
+  return JSON.stringify(parsedA.args) === JSON.stringify(parsedB.args);
 }
 
 interface AgyHookCommand {
@@ -526,7 +537,7 @@ class AgyHookWriter extends JsonHookWriter {
       .map((group) => ({
         ...group,
         hooks: group.hooks.filter(
-          (cmd) => !commandsUseSameShim(cmd.command, expected)
+          (cmd) => !commandMatchesIntent(cmd.command, expected)
         ),
       }))
       .filter((group) => group.hooks.length > 0);
@@ -550,7 +561,7 @@ class AgyHookWriter extends JsonHookWriter {
     }
     const entries = groups.flatMap((group) => group.hooks);
     const shimEntries = entries.filter((cmd) =>
-      commandsUseSameShim(cmd.command, expected)
+      commandMatchesIntent(cmd.command, expected)
     );
     const exact = shimEntries.some(
       (cmd) => normalizePathSeparators(cmd.command) === expected

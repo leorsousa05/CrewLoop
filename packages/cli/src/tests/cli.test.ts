@@ -137,6 +137,8 @@ describe('cli', () => {
     assert.ok(help.includes('claude'));
     assert.ok(help.includes('codex'));
     assert.ok(help.includes('agy'));
+    assert.ok(help.includes('kimi/codex/agy'));
+    assert.ok(help.includes('before_tool_use/after_tool_use for claude'));
     assert.ok(help.includes('--no-hooks'));
   });
 

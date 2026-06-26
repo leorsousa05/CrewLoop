@@ -76,10 +76,8 @@ Rules:
 
 ## Memory Conventions
 
-- Every skill invokes `obsidian-second-brain` via the `Skill` tool at task start and end.
-- Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
+- Every skill ends with the standard letter-based navigation menu.
 - Target the correct vault layer: `Knowledge/` for durable guides, `Journal/` for session outcomes, `Memory/` for user profile, `Notes/` for scratchpads, `_Inbox/` for proposals.
-- Full reference: `references/obsidian-mcp-usage.md`.
 
 ---
 
@@ -108,7 +106,7 @@ When the user explicitly activates AFK mode, skills route automatically through 
 
 Case-insensitive matches: `AFK`, `estarei AFK`, `modo AFK`, `vou ficar AFK`.
 
-When activated, set `afk: true` in `MEMORY.md` so subsequent skills know the mode is active. AFK mode resets when the workflow returns to Orchestrator after shipping, or when the user explicitly disables it.
+When activated, the workflow may skip the navigation menu and load the next skill automatically. AFK mode resets when the workflow returns to Orchestrator after shipping, or when the user explicitly disables it.
 
 ### Role prefixes
 

@@ -107,7 +107,7 @@ Commands:
 Hooks:
   Supported agents: kimi, claude, codex, agy
   Running "crewloop install" registers agent-specific hooks (PreToolUse/PostToolUse
-  for kimi/codex, before_tool_use/after_tool_use for claude/agy) in each agent's
+  for kimi/codex/agy, before_tool_use/after_tool_use for claude) in each agent's
   config file. The hooks send events to the CrewLoop dashboard so it can track the
   active skill and session state. Use --no-hooks to skip this step.
 

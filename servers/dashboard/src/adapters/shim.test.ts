@@ -88,6 +88,20 @@ describe('buildEvent', () => {
     assert.equal(event?.duration_ms, 12);
   });
 
+  it('builds Kimi PostToolUse event from tool_output alias', () => {
+    const event = buildEvent('kimi' as AgentSource, {
+      hook_event_name: 'PostToolUse',
+      session_id: 'sess-1',
+      cwd: '/project',
+      tool_name: 'Bash',
+      tool_input: { command: 'echo hi' },
+      tool_output: { success: true, stdout: 'hi' },
+    });
+    assert.equal(event?.event_type, 'tool_end');
+    assert.equal(event?.status, 'success');
+    assert.equal((event?.output as Record<string, unknown>).contentSnippet, 'hi');
+  });
+
   it('builds Codex event', () => {
     const event = buildEvent('codex' as AgentSource, {
       sessionId: 'sess-2',
@@ -97,7 +111,8 @@ describe('buildEvent', () => {
     });
     assert.equal(event?.source, 'codex');
     assert.equal(event?.tool, 'Bash');
-    assert.equal(event?.detail, undefined);
+    assert.equal(event?.detail, 'ls');
+    assert.equal((event?.input as Record<string, unknown>).command, 'ls');
     assert.equal(event?.status, 'success');
     assert.equal(event?.duration_ms, 5);
   });
