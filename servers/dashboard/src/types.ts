@@ -20,6 +20,8 @@ export interface DashboardEvent {
   detail?: string;
   status?: EventStatus;
   duration_ms?: number;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
 }
 
 export interface Session {
@@ -54,6 +56,8 @@ export interface ClientEvent {
   status?: EventStatus;
   duration_ms?: number;
   skill?: string;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
 }
 
 export interface ClientSession {
