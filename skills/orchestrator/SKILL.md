@@ -22,19 +22,6 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** user priorities and active context
-- **Persist at end:** confirmed priorities to curated memory; unclear items to inbox
-
----
 
 ## SUBAGENT DELEGATION
 

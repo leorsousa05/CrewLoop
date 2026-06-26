@@ -6,7 +6,7 @@ CrewLoop is distributed through npm as two public packages under the `@archznn` 
 
 | Package | Location | Contents |
 |---------|----------|----------|
-| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/`, `references/`, `assets/`, and `servers/obsidian-mcp/` |
+| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/`, `references/`, `assets/`, and `servers/dashboard/` |
 | `@archznn/crewloop-cli` | `packages/cli/package.json` | `crewloop` CLI installer |
 
 ## Installation

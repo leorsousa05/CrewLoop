@@ -44,23 +44,7 @@ python scripts/validate-skills.py
 
 You should see `PASS` for every skill.
 
-## Step 4: Install optional Obsidian MCP server
-
-If you want to use the Obsidian Second Brain:
-
-1. Install the MCP server:
-
-```bash
-cd servers/obsidian-mcp
-# Follow the README for your platform
-```
-
-2. Configure your agent to use the MCP server.
-3. Create or connect a vault at `~/.lea`.
-
-See [`references/obsidian-mcp-usage.md`](https://github.com/leorsousa05/CrewLoop/tree/main/references/obsidian-mcp-usage.md) for details.
-
-## Step 5: Build the documentation site (optional)
+## Step 4: Build the documentation site (optional)
 
 If you want to preview or deploy the CrewLoop website locally:
 

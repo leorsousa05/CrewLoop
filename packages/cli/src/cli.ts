@@ -4,7 +4,6 @@ import { spawn } from 'node:child_process';
 import { resolveSkills } from './resolver';
 import { resolveAgentDir, listSupportedAgents } from './agents';
 import { installSkills } from './installer';
-import { installMcpServer, type McpInstallResult } from './mcp';
 import { installHooks, type HookWriterResult } from './hooks';
 
 function requireValue(arg: string, next: string | undefined): string {
@@ -103,7 +102,7 @@ Commands:
   help                 Show this help message
 
 Hooks:
-  Supported agents: kimi, claude, codex, agy
+  Supported agents: kimi, claude, codex
   Running "crewloop install" registers before_tool_use and after_tool_use hooks in
   each agent's config file. The hooks send events to the CrewLoop dashboard so it
   can track the active skill and session state. Use --no-hooks to skip this step.
@@ -244,35 +243,6 @@ async function handleInstall(args: ReturnType<typeof parseArgs>): Promise<number
       console.error(`  ! ${error.message}`);
     }
     return 1;
-  }
-
-  const mcpDir = path.join(packageRoot, 'servers', 'obsidian-mcp');
-  let mcpResult: McpInstallResult | undefined;
-  if (fs.existsSync(mcpDir)) {
-    console.error('Ensuring Obsidian MCP server is installed...');
-
-    mcpResult = installMcpServer(mcpDir, {
-      dryRun: args.dryRun,
-      force: args.force,
-      onProgress: (progress) => {
-        const icon = progress.step === 'complete' ? '✓' : '•';
-        console.error(`  ${icon} ${progress.message}`);
-      },
-    });
-
-    if (mcpResult.error) {
-      console.error(`MCP install warning: ${mcpResult.error.message}`);
-    } else if (mcpResult.durationMs) {
-      console.error(`  ✓ Done (${(mcpResult.durationMs / 1000).toFixed(1)}s)`);
-    }
-
-    if (!mcpResult.error) {
-      if (mcpResult.installed) {
-        console.log(`Installed Obsidian MCP server at ${mcpResult.binaryPath}`);
-      } else if (mcpResult.skipped) {
-        console.log(`Obsidian MCP server already installed at ${mcpResult.binaryPath}`);
-      }
-    }
   }
 
   if (args.hooks !== false) {

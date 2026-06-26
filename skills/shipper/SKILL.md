@@ -16,36 +16,6 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** commit, branch, and project conventions
-- **Persist at end:** shipping log to journal; archived spec links updated in `Journal/loop-engineering-agents.md`; updated conventions to knowledge; active context to curated memory
-
-## AFK MODE & ROLE PREFIX
-
-**Role prefix:** [SHIPPER SHIPPING]
-
-Print this prefix on its own line before the first line of every response.
-
-**AFK mode activation:**
-- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
-- `MEMORY.md` contains `afk: true`.
-
-**AFK mode behavior:**
-- Skip the navigation menu at the end.
-- State the next skill being activated.
-- Load the next skill via the Skill tool (do not wait for user choice).
-
-**Next skill:** Orchestrator (always).
-
----
 
 ## WORKFLOW
 
@@ -341,9 +311,6 @@ git stash pop
 
 # Archive specs before committing (move from changes/ to archive/)
 # Example: mv specs/changes/001-auth-jwt specs/archive/2024-01-15-001-auth-jwt/
-
-# Update Journal spec links after archiving
-- Invoke `obsidian-second-brain` to move the spec link from `## Specs / ### Active` to `## Specs / ### Archived` in `Journal/loop-engineering-agents.md`, updating the path to the archive location (e.g. `../../specs/archive/YYYY-MM-DD-NNN-name/specs/spec.md`). Do NOT read or write `~/.lea` directly.
 
 # Stage all changes
 git add -A

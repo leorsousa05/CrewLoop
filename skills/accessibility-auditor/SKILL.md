@@ -25,26 +25,6 @@ You do NOT write production code. You do NOT run git operations. You do not repl
 
 ---
 
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** prior accessibility decisions, known a11y patterns, and project design system guidance
-- **Persist at end:** audit findings to journal; reusable a11y heuristics to knowledge; active context to curated memory
-
-### MCP Tools Reference
-
-| Tool | When to use |
-|------|-------------|
-| `search_notes` | Find prior a11y decisions and common failures in `Knowledge/` and `Journal/`. |
-| `learn_from_text` | Persist a new accessibility heuristic or remediation pattern. |
-
----
 
 ## AFK MODE & ROLE PREFIX
 
