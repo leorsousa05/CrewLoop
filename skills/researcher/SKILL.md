@@ -25,26 +25,6 @@ You do NOT make final architecture decisions. You do NOT write production code. 
 
 ---
 
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** prior research, technology decisions, and experiment results
-- **Persist at end:** research summaries to knowledge or inbox; experiment results to journal; active context to curated memory
-
-### MCP Tools Reference
-
-| Tool | When to use |
-|------|-------------|
-| `search_notes` | Find prior research and technology decisions in `Knowledge/` and experiment results in `Journal/`. |
-| `learn_from_text` | Persist a research finding or decision rationale. |
-
----
 
 ## WORKFLOW
 

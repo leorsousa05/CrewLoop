@@ -74,17 +74,6 @@ Each skill shows only the options relevant to its handoff. The agent waits for e
 
 This is the only exception to the "never route automatically" rule.
 
-## Second brain
-
-The **Obsidian Second Brain** is an optional memory layer powered by a local Obsidian vault (`~/.lea`) and the `obsidian-mcp` server. It stores:
-
-- User priorities in `MEMORY.md`.
-- Durable knowledge in `Knowledge/`.
-- Session outcomes in `Journal/`.
-- Temporary drafts in `Notes/`.
-
-If the vault is unavailable, CrewLoop continues without it.
-
 ## Conventional Commits
 
 All commits follow the [Conventional Commits](https://www.conventionalcommits.org/) standard:

@@ -16,36 +16,6 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ---
 
-## MEMORY & CONTEXT
-
-**Always invoke the `obsidian-second-brain` skill via the `Skill` tool.**
-Never read or write files inside `~/.lea` directly with `Read`, `Edit`, `Write`, or `Bash`.
-
-At the start of the task, the `obsidian-second-brain` skill will search and read the relevant layers for this role.
-At the end of the task, it will persist outcomes to the correct layers.
-
-This skill's targets:
-- **Read at start:** project conventions and prior decisions
-- **Persist at end:** review findings to journal; process updates to knowledge; active context to curated memory
-
-## AFK MODE & ROLE PREFIX
-
-**Role prefix:** [REVIEWER REVIEWING]
-
-Print this prefix on its own line before the first line of every response.
-
-**AFK mode activation:**
-- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
-- `MEMORY.md` contains `afk: true`.
-
-**AFK mode behavior:**
-- Skip the navigation menu at the end.
-- State the next skill being activated.
-- Load the next skill via the Skill tool (do not wait for user choice).
-
-**Next skill:** Shipper (when review is approved or approved with warnings; if changes are required, route back to Engineer instead).
-
----
 
 ## MODE
 

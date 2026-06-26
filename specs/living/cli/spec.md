@@ -57,4 +57,3 @@ Running `crewloop install` multiple times:
 - Hook config writers live in `packages/cli/src/hooks.ts`.
 - Agent metadata lives in `packages/cli/src/agents.ts`.
 - Shim normalization lives in `servers/dashboard/src/adapters/shim.ts`.
-- The Obsidian MCP server is installed/ensured during `crewloop install` when the `servers/obsidian-mcp` directory is present.

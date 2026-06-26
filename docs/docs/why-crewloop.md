@@ -39,7 +39,6 @@ Each phase is owned by a specialized skill. The skill doesn't do the next phase'
 | Untested code | Engineer writes tests before or alongside implementation |
 | Security holes | Reviewer scans for secrets, unsafe patterns, and AI artifacts |
 | Messy git history | Shipper generates Conventional Commits and proper branches |
-| Lost context | Obsidian Second Brain persists decisions and reusable knowledge |
 
 ## When CrewLoop shines
 

@@ -12,13 +12,6 @@ flowchart TD
 
     U --> O
 
-    subgraph Memory["Memory Layer"]
-        OB[🧠 Obsidian Second Brain]
-    end
-
-    OB -.->|read prior context| O
-    O -.->|persist outcomes| OB
-
     subgraph PreLoop["Optional Pre-Loop Advisors"]
         PM[📊 Product Manager]
         RS[🔬 Researcher]
@@ -92,8 +85,7 @@ Every task starts with a user request. It can be vague or detailed:
 The Orchestrator:
 
 1. Reads global conventions and references.
-2. Optionally reads the Obsidian vault for prior context.
-3. Asks 2–4 clarifying questions.
+2. Asks 2–4 clarifying questions.
 4. Produces a **Task Brief**.
 5. Routes to Architect (always) or to an optional advisor.
 

@@ -44,7 +44,6 @@ const sidebars = {
             'supporting/product-manager',
             'supporting/maintainer',
             'supporting/researcher',
-            'supporting/obsidian-second-brain',
             'supporting/security-guard',
             'supporting/accessibility-auditor',
           ],

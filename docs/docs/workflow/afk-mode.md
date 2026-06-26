@@ -4,10 +4,7 @@ AFK mode allows the CrewLoop flow to continue without manual menu selection at e
 
 ## How to activate
 
-AFK mode is activated when:
-
-- The user explicitly says "AFK", "estarei AFK", "modo AFK", or similar.
-- `MEMORY.md` contains `afk: true`.
+AFK mode is activated when the user explicitly says "AFK", "estarei AFK", "modo AFK", or similar.
 
 ## Behavior
 

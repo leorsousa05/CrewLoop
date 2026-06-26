@@ -16,7 +16,6 @@ const SKILL_ICONS: Record<string, string> = {
   researcher: 'microscope',
   'security-guard': 'shield',
   'accessibility-auditor': 'person',
-  'obsidian-second-brain': 'brain',
 };
 
 export class SkillRegistry {
