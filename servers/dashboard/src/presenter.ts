@@ -10,6 +10,8 @@ export function presentEvent(event: Session['events'][number]): ClientEvent {
     status: event.status,
     duration_ms: event.duration_ms,
     skill: event.skill,
+    input: event.input,
+    output: event.output,
   };
 }
 

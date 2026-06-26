@@ -127,7 +127,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     filePath: string,
     contentType: string
   ): void {
-    const publicDir = path.resolve(__dirname, '..', 'public');
+    const publicDir = path.resolve(__dirname, '..', 'dist', 'public');
     const fullPath = path.resolve(publicDir, filePath);
     if (!fullPath.startsWith(publicDir + path.sep)) {
       res.statusCode = 403;
@@ -181,6 +181,10 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
         httpServer.listen(config.port, config.host, () => {
           httpServer.off('error', onError);
           wss.off('error', onError);
+          const uiIndex = path.resolve(__dirname, '..', 'dist', 'public', 'index.html');
+          if (!fs.existsSync(uiIndex)) {
+            console.warn('Warning: built UI not found at dist/public/index.html. Run `npm run build` first.');
+          }
           console.log(`CrewLoop dashboard running at http://${config.host}:${config.port}`);
           resolve();
         });
