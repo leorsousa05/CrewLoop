@@ -1,65 +1,50 @@
-# Security Guard
+---
+sidebar_position: 6
+---
+
+# Security-Guard
+
+> Security specialist. Reviews for vulnerabilities, secret exposure, and auth flaws.
 
 **Phase:** Security Review
 
-The Security Guard performs focused security audits of changed files and reports findings with severity and remediation steps.
+## Role
 
-## What the Security Guard does
+The Security-Guard scans changes for security vulnerabilities, secret exposure, authentication flaws, and supply-chain risks. It reports findings to the Reviewer or Engineer.
 
-The Security Guard is a deep-dive security specialist. It reviews code for secrets, injection risks, authentication/authorization boundaries, dependency vulnerabilities, and infrastructure exposure.
+## Responsibilities
 
-### Core responsibilities
+1. Scan for hardcoded secrets: search for `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`, `PRIVATE_KEY` strings in code and config.
+2. Check for `.env` files or credential files committed to the repository.
+3. Review auth and authorization: verify JWT expiry, RBAC enforcement, and session management.
+4. Identify OWASP Top 10 vulnerabilities: injection, XSS, CSRF, broken access control, insecure deserialization.
+5. Check dependency supply-chain risk: ensure pinned versions and scan for known CVEs.
+6. Review CORS configurations, CSP headers, and other security headers.
+7. Flag PII handling and compliance gaps (GDPR, HIPAA if applicable).
 
-1. **Scan for secrets**
-   - API keys, tokens, passwords, private keys, and `.env` files.
-   - Hard-coded credentials and leaked configuration.
+## What Security-Guard Never Does
 
-2. **Check for injection risks**
-   - SQL injection, command injection, XSS, path traversal.
-   - Unsanitized user input reaching sensitive sinks.
+- ❌ Write code fixes.
+- ❌ Run git operations.
+- ❌ Approve changes (Reviewer owns approval).
 
-3. **Verify auth and authz**
-   - Protected endpoints, session handling, OAuth/JWT usage.
-   - Privilege escalation and missing authorization checks.
+## Output Artifact
 
-4. **Review dependencies**
-   - New packages and supply-chain risks.
-   - Known vulnerable versions or suspicious publishers.
+| Artifact | Description |
+|----------|-------------|
+| **Security Audit Report** | Findings categorized by severity (Critical, High, Medium, Low) with file/line reference and suggested remediation. |
 
-5. **Inspect infrastructure**
-   - CORS, CSP, security headers, secrets in CI/CD.
-   - Production exposure and network boundaries.
+## Concrete Example
 
-## When to invoke
-
-The Security Guard triggers when:
-
-- The Orchestrator or Reviewer detects security-sensitive work.
-- The user asks about security review, audit, secrets, auth, vulnerabilities, or supply chain.
-- The change involves payments, PII, health data, authentication, new dependencies, or production exposure.
-
-## Concrete example
-
-**User:** "Can you review the new auth flow for security issues?"
-
-**Security Guard:**
-
-1. Reads the changed files and the spec.
-2. Scans for hard-coded secrets and insecure token storage.
-3. Checks password handling and session configuration.
-4. Reviews dependency changes for known vulnerabilities.
-5. Produces a Security Review Report with severity and remediation steps.
-6. Routes to Engineer or Reviewer.
-
-## Output artifact: Security Review Report
-
-| Section | Content |
-|---------|---------|
-| Scope | Files and surfaces reviewed |
-| Findings | Issues with severity and evidence |
-| Remediation | Concrete steps to fix each issue |
-| Verdict | PASS / WARN / FAIL |
+**Security-Guard reviews JWT login PR:**
+1. Scans codebase changes.
+2. Identifies:
+   - `JWT_SECRET` hardcoded as string literal `"mysecret"` in `auth.ts` line 12 — CRITICAL: must use environment variable.
+   - Token not invalidated on logout, stored in `localStorage` — HIGH: use httpOnly cookie.
+   - Missing HTTPS-only flag on session cookie — MEDIUM.
+3. Returns report to Reviewer.
 
 ## Handoff
 
-**Next skill:** Engineer, Reviewer, or Orchestrator.
+**Invoked by:** Reviewer.  
+**Sends to:** Reviewer (which routes back to Engineer for fixes).

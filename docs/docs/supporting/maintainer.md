@@ -1,62 +1,48 @@
+---
+sidebar_position: 4
+---
+
 # Maintainer
 
-**Phase:** Upkeep
+> Upkeep specialist. Diagnoses issues, classifies debt, and plans dependency updates.
 
-The Maintainer diagnoses issues, classifies technical debt, plans dependency updates, and handles production incidents.
+**Phase:** Maintenance
 
-## What the Maintainer does
+## Role
 
-The Maintainer keeps the project healthy over time. It is the skill you call when things are breaking, slowing down, or getting harder to work with.
+The Maintainer diagnoses production issues, classifies technical debt, plans dependency updates, and plans remediation before handing off to the Architect for a spec.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Bug triage**
-   - Reproduce issues.
-   - Classify severity and root cause.
+1. Reproduce and classify bugs: determine severity, root cause, and affected surface area.
+2. Identify technical debt: locate code smells, duplication, outdated patterns, and high-complexity hotspots.
+3. Assess dependency update risk and plan migration steps.
+4. Diagnose production incidents: propose an immediate fix and long-term prevention.
+5. Recommend prioritization: decide whether to fix now, track, or defer.
 
-2. **Technical debt analysis**
-   - Identify code smells, duplication, outdated patterns.
-   - Prioritize remediation.
+## What Maintainer Never Does
 
-3. **Dependency updates**
-   - Assess update risk.
-   - Plan migration steps.
+- ❌ Write new features or functional capabilities.
+- ❌ Run git operations.
+- ❌ Approve changes.
 
-4. **Incident response**
-   - Diagnose production issues.
-   - Propose immediate fixes and long-term prevention.
+## Output Artifact
 
-## When to invoke
+| Artifact | Description |
+|----------|-------------|
+| **Maintenance Report** | Bug diagnosis, root cause analysis, severity assessment, recommended short/long-term fixes, risks, and spec recommendation (yes/no + detail level). |
 
-The Maintainer triggers when:
+## Concrete Example
 
-- The Orchestrator needs triage for a bug or incident.
-- The user asks about flaky tests, performance degradation, or debt.
-- A production issue needs diagnosis.
-
-## Concrete example
-
-**User:** "Our tests are flaky after the last dependency update."
-
-**Maintainer:**
-
-1. Reviews recent dependency changes.
-2. Identifies the flaky tests and their common patterns.
-3. Proposes:
-   - Pin the problematic dependency temporarily.
-   - Refactor async test setup.
-   - Add retry logic where appropriate.
-4. Routes to Engineer with a clear handoff.
-
-## Output artifact: Maintenance Plan
-
-| Section | Content |
-|---------|---------|
-| Diagnosis | Root cause |
-| Severity | Impact assessment |
-| Recommendations | Short and long-term fixes |
-| Risks | What could go wrong |
+**User reports: "Checkout tests are flaky after ws update."**
+1. Maintainer investigates dependency log.
+2. Finds `ws 8.18.0` changed async flush behavior.
+3. Identifies tests use `beforeEach` without awaiting flush, causing a race condition.
+4. Recommends wrapping assertions in `waitFor` and updating `beforeEach` teardown.
+5. Recommends a lightweight spec (tasks.md only).
+6. Routes to Architect.
 
 ## Handoff
 
-**Next skill:** Engineer, Architect, or Orchestrator.
+**Invoked by:** Orchestrator.  
+**Sends to:** Orchestrator (which routes to Architect).

@@ -1,61 +1,48 @@
+---
+sidebar_position: 3
+---
+
 # Product-Manager
+
+> Product strategist. Frames requirements as user value, success metrics, and prioritized scope.
 
 **Phase:** Product Framing
 
-The Product-Manager frames requirements in terms of user value, success metrics, prioritization, and scope.
+## Role
 
-## What the Product-Manager does
+The Product-Manager frames requirements in terms of user pain, success metrics, prioritization, and scope decisions. It helps the team build the right thing before the Architect designs it.
 
-The Product-Manager is a strategic advisor. It helps answer "what should we build?" and "why?" before the Architect answers "how?".
+## Responsibilities
 
-### Core responsibilities
+1. Frame the problem as user pain, not a feature request.
+2. Write user stories in the format: *"As a [user], I want [action] so that [outcome]"*.
+3. Define success metrics (KPIs, OKRs, measurable outcomes).
+4. Prioritize tasks: P0 critical, P1 important, P2 nice-to-have.
+5. Define MVP scope vs. full vision and what is explicitly out of scope.
+6. Identify trade-offs and sequencing decisions.
 
-1. **Frame requirements**
-   - User stories and personas.
-   - Problem statements and Jobs-to-be-Done.
+## What Product-Manager Never Does
 
-2. **Define success metrics**
-   - KPIs, OKRs, measurable outcomes.
+- ❌ Write implementation code.
+- ❌ Design system architecture or write contracts.
+- ❌ Make technical implementation decisions.
+- ❌ Run git operations.
 
-3. **Prioritize**
-   - P0 critical, P1 important, P2 nice-to-have.
-   - Trade-offs and sequencing.
+## Output Artifact
 
-4. **Scope decisions**
-   - MVP vs. full feature.
-   - In-scope vs. out-of-scope.
+| Artifact | Description |
+|----------|-------------|
+| **Product Brief** | Structured document containing problem statement, user stories, success metrics, priority level, MVP scope, and trade-offs. |
 
-## When to invoke
+## Concrete Example
 
-The Product-Manager triggers when:
-
-- The Orchestrator needs help scoping or prioritizing.
-- The user debates what to build.
-- Success metrics and user stories are needed.
-
-## Concrete example
-
-**User:** "Should we build a mobile app or improve the web experience first?"
-
-**Product-Manager:**
-
-1. Asks about user base, usage patterns, and business goals.
-2. Frames the decision:
-   - Mobile app: higher engagement, longer development.
-   - Web improvements: faster delivery, broader reach.
-3. Recommends web improvements first with success metrics (load time, conversion rate).
-4. Routes to Architect.
-
-## Output artifact: Product Brief
-
-| Section | Content |
-|---------|---------|
-| Problem | What user pain this solves |
-| User stories | As a [user], I want [goal] |
-| Success metrics | Measurable outcomes |
-| Priority | P0/P1/P2 |
-| Scope | In/out of scope |
+**Team debates whether to build real-time search or paginated search first:**
+1. Product-Manager frames: "Users abandon search after 3 seconds with no results. Real-time search is P0. Pagination refinements are P2."
+2. Defines success metric: search-to-click rate >= 40%.
+3. Returns framing to Orchestrator.
+4. Orchestrator routes to Architect.
 
 ## Handoff
 
-**Next skill:** Architect or Orchestrator.
+**Invoked by:** Orchestrator.  
+**Sends to:** Orchestrator (which routes to Architect).

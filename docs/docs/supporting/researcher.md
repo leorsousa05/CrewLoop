@@ -1,59 +1,47 @@
+---
+sidebar_position: 5
+---
+
 # Researcher
 
-**Phase:** Technology Evaluation
+> Technology evaluator. Compares options and produces evidence-based recommendations.
 
-The Researcher evaluates technologies, compares alternatives, runs proofs of concept, and recommends options.
+**Phase:** Research
 
-## What the Researcher does
+## Role
 
-The Researcher reduces uncertainty before the Architect commits to a technical direction.
+The Researcher evaluates technology options, compares alternatives, and produces an evidence-based recommendation with clear rationale before the Architect makes irreversible decisions.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Evaluate alternatives**
-   - Libraries, frameworks, databases, cloud services.
+1. Understand the decision to be made and its constraints (performance, team expertise, license, cost).
+2. Enumerate viable options: locate 2-5 candidates.
+3. Compare candidates across relevant dimensions in a structured table.
+4. Build a minimal proof-of-concept if the decision requires code-level validation.
+5. Produce a recommendation with explicit rationale.
+6. Document trade-offs and deferred concerns.
 
-2. **Compare trade-offs**
-   - Performance, ecosystem, learning curve, maintenance, licensing.
+## What Researcher Never Does
 
-3. **Run proofs of concept**
-   - Small experiments to validate assumptions.
+- ❌ Make irreversible architectural decisions (Architect owns that).
+- ❌ Write production implementation code.
+- ❌ Run git operations.
 
-4. **Recommend a choice**
-   - Clear recommendation with rationale.
-   - Risks and mitigation.
+## Output Artifact
 
-## When to invoke
+| Artifact | Description |
+|----------|-------------|
+| **Research Report** | Decision context, options evaluated, comparison table, recommendation, rationale, trade-offs, and suggested next step. |
 
-The Researcher triggers when:
+## Concrete Example
 
-- The Orchestrator needs technology evaluation before architecture.
-- The user asks "should we use X or Y?"
-- A new technology decision is needed.
-
-## Concrete example
-
-**User:** "Should we use PostgreSQL or MongoDB for the new service?"
-
-**Researcher:**
-
-1. Compares:
-   - PostgreSQL: strong consistency, relational, mature ecosystem.
-   - MongoDB: flexible schema, horizontal scaling, document model.
-2. Considers project needs: complex queries, transactional integrity, team familiarity.
-3. Recommends PostgreSQL with rationale.
-4. Routes to Architect.
-
-## Output artifact: Research Report
-
-| Section | Content |
-|---------|---------|
-| Options | Alternatives considered |
-| Criteria | How they were evaluated |
-| Comparison | Pros and cons |
-| Recommendation | Best choice and why |
-| Risks | Potential issues |
+**User asks: "Should we use PostgreSQL or MongoDB for the new service?"**
+1. Researcher compares: PostgreSQL (ACID, mature, complex queries, team familiarity, strong ecosystem) vs MongoDB (flexible schema, horizontal scaling, weaker transactions, unfamiliar to team).
+2. Context constraints: transactional payments service, 3-developer team.
+3. Recommendation: PostgreSQL.
+4. Routes to Architect for ADR in `specs/decisions/`.
 
 ## Handoff
 
-**Next skill:** Architect or Engineer.
+**Invoked by:** Orchestrator.  
+**Sends to:** Orchestrator (which routes to Architect).

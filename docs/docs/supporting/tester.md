@@ -1,64 +1,52 @@
+---
+sidebar_position: 2
+---
+
 # Tester
 
-**Phase:** QA
+> QA specialist. Designs test strategies, analyzes coverage, and reproduces bugs.
 
-The Tester designs test strategies, identifies missing coverage, reproduces bugs, and complements the Engineer's tests.
+**Phase:** Quality Assurance
 
-## What the Tester does
+## Role
 
-The Tester is a QA specialist. It thinks about how software can fail and ensures those failures are caught before shipping.
+The Tester designs test strategies, analyzes coverage gaps, and reproduces bugs with minimal test cases. It cycles with the Engineer during implementation to ensure full test coverage before the Reviewer inspects the code.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Design test strategies**
-   - Unit, integration, e2e, accessibility, visual regression, performance.
-   - Coverage targets and priorities.
+1. Read the spec and implementation to understand the expected behavior.
+2. Design test strategy: determine which layer covers which behavior (unit, integration, e2e, accessibility, performance).
+3. Identify untested branches, edge cases, and error states.
+4. Reproduce reported bugs with a minimal failing test case.
+5. Analyze coverage gaps and flag what is missing.
+6. Cycle with the Engineer: Tester finds gaps, Engineer fixes, Tester verifies.
 
-2. **Identify missing coverage**
-   - Review existing tests.
-   - Find untested branches, edge cases, and error paths.
+## What Tester Never Does
 
-3. **Reproduce bugs**
-   - Create minimal reproduction steps.
-   - Classify severity and impact.
+- ❌ Write implementation code.
+- ❌ Run git operations.
+- ❌ Approve changes (Reviewer owns approval).
 
-4. **Complement engineer tests**
-   - Suggest additional test cases.
-   - Design e2e scenarios.
+## Output Artifact
 
-## When to invoke
+| Artifact | Description |
+|----------|-------------|
+| **Test Plan** | Testing approach per layer (unit/integration/e2e). |
+| **Coverage gaps** | Documented list of untested paths and edge cases. |
+| **Bug reproduction** | Minimal failing test case reproducing a bug. |
+| **Recommendations** | Detailed list of what the Engineer should test next. |
 
-The Tester triggers when:
+## Concrete Example
 
-- The Orchestrator needs QA strategy before implementation.
-- The Engineer wants help designing tests.
-- The user asks about coverage, edge cases, or bug reproduction.
-
-## Concrete example
-
-**User:** "How should we test the new checkout flow?"
-
-**Tester:**
-
-1. Analyzes the checkout flow spec.
-2. Proposes:
-   - Unit tests for price calculation and discount logic.
-   - Integration tests for payment gateway interactions.
-   - E2E tests for happy path and failure paths.
-   - Accessibility tests for form fields.
-3. Provides a test plan document.
-4. Routes to Engineer or Architect.
-
-## Output artifact: Test Plan
-
-| Section | Content |
-|---------|---------|
-| Scope | What to test |
-| Strategy | Unit, integration, e2e, etc. |
-| Test cases | Specific scenarios |
-| Edge cases | Boundary conditions |
-| Tools | Testing frameworks |
+**Engineer finishes search bar component:**
+1. Tester reviews implementation and test files.
+2. Finds that `useSearch` hook has no test for rapid input clearing.
+3. Identifies that API error states (404/500) are not verified.
+4. Notes keyboard navigation from input to results is not verified.
+5. Returns findings to Engineer.
+6. Engineer adds tests. Tester confirms coverage is complete.
 
 ## Handoff
 
-**Next skill:** Engineer, Architect, Reviewer, or Shipper.
+**Invoked by:** Engineer.  
+**Sends back to:** Engineer.

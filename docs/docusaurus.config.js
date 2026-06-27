@@ -1,7 +1,4 @@
 // @ts-check
-// `@type` JSDoc annotations allow editor autocompletion and type checking
-// (when paired with `@ts-check`).
-
 import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
@@ -36,12 +33,10 @@ const config = {
   presets: [
     [
       'classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          editUrl:
-            'https://github.com/leorsousa05/CrewLoop/tree/main/docs/',
+          editUrl: 'https://github.com/leorsousa05/CrewLoop/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -51,65 +46,61 @@ const config = {
     ],
   ],
 
-  themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      colorMode: {
-        respectPrefersColorScheme: true,
-      },
-      navbar: {
-        title: 'CrewLoop',
-        items: [
-          {
-            type: 'docSidebar',
-            sidebarId: 'docsSidebar',
-            position: 'left',
-            label: 'Docs',
-          },
-          {
-            href: 'https://github.com/leorsousa05/CrewLoop',
-            label: 'GitHub',
-            position: 'right',
-          },
-        ],
-      },
-      footer: {
-        style: 'dark',
-        links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Getting Started',
-                to: '/docs/intro',
-              },
-              {
-                label: 'The Crew',
-                to: '/docs/category/the-crew',
-              },
-              {
-                label: 'Workflow',
-                to: '/docs/workflow/overview',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/leorsousa05/CrewLoop',
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} CrewLoop. Built with Docusaurus.`,
-      },
-      prism: {
-        theme: prismThemes.github,
-        darkTheme: prismThemes.dracula,
-      },
-    }),
+  themeConfig: ({
+    colorMode: {
+      respectPrefersColorScheme: true,
+    },
+    navbar: {
+      title: 'CrewLoop',
+      items: [
+        {
+          type: 'docSidebar',
+          sidebarId: 'docsSidebar',
+          position: 'left',
+          label: 'Docs',
+        },
+        {
+          to: 'docs/getting-started/installation',
+          label: 'Install',
+          position: 'left',
+        },
+        {
+          to: 'docs/core/orchestrator',
+          label: 'The Crew',
+          position: 'left',
+        },
+        {
+          href: 'https://github.com/leorsousa05/CrewLoop',
+          label: 'GitHub',
+          position: 'right',
+        },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Docs',
+          items: [
+            { label: 'Getting Started', to: 'docs/getting-started/what-is-crewloop' },
+            { label: 'The Crew', to: 'docs/core/orchestrator' },
+            { label: 'Workflow', to: 'docs/concepts/workflow' },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            { label: 'GitHub', href: 'https://github.com/leorsousa05/CrewLoop' },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} CrewLoop. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+    },
+  }),
 };
 
 export default config;

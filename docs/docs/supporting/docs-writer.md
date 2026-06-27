@@ -1,73 +1,57 @@
+---
+sidebar_position: 1
+---
+
 # Docs-Writer
+
+> Technical documentation specialist. Writes or rewrites project documentation tailored to type and audience.
 
 **Phase:** Documentation
 
-The Docs-Writer produces clear, actionable documentation tailored to the project type and audience. It is invoked by the Orchestrator for pure documentation tasks or by the Architect when docs are part of a larger change.
+## Role
 
-## What the Docs-Writer does
+The Docs-Writer reads the codebase, detects its type, selects the right structure, and writes clear, user-facing or developer-facing documentation. It does not write implementation code or run git operations.
 
-The Docs-Writer is a technical documentation specialist. It writes READMEs, module docs, feature docs, API docs, and any other project documentation.
+## Responsibilities
 
-### Core responsibilities
+1. Identify the document type: project README, module docs, feature docs, or capability docs.
+2. Read project manifests, directory structure, and existing docs before writing a single word.
+3. Detect the project type from signals (CLI tool, library, app, framework, monorepo) and select appropriate sections.
+4. Write documentation following universal rules: H1 is the project name, features are above the fold, real runnable code examples are provided, first-time readers get something running in 60 seconds.
+5. Validate quality before declaring done: ensure no leftover boilerplate and no pseudocode examples.
 
-1. **Understand the audience**
-   - Internal developers, external users, contributors, operators?
-   - What do they need to know?
+## What Docs-Writer Never Does
 
-2. **Read existing docs and specs**
-   - Avoid duplicating content.
-   - Align with the project's tone and structure.
+- ❌ Write implementation code or configuration changes.
+- ❌ Run git operations (redirect to Shipper).
+- ❌ Add badges to unpublished or private projects.
+- ❌ Add a table of contents to documentation under 100 lines.
 
-3. **Write or rewrite documentation**
-   - READMEs
-   - Module/feature documentation
-   - API reference
-   - Capability docs
-   - Changelog entries
+## Output Artifact
 
-4. **Follow documentation conventions**
-   - Clear structure.
-   - Code examples where useful.
-   - Accurate and up-to-date information.
+| Artifact | Description |
+|----------|-------------|
+| **README** | Project overview, features, installation, usage, contribution guidelines. |
+| **Module docs** | Detailed API reference, module constraints, contracts, and usage examples. |
+| **Feature docs** | User-facing manuals explaining how a feature works and how to use it. |
+| **Changelog** | Structured release notes summarizing new features, fixes, and breaking changes. |
 
-## When to invoke
+## Concrete Example
 
-The Docs-Writer triggers when:
-
-- The user says "write a README", "rewrite README", "create documentation", "document this module".
-- The Orchestrator determines the task is purely documentation with no code changes.
-- The Architect routes documentation work here.
-
-## Concrete example
-
-**User:** "Document the auth module."
-
-**Docs-Writer:**
-
-1. Reads the auth module code and existing README.
-2. Produces `docs/auth.md` with:
-   - Overview
-   - Installation
-   - API reference
-   - Usage examples
-   - Error handling
-3. Presents the menu:
-   ```
-   [O] Back to Orchestrator
-   [A] Send to Architect — Need specs or architectural docs
-   [E] Send to Engineer — Need code changes alongside docs
-   [S] Send to Shipper — Commit and ship the documentation
-   ```
-
-## Output artifact: Documentation
-
-| Type | Examples |
-|------|----------|
-| README | Project overview, quick start |
-| Module docs | API reference, usage examples |
-| Feature docs | How a feature works |
-| Changelog | Release notes |
+**Orchestrator routes a pure documentation task: rewrite AGENTS.md.**
+1. Docs-Writer reads `conventions.md`, `workflow.md`, all 13 `SKILL.md` files, the dashboard `README.md`, and the CLI `README.md`.
+2. Gathers the exact project layout and workflow conventions.
+3. Produces a 313-line `AGENTS.md` covering project overview, directory structure, core and supporting skills, mandatory flow rules, AFK mode details, and security audit scan parameters.
+4. Hands off.
 
 ## Handoff
 
-**Next skill:** Orchestrator, Architect, Engineer, or Shipper depending on context.
+**Invoked by:** Orchestrator or Architect.  
+**Sends to:** Reviewer or Shipper.
+
+```markdown
+**What would you like to do?**
+
+- **[O] Return to Orchestrator** — Adjust scope or requirements
+- **[S] Send to Shipper** — Commit and ship the documentation
+```

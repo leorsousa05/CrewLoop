@@ -3,16 +3,42 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   docsSidebar: [
-    'intro',
-    'why-crewloop',
-    'concepts',
-    'installation',
+    {
+      type: 'category',
+      label: 'Getting Started',
+      collapsed: false,
+      link: {
+        type: 'generated-index',
+        description: 'Learn how to get up and running with CrewLoop.',
+      },
+      items: [
+        'getting-started/what-is-crewloop',
+        'getting-started/why-crewloop',
+        'getting-started/installation',
+        'getting-started/first-task',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Core Concepts',
+      link: {
+        type: 'generated-index',
+        description: 'Understand the underlying philosophy and mechanics of the workflow.',
+      },
+      items: [
+        'concepts/skills-and-roles',
+        'concepts/workflow',
+        'concepts/specs',
+        'concepts/navigation-and-afk',
+        'concepts/conventional-commits',
+      ],
+    },
     {
       type: 'category',
       label: 'The Crew',
       link: {
         type: 'generated-index',
-        description: 'Deep guides for every CrewLoop skill.',
+        description: 'Reference for all 13 CrewLoop skills.',
       },
       items: [
         {
@@ -20,7 +46,7 @@ const sidebars = {
           label: 'Core Skills',
           link: {
             type: 'generated-index',
-            description: 'The mandatory flow: Orchestrator → Architect → Designer/Engineer → Reviewer → Shipper.',
+            description: 'The mandatory six-skill flow.',
           },
           items: [
             'core/orchestrator',
@@ -52,21 +78,31 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Workflow',
+      label: 'Tools',
       link: {
         type: 'generated-index',
-        description: 'How tasks flow through the crew end to end.',
+        description: 'The tooling ecosystem built around the skills.',
       },
       items: [
-        'workflow/overview',
-        'workflow/detailed-flow',
-        'workflow/decision-trees',
-        'workflow/artifacts',
-        'workflow/afk-mode',
+        'tools/cli',
+        'tools/dashboard',
+        'tools/obsidian-mcp',
       ],
     },
-    'usage-examples',
-    'contributing',
+    {
+      type: 'category',
+      label: 'Contributing',
+      link: {
+        type: 'generated-index',
+        description: 'Guidelines for extending the skills and CLI.',
+      },
+      items: [
+        'contributing/writing-a-skill',
+        'contributing/repository-structure',
+        'contributing/conventions',
+        'contributing/publishing',
+      ],
+    },
   ],
 };
 

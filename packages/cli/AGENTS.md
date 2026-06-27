@@ -1,12 +1,30 @@
 # AGENTS.md — CrewLoop CLI
 
-> Guide for AI agents working in `packages/cli/`. Read this file before changing hook installation, agent definitions, or test expectations.
+> Guide for AI agents working in `packages/cli/`. Read this file before changing hook installation, agent definitions, or the installer logic.
 
 ---
 
 ## What this package does
 
-`@archznn/crewloop-cli` installs CrewLoop skills into an agent's skills directory and configures agent-specific hooks so tool-use events are forwarded to the CrewLoop dashboard.
+`@archznn/crewloop-cli` is the TypeScript CLI that installs CrewLoop skills into an agent's skill directory and configures agent-specific hooks so that tool-use events are forwarded to the CrewLoop dashboard.
+
+Two commands are exposed:
+
+- `crewloop install` — copies skills to the agent's skill directory and writes hook configuration to the agent's config file.
+- `crewloop list` — lists all available skills.
+
+---
+
+## Source files at a glance
+
+| File | Single responsibility |
+|------|----------------------|
+| `src/cli.ts` | Entry point — command parsing and flag handling |
+| `src/agents.ts` | Supported agent definitions: config path, hook format, agent ID |
+| `src/installer.ts` | Skill copy/install logic — copies SKILL.md files to the target directory |
+| `src/hooks.ts` | Hook configuration — reads and writes agent config files using the Strategy pattern |
+| `src/resolver.ts` | Path resolution utilities — resolves home dir, skill dirs, agent config paths |
+| `src/tests/` | Test suite for hooks, installer, and agent definitions |
 
 ---
 
@@ -19,7 +37,7 @@ Hook configuration lives in `src/hooks.ts`. The design uses the **Strategy** pat
 - `GroupedJsonHookWriter` — shared base for agents that use grouped JSON hooks.
   - `CodexHookWriter` — writes to `~/.codex/hooks.json` under `"hooks"`.
   - `ClaudeHookWriter` — writes to `~/.claude/config.json` under `"hooks"`.
-  - `AgyHookWriter` — writes to `~/.agy/config.json` under `"crewloop"`.
+  - `AgyHookWriter` — writes to `~/.gemini/config/hooks.json` under `"crewloop"`.
 
 Agent metadata (config path, format, commands) is defined in `src/agents.ts`.
 
@@ -168,7 +186,7 @@ The shim receives event context via stdin, which is the standard mechanism for a
    - Idempotency on reinstall.
    - User hook preservation.
    - Migration from old CrewLoop format if applicable.
-5. Update this `AGENTS.md` with the new agent's format.
+5. Update this `AGENTS.md` with the new agent's format and config path.
 
 ---
 
@@ -200,6 +218,20 @@ Tests use temporary directories and do not touch real agent config files in the 
 ## Conventions
 
 - Keep `src/hooks.ts` focused on hook configuration only.
+- Keep `src/installer.ts` focused on skill file copying only.
 - Do not change skill installation logic in the same PR as hook format changes unless the spec explicitly requires it.
-- Preserve user hooks at all times.
+- Preserve user hooks at all times — never remove a hook that does not contain `crewloop-shim`.
 - Always create a backup before mutating an existing config file.
+- Use `src/resolver.ts` for all path resolution — do not hardcode paths.
+
+---
+
+## What agents should NOT do here
+
+- **Do not modify `src/hooks.ts` and `src/installer.ts` in the same commit** unless the spec explicitly requires it — these are independent responsibilities.
+- **Do not hardcode home directory paths** — use `src/resolver.ts`.
+- **Do not use `"*"` as the Kimi matcher** — it is an invalid JavaScript regex. Use `".*"`.
+- **Do not remove hooks that do not contain `crewloop-shim`** — those belong to the user.
+- **Do not write to real agent config files in tests** — use temporary directories.
+- **Do not run git operations** — use the Shipper skill.
+- **Do not skip creating a spec** before making changes — even a 1-line fix needs a `.spec.yaml` + `tasks.md`.

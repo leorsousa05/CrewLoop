@@ -1,131 +1,61 @@
+---
+sidebar_position: 5
+---
+
 # Reviewer
 
-**Phase:** Quality Gate
+> Quality gate. The last line of defense before code reaches the repository.
 
-The Reviewer is the last line of defense before code reaches the repository. It inspects diffs and changed files for spec compliance, code quality, security, performance, and AI artifacts.
+**Phase:** Review
 
-## What the Reviewer does
+## Role
 
-The Reviewer reads, analyzes, judges, and reports. It does not write code, fix issues, or run git operations.
+The Reviewer audits every diff for spec compliance, code quality, security, performance, and AI artifacts. It is the single gate between Engineer and Shipper. It never writes code or fixes issues itself.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Verify state**
-   - Check `git status`, `git diff --stat`, `git log`.
-   - Confirm there are changes to review.
-   - Read the spec for compliance checking.
+1. Check git status and diff to confirm there are changes to review.
+2. Read changed files in full — the diff alone is not sufficient context.
+3. Read the spec to verify the implementation matches the contract.
+4. Evaluate code quality: SOLID principles, clean code, complexity, error handling.
+5. Check test coverage: new logic must have tests; no new branches without assertions.
+6. Scan for security issues: hardcoded secrets (`API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`), unsafe patterns, OWASP Top 10.
+7. Scan for AI artifacts: `console.log`, `TODO` without issue reference, placeholder comments, empty catch blocks, "Written by AI" comments.
+8. Produce a review report with a clear verdict and specific file/line references for every issue.
 
-2. **Read changed files**
-   - The diff alone is not enough.
-   - Read the actual files to understand context, intent, and edge cases.
+## What Reviewer Never Does
 
-3. **Evaluate against categories**
-   - Spec compliance
-   - Code quality
-   - Test coverage
-   - Security
-   - Performance
-   - Error handling
-   - AI artifacts and incomplete work
-   - Documentation
+- ❌ Write code or fix issues (returns to Engineer).
+- ❌ Run git operations.
+- ❌ Approve without reading changed files.
+- ❌ Approve new logic without checking for tests.
 
-4. **Produce a review report**
-   - Overall verdict: Approved, Approved with Warnings, or Changes Required.
-   - Critical issues (ship blockers).
-   - Warnings (should fix but not blockers).
-   - Specific recommendations with file/line references.
+## Output Artifact
 
-## When to invoke
+| Section | Content |
+|---------|---------|
+| **Verdict** | Approved / Approved with Warnings / Changes Required |
+| **Critical issues** | Ship blockers with file and line reference |
+| **Warnings** | Non-blocking concerns |
+| **Recommendations** | Suggestions for improvement |
 
-The Reviewer triggers after Engineer, or when the user says:
+## Concrete Example
 
-- "Review this"
-- "Check the code"
-- "Code review"
-- "Quality check"
-
-## Concrete example
-
-**Review of JWT login page:**
-
-**Reviewer:**
-
-1. Runs `git status --short` and `git diff --stat`.
-2. Reads `src/components/LoginForm.tsx`, `src/lib/auth.ts`, `src/components/ProtectedRoute.tsx`, and tests.
-3. Checks:
-   - Does the implementation match the spec?
-   - Are emails validated?
-   - Is the token stored securely?
-   - Are there tests for error states?
-   - Any `console.log` or `debugger` left?
-   - Any hardcoded secrets?
-4. Finds:
-   - ⚠️ Warning: `console.log` left in `auth.ts` line 42.
-   - ✅ All acceptance criteria met.
-5. Verdict: **Approved with Warnings**.
-6. Presents the menu:
-   ```
-   [S] Send to Shipper — Commit, branch, push, and PR
-   [E] Back to Engineer — Fix warnings before shipping
-   [O] Back to Orchestrator — Adjust scope
-   ```
-
-## What the Reviewer never does
-
-- ❌ Write code or fix issues
-- ❌ Run git operations
-- ❌ Skip reading changed files
-- ❌ Approve without checking tests for new logic
-
-## Review report structure
-
-```markdown
-## Review Report
-
-**Overall:** Approved / Approved with Warnings / Changes Required
-
-### Critical issues
-- [ ] Issue 1
-
-### Warnings
-- [ ] Warning 1
-
-### Recommendations
-- Suggestion 1
-```
-
-## Decision tree
-
-```mermaid
-flowchart TD
-    R[Reviewer completes inspection]
-    R --> V{Verdict}
-    V -->|Approved / Warnings| S[Shipper]
-    V -->|Code-level issues| E[Engineer]
-    V -->|Design-level issues| A[Architect]
-```
+**Reviewer reviews JWT login diff:**
+1. Verifies that implementation files match the spec requirements.
+2. Identifies:
+   - `console.log` in `auth.ts` line 42 — CRITICAL (must remove before ship).
+   - JWT secret compared with `==` instead of `crypto.timingSafeEqual` — CRITICAL (timing attack vulnerability).
+   - Missing `aria-describedby` on error message — WARNING.
+3. Returns `Changes Required` report to Engineer.
 
 ## Handoff
 
-**Next skill:**
+**Invoked by:** Engineer.  
+**Sends to:** Shipper (approved), Engineer (code fixes needed), Architect (design-level issue), Security-Guard (security concerns), Accessibility-Auditor (accessibility concerns).
 
-- Shipper (if approved or approved with warnings)
-- Engineer (if code-level changes required)
-- Architect (if design-level issue)
-
-## Navigation menu examples
-
-**Approved:**
 ```markdown
-- **[S] Send to Shipper** — Commit, branch, push, and PR
-- **[E] Back to Engineer** — Fix warnings before shipping
-- **[O] Back to Orchestrator** — Adjust scope or requirements
-```
+**What would you like to do?**
 
-**Changes required:**
-```markdown
-- **[E] Back to Engineer** — Fix critical issues (recommended)
-- **[A] Back to Architect** — Design-level issue, needs re-analysis
-- **[S] Send to Shipper anyway** — Override and ship (not recommended)
-- **[O] Back to Orchestrator** — Adjust scope or requirements
+- **[S] Send to Shipper** — Commit and ship the documentation (if approved)
 ```

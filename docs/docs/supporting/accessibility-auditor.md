@@ -1,68 +1,49 @@
+---
+sidebar_position: 7
+---
+
 # Accessibility-Auditor
+
+> Accessibility specialist. Reviews UI for WCAG compliance and inclusive design.
 
 **Phase:** Accessibility Review
 
-The Accessibility-Auditor reviews UI implementations for WCAG compliance, keyboard navigability, semantic structure, and inclusive design.
+## Role
 
-## What the Accessibility-Auditor does
+The Accessibility-Auditor reviews UI implementations for WCAG 2.1 AA compliance, keyboard navigability, semantic structure, and inclusive design. It reports findings to the Reviewer or Engineer.
 
-The Accessibility-Auditor is a focused accessibility specialist. It checks that UI changes work for keyboard users, screen-reader users, people with low vision, and people who prefer reduced motion.
+## Responsibilities
 
-### Core responsibilities
+1. Check semantic HTML: heading hierarchy (one H1), landmarks (main, nav, aside), ARIA usage, valid roles, and accessible names.
+2. Verify keyboard navigation: tab order, focus visibility (visible outline), keyboard traps, and custom interactive elements reachable without a mouse.
+3. Check color contrast: WCAG 2.1 AA ratios (4.5:1 for normal text, 3:1 for large text and UI components).
+4. Verify labels and alt text: all form inputs labeled, all buttons have descriptive text, all images have alt attributes, error messages linked with `aria-describedby`.
+5. Check motion preferences: ensure `prefers-reduced-motion` is honored, and no auto-playing animations that cannot be paused.
+6. Review mobile/responsive layout: touch targets >= 44x44px, page usable at 200% zoom without horizontal scroll.
 
-1. **Check semantic HTML**
-   - Proper heading hierarchy, landmarks, and ARIA usage.
-   - Valid roles and accessible names.
+## What Accessibility-Auditor Never Does
 
-2. **Verify keyboard navigation**
-   - Focus order, focus visibility, and keyboard traps.
-   - Custom controls reachable and operable without a mouse.
+- ❌ Write code fixes.
+- ❌ Run git operations.
+- ❌ Approve changes.
 
-3. **Check color and contrast**
-   - WCAG 2.1 level AA contrast ratios.
-   - Information not conveyed by color alone.
+## Output Artifact
 
-4. **Verify labels and alt text**
-   - Form labels, button text, image alternatives.
-   - Error messages and status announcements.
+| Artifact | Description |
+|----------|-------------|
+| **Accessibility Audit Report** | Scope (components/pages reviewed), findings (issue + severity + WCAG criterion reference), remediation (concrete fix steps), and final verdict (PASS/WARN/FAIL). |
 
-5. **Respect motion preferences**
-   - `prefers-reduced-motion` honored for animations.
-   - No auto-playing motion that cannot be paused.
+## Concrete Example
 
-6. **Review responsive behavior**
-   - Touch target sizes, zoom behavior, mobile usability.
-
-## When to invoke
-
-The Accessibility-Auditor triggers when:
-
-- The Orchestrator, Reviewer, or Designer detects UI accessibility concerns.
-- The user asks about accessibility audit, a11y check, WCAG, screen readers, keyboard navigation, or color contrast.
-- The change involves new components, forms, modals, color/typography changes, or responsive layouts.
-
-## Concrete example
-
-**User:** "Is the new checkout form accessible?"
-
-**Accessibility-Auditor:**
-
-1. Reads the changed files and the design spec.
-2. Checks form labels, error messaging, and focus management.
-3. Verifies color contrast and keyboard flow.
-4. Reviews ARIA usage on custom dropdowns.
-5. Produces an Accessibility Audit Report with severity and remediation steps.
-6. Routes to Engineer, Designer, or Reviewer.
-
-## Output artifact: Accessibility Audit Report
-
-| Section | Content |
-|---------|---------|
-| Scope | Components and pages reviewed |
-| Findings | Issues with severity and WCAG reference |
-| Remediation | Concrete steps to fix each issue |
-| Verdict | PASS / WARN / FAIL |
+**Accessibility-Auditor reviews search bar implementation:**
+1. Tests component with a keyboard and screen reader.
+2. Finds:
+   - Search input has no accessible label — FAIL (WCAG 1.3.1): add `aria-label="Search products"` or visible `<label>`.
+   - Results list not announced to screen readers — WARN: add `aria-live="polite"`.
+   - Focus outline removed in CSS with `outline: none` — FAIL (WCAG 2.4.7): restore or replace with custom visible outline.
+3. Returns report to Reviewer.
 
 ## Handoff
 
-**Next skill:** Engineer, Designer, Reviewer, or Orchestrator.
+**Invoked by:** Reviewer.  
+**Sends to:** Reviewer (which routes to Engineer or Designer).
