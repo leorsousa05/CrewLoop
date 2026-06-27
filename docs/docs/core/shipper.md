@@ -17,15 +17,16 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 1. Verify git state: check git status, git diff --stat, git log, and remote configuration.
 2. Read the full diff to understand what changed and categorize the change type.
 3. Determine the correct Conventional Commits type and scope.
-4. Archive the spec: move specs/changes/NNN-name/ to specs/archive/YYYY-MM-DD-NNN-name/.
-5. Draft the commit message: type(scope): description in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
-6. Create the branch: type/short-description in kebab-case.
-7. Stage all changes, commit, and push to the remote.
-8. Generate and display the PR creation link.
+4. Verify and execute package version bumps (`npm version <type>`) if versioning applies, aligning internal dependencies in workspaces.
+5. Archive the spec: move specs/changes/NNN-name/ to specs/archive/YYYY-MM-DD-NNN-name/.
+6. Draft the commit message: type(scope): description in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
+7. Create the branch: type/short-description in kebab-case.
+8. Stage all changes, commit, and push to the remote.
+9. Generate and display the PR creation link.
 
 ## What Shipper Never Does
 
-- ❌ Write implementation code.
+- ❌ Write implementation code or fix functional bugs (Exception: Allowed to run version bump commands like `npm version` or modify manifest JSON files to update version strings).
 - ❌ Review code or fix bugs.
 - ❌ Commit without showing the diff first.
 - ❌ Use vague messages ("update", "fix", "changes").
@@ -38,6 +39,7 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 |----------|-------------|
 | **Branch** | type/short-description (kebab-case) |
 | **Commit** | Conventional Commits message with scope and optional body |
+| **Bumped Version** | Staged manifest changes updating project and dependency versions |
 | **Archived spec** | specs/archive/YYYY-MM-DD-NNN-name/ |
 | **PR link** | Platform URL for opening the pull request |
 
@@ -45,9 +47,12 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 
 **Shipper ships JWT login:**
 1. Verifies Reviewer approval.
-2. Archives spec to `specs/archive/2026-06-27-003-jwt-login/`.
-3. Creates branch `feat/jwt-login-page`.
-4. Commits with message:
+2. Identifies commit type as `feat` (requires a minor version bump).
+3. Executes `npm version minor --workspaces --no-git-tag-version` after user confirmation.
+4. Updates local dependency reference of CLI on the root package.
+5. Archives spec to `specs/archive/2026-06-27-003-jwt-login/`.
+6. Creates branch `feat/jwt-login-page`.
+7. Commits with message:
    ```
    feat(auth): add JWT login page with animated form
 
@@ -57,7 +62,7 @@ The Shipper is the only skill authorized to perform git operations. After the Re
    - Unit and integration tests
    - Accessibility: aria-label, role=form, Escape-to-dismiss
    ```
-5. Pushes to remote repository and generates PR link.
+8. Pushes to remote repository and generates PR link.
 
 ## Handoff
 

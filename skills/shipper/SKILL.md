@@ -81,7 +81,33 @@ Determine the **conventional commit type** by analyzing the diff:
 
 ---
 
-### Step 4: Suggest Branch Name
+### Step 4: Verify & Bump Package Version
+
+If the project uses versioning (e.g., `package.json` in Node.js, `Cargo.toml` in Rust, `pyproject.toml` in Python):
+
+1. **Verify if a version bump is required:**
+   - Check if package manifests have version changes compared to the `main` branch:
+     ```bash
+     git diff origin/main -- package.json packages/cli/package.json
+     ```
+   - If the commit type is `feat` or includes breaking changes (`!`), a **minor** (or **major**) bump is recommended.
+   - If the commit type is `fix`, a **patch** bump is recommended.
+   - For `docs`, `test`, `refactor`, `style`, `chore`, version bumps are usually not required.
+
+2. **Align workspace dependencies:**
+   - In monorepos, check if dependencies between local packages are aligned. For example, if `packages/cli/package.json` depends on `@archznn/crewloop-skills` (the root package), ensure the dependency constraint is updated to match the new version.
+
+3. **Suggest or execute the version bump:**
+   - If the version hasn't been bumped yet, warn the user and suggest running:
+     ```bash
+     npm version <patch | minor | major> --workspaces --no-git-tag-version
+     ```
+     *(Adapt commands to the project packaging tool if not using Node.js/npm).*
+   - Always ask for user confirmation before running the bump command. Do not run it automatically without confirmation.
+
+---
+
+### Step 5: Suggest Branch Name
 
 Format: `<type>/<short-description>`
 
@@ -100,7 +126,7 @@ Examples:
 
 ---
 
-### Step 5: Draft Commit Message
+### Step 6: Draft Commit Message
 
 Follow **Conventional Commits** specification:
 
@@ -236,7 +262,7 @@ chore(deps): update eslint to v9
 
 ---
 
-### Step 6: Present to User
+### Step 7: Present to User
 
 Show a formatted summary and ASK before proceeding:
 
@@ -295,7 +321,7 @@ Closes #42
 
 ---
 
-### Step 7: Execute (only if user confirms)
+### Step 8: Execute (only if user confirms)
 
 **If user confirms commit:**
 
@@ -343,7 +369,7 @@ Extract owner/repo from remote URL:
 
 ## RESPONSE RULES
 
-- **NEVER write code** — You only run git commands and analyze diffs. You MUST NOT use Write, Edit, or any tool that modifies source files. Read-only access to inspect code.
+- **NEVER write code** — You only run git commands and analyze diffs. You MUST NOT use Write, Edit, or any tool that modifies source files. Read-only access to inspect code. (Exception: Allowed to run `npm version` or make edits to version/dependency strings in manifests like `package.json` to perform package version bumps).
 - **NEVER review code** — Code review is the reviewer's job. If you spot issues in the diff, note them but don't block. Redirect: "Reviewer should have caught this."
 - **NEVER fix bugs** — If you spot issues in the diff, note them but don't fix. Redirect: "Engineer should fix this before shipping."
 - **Always show the diff summary** before committing — user must see what will be committed
