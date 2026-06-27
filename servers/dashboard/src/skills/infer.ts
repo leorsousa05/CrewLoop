@@ -1,5 +1,5 @@
 import type { DashboardEvent, Session, SkillInferenceResult, SkillMeta } from '../types';
-import { inferFromTool, inferFromGitCommand } from './mapping';
+import { inferFromGitCommand } from './mapping';
 
 export class SkillInferenceEngine {
   private skillNames: Set<string>;
@@ -32,13 +32,6 @@ export class SkillInferenceEngine {
       const gitSkill = inferFromGitCommand(event.detail);
       if (gitSkill) {
         return { skill: gitSkill, confidence: 'heuristic' };
-      }
-    }
-
-    if (event.tool) {
-      const mapped = inferFromTool(event.tool);
-      if (mapped && this.skillNames.has(mapped)) {
-        return { skill: mapped, confidence: 'heuristic' };
       }
     }
 

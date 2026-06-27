@@ -1,0 +1,11 @@
+id: 001-fix-agent-hook-formats
+status: completed
+title: Fix agent hook configuration formats and add CLI AGENTS.md
+created: 2026-06-26
+author: architect
+scope:
+  - packages/cli/src/hooks.ts
+  - packages/cli/src/agents.ts
+  - packages/cli/src/tests/hooks.test.ts
+  - packages/cli/AGENTS.md
+  - packages/cli/README.md (optional)

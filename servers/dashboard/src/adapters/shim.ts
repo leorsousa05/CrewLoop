@@ -2,6 +2,7 @@ import http from 'node:http';
 import type { AgentSource, DashboardEvent } from '../types';
 import { normalizeKimi, type KimiHookPayload } from './kimi';
 import { normalizeCodex, type CodexHookPayload } from './codex';
+import { normalizeAgy, type AgyHookPayload } from './agy';
 import { sanitize } from '../filters/sanitize';
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:7890';
@@ -17,7 +18,7 @@ export function getDefaultSkill(argv: string[]): string | undefined {
 
 export function detectSource(argv: string[]): AgentSource | undefined {
   const arg = argv[2];
-  if (arg === 'kimi' || arg === 'codex' || arg === 'opencode' || arg === 'log-watcher') {
+  if (arg === 'kimi' || arg === 'codex' || arg === 'opencode' || arg === 'log-watcher' || arg === 'agy') {
     return arg;
   }
   const env = process.env.CREWLOOP_DASHBOARD_SOURCE;
@@ -25,7 +26,8 @@ export function detectSource(argv: string[]): AgentSource | undefined {
     env === 'kimi' ||
     env === 'codex' ||
     env === 'opencode' ||
-    env === 'log-watcher'
+    env === 'log-watcher' ||
+    env === 'agy'
   ) {
     return env;
   }
@@ -44,6 +46,8 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
       return normalizeKimi(payload as unknown as KimiHookPayload);
     case 'codex':
       return normalizeCodex(payload as unknown as CodexHookPayload);
+    case 'agy':
+      return normalizeAgy(payload as unknown as AgyHookPayload);
     default:
       return undefined;
   }
@@ -61,31 +65,40 @@ export function buildEvent(
 
   if (base.event_type === 'session_start' && defaultSkill) {
     base.skill = defaultSkill;
+  } else if (source === 'agy' && defaultSkill && !base.skill) {
+    base.skill = defaultSkill;
   }
 
   const isPost = base.event_type === 'tool_end';
   const sanitized = sanitize(
     {
       tool_name: base.tool || '',
-      tool_input: (raw.tool_input || raw.toolInput) as Record<string, unknown> | undefined,
-      tool_response: (raw.tool_response || raw.toolResponse) as Record<string, unknown> | undefined,
+      tool_input: (base.input || raw.tool_input || raw.toolInput) as Record<string, unknown> | undefined,
+      tool_response: (base.output || raw.tool_response || raw.toolResponse) as Record<string, unknown> | undefined,
     },
     isPost ? 'post' : 'pre'
   );
 
   return {
     ...base,
-    detail: sanitized.detail,
+    detail: sanitized.detail ?? base.detail,
     status: sanitized.status,
     duration_ms: sanitized.duration_ms,
   };
 }
 
-export function postEvent(event: DashboardEvent): void {
+export function postEvent(event: DashboardEvent, onDone?: () => void): void {
   const serverUrl = process.env.CREWLOOP_DASHBOARD_URL || DEFAULT_SERVER_URL;
   const body = JSON.stringify(event);
 
   const url = new URL('/event', serverUrl);
+  let done = false;
+  function finish(): void {
+    if (done) return;
+    done = true;
+    onDone?.();
+  }
+
   const req = http.request(
     {
       hostname: url.hostname,
@@ -98,11 +111,17 @@ export function postEvent(event: DashboardEvent): void {
       },
       timeout: 300,
     },
-    () => {}
+    (res) => {
+      res.resume();
+      finish();
+    }
   );
 
-  req.on('error', () => {});
-  req.on('timeout', () => req.destroy());
+  req.on('error', finish);
+  req.on('timeout', () => {
+    req.destroy();
+    finish();
+  });
   req.write(body);
   req.end();
 }
@@ -110,7 +129,7 @@ export function postEvent(event: DashboardEvent): void {
 export function runShim(): void {
   const source = detectSource(process.argv);
   if (!source) {
-    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|codex>\n');
+    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|codex|agy>\n');
     process.exit(1);
   }
 
@@ -126,7 +145,8 @@ export function runShim(): void {
       const payload = JSON.parse(raw);
       const event = buildEvent(source, payload, defaultSkill);
       if (event) {
-        postEvent(event);
+        postEvent(event, () => process.exit(0));
+        return;
       }
     } catch {
       // Fail silently so the agent is never blocked.

@@ -46,7 +46,8 @@ export function operationType(tool: string): 'read' | 'edit' | 'other' {
 export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
   const chronological = events.slice().reverse();
   const invocations: ToolInvocation[] = [];
-  const running = new Map<string, ToolInvocation[]>();
+  const runningById = new Map<string, ToolInvocation>();
+  const runningByTool = new Map<string, ToolInvocation[]>();
 
   for (const ev of chronological) {
     const tool = ev.tool || ev.event_type;
@@ -65,15 +66,31 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
         output: undefined,
       };
       invocations.push(inv);
-      if (!running.has(ev.tool)) running.set(ev.tool, []);
-      running.get(ev.tool)!.push(inv);
+      runningById.set(ev.id, inv);
+      if (!runningByTool.has(ev.tool)) runningByTool.set(ev.tool, []);
+      runningByTool.get(ev.tool)!.push(inv);
       continue;
     }
 
-    if (ev.event_type === 'tool_end' && ev.tool) {
-      const stack = running.get(ev.tool);
-      if (stack && stack.length) {
-        const inv = stack.pop()!;
+    if (ev.event_type === 'tool_end') {
+      let inv: ToolInvocation | undefined;
+
+      if (runningById.has(ev.id)) {
+        inv = runningById.get(ev.id);
+        runningById.delete(ev.id);
+        const stack = runningByTool.get(inv!.tool);
+        if (stack) {
+          const idx = stack.lastIndexOf(inv!);
+          if (idx !== -1) stack.splice(idx, 1);
+        }
+      } else if (ev.tool) {
+        const stack = runningByTool.get(ev.tool);
+        if (stack && stack.length) {
+          inv = stack.pop();
+        }
+      }
+
+      if (inv) {
         inv.status = status;
         inv.endTime = ev.timestamp;
         inv.durationMs = ev.duration_ms;
@@ -81,9 +98,10 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
         inv.detail = ev.detail || inv.detail;
         continue;
       }
+
       invocations.push({
         id: ev.id,
-        tool: ev.tool,
+        tool: ev.tool || ev.event_type,
         eventType: ev.event_type,
         status,
         startTime: ev.timestamp,

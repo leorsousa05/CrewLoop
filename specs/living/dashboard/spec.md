@@ -61,26 +61,32 @@ export interface ClientEvent {
 
 ### AGY payload
 
-AGY sends the tool name at the top level or inside a `toolCall` object. It does not include a `hook_event_name` field, so the shim uses the `--event-type` argument from the hook command:
+AGY sends JSON on stdin with camelCase fields. The payload includes `hook_event_name` (`PreToolUse` / `PostToolUse`) and a `toolCall` object on pre events:
 
 ```typescript
 interface AgyHookPayload {
+  hook_event_name?: 'PreToolUse' | 'PostToolUse';
   conversationId?: string;
   sessionId?: string;
   session_id?: string;
   toolName?: string;
   toolCall?: { name?: string; args?: Record<string, unknown> };
-  toolInput?: Record<string, unknown>;
-  toolResponse?: Record<string, unknown>;
-  skill?: string;
+  stepIdx?: number;
+  error?: string;
 }
 ```
 
-The adapter resolves:
+The adapter (`servers/dashboard/src/adapters/agy.ts`) resolves:
 
-- `event_type` from the shim's `--event-type` argument (defaults to `tool_end`).
-- `tool` from `toolName ?? toolCall?.name`.
-- `session_id` from `sessionId ?? session_id ?? conversationId`.
+- `event_type` from `hook_event_name`.
+- `session_id` from `conversationId ?? sessionId ?? session_id`.
+- `id` as a deterministic value `agy:${session_id}:${stepIdx}` so pre/post events pair correctly even when the post event does not repeat the tool name.
+- `tool` by mapping AGY snake_case names to internal names (`run_command` → `Bash`, `view_file` → `Read`, etc.).
+- `detail` by extracting the primary argument for known tools (`CommandLine`, `AbsolutePath`, etc.).
+- `skill` when a `Read` (`view_file`) targets a skill file whose path matches `.../skills/<skill-name>/SKILL.md`.
+- `output` on `PostToolUse` from the `error` field when present.
+
+Because AGY does not emit `session_start`, the shim applies the `--default-skill` fallback to every AGY event that does not already carry an inferred or explicit skill.
 
 ## Security
 
@@ -123,6 +129,16 @@ A shared filter bar appears on list and graph views. Filters apply to invocation
 - **Time range** — `1m`, `5m`, `15m`, `1h`, `24h`, `session`, or `all`.
 
 Filter state is global and ephemeral (not persisted across reloads).
+
+## Skill inference
+
+The dashboard does **not** guess a skill from generic tool usage. `SkillInferenceEngine` decides the active skill for a session using only these signals, in order:
+
+1. **Explicit skill change** — `event_type: skill_change` with a known `skill`.
+2. **Skill tool invocation** — `tool: Skill` with a known skill name in `detail`.
+3. **Git heuristic** — `tool: Bash` with a git command (`commit`, `push`, `branch`, `merge`, `tag`, `checkout`) maps to `shipper`.
+4. **Preserve existing explicit skill** — once a session has an explicit skill, it is kept until another explicit signal arrives.
+5. **No match** — `activeSkill` is left undefined and the UI shows a "no active skill" state.
 
 ## Implementation notes
 

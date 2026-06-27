@@ -1,0 +1,11 @@
+id: 002-fix-kimi-hook-config-path
+status: completed
+title: Fix Kimi hook configuration file path
+created: 2026-06-26
+author: architect
+scope:
+  - packages/cli/src/agents.ts
+  - packages/cli/src/tests/hooks.test.ts
+  - packages/cli/AGENTS.md
+  - specs/archive/2026-06-26-001-fix-agent-hook-formats/
+  - specs/living/cli/hooks.md
