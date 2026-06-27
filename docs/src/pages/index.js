@@ -19,12 +19,12 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to="/docs/getting-started/what-is-crewloop">
             Get Started
           </Link>
           <Link
             className="button button--outline button--secondary button--lg"
-            to="/docs/workflow/overview">
+            to="/docs/concepts/workflow">
             See the Workflow
           </Link>
         </div>

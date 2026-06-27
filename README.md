@@ -75,60 +75,46 @@ Each skill will be automatically detected and activated according to the convers
 
 ```mermaid
 flowchart TD
-    O["🎯 Orchestrator<br>Discovery & Routing"]
-    O --> PM["📊 Product-Manager<br>Prioritization"]
-    O --> RS["🔬 Researcher<br>Technology Evaluation"]
-    O --> MN["🛠️ Maintainer<br>Incident & Debt"]
-    O --> T["🧪 Tester<br>QA Strategy"]
+    O["🎯 Orchestrator\nDiscovery & Routing"]
+    O --> PM["📊 Product-Manager\nPrioritization"]
+    O --> RS["🔬 Researcher\nTechnology Evaluation"]
+    O --> MN["🛠️ Maintainer\nIncident & Debt"]
+    O --> T["🧪 Tester\nQA Strategy"]
     PM --> A
     RS --> A
     MN --> A
     T --> A
-    A["🏗️ Architect<br>Specs & Architecture"] --> D["🎨 Designer<br>UI/UX Direction"]
-    A --> E["🔧 Engineer<br>Implementation"]
-    A --> W["📝 Docs-Writer<br>Documentation"]
+    A["🏗️ Architect\nSpecs & Architecture"] --> D["🎨 Designer\nUI/UX Direction"]
+    A --> E["🔧 Engineer\nImplementation"]
+    A --> W["📝 Docs-Writer\nDocumentation"]
     D --> E
     E --> T
     T --> E
-    E --> R["🔍 Reviewer<br>Quality Gate"]
-    R --> S["🚀 Shipper<br>Git & PR"]
+    E --> R["🔍 Reviewer\nQuality Gate"]
+    R --> S["🚀 Shipper\nGit & PR"]
     S --> O
     W --> O
-    SG["🛡️ Security-Guard<br>Security Review"] -.-> R
-    AA["♿ Accessibility-Auditor<br>Accessibility Review"] -.-> R
+    SG["🛡️ Security-Guard\nSecurity Review"] -.-> R
+    AA["♿ Accessibility-Auditor\nAccessibility Review"] -.-> R
     R --> SG
     R --> AA
     SG --> E
     AA --> E
-
-    style O fill:#01579b,color:#fff
-    style A fill:#e65100,color:#fff
-    style D fill:#6a1b9a,color:#fff
-    style E fill:#1b5e20,color:#fff
-    style R fill:#b71c1c,color:#fff
-    style S fill:#00695c,color:#fff
-    style W fill:#5e35b1,color:#fff
-    style T fill:#f57f17,color:#fff
-    style PM fill:#283593,color:#fff
-    style RS fill:#006064,color:#fff
-    style MN fill:#37474f,color:#fff
-    style SG fill:#b71c1c,color:#fff
-    style AA fill:#6a1b9a,color:#fff
 ```
 
 **Flow rules:**
 
-1. **Orchestrator always sends to Architect first** — never directly to Designer, Engineer, or Docs-Writer. Optional pre-routing to Product-Manager, Researcher, Maintainer, or Tester is allowed.
+1. **Orchestrator always sends to Architect first** — never directly to Designer, Engineer, or Docs-Writer.
 2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend), Engineer (backend/code), or Docs-Writer (documentation).
 3. **Designer acts before Engineer** — when there is UI, the designer creates the visual specification before the engineer implements.
 4. **Engineer never does git, review, or docs** — reviewer, shipper, and docs-writer handle those.
 5. **Reviewer is the quality gate** — no code reaches the repository without review.
 6. **Shipper is the only one who touches git** — commit, branch, push, PR.
-7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs. Called by orchestrator when the task is purely documentation.
-8. **Tester designs QA strategy** — reviews coverage, reproduces bugs, and complements engineer tests.
+7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs.
+8. **Tester designs QA strategy** — reviews coverage, reproduces bugs, and cycles with engineer.
 9. **Product-Manager, Researcher, and Maintainer are optional advisors** — framing, technology evaluation, and upkeep before or alongside the core flow.
-10. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back to the Engineer or Reviewer and do not touch git.
-11. **Specs are archived** — `specs/changes/` becomes `specs/archive/` on commit.
+10. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility.
+11. **Specs are archived** — `specs/changes/` folder is moved to `specs/archive/` on commit.
 12. **All skills return to orchestrator** — it is the central hub.
 
 ## Adding a New Skill
@@ -153,26 +139,17 @@ python scripts/validate-skills.py
 
 ```
 CrewLoop/
-├── skills/                    # All team skills
+├── skills/                    # All 13 team skills
 │   ├── orchestrator/
 │   ├── architect/
-│   ├── designer/
-│   ├── engineer/
-│   ├── reviewer/
-│   ├── shipper/
-│   ├── docs-writer/
-│   ├── tester/
-│   ├── product-manager/
-│   ├── maintainer/
-│   ├── researcher/
-│   ├── security-guard/
-│   └── accessibility-auditor/
+│   └── ...
 ├── scripts/                   # Helper scripts
 │   ├── validate-skills.py
 │   ├── package-skill.py
 │   └── npm-publish-dry-run.sh
-├── servers/                   # Optional servers
-│   └── dashboard/             # Real-time skill dashboard
+├── servers/                   # Runtime servers
+│   ├── dashboard/             # Real-time skill dashboard
+│   └── obsidian-mcp/          # Obsidian MCP server (Python, experimental)
 ├── references/                # Shared conventions and workflow docs
 │   ├── conventions.md
 │   ├── skill-anatomy.md
@@ -199,8 +176,8 @@ Packages are published automatically by GitHub Actions when a semantic-version t
 3. Create and push a tag:
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.7.0
+git push origin v0.7.0
 ```
 
 The workflow will:

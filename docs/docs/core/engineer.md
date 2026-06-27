@@ -1,97 +1,73 @@
+---
+sidebar_position: 4
+---
+
 # Engineer
 
-**Phase:** Build & Implementation
+> Implementation and tests. The only skill that writes code.
 
-The Engineer is the only skill that writes implementation code. It follows the specs and design specs created by the Architect and Designer, writes tests, and verifies builds.
+**Phase:** Build
 
-## What the Engineer does
+## Role
 
-The Engineer is a senior software engineer. It ships code, writes tests, verifies behavior, and never redesigns architecture or touches git.
+The Engineer is the only skill that writes implementation code. It follows specs and design specs, writes tests, verifies builds, and never reviews its own work or touches git.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Read specs first**
-   - Read the spec folder in `specs/changes/NNN-name/`.
-   - Read the design spec if UI is involved.
-   - If specs are missing or incomplete, ask to route to Architect.
+1. Read the spec folder completely before writing any code. If a spec is missing, ask to route to Architect first.
+2. Read the design spec if the task involves any UI change.
+3. Implement the change following existing codebase patterns and conventions. Do not change contracts without Architect approval.
+4. Write tests following TDD principles: unit tests for branching and side effects, integration tests for API calls, e2e for critical user flows.
+5. Verify the build passes and all tests are green.
+6. Mark completed tasks in tasks.md.
+7. Route to Tester if test coverage strategy is involved before proceeding to Reviewer.
 
-2. **Implement the change**
-   - Write code according to the spec.
-   - Follow existing patterns and conventions.
-   - Do not change contracts or interfaces without Architect approval.
+### TDD skip criteria
+Write a test if **ANY** of these apply:
+- Branching logic (if/switch/loops)
+- Side effects or I/O, state mutation
+- External dependencies
+- Public API surface
 
-3. **Write tests**
-   - Follow TDD principles when applicable.
-   - Write tests for branching, side effects, external dependencies, public APIs, and critical workflows.
-   - Skip tests only for pure, branchless, dependency-free transformations.
+Skip only if **ALL** are true:
+- [x] Pure function
+- [x] No branching
+- [x] No external deps
+- [x] Simple data transformation
 
-4. **Verify builds**
-   - Run relevant tests and build commands.
-   - Fix issues within scope.
+## What Engineer Never Does
 
-5. **Update spec status**
-   - Mark tasks in `tasks.md` as done.
-   - Do not archive specs — that is the Shipper's job.
+- ❌ Redesign architecture or change public contracts without Architect approval.
+- ❌ Skip reading specs.
+- ❌ Run git operations (commit, branch, push, PR).
+- ❌ Review its own code.
+- ❌ Approve its own changes.
 
-## When to invoke
-
-The Engineer triggers after Architect or Designer, or when the user says:
-
-- "Build this"
-- "Implement the spec"
-- "Write the code"
-- "Fix this bug"
-
-## Concrete example
-
-**Spec + Design:** JWT login page for React.
-
-**Engineer:**
-
-1. Reads `specs/changes/002-jwt-login/` and the design spec.
-2. Creates `src/components/LoginForm.tsx` with email/password fields.
-3. Implements `src/lib/auth.ts` with `login(credentials)` calling `POST /auth/login`.
-4. Adds protected route wrapper in `src/components/ProtectedRoute.tsx`.
-5. Writes tests:
-   - `LoginForm.test.tsx` — validation and submission
-   - `auth.test.ts` — API call and token storage
-   - `ProtectedRoute.test.tsx` — redirect when unauthenticated
-6. Runs `npm test` and `npm run build` to verify.
-7. Presents the menu:
-   ```
-   [R] Send to Reviewer — Code review and quality check
-   [O] Return to Orchestrator — New task or adjustments
-   [D] Return to Designer — Adjust design
-   [A] Return to Architect — Re-analyze or adjust specs
-   ```
-
-## What the Engineer never does
-
-- ❌ Redesign architecture or change contracts
-- ❌ Skip specs
-- ❌ Run git operations (commit, push, branch, PR)
-- ❌ Review its own code
-- ❌ Approve its own changes
-
-## Output artifact: Code + Tests
+## Output Artifact
 
 | Type | Examples |
 |------|----------|
-| Implementation | Components, functions, modules |
-| Tests | Unit, integration, e2e |
-| Config | Only if explicitly required by spec |
+| **Implementation** | Components, hooks, services, utilities, modules |
+| **Tests** | Unit, integration, e2e |
+| **Build verification** | All tests pass, no type errors |
+
+## Concrete Example
+
+**Engineer implements JWT login:**
+1. Creates `LoginForm.tsx` following the design spec colors and animation.
+2. Creates `useAuth.ts` hook with JWT storage.
+3. Creates `auth.ts` service with `POST /auth/login` call.
+4. Creates `LoginForm.test.tsx` with 4 unit tests and 2 integration tests.
+5. Verifies build passes locally.
+6. Routes to Reviewer.
 
 ## Handoff
 
-**Next skill:** Reviewer.
-
-## Navigation menu example
+**Invoked by:** Architect or Designer.  
+**Sends to:** Reviewer (after Tester if applicable).
 
 ```markdown
 **What would you like to do?**
 
-- **[R] Send to Reviewer** — Code review and quality check
-- **[O] Return to Orchestrator** — New task or adjustments
-- **[D] Return to Designer** — Adjust design or visual specification
-- **[A] Return to Architect** — Re-analyze or adjust specs
+- **[R] Send to Reviewer** — Quality gate
 ```

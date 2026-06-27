@@ -1,113 +1,71 @@
+---
+sidebar_position: 6
+---
+
 # Shipper
 
-**Phase:** Git & PR
+> Git operations and PR preparation. The only skill allowed to touch git.
 
-The Shipper is the only skill allowed to touch git. After review, it packages the changes cleanly: analyzes the diff, drafts a Conventional Commit message, creates a branch, commits, pushes, and prepares the PR.
+**Phase:** Ship
 
-## What the Shipper does
+## Role
 
-The Shipper is a git workflow specialist. It does not write code, review code, or fix bugs. It ships what is already built and reviewed.
+The Shipper is the only skill authorized to perform git operations. After the Reviewer approves, the Shipper packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, and prepares a PR.
 
-### Core responsibilities
+## Responsibilities
 
-1. **Verify git state**
-   - Check `git status`, `git diff --stat`, `git log`, remote configuration.
-   - Confirm there are changes to ship.
+1. Verify git state: check git status, git diff --stat, git log, and remote configuration.
+2. Read the full diff to understand what changed and categorize the change type.
+3. Determine the correct Conventional Commits type and scope.
+4. Archive the spec: move specs/changes/NNN-name/ to specs/archive/YYYY-MM-DD-NNN-name/.
+5. Draft the commit message: type(scope): description in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
+6. Create the branch: type/short-description in kebab-case.
+7. Stage all changes, commit, and push to the remote.
+8. Generate and display the PR creation link.
 
-2. **Read the diff**
-   - Understand what changed.
-   - Categorize the change type.
+## What Shipper Never Does
 
-3. **Analyze and categorize**
-   - Determine Conventional Commit type: `feat`, `fix`, `docs`, `refactor`, `test`, etc.
-   - Identify scope.
+- ❌ Write implementation code.
+- ❌ Review code or fix bugs.
+- ❌ Commit without showing the diff first.
+- ❌ Use vague messages ("update", "fix", "changes").
+- ❌ Force push.
+- ❌ Commit `.env` files, secrets, or build directories.
 
-4. **Archive specs**
-   - Move completed specs from `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`.
+## Output Artifact
 
-5. **Draft commit message**
-   - Follow Conventional Commits.
-   - Include body for non-trivial changes.
+| Artifact | Description |
+|----------|-------------|
+| **Branch** | type/short-description (kebab-case) |
+| **Commit** | Conventional Commits message with scope and optional body |
+| **Archived spec** | specs/archive/YYYY-MM-DD-NNN-name/ |
+| **PR link** | Platform URL for opening the pull request |
 
-6. **Create branch and commit**
-   - Branch name: `<type>/<short-description>` in kebab-case.
-   - Stage, commit, and push.
+## Concrete Example
 
-7. **Prepare PR**
-   - Generate PR link based on remote platform (GitHub, GitLab, Bitbucket).
-
-## When to invoke
-
-The Shipper triggers after Reviewer approval, or when the user says:
-
-- "Commit this"
-- "Create PR"
-- "Ship it"
-- "Push changes"
-
-## Concrete example
-
-**Shipping JWT login page:**
-
-**Shipper:**
-
-1. Runs `git status --short` and sees modified files.
-2. Analyzes diff and categorizes as `feat(auth)`.
-3. Drafts commit message:
+**Shipper ships JWT login:**
+1. Verifies Reviewer approval.
+2. Archives spec to `specs/archive/2026-06-27-003-jwt-login/`.
+3. Creates branch `feat/jwt-login-page`.
+4. Commits with message:
    ```
-   feat(auth): add JWT login page
+   feat(auth): add JWT login page with animated form
 
-   Implement login form, auth API client, and protected route.
-   Add unit tests for form validation, API call, and route guard.
-
-   - Add LoginForm component
-   - Add auth service with JWT token handling
-   - Add ProtectedRoute wrapper
-   - Add tests for auth flow
+   - LoginForm component with focus animations
+   - useAuth hook with JWT storage
+   - POST /auth/login integration
+   - Unit and integration tests
+   - Accessibility: aria-label, role=form, Escape-to-dismiss
    ```
-4. Creates branch `feat/jwt-login-page`.
-5. Archives spec from `specs/changes/002-jwt-login/` to `specs/archive/2026-06-22-002-jwt-login/`.
-6. Stages, commits, and pushes.
-7. Generates PR link: `https://github.com/leorsousa05/CrewLoop/compare/feat/jwt-login-page?expand=1`.
-
-## What the Shipper never does
-
-- ❌ Write code
-- ❌ Review code
-- ❌ Fix bugs
-- ❌ Commit without showing the diff first
-- ❌ Use vague commit messages like "update" or "fix"
-- ❌ Force push
-
-## Conventional Commits types
-
-| Type | Use when |
-|------|----------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting, no logic change |
-| `refactor` | Code change without behavior change |
-| `perf` | Performance improvement |
-| `test` | Adding or fixing tests |
-| `build` | Build system changes |
-| `ci` | CI/CD changes |
-| `chore` | Maintenance, deps, config |
-| `revert` | Reverting a previous commit |
+5. Pushes to remote repository and generates PR link.
 
 ## Handoff
 
-**Next skill:** Orchestrator.
-
-## Navigation menu example
+**Invoked by:** Reviewer.  
+**Sends to:** Orchestrator (returns control to start the next loop).
 
 ```markdown
 **What would you like to do?**
 
-- **[C] Commit & Push** — Create branch, commit, and push
-- **[P] Commit, Push & Open PR** — All of the above + PR link
-- **[E] Edit** — Change commit message, branch name, or scope
-- **[R] Review** — Go back to review the changes
-- **[O] Back to Orchestrator** — New task or continue working
-- **[N] Cancel** — Do nothing, keep changes unstaged
+- **[O] Return to Orchestrator** — Next task or adjustments
 ```

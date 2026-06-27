@@ -1,119 +1,60 @@
+---
+sidebar_position: 2
+---
+
 # Architect
+
+> Specs, architecture, and contracts. The gatekeeper of the workflow.
 
 **Phase:** Specs & Architecture
 
-The Architect is the gatekeeper of CrewLoop. After the Orchestrator produces a brief, the Architect turns that brief into a concrete, implementable plan. No code is written until the Architect has created or updated specs.
+## Role
 
-## What the Architect does
+The Architect is a principal software architect who thinks in systems, boundaries, and contracts. It designs before building and creates specs that Engineers can execute without ambiguity. It does not write implementation code beyond type signatures and interface stubs.
 
-The Architect thinks in systems, boundaries, and contracts. It designs before building. Its output is a spec folder that the Engineer can execute without ambiguity.
+## Responsibilities
 
-### Core responsibilities
+1. Read the Task Brief from Orchestrator completely before taking any action.
+2. Explore existing specs in specs/, ADRs in specs/decisions/, and relevant codebase patterns.
+3. Answer 7 analysis questions: domain placement, component responsibilities, contracts to define, what needs tests, architecture that minimizes ambiguity, project structure changes, and key trade-offs.
+4. Create the spec folder at specs/changes/NNN-name/ with .spec.yaml, proposal.md, specs/, design.md, and tasks.md.
+5. Define TypeScript interfaces, API contracts, schemas, and type signatures (no implementation).
+6. Produce a test plan identifying what must be tested and why.
+7. Assess risks, trade-offs, and deferred items.
 
-1. **Read the brief and existing context**
-   - Read the Orchestrator's brief verbatim.
-   - Explore existing specs, ADRs, and codebase patterns.
-   - Read `conventions.md`, `workflow.md`, and `AGENTS.md`.
+## What Architect Never Does
 
-2. **Decide the task shape**
-   - Is this UI/frontend work? Route to Designer after specs.
-   - Is this backend/code work? Route to Engineer after specs.
-   - Is this documentation-only? Route to Docs-Writer after specs.
+- ❌ Write implementation code (only type signatures and stubs).
+- ❌ Skip specs even for tiny changes.
+- ❌ Auto-route without user confirmation (except in AFK mode).
+- ❌ Run builds or tests.
+- ❌ Execute git operations.
 
-3. **Create the spec folder**
-   - `specs/changes/NNN-name/`
-   - `.spec.yaml` — metadata
-   - `proposal.md` — why the change is needed
-   - `specs/spec.md` — what the change must do
-   - `design.md` — how it should be built
-   - `tasks.md` — ordered checklist
-
-4. **Define contracts and boundaries**
-   - Type signatures, interfaces, schemas, API contracts.
-   - Domain boundaries and module responsibilities.
-   - Public vs. private APIs.
-
-5. **Produce a test plan**
-   - What to test and why.
-   - Which tests are mandatory vs. skip criteria.
-
-6. **Assess risks**
-   - Trade-offs, deferred items, migration concerns.
-   - Security and compliance implications.
-
-## When to invoke
-
-The Architect triggers after the Orchestrator, or when the user explicitly says:
-
-- "Proceed to architect"
-- "Create specs"
-- "How should I build this?"
-- "Analyze this"
-
-## Concrete example
-
-**Brief:** Add a JWT-based login page to a React app.
-
-**Architect:**
-
-1. Creates `specs/changes/002-jwt-login/`.
-2. Writes `proposal.md` explaining the need for secure authentication.
-3. Writes `specs/spec.md` with:
-   - Acceptance criteria (login form, token storage, protected routes, logout).
-   - API contract (`POST /auth/login` returns `{ token: string }`).
-   - TypeScript interfaces for credentials and user.
-   - Security requirements (HTTPS only, httpOnly cookie option discussed).
-4. Writes `design.md` noting that UI will be handled by Designer.
-5. Writes `tasks.md` with ordered steps.
-6. Presents the menu:
-   ```
-   [D] Send to Designer — Visual/UI design specification
-   [E] Send to Engineer — Start implementation (BUILD mode)
-   [O] Return to Orchestrator — Adjust scope
-   ```
-
-## What the Architect never does
-
-- ❌ Write implementation code beyond type signatures and stubs
-- ❌ Skip specs
-- ❌ Make routing choices without user confirmation (except in AFK mode)
-- ❌ Run builds or tests
-- ❌ Execute git operations
-
-## Output artifact: Spec Folder
-
-The spec folder is the single source of truth for the change. Every subsequent skill reads it.
+## Output Artifact
 
 | File | Purpose |
 |------|---------|
-| `.spec.yaml` | Status, dates, author, tags |
-| `proposal.md` | Why the change is needed |
-| `specs/spec.md` | What the change must do |
-| `design.md` | How it should be built |
-| `tasks.md` | Ordered checklist |
+| `.spec.yaml` | Status, dates, author, affected files, skills involved |
+| `proposal.md` | WHY: motivation, scope, constraints |
+| `specs/spec.md` | WHAT: delta vs. current system, acceptance criteria |
+| `design.md` | HOW: interfaces, contracts, data flows, architecture |
+| `tasks.md` | Ordered implementation checklist |
 
-## Decision tree
+## Concrete Example
 
-```mermaid
-flowchart TD
-    A[Architect receives brief]
-    A --> B{Task involves UI?}
-    B -->|Yes| D[Route to Designer]
-    B -->|No| C{Task involves code?}
-    C -->|Yes| E[Route to Engineer]
-    C -->|No| F[Route to Docs-Writer or Orchestrator]
-```
+**Architect receives brief for JWT login:**
+1. Explores the React codebase structures.
+2. Creates `specs/changes/003-jwt-login/`.
+3. Defines API contract: `POST /auth/login` returning `{token: string, expiresAt: number}`.
+4. Defines TypeScript interfaces `AuthCredentials` and `AuthResponse`.
+5. Establishes the test plan for unit (token validation) and integration (API call) tests.
+6. Populates `tasks.md` with 8 ordered steps.
+7. Routes to Designer (or Engineer if no visual changes are needed).
 
 ## Handoff
 
-**Next skill:**
-
-- Designer (if UI/frontend)
-- Engineer (if backend/code)
-- Docs-Writer (if pure documentation)
-- Orchestrator (if scope needs adjustment)
-
-## Navigation menu example
+**Invoked by:** Orchestrator.  
+**Sends to:** Designer (if UI/frontend involved), Engineer (if backend or code-only), or Docs-Writer (if pure documentation).
 
 ```markdown
 **What would you like to do?**

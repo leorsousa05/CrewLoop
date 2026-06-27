@@ -1,126 +1,65 @@
+---
+sidebar_position: 3
+---
+
 # Designer
+
+> Aesthetic direction and design specification. Sets the visual standard before code is written.
 
 **Phase:** UI/UX Direction
 
-The Designer defines the visual and interaction direction for frontend work. It produces design specifications that Engineers can implement with precision. The Designer never writes implementation code.
+## Role
 
-## What the Designer does
+The Designer is a UI/UX specialist who defines the aesthetic direction for every frontend change. It produces design specs that Engineers can implement with precision and without guessing. It never writes HTML, CSS, or JavaScript.
 
-The Designer combines creative vision with technical guardrails. Every design decision is intentional, distinctive, and accessible.
+## Responsibilities
 
-### Core responsibilities
+1. Read the spec from Architect before taking any design decisions.
+2. Discover intent: purpose, tone (playful/luxury/editorial/minimal/brutalist), visual references, constraints.
+3. Commit to one clear aesthetic direction. Avoid generic or AI-default looks.
+4. Define the complete design system: color palette with usage rules, typography (font, size, weight, line-height), spacing scale, layout grid, and responsive breakpoints.
+5. Specify motion: animation style, easing curves, duration, and prefers-reduced-motion support.
+6. Ensure accessibility: WCAG 2.1 AA contrast ratios, touch targets >= 44px, visible focus states, keyboard navigation.
+7. Produce a design spec with ASCII wireframes, component breakdown, and an asset list.
 
-1. **Read specs first**
-   - Check existing specs in `specs/changes/NNN-name/`.
-   - Align with the Architect's constraints and contracts.
-   - If no specs exist, ask to route to Architect first.
+## What Designer Never Does
 
-2. **Discover intent**
-   - Purpose: What problem does the interface solve? Who uses it?
-   - Tone: playful, brutal, luxurious, organic, editorial, futuristic, minimal, maximal?
-   - Constraints: platform, framework, brand guidelines.
+- ❌ Write HTML, CSS, or JavaScript implementation code.
+- ❌ Skip the aesthetic direction step.
+- ❌ Use generic gradients or default typography without commitment.
+- ❌ Sacrifice accessibility for visual effect.
 
-3. **Commit to a direction**
-   - Choose one clear aesthetic direction.
-   - Avoid generic "AI slop" looks.
-
-4. **Define the design system**
-   - Color palette and usage rules.
-   - Typography (fonts, sizes, weights).
-   - Spacing, layout grid, responsive breakpoints.
-   - Component behavior and states.
-
-5. **Specify motion**
-   - Animation style (subtle, bold, scroll, page transitions, none).
-   - Easing curves, spring physics, duration.
-   - `prefers-reduced-motion` support.
-
-6. **Ensure accessibility**
-   - Contrast ratios.
-   - Touch targets ≥ 44px.
-   - Focus states and keyboard navigation.
-   - Screen reader considerations.
-
-7. **Produce a design spec**
-   - ASCII wireframes, color swatches, component breakdowns.
-   - Asset list (icons, images, textures).
-   - Pre-implementation checklist.
-
-## When to invoke
-
-The Designer triggers when the Architect routes a UI/frontend task, or when the user says:
-
-- "Design a landing page"
-- "Redesign this page"
-- "Create a dashboard"
-- "Improve this UI"
-
-## Concrete example
-
-**Spec:** Add a JWT login page.
-
-**Designer:**
-
-1. Chooses a "luxury/refined" direction: generous whitespace, elegant serif headings, muted palette, subtle motion.
-2. Defines:
-   - Primary color: `#0f172a`
-   - Accent: `#6366f1`
-   - Font: Inter for UI, Canela for headings.
-   - Form fields with floating labels and soft focus rings.
-3. Provides an ASCII wireframe:
-   ```
-   +-----------------------------+
-   |         [Logo]              |
-   |                             |
-   |  Welcome back               |
-   |                             |
-   |  [Email          ]          |
-   |  [Password       ]          |
-   |                             |
-   |  [      Sign in      ]      |
-   |                             |
-   |  Forgot password?           |
-   +-----------------------------+
-   ```
-4. Specifies focus transitions: 200ms ease-out for borders and shadows.
-5. Presents the menu:
-   ```
-   [E] Send to Engineer — Implement the design
-   [O] Return to Orchestrator — Adjust scope
-   [A] Send to Architect — Review technical architecture
-   ```
-
-## What the Designer never does
-
-- ❌ Write HTML, CSS, or JavaScript implementation
-- ❌ Skip the aesthetic direction step
-- ❌ Use generic aesthetics (e.g., default gradients, Inter-only typography)
-- ❌ Sacrifice accessibility for beauty
-
-## Output artifact: Design Spec
+## Output Artifact
 
 | Section | Content |
 |---------|---------|
-| Direction | Chosen aesthetic and why |
-| Color palette | Hex values and usage |
-| Typography | Fonts, sizes, weights |
-| Layout | Grid, spacing, responsive behavior |
-| Components | Buttons, forms, cards, etc. |
-| Motion | Animation style, easing, duration |
-| Accessibility | Contrast, touch targets, reduced motion |
-| Wireframes | ASCII or reference images |
-| Asset list | Icons, images, textures |
+| **Direction** | Chosen aesthetic and rationale |
+| **Color palette** | Hex values and usage rules |
+| **Typography** | Fonts, sizes, weights, line heights |
+| **Layout** | Grid, spacing scale, responsive breakpoints |
+| **Components** | Buttons, inputs, cards, modals with all states |
+| **Motion** | Animation style, easing, duration, reduced-motion fallback |
+| **Accessibility** | Contrast ratios, touch targets, focus states |
+| **Wireframes** | ASCII diagrams or visual references |
+| **Asset list** | Icons, images, textures needed |
+
+## Concrete Example
+
+**Designer receives spec for JWT login:**
+1. Commits to clean editorial direction.
+2. Design variables defined: `#0A0A0A` background, `#F5F5F5` text, Inter 16px/1.5 body, centered 400px card.
+3. Focus animation defined: border-color transition 100ms ease.
+4. Form fade-in defined: opacity 0 to 1, translateY 8px to 0, 200ms ease-out.
+5. Accessibility parameters: `aria-label` on form, `role=form`, Escape closes any modal, prefers-reduced-motion skips animations.
+6. Handover design document written.
 
 ## Handoff
 
-**Next skill:** Engineer.
-
-## Navigation menu example
+**Invoked by:** Architect.  
+**Sends to:** Engineer.
 
 ```markdown
 **What would you like to do?**
 
-- **[E] Send to Engineer** — Implement the design (BUILD mode)
-- **[O] Return to Orchestrator** — Adjust scope or requirements
-- **[A] Send to Architect** — Review technical architecture before implementing
+- **[E] Send to Engineer** — Implement the spec
 ```
