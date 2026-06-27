@@ -1,4 +1,4 @@
-export type AgentSource = 'kimi' | 'codex' | 'opencode' | 'log-watcher';
+export type AgentSource = 'kimi' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
 
 export type EventType =
   | 'session_start'
@@ -99,8 +99,6 @@ export interface SkillMeta {
   description: string;
   icon: string;
 }
-
-export type ToolToSkillMap = Record<string, string | undefined>;
 
 export interface SkillInferenceResult {
   skill: string | undefined;

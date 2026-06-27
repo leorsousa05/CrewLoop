@@ -52,12 +52,20 @@ describe('SkillInferenceEngine', () => {
     assert.equal(result.confidence, 'explicit');
   });
 
-  it('infers researcher from Read tool', () => {
+  it('returns unknown for generic Read tool', () => {
     const engine = new SkillInferenceEngine(skills);
     const event = makeEvent({ tool: 'Read', detail: 'README.md' });
     const result = engine.infer(event, makeSession());
-    assert.equal(result.skill, 'researcher');
-    assert.equal(result.confidence, 'heuristic');
+    assert.equal(result.skill, undefined);
+    assert.equal(result.confidence, 'unknown');
+  });
+
+  it('returns unknown for generic Bash tool', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({ tool: 'Bash', detail: 'ls -la' });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, undefined);
+    assert.equal(result.confidence, 'unknown');
   });
 
   it('infers shipper from git commit command', () => {

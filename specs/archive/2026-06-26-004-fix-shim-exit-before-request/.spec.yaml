@@ -1,0 +1,7 @@
+id: 004-fix-shim-exit-before-request
+status: completed
+type: fix
+scope: backend
+priority: P0
+created: 2026-06-26
+author: architect

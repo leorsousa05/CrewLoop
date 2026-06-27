@@ -56,7 +56,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
     skillsDir: path.join(os.homedir(), '.agy', 'skills'),
     hooks: {
       supported: true,
-      configPath: path.join(os.homedir(), '.agy', 'config.json'),
+      configPath: path.join(os.homedir(), '.gemini', 'config', 'hooks.json'),
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
       afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',

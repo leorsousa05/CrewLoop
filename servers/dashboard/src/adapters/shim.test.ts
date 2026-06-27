@@ -51,18 +51,18 @@ describe('buildEvent', () => {
     assert.equal(event?.status, 'running');
   });
 
-  it('builds Kimi PostToolUse event with status', () => {
+  it('builds Kimi PostToolUse event with input and wrapped output', () => {
     const event = buildEvent('kimi' as AgentSource, {
       hook_event_name: 'PostToolUse',
       session_id: 'sess-1',
       cwd: '/project',
       tool_name: 'Read',
       tool_input: { path: 'README.md' },
-      tool_response: { success: true, duration_ms: 12 },
+      tool_output: 'README content',
     });
     assert.equal(event?.event_type, 'tool_end');
-    assert.equal(event?.status, 'success');
-    assert.equal(event?.duration_ms, 12);
+    assert.deepEqual(event?.input, { path: 'README.md' });
+    assert.deepEqual(event?.output, { output: 'README content' });
   });
 
   it('builds Codex event', () => {
@@ -132,6 +132,59 @@ describe('buildEvent', () => {
       hook_event_name: 'SessionStart',
       skill: 'engineer',
     });
+    assert.equal(event?.skill, 'engineer');
+  });
+
+  it('preserves AGY detail extracted by the adapter', () => {
+    const event = buildEvent('agy' as AgentSource, {
+      hook_event_name: 'PreToolUse',
+      conversationId: 'sess-agy',
+      stepIdx: 0,
+      toolCall: {
+        name: 'run_command',
+        args: { CommandLine: 'git status', Cwd: '/project' },
+      },
+    });
+    assert.equal(event?.source, 'agy');
+    assert.equal(event?.tool, 'Bash');
+    assert.equal(event?.detail, 'git status');
+    assert.equal(event?.status, 'running');
+  });
+
+  it('applies default skill fallback to AGY tool events', () => {
+    const event = buildEvent(
+      'agy' as AgentSource,
+      {
+        hook_event_name: 'PreToolUse',
+        conversationId: 'sess-agy-default',
+        stepIdx: 0,
+        toolCall: {
+          name: 'run_command',
+          args: { CommandLine: 'git status', Cwd: '/project' },
+        },
+      },
+      'orchestrator'
+    );
+    assert.equal(event?.event_type, 'tool_start');
+    assert.equal(event?.skill, 'orchestrator');
+  });
+
+  it('prefers AGY inferred skill over default skill fallback', () => {
+    const event = buildEvent(
+      'agy' as AgentSource,
+      {
+        hook_event_name: 'PreToolUse',
+        conversationId: 'sess-agy-inferred',
+        stepIdx: 0,
+        toolCall: {
+          name: 'view_file',
+          args: { AbsolutePath: '/home/arch/.agents/skills/engineer/SKILL.md' },
+        },
+      },
+      'orchestrator'
+    );
+    assert.equal(event?.event_type, 'tool_start');
+    assert.equal(event?.tool, 'Read');
     assert.equal(event?.skill, 'engineer');
   });
 });

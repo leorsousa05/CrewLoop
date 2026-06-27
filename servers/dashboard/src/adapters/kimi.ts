@@ -6,7 +6,7 @@ export interface KimiHookPayload {
   cwd: string;
   tool_name?: string;
   tool_input?: Record<string, unknown>;
-  tool_response?: Record<string, unknown>;
+  tool_output?: string | Record<string, unknown>;
   stop_reason?: string;
   usage?: unknown;
   skill?: string;
@@ -34,7 +34,17 @@ export function normalizeKimi(payload: KimiHookPayload): DashboardEvent | undefi
     event_type,
     tool: payload.tool_name,
     skill: payload.skill,
+    input: payload.tool_input,
+    output: normalizeOutput(payload.tool_output),
   };
+}
+
+function normalizeOutput(
+  output: string | Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  if (output === undefined) return undefined;
+  if (typeof output === 'string') return { output };
+  return output;
 }
 
 function generateId(): string {

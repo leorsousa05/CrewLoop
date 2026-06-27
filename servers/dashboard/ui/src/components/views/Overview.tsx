@@ -119,7 +119,7 @@ export function Overview({ sessions, selectedSession, onSelectSession }: Props) 
                   <Icon name={sourceIcon(s.source)} className="w-5 h-5 text-text-secondary" />
                   <div className="flex flex-col min-w-0">
                     <span className="text-sm text-text-primary font-mono truncate">
-                      {truncate(s.activeSkill?.name || s.id, 24)}
+                      {truncate(s.activeSkill?.name || 'No active skill', 24)}
                     </span>
                     <span className="text-[11px] text-text-muted uppercase">{s.source}</span>
                   </div>
