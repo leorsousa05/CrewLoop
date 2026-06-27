@@ -1,0 +1,14 @@
+id: "2026-06-27-001-agents-md-rewrite"
+title: "Complete rewrite of AGENTS.md files"
+status: "in-progress"
+type: "documentation"
+priority: P1
+created_at: "2026-06-27"
+author: "orchestrator + architect"
+affected_files:
+  - "AGENTS.md"
+  - "packages/cli/AGENTS.md"
+skills_involved:
+  - docs-writer
+  - reviewer
+  - shipper
