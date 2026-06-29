@@ -117,12 +117,12 @@ Every skill response must start with its prefix on its own line:
 
 | Skill | Prefix |
 |-------|--------|
-| Orchestrator | `[ORCHESTRATOR TALKING]` |
-| Architect | `[ARCHITECT ANALYZING]` |
-| Designer | `[DESIGNER DESIGNING]` |
-| Engineer | `[ENGINEER BUILDING]` |
-| Reviewer | `[REVIEWER REVIEWING]` |
-| Shipper | `[SHIPPER SHIPPING]` |
+| Orchestrator | `> 🎯 **Orchestrator**` |
+| Architect | `> 🏗️ **Architect**` |
+| Designer | `> 🎨 **Designer**` |
+| Engineer | `> 🔧 **Engineer**` |
+| Reviewer | `> 🔍 **Reviewer**` |
+| Shipper | `> 🚀 **Shipper**` |
 
 ### Automatic routing
 

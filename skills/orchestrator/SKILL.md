@@ -61,7 +61,7 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [ORCHESTRATOR TALKING]
+**Role prefix:** > 🎯 **Orchestrator**
 
 Print this prefix on its own line before the first line of every response.
 

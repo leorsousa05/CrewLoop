@@ -28,7 +28,7 @@ You do NOT write production code. You do NOT run git operations. You do not repl
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [ACCESSIBILITY-AUDITOR CHECKING]
+**Role prefix:** > ♿ **Accessibility-Auditor**
 
 Print this prefix on its own line before the first line of every response.
 

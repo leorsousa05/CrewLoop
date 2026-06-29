@@ -96,7 +96,7 @@ Include concrete remediation steps and route appropriately.
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [SECURITY-GUARD SCANNING]
+**Role prefix:** > 🛡️ **Security-Guard**
 
 Print this prefix on its own line before the first line of every response.
 

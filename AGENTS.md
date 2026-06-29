@@ -216,7 +216,7 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 
 **Behavior when active:**
 - Skills skip the interactive navigation prompts.
-- Each response must start with the skill's role prefix on its own line (e.g., `[ENGINEER BUILDING]`, `[REVIEWER REVIEWING]`).
+- Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **Engineer**`, `> 🔍 **Reviewer**`).
 - Each skill automatically returns control to the Orchestrator, which then automatically routes to and loads the next appropriate skill.
 - The standard routing rules still apply: Orchestrator ⇄ Architect ⇄ Orchestrator ⇄ Designer ⇄ Orchestrator ⇄ Engineer ⇄ Orchestrator ⇄ Reviewer ⇄ Orchestrator ⇄ Shipper.
 
