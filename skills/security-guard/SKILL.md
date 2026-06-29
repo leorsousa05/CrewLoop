@@ -96,7 +96,7 @@ Include concrete remediation steps and route appropriately.
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [SECURITY-GUARD SCANNING]
+**Role prefix:** > 🛡️ **Security-Guard**
 
 Print this prefix on its own line before the first line of every response.
 
@@ -115,8 +115,8 @@ Print this prefix on its own line before the first line of every response.
 
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Main task routing
-- **[A] Return to Architect** — Adjust specs or contracts
-- **[E] Return to Engineer** — Fix reported security issues
-- **[R] Return to Reviewer** — Return to general review after security fixes
-- **[S] Return to Shipper** — Git operations
+Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
+```markdown
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+```

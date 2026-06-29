@@ -181,10 +181,16 @@ Supporting skills report their findings back to the skill that invoked them. The
 
 ---
 
-## Mandatory Development Flow
+## Mandatory Development Flow (Hub-and-Spoke)
+
+All execution skills return control to the Orchestrator. The Orchestrator manages the task state and handles all routing:
 
 ```
-Orchestrator → Architect → (Designer, if UI) → Engineer → Reviewer → Shipper → Orchestrator
+Orchestrator ⇄ Architect
+Orchestrator ⇄ Designer (if UI)
+Orchestrator ⇄ Engineer
+Orchestrator ⇄ Reviewer
+Orchestrator ⇄ Shipper
 ```
 
 Rules — no exceptions:
@@ -195,10 +201,10 @@ Rules — no exceptions:
 4. **Engineer never does git operations** and never reviews its own code.
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
-7. **Navigation menus are letter-based** (`[A] Architect`, `[D] Designer`, `[E] Engineer`, `[R] Reviewer`, `[S] Shipper`, `[O] Orchestrator`) and appear at the end of each skill response. Skills must wait for user confirmation before routing.
-8. **Security-guard and accessibility-auditor** are optional specialists. They are invoked by Orchestrator or Reviewer, report findings, and do not advance the flow independently.
-9. **Tester cycles with Engineer** — `Engineer → Tester → Engineer` — before routing to Reviewer.
-10. **All roads return to Orchestrator.** After Shipper completes, the flow loops back.
+7. **Navigation menus are simplified** to return control to the Orchestrator (`[O] Return to Orchestrator`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
+8. **Sub-skills assist core skills** — `schema-designer` helps `architect`, `frontend-architect` helps `designer`, and `devops-specialist` helps `shipper`.
+9. **All roads return to Orchestrator.** Every agent hands control back to Orchestrator between phases.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 16 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the Orchestrator/Architect gatekeepers.
 
 ---
 
@@ -209,10 +215,10 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 **Activation:** The user says `AFK`, `modo AFK`, `vou ficar AFK`, or `MEMORY.md` in the project root contains `afk: true`.
 
 **Behavior when active:**
-- Skills skip the letter-based navigation menu at the end of their response.
-- Each response must start with the skill's role prefix on its own line (e.g., `[ENGINEER BUILDING]`, `[REVIEWER INSPECTING]`).
-- Each skill loads the next skill automatically via the Skill tool without waiting for user input.
-- The standard routing rules still apply: Orchestrator → Architect → (Designer) → Engineer → Reviewer → Shipper.
+- Skills skip the interactive navigation prompts.
+- Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **Engineer**`, `> 🔍 **Reviewer**`).
+- Each skill automatically returns control to the Orchestrator, which then automatically routes to and loads the next appropriate skill.
+- The standard routing rules still apply: Orchestrator ⇄ Architect ⇄ Orchestrator ⇄ Designer ⇄ Orchestrator ⇄ Engineer ⇄ Orchestrator ⇄ Reviewer ⇄ Orchestrator ⇄ Shipper.
 
 **Deactivation:** AFK mode ends when Shipper completes and returns control to Orchestrator.
 
@@ -285,12 +291,12 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 
 ## How to Contribute
 
-1. Start with **Orchestrator** — gather context, produce a structured brief.
-2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written.
-3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts.
-4. **Engineer** implements the spec, then routes to Tester if test coverage is involved.
-5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts.
-6. **Shipper** commits on a branch following the Conventional Commits format, pushes, and opens a PR.
+1. Start with **Orchestrator** — gather context, produce a structured brief, and route to Architect.
+2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then returns to Orchestrator.
+3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then returns to Orchestrator.
+4. **Engineer** implements the spec, runs verification, and returns to Orchestrator.
+5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts, and returns to Orchestrator.
+6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, and returns to Orchestrator.
 7. Run `python scripts/validate-skills.py` after adding or editing any `SKILL.md`.
 8. Update `README.md` and `AGENTS.md` if the repository structure or team rules change.
 9. Place new skills in `skills/<skill-name>/SKILL.md` using `assets/templates/skill-template.md`.

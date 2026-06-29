@@ -72,8 +72,8 @@ Present a concise comparison:
 
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Main task routing
-- **[A] Return to Architect** — Convert research into specs
-- **[E] Return to Engineer** — Implement the chosen option
-- **[R] Return to Reviewer** — Quality review
-- **[S] Return to Shipper** — Git operations
+Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
+```markdown
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+```

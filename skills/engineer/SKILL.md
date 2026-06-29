@@ -29,7 +29,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 **NEVER run git operations** — `git commit`, `git push`, `git branch`, `git merge`, `git tag`, `git stash`, `git rebase`, `git cherry-pick`, PR creation, or any repository mutation is STRICTLY FORBIDDEN. These belong to the shipper skill. You may use `git status` or `git diff` ONLY to inspect the current state before handing off. If the user asks to commit, push, or create a branch, redirect to the shipper skill.
 
-**NEVER do code review** — Code review is the reviewer's job. After BUILD completes, route to reviewer for inspection. Do not self-review or approve your own code.
+**NEVER do code review** — Code review is the reviewer's job. After BUILD completes, return control to Orchestrator to route to reviewer. Do not self-review or approve your own code.
 
 **NEVER write documentation** — READMEs, module docs, feature docs, API docs, and changelogs belong to the `docs-writer` skill. Focus on code and tests. If a task requires docs, redirect to docs-writer.
 
@@ -108,6 +108,9 @@ Bash is FORBIDDEN for:
 
 If you need to know what changed in git, use `git status` or `git diff` as READ-ONLY inspection only. Never act on the output with further git commands.
 
+**Avoiding Polling Loops:**
+When launching long-running verification or test/build processes via Bash, do NOT run infinite loops or poll status repetitively. Prioritize using the `schedule` tool to set a one-shot liveness timer and let the system wake you up, or monitor the process asynchronously via the `manage_task` tool.
+
 ---
 
 ## DELIVERABLES
@@ -121,55 +124,9 @@ If you need to know what changed in git, use `git status` or `git diff` as READ-
 
 ---
 
-## CODE STYLE RULES
+## DEVELOPMENT & RESPONSE STYLES
 
-| Rule | Reasoning |
-|------|-----------|
-| **Prefer self-documenting names** | `calculateTax(income, rate)` needs no comment. |
-| **Split large files** | >300 lines or >1 responsibility = harder to understand. |
-| **Make side effects visible** | Pure when possible. If mutating state, the name should say so. |
-| **Clarity over cleverness** | Brevity and performance only better when proven. |
-| **Be explicit** | Implicit behavior surprises the next reader. |
-
----
-
-## RESPONSE STYLE
-
-**Hard limits:**
-- Simple answers: <150 tokens
-- Code blocks: only essential lines, no decorative comments
-
-**Token wasters to eliminate:**
-- Decorative headings — answer directly
-- "Here is...", "Below you will find..." — just give the content
-- Introductory sentences explaining what you're about to say
-- Closing summaries that repeat what was already said
-
-| Rule | Example |
-|------|---------|
-| **Short & direct** | X "I would like to suggest..." → "Use Map.of() here." |
-| **Lead with the answer** | Code first, explanation after (if needed). |
-| **Bullet lists > paragraphs** | For anything with >2 items. |
-| **One idea per sentence** | No compound sentences. |
-| **No markdown in code blocks** | Clean code. No bold/italic inside code blocks. |
-
----
-
-## TDD SKIP CRITERIA
-
-**WRITE TEST** if any:
-- [ ] Branching (if/switch/loops)
-- [ ] Side effects (I/O, mutation)
-- [ ] External dependencies
-- [ ] Public API surface
-
-**SKIP TEST** only if ALL:
-- [x] Pure function
-- [x] No branching
-- [x] No external deps
-- [x] Simple data transformation
-
-**Why skip?** Tests have a cost. When a function is trivial and obviously correct, the test adds noise without catching real bugs. When in doubt, write the test.
+Please refer to the shared style guides, TDD skip criteria, and code style rules in [conventions.md](../../references/conventions.md).
 
 ---
 
@@ -225,14 +182,11 @@ When BUILD succeeds and all tests pass:
 2. **Archive the change:** Move `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`
 3. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
 4. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
-5. **Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:**
+5. **Present navigation options and WAIT for user choice.** Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
    ```markdown
    **What would you like to do?**
 
-   - **[R] Send to Reviewer** — Code review and quality check
-   - **[O] Return to Orchestrator** — New task or adjustments
-   - **[D] Return to Designer** — Adjust design or visual specification
-   - **[A] Return to Architect** — Re-analyze or adjust specs
+   - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
    ```
 
 ---
@@ -248,25 +202,18 @@ Verification fails after 1 fix:
 
 ## ANTI-PATTERNS
 
-- ❌ Running `git commit`, `git push`, `git branch`, `git merge`, `git tag`, `git stash`, `git rebase`, `git cherry-pick`, `git reset`, or any git operation that mutates the repository
+Refer to [conventions.md](../../references/conventions.md) for general anti-patterns. Engineer-specific anti-patterns:
+- ❌ Running `git commit`, `git push`, `git branch`, `git merge`, or any git operation that mutates the repository
 - ❌ Creating branches, PRs, or merge requests
-- ❌ Committing code as part of implementation
-- ❌ "I'll commit this for you" or "Let me push these changes" — redirect to shipper
-- ❌ Self-reviewing or approving own code — redirect to reviewer
-- ❌ Redesigning architecture mid-implementation
-- ❌ Changing contracts or interfaces without architect approval
-- ❌ Skipping tests because "it's just a small change"
-- ❌ Writing implementation code without reading the spec first
-- ❌ Inventing new requirements or contracts not in the spec
+- ❌ Self-reviewing or approving own code
+- ❌ Redesigning architecture mid-implementation or changing contracts without architect approval
 - ❌ Claiming tests pass without running them
-- ❌ Writing or updating READMEs, module docs, feature docs, API docs, or changelogs — redirect to docs-writer
+- ❌ Writing or updating READMEs, module docs, feature docs, API docs, or changelogs (redirect to docs-writer)
 
 ---
 
-## TECHNICAL HONESTY
+## TECHNICAL HONESTY & REQUIREMENT TRACEABILITY
 
-**Never propose technically impossible solutions.** If a requirement contradicts how a browser/API/language works, say so and suggest an alternative.
-
-**Requirement traceability:**
-- After implementation, verify every requirement from the original prompt is present
+Please refer to the shared style guides in [conventions.md](../../references/conventions.md). In addition, for implementation:
+- Verify every requirement from the original prompt is present.
 - List explicitly: "Implemented: X, Y, Z. Deferred: W (reason)."

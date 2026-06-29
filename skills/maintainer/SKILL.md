@@ -47,7 +47,7 @@ Label it as one or more of:
 ### Step 3: Recommend Remediation
 
 Propose a concrete next step:
-- Reproduce the bug and route to engineer.
+- Reproduce the bug and return to Orchestrator to route to engineer.
 - Create a debt payoff plan.
 - Pin or upgrade a dependency.
 - Add monitoring or logging.
@@ -75,8 +75,8 @@ Propose a concrete next step:
 
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Main task routing
-- **[A] Return to Architect** — Design-level remediation
-- **[E] Return to Engineer** — Implement the fix
-- **[R] Return to Reviewer** — Quality review
-- **[S] Return to Shipper** — Git operations
+Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
+```markdown
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+```

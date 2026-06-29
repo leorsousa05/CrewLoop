@@ -28,7 +28,7 @@ You do NOT write production code. You do NOT run git operations. You do not repl
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [ACCESSIBILITY-AUDITOR CHECKING]
+**Role prefix:** > ♿ **Accessibility-Auditor**
 
 Print this prefix on its own line before the first line of every response.
 
@@ -185,38 +185,13 @@ Summarize findings in a structured report:
 
 ### Step 5: Route Based on Verdict
 
-**If overall is PASS or PASS WITH WARNINGS:**
-
-Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
+Present the navigation menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
 **What would you like to do?**
 
-- **[R] Return to Reviewer** — Fold findings into general review
-- **[E] Back to Engineer** — Fix warnings before review
-- **[D] Back to Designer** — Design-level a11y problem
-- **[O] Back to Orchestrator** — Adjust scope
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
-
-**If overall is FAIL:**
-
-Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
-
-```markdown
-**What would you like to do?**
-
-- **[E] Back to Engineer** — Fix critical issues (recommended)
-- **[D] Back to Designer** — Design-level issue, needs re-analysis
-- **[R] Return to Reviewer** — Proceed to general review with known a11y debt
-- **[O] Back to Orchestrator** — Adjust scope or requirements
-```
-
-**Routing rules:**
-- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill.
-- **Engineer** — For markup, CSS, focus management, ARIA, and component fixes.
-- **Designer** — For color palette, layout, motion, or interaction model changes.
-- **Reviewer** — To fold the audit into the broader quality gate.
-- **Orchestrator** — For scope changes or requirement adjustments.
 
 ---
 

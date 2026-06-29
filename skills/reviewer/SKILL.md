@@ -209,40 +209,19 @@ Summarize findings in a structured report:
 
 ### Step 6: Route Based on Verdict
 
-**If overall is APPROVED or APPROVED WITH WARNINGS:**
+Present the navigation menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
-Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
 ```markdown
 **What would you like to do?**
 
-- **[S] Send to Shipper** — Commit, branch, push, and PR
-- **[E] Back to Engineer** — Fix warnings before shipping
-- **[O] Back to Orchestrator** — Adjust scope or requirements
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
-
-**If overall is CHANGES REQUIRED:**
-
-Present navigation options and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
-```markdown
-**What would you like to do?**
-
-- **[E] Back to Engineer** — Fix critical issues (recommended)
-- **[A] Back to Architect** — Design-level issue, needs re-analysis
-- **[S] Send to Shipper anyway** — Override and ship (not recommended)
-- **[O] Back to Orchestrator** — Adjust scope or requirements
-```
-
-**Routing rules:**
-- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill.
-- **Engineer** — For code-level fixes (quality, tests, security, performance, error handling, AI artifacts)
-- **Architect** — For design-level issues (spec non-compliance, architectural mismatch, interface changes needed)
-- **Shipper** — Only when review is clean or user explicitly overrides
-- **Orchestrator** — For scope changes or requirement adjustments
 
 ---
 
 ## RESPONSE RULES
 
+Please adhere to the shared style guides in [conventions.md](../../references/conventions.md). Reviewer-specific rules:
 - **Never skip reading changed files** — The diff is not enough context for a thorough review.
 - **Never write code** — Report issues, don't fix them. Redirect to engineer.
 - **Never run git operations** — No commit, push, branch, merge. Redirect to shipper.
@@ -250,18 +229,15 @@ Present navigation options and WAIT for user choice. NEVER proceed to another sk
 - **Cite line numbers** when possible — makes fixes faster for the engineer.
 - **Distinguish critical vs. warning** — Critical = ship blocker. Warning = should fix but not a blocker.
 - **Always reference the spec** when one exists — specs are the source of truth.
-- **When done, present navigation options** — Always show the menu with clear next steps.
 
 ---
 
 ## ANTI-PATTERNS
 
+Refer to [conventions.md](../../references/conventions.md) for general anti-patterns. Reviewer-specific anti-patterns:
 - ❌ Reviewing only the diff without reading changed files
-- ❌ Fixing code during review — that's engineer's job
-- ❌ Running git operations — that's shipper's job
+- ❌ Fixing code during review (that's engineer's job)
+- ❌ Running git operations (that's shipper's job)
 - ❌ Vague feedback like "this could be better" — be specific
-- ❌ Missing critical issues because the diff looked simple
 - ❌ Approving without checking tests exist for new logic
-- ❌ Ignoring security concerns because "it's just a small change"
 - ❌ Skipping AI artifact checks
-- ❌ Forgetting to reference specs when they exist

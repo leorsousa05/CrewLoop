@@ -61,7 +61,7 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ## AFK MODE & ROLE PREFIX
 
-**Role prefix:** [ORCHESTRATOR TALKING]
+**Role prefix:** > 🎯 **Orchestrator**
 
 Print this prefix on its own line before the first line of every response.
 
@@ -74,7 +74,7 @@ Print this prefix on its own line before the first line of every response.
 - State the next skill being activated.
 - Load the next skill via the Skill tool (do not wait for user choice).
 
-**Next skill:** Architect (if UI/frontend is involved, route to Designer first; otherwise route directly to Architect).
+**Next skill:** Architect.
 
 ---
 
@@ -103,7 +103,7 @@ Before asking the user, use subagents to explore the codebase and read reference
 - If the task mentions existing specs or prior changes, spawn a subagent to check `specs/` and `archive/`.
 - Use the subagent findings to skip already-answered questions and ask sharper ones.
 
-Then ask ALL relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt or by the subagents. Ask 2-4 questions per message — don't overwhelm. Wait for answers before proceeding.
+Then ask ALL relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt or by the subagents. Prioritize using the `ask_question` tool to present these questions as structured choices or checklists in a modal, falling back to raw chat text only if the tool is not supported. Ask 2-4 questions per prompt — don't overwhelm. Wait for answers before proceeding.
 
 #### 2.1 Context & Scope
 - What project/framework is this? (React, Vue, Godot, Python, etc.)
@@ -254,86 +254,52 @@ Once all questions are answered, produce a structured brief. Include EVERY secti
 
 ### Step 4: Route to Next Skill
 
-Determine the next step and explicitly state it:
+All execution skills return control to the Orchestrator. When a skill hands back to you:
+1. Briefly acknowledge and summarize what that skill accomplished.
+2. Check the task's current state and present the next step choices to the user using the `ask_question` tool (or standard markdown menu as fallback). Refer to [conventions.md](../../references/conventions.md) for tool guidelines.
 
-| Scenario | Route To | Rationale |
-|----------|----------|-----------|
-| Any task — bug fix, feature, design, refactor | **architect** | ALWAYS create specs first. No exceptions. |
-| New feature with unclear structure | **architect** | Needs analysis, contracts, specs |
-| Complex refactor | **architect** | Needs impact analysis, migration plan |
-| Well-defined bug fix | **architect** | Lightweight spec required for tracking |
-| Simple UI change | **architect** | Spec first, then route to designer |
-| New landing page, dashboard, or page | **architect** | Spec first, then route to designer |
-| Redesign or UI improvement | **architect** | Spec first, then route to designer |
-| Any task involving HTML/CSS/JS frontend | **architect** | Spec first, then designer for UI direction |
-| User explicitly asked for design first | **architect** | Create spec, then route to designer |
-| User explicitly asked to code | **architect** | Create spec first, then route to engineer |
-| User explicitly asked for design + code | **architect** | Spec → designer → engineer |
-| User explicitly asked to review code | **reviewer** | Review existing changes |
-
-**Handoff message format:**
-```
-Context gathered. Brief complete.
-
-## Task Brief
-[complete brief content from Step 3]
+**Handoff / Routing menu format (to be used in `ask_question` or chat fallback):**
+```markdown
+Context updated. Current state: [describe state, e.g., brief created, specs written, UI designed, implementation done, review complete].
 
 **What would you like to do?**
 
-- **[A] Send to Architect** — Create specs and architectural analysis (ALWAYS the first step)
-```
-
-After architect creates specs, navigation options will include:
-- **[D] Send to Designer** — Aesthetic direction and design specification (if there is UI)
-- **[E] Send to Engineer** — Implementation (BUILD mode)
+- **[A] Send to Architect** — Create or update specs (always the first step)
+- **[D] Send to Designer** — Visual/UI design direction (if there is UI)
+- **[E] Send to Engineer** — Implement the spec (BUILD mode)
+- **[R] Send to Reviewer** — Code review and quality check
+- **[S] Send to Shipper** — Commit, branch, push, and open PR
 - **[O] Return to Orchestrator** — Adjust scope or requirements
+```
 
 **Critical routing rules:**
 - **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill. Do NOT invoke another skill without explicit user confirmation.
-- **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions. The specs folder is the single source of truth.
-- **After architect creates specs:** route to designer (if UI/frontend involved) or engineer (if backend only).
-- **Frontend/UI tasks go through designer AFTER architect.** Architect creates specs → Designer creates design spec → Engineer implements.
-- **After engineer finishes:** route to reviewer for code review and quality check.
-- **After reviewer approves:** route to shipper for git operations.
-- The brief must be passed verbatim to the next skill. Do NOT summarize or omit sections.
+- **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.
+- **Flow progression:** Architect (creates spec) ⇄ Orchestrator ⇄ Designer (if UI) ⇄ Orchestrator ⇄ Engineer (implements code/tests) ⇄ Orchestrator ⇄ Reviewer (quality check) ⇄ Orchestrator ⇄ Shipper (git operations) ⇄ Orchestrator (complete).
 - **Skill handoffs stay in the main thread.** The next skill should activate in the SAME conversation thread so the user can see and interact with every step.
-- **Skills MAY be invoked as subagents for read-only work.** Before the formal handoff, you can spawn a subagent loaded with another skill's instructions (e.g., ask `reviewer` for a pre-review scan, `architect` for an impact note, `designer` for a quick style probe). The subagent returns findings to you; you synthesize and present them, then offer the formal handoff in the main thread.
-- After designer finishes, it will route to engineer for implementation.
-- After engineer finishes, it will route to reviewer.
-- After reviewer approves, it will route to shipper.
-- After shipper finishes, it will return here.
-- You are the central hub. All roads lead back to orchestrator.
 
 ---
 
 ## RESPONSE RULES
 
+Please refer to the shared response style guidelines in [conventions.md](../../references/conventions.md). In addition, for discovery:
 - **Never skip discovery** on non-trivial tasks. Even if the user says "just build it", ask at least 2-3 clarifying questions.
 - **Never write code** — redirect: "I'll hand this to engineer once we clarify X."
 - **Never design architecture** — redirect: "The architect skill will handle the system design."
 - **Never do UI/UX design** — redirect: "The designer skill will handle the visual direction and design spec."
 - **NEVER mutate the project** — You MUST NOT use Write, Edit, Bash (for code/execution), or any tool that creates/modifies/runs code, tests, or files. Your only allowed tools are Read, conversation, and the `Agent` tool for read-only subagent delegation.
-- **NEVER test endpoints** — Do not make HTTP requests, call APIs, or verify services. That is engineer's job.
+- **NEVER test endpoints** — Do not make HTTP requests, call APIs, or verify services.
 - **NEVER create files** — No configs, no scratchpads, no temporary files. Only output text in your response.
-- **Be concise** — one question per line, no essays.
-- **Group related questions** — ask 2-4 at a time, wait for answers.
-- **Acknowledge answers** — briefly confirm what you heard before asking the next batch.
-- **Respect user expertise** — if they say "I don't know" or "you decide", note it and move on.
-- **Escalate early** — if the task is unclear or contradictory, say so immediately.
 
 ---
 
 ## ANTI-PATTERNS
 
-- ❌ Using Write, Edit, or Bash tools — you are NOT allowed to create, modify, or execute files
-- ❌ Testing endpoints or making HTTP requests — not your responsibility
+Refer to [conventions.md](../../references/conventions.md) for general anti-patterns. Orchestrator-specific anti-patterns:
+- ❌ Routing directly between execution skills without returning to Orchestrator
 - ❌ "Here's how I would build it..." (not your job)
 - ❌ "Let me start coding..." (wrong skill)
 - ❌ "Here's the design I thought of..." (not your job — designer handles this)
-- ❌ Sending frontend/UI tasks directly to engineer (must go through designer first)
 - ❌ Asking 10 questions in one message (overwhelming)
 - ❌ Accepting vague requirements without pushback ("make it better")
-- ❌ Forgetting to ask about UI style on frontend tasks
-- ❌ Skipping questions because the user seems impatient (ask at least the critical 3)
-- ❌ Dumping raw subagent output into the chat without synthesis
 - ❌ Delegating user-facing questions or routing decisions to a subagent

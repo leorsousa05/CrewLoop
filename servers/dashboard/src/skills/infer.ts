@@ -39,6 +39,10 @@ export class SkillInferenceEngine {
       return { skill: session.active_skill, confidence: 'heuristic' };
     }
 
+    if (event.default_skill && this.skillNames.has(event.default_skill)) {
+      return { skill: event.default_skill, confidence: 'heuristic' };
+    }
+
     return { skill: undefined, confidence: 'unknown' };
   }
 

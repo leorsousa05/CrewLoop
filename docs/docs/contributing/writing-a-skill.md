@@ -73,7 +73,7 @@ Fix any `FAIL` items before proceeding.
 New skills must go through the standard flow:
 
 ```
-Orchestrator → Architect (spec) → Engineer → Reviewer → Shipper
+Orchestrator ⇄ Architect ⇄ Orchestrator ⇄ Engineer ⇄ Orchestrator ⇄ Reviewer ⇄ Orchestrator ⇄ Shipper
 ```
 
 ## Anti-patterns

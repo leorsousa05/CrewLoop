@@ -145,7 +145,8 @@ describe('shim binary', () => {
       const parsed = JSON.parse(receivedBody!);
       assert.strictEqual(parsed.event_type, 'tool_start');
       assert.strictEqual(parsed.source, 'agy');
-      assert.strictEqual(parsed.skill, 'orchestrator');
+      assert.strictEqual(parsed.skill, undefined);
+      assert.strictEqual(parsed.default_skill, 'orchestrator');
     } finally {
       server.close();
     }

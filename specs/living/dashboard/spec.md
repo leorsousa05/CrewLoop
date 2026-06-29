@@ -86,7 +86,7 @@ The adapter (`servers/dashboard/src/adapters/agy.ts`) resolves:
 - `skill` when a `Read` (`view_file`) targets a skill file whose path matches `.../skills/<skill-name>/SKILL.md`.
 - `output` on `PostToolUse` from the `error` field when present.
 
-Because AGY does not emit `session_start`, the shim applies the `--default-skill` fallback to every AGY event that does not already carry an inferred or explicit skill.
+Because AGY does not emit `session_start`, the shim applies the `--default-skill` fallback as a separate `default_skill` field on every AGY event that does not already carry an inferred or explicit skill. The state store only uses `default_skill` when the session has no active skill, so an inferred skill from a `Read` of `SKILL.md` is preserved across subsequent tool calls.
 
 ## Security
 

@@ -101,4 +101,21 @@ describe('SkillInferenceEngine', () => {
     assert.equal(result.skill, undefined);
     assert.equal(result.confidence, 'unknown');
   });
+
+  it('falls back to default_skill when no active skill exists', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({ tool: 'Bash', detail: 'ls', default_skill: 'orchestrator' });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, 'orchestrator');
+    assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('ignores default_skill when session already has active skill', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const session = makeSession({ active_skill: 'architect' });
+    const event = makeEvent({ tool: 'Bash', detail: 'ls', default_skill: 'orchestrator' });
+    const result = engine.infer(event, session);
+    assert.equal(result.skill, 'architect');
+    assert.equal(result.confidence, 'heuristic');
+  });
 });
