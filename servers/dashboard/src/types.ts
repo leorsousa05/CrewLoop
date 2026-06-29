@@ -16,6 +16,7 @@ export interface DashboardEvent {
   session_id: string;
   event_type: EventType;
   skill?: string;
+  default_skill?: string;
   tool?: string;
   detail?: string;
   status?: EventStatus;

@@ -166,7 +166,8 @@ describe('buildEvent', () => {
       'orchestrator'
     );
     assert.equal(event?.event_type, 'tool_start');
-    assert.equal(event?.skill, 'orchestrator');
+    assert.equal(event?.skill, undefined);
+    assert.equal(event?.default_skill, 'orchestrator');
   });
 
   it('prefers AGY inferred skill over default skill fallback', () => {
@@ -186,5 +187,6 @@ describe('buildEvent', () => {
     assert.equal(event?.event_type, 'tool_start');
     assert.equal(event?.tool, 'Read');
     assert.equal(event?.skill, 'engineer');
+    assert.equal(event?.default_skill, undefined);
   });
 });

@@ -38,6 +38,9 @@ export class StateStore {
     } else if (event.skill) {
       session.active_skill = event.skill;
       session.active_confidence = event.event_type === 'skill_change' ? 'explicit' : 'heuristic';
+    } else if (!session.active_skill && event.default_skill) {
+      session.active_skill = event.default_skill;
+      session.active_confidence = 'heuristic';
     }
 
     if (event.event_type === 'session_end') {

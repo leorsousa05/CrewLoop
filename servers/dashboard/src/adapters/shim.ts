@@ -66,7 +66,7 @@ export function buildEvent(
   if (base.event_type === 'session_start' && defaultSkill) {
     base.skill = defaultSkill;
   } else if (source === 'agy' && defaultSkill && !base.skill) {
-    base.skill = defaultSkill;
+    base.default_skill = defaultSkill;
   }
 
   const isPost = base.event_type === 'tool_end';

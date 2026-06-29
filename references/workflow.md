@@ -19,17 +19,17 @@ Complete workflow for the Loop Engineering Agents team.
 
 ---
 
-## Flow Diagram
+## Flow Diagram (Hub-and-Spoke)
+
+All execution skills return control to the Orchestrator. The Orchestrator manages the task state and routes to the next step.
 
 ```mermaid
 flowchart TD
-    O["🎯 Orchestrator<br>Discovery & Routing"] --> A["🏗️ Architect<br>Specs & Architecture"]
-    A --> D["🎨 Designer<br>UI/UX Direction"]
-    A --> E["🔧 Engineer<br>Implementation"]
-    D --> E
-    E --> R["🔍 Reviewer<br>Quality Gate"]
-    R --> S["🚀 Shipper<br>Git & PR"]
-    S --> O
+    O["🎯 Orchestrator<br>Discovery & Routing Hub"] <--> A["🏗️ Architect<br>Specs & Architecture"]
+    O <--> D["🎨 Designer<br>UI/UX Direction"]
+    O <--> E["🔧 Engineer<br>Implementation"]
+    O <--> R["🔍 Reviewer<br>Quality Gate"]
+    O <--> S["🚀 Shipper<br>Git & PR"]
 
     SG["🛡️ Security-Guard<br>Security Review"] -.-> R
     AA["♿ Accessibility-Auditor<br>Accessibility Review"] -.-> R
@@ -52,13 +52,11 @@ flowchart TD
 
 ## Routing Rules
 
-1. **Orchestrator ALWAYS sends to Architect first** — never directly to Designer or Engineer.
-2. **Architect is the gatekeeper** — creates specs and routes to Designer (UI) or Engineer (code).
-3. **Designer acts BEFORE Engineer** — visual spec before implementation.
-4. **Engineer never does git or review** — routes to Reviewer after BUILD.
-5. **Reviewer is the quality gate** — routes to Shipper if clean, or back to Engineer/Architect if issues are found.
-6. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back to the Engineer or Reviewer and do not touch git.
-7. **Shipper is the only one who touches git** — commit, branch, push, PR.
-8. **All skills return to Orchestrator** — it is the central hub.
-
-
+1. **Orchestrator is the Central Hub** — every agent hands control back to Orchestrator at the end of their turn.
+2. **Orchestrator ALWAYS sends to Architect first** — to create or update specifications.
+3. **Architect is the design gatekeeper** — once the spec is created, they return control to Orchestrator, which routes to Designer (for UI) or Engineer (for code).
+4. **Designer acts BEFORE Engineer** — visual spec is designed, control returns to Orchestrator, which then routes to Engineer.
+5. **Engineer never does git or review** — implements code/tests, then returns control to Orchestrator, which routes to Reviewer.
+6. **Reviewer is the quality gate** — reviews changes, returns control to Orchestrator. If approved, Orchestrator routes to Shipper; if changes needed, Orchestrator routes back to Engineer.
+7. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back and do not touch git.
+8. **Shipper is the only one who touches git** — performs branch, commit, push, PR, and returns control to Orchestrator.

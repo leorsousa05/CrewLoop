@@ -71,51 +71,47 @@ Each skill will be automatically detected and activated according to the convers
 | [`security-guard`](skills/security-guard/SKILL.md) | 🛡️ | Security Review | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/security-guard) |
 | [`accessibility-auditor`](skills/accessibility-auditor/SKILL.md) | ♿ | Accessibility Review | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/accessibility-auditor) |
 
-## Workflow
+## Workflow (Hub-and-Spoke)
+
+All execution skills return control to the Orchestrator. The Orchestrator manages the task state and handles all routing decisions.
 
 ```mermaid
 flowchart TD
-    O["🎯 Orchestrator\nDiscovery & Routing"]
-    O --> PM["📊 Product-Manager\nPrioritization"]
-    O --> RS["🔬 Researcher\nTechnology Evaluation"]
-    O --> MN["🛠️ Maintainer\nIncident & Debt"]
-    O --> T["🧪 Tester\nQA Strategy"]
-    PM --> A
-    RS --> A
-    MN --> A
-    T --> A
-    A["🏗️ Architect\nSpecs & Architecture"] --> D["🎨 Designer\nUI/UX Direction"]
-    A --> E["🔧 Engineer\nImplementation"]
-    A --> W["📝 Docs-Writer\nDocumentation"]
-    D --> E
-    E --> T
-    T --> E
-    E --> R["🔍 Reviewer\nQuality Gate"]
-    R --> S["🚀 Shipper\nGit & PR"]
-    S --> O
-    W --> O
+    O["🎯 Orchestrator\nCentral Hub & Routing"] <--> A["🏗️ Architect\nSpecs & Architecture"]
+    O <--> D["🎨 Designer\nUI/UX Direction"]
+    O <--> E["🔧 Engineer\nImplementation"]
+    O <--> R["🔍 Reviewer\nQuality Gate"]
+    O <--> S["🚀 Shipper\nGit & PR"]
+    O <--> W["📝 Docs-Writer\nDocumentation"]
+    O <--> PM["📊 Product-Manager\nPrioritization"]
+    O <--> RS["🔬 Researcher\nTechnology Evaluation"]
+    O <--> MN["🛠️ Maintainer\nIncident & Debt"]
+    O <--> T["🧪 Tester\nQA Strategy"]
+
+    A -.-> SD["🔌 Schema-Designer\nAPI & DB Schemas"]
+    SD -.-> A
+    D -.-> FA["🧱 Frontend-Architect\nReact Component Spec"]
+    FA -.-> D
+    S -.-> DO["🐳 DevOps-Specialist\nCI/CD & Docker"]
+    DO -.-> S
+
     SG["🛡️ Security-Guard\nSecurity Review"] -.-> R
     AA["♿ Accessibility-Auditor\nAccessibility Review"] -.-> R
-    R --> SG
-    R --> AA
-    SG --> E
-    AA --> E
+    R -.-> SG
+    R -.-> AA
 ```
 
 **Flow rules:**
 
-1. **Orchestrator always sends to Architect first** — never directly to Designer, Engineer, or Docs-Writer.
-2. **Architect is the gatekeeper** — creates specs and decides whether to route to Designer (UI/frontend), Engineer (backend/code), or Docs-Writer (documentation).
-3. **Designer acts before Engineer** — when there is UI, the designer creates the visual specification before the engineer implements.
-4. **Engineer never does git, review, or docs** — reviewer, shipper, and docs-writer handle those.
-5. **Reviewer is the quality gate** — no code reaches the repository without review.
-6. **Shipper is the only one who touches git** — commit, branch, push, PR.
-7. **Docs-Writer produces documentation** — READMEs, module docs, feature docs.
-8. **Tester designs QA strategy** — reviews coverage, reproduces bugs, and cycles with engineer.
-9. **Product-Manager, Researcher, and Maintainer are optional advisors** — framing, technology evaluation, and upkeep before or alongside the core flow.
-10. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility.
-11. **Specs are archived** — `specs/changes/` folder is moved to `specs/archive/` on commit.
-12. **All skills return to orchestrator** — it is the central hub.
+1. **Orchestrator is the Central Hub** — every agent hands control back to Orchestrator at the end of their turn.
+2. **Orchestrator always routes to Architect first** — to create or update specifications.
+3. **Architect is the design gatekeeper** — once the spec is created, control returns to Orchestrator, which routes to Designer (for UI) or Engineer (for code).
+4. **Designer acts before Engineer** — when there is UI, the designer creates the visual specification before the engineer implements, returning control to Orchestrator in between.
+5. **Engineer never does git, review, or docs** — implements code and returns to Orchestrator, which routes to Reviewer.
+6. **Reviewer is the quality gate** — no code reaches the repository without review.
+7. **Shipper is the only one who touches git** — commit, branch, push, PR.
+8. **Sub-skills assist core skills** — `schema-designer` helps `architect`, `frontend-architect` helps `designer`, and `devops-specialist` helps `shipper`.
+9. **Specs are archived** — `specs/changes/` folder is moved to `specs/archive/` on commit.
 
 ## Adding a New Skill
 
@@ -133,7 +129,7 @@ cp assets/templates/skill-template.md skills/<skill-name>/SKILL.md
 python scripts/validate-skills.py
 ```
 
-4. Follow the full team workflow (orchestrator → architect → engineer → reviewer → shipper) to integrate it.
+4. Follow the full team workflow (hub-and-spoke star routing via Orchestrator) to integrate it.
 
 ## Repository Layout
 
@@ -176,8 +172,8 @@ Packages are published automatically by GitHub Actions when a semantic-version t
 3. Create and push a tag:
 
 ```bash
-git tag v0.7.0
-git push origin v0.7.0
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
 The workflow will:

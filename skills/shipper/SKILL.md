@@ -264,7 +264,7 @@ chore(deps): update eslint to v9
 
 ### Step 7: Present to User
 
-Show a formatted summary and ASK before proceeding:
+Show a formatted summary and ASK before proceeding. Prioritize using the `ask_question` tool to present the choices in an interactive modal, falling back to raw chat text only if the tool is not supported:
 
 ```markdown
 ## 📦 Ready to Ship
@@ -369,22 +369,17 @@ Extract owner/repo from remote URL:
 
 ## RESPONSE RULES
 
-- **NEVER write code** — You only run git commands and analyze diffs. You MUST NOT use Write, Edit, or any tool that modifies source files. Read-only access to inspect code. (Exception: Allowed to run `npm version` or make edits to version/dependency strings in manifests like `package.json` to perform package version bumps).
-- **NEVER review code** — Code review is the reviewer's job. If you spot issues in the diff, note them but don't block. Redirect: "Reviewer should have caught this."
-- **NEVER fix bugs** — If you spot issues in the diff, note them but don't fix. Redirect: "Engineer should fix this before shipping."
-- **Always show the diff summary** before committing — user must see what will be committed
-- **Always run the VALIDATION CHECKLIST** before presenting the commit message — reject messages that fail any check
-- **Always check for specs** — Before shipping, verify specs exist in `specs/changes/NNN-name/`. If no specs found, warn: "No specs found. Architect should create specs before shipping."
-- **Always archive specs on commit** — Move completed specs from `specs/changes/` to `specs/archive/YYYY-MM-DD-NNN-name/` before pushing
-- **Always ask for confirmation** before creating branches or commits
-- **Never force push** — Always use safe git operations
-- **Never accept invented commit types** — If the diff doesn't fit any of the 11 types, analyze again until it fits
-- **Respect .gitignore** — Don't suggest committing ignored files
-- **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice. NEVER proceed to another skill without explicit user confirmation:
+Please adhere to the shared style guides in [conventions.md](../../references/conventions.md). Shipper-specific rules:
+- **NEVER write code** — You only run git commands and analyze diffs. You MUST NOT use Write, Edit, or any tool that modifies source files. (Exception: Allowed to run package version bumps or edit dependency strings in manifest files like `package.json`).
+- **NEVER review code** or fix bugs — redirect to reviewer or engineer.
+- **Always show the diff summary** before committing — user must see what will be committed.
+- **Always run the VALIDATION CHECKLIST** before presenting the commit message.
+- **Always check for specs** and archive them on commit.
+- **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
   ```markdown
   **What would you like to do?**
 
-  - **[O] Back to Orchestrator** — New task or continue working
+  - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
   ```
 
 ---
