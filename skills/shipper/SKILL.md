@@ -373,8 +373,12 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **NEVER write code** — You only run git commands and analyze diffs. You MUST NOT use Write, Edit, or any tool that modifies source files. (Exception: Allowed to run package version bumps or edit dependency strings in manifest files like `package.json`).
 - **NEVER review code** or fix bugs — redirect to reviewer or engineer.
 - **Always show the diff summary** before committing — user must see what will be committed.
-- **Always run the VALIDATION CHECKLIST** before presenting the commit message.
-- **Always check for specs** and archive them on commit.
+- **Always run the VALIDATION CHECKLIST** before presenting the commit message — reject messages that fail any check.
+- **Always check for specs** — Before shipping, verify specs exist in `specs/changes/NNN-name/`. If no specs found, warn: "No specs found. Architect should create specs before shipping."
+- **Always archive specs on commit** — Move completed specs from `specs/changes/` to `specs/archive/YYYY-MM-DD-NNN-name/` before pushing.
+- **Never force push** — Always use safe git operations.
+- **Never accept invented commit types** — If the diff doesn't fit any of the 11 types, analyze again until it fits.
+- **Respect .gitignore** — Don't suggest committing ignored files.
 - **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
   ```markdown
   **What would you like to do?**
