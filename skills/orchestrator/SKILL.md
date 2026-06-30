@@ -109,6 +109,21 @@ If the request is new, ambiguous, or describes a whole project rather than a wel
 
 If the request is already well-scoped (e.g., "Fix the login button on the navbar"), skip `project-brainstorm` and gather context yourself.
 
+### Step 1c: Decide Whether to Invoke `long-term-manager`
+
+If the project is expected to span multiple sessions, invoke the `long-term-manager` skill to create or update long-term tracking artifacts. It maintains `docs/long-term-plan.md`, `docs/session-log.md`, `docs/progress-checklist.md`, and `docs/context-resume.md` inside the target project.
+
+**Trigger examples:**
+- "I want to build a game over the next few weeks."
+- "Let's plan this feature for the long term."
+- "Continue the project we started last week."
+- `project-brainstorm` returns a brief that signals multi-session work.
+- The user returns to an existing project and needs context reconstruction.
+
+**How to route:** Load the `long-term-manager` skill after `project-brainstorm` returns (or directly if the brief/context already indicates long-term work). Pass the brief and any existing long-term artifacts. After it updates the artifacts, continue from Step 3 for normal routing to Architect or Designer.
+
+If the task is a single-session change (e.g., a one-line bug fix or a small tweak), skip `long-term-manager` and gather context yourself.
+
 ### Step 2: Gather Context (Use Subagents Here)
 
 Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.

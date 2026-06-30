@@ -11,7 +11,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 
 ## Highlights
 
-- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, and eight supporting roles each own one phase and never invade another's territory.
+- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, and nine supporting roles each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line fix to a full feature, gets a lightweight spec in `specs/changes/` before implementation starts.
 - **Design before code:** When there is UI, the Designer defines the aesthetic direction before the Engineer writes markup or styles.
 - **Docs by docs-writer:** READMEs, module docs, and changelogs are owned by the docs-writer skill so the engineer can focus on code and tests.
@@ -66,6 +66,7 @@ Each skill is automatically detected and activated according to the conversation
 | Skill | Phase | Responsibility |
 |-------|-------|----------------|
 | [`project-brainstorm`](skills/project-brainstorm/SKILL.md) | Brainstorm | Discovery for new or ambiguous project ideas |
+| [`long-term-manager`](skills/long-term-manager/SKILL.md) | Tracking | Durable tracking for projects that span multiple sessions |
 | [`docs-writer`](skills/docs-writer/SKILL.md) | Docs | Documentation, READMEs, and changelogs |
 | [`tester`](skills/tester/SKILL.md) | QA | Test strategy, coverage analysis, and test plans |
 | [`product-manager`](skills/product-manager/SKILL.md) | Product | Prioritization, roadmap, and success metrics |
@@ -86,6 +87,7 @@ flowchart TD
     O <--> R["Reviewer\nQuality Gate"]
     O <--> S["Shipper\nGit & PR"]
     O <--> PB["Project-Brainstorm\nDiscovery"]
+    O <--> LTM["Long-Term Manager\nMulti-Session Tracking"]
     O <--> W["Docs-Writer\nDocumentation"]
     O <--> PM["Product-Manager\nPrioritization"]
     O <--> RS["Researcher\nTechnology Evaluation"]

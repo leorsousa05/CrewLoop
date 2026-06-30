@@ -1,0 +1,10 @@
+status: active
+id: "014"
+name: long-term-manager-skill
+created_at: "2026-06-30"
+author: agent
+summary: Add a `long-term-manager` supporting skill to the CrewLoop bundle that creates and maintains long-term project artifacts (plan, session log, progress checklist, resume context) in Markdown within the target project.
+affected_files:
+  - skills/long-term-manager/SKILL.md
+  - skills/orchestrator/SKILL.md
+  - AGENTS.md

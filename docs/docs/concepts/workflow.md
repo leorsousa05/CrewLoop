@@ -20,6 +20,7 @@ flowchart TD
     O <--> RS["🔬 Researcher\nTechnology Evaluation"]
     O <--> MN["🛠️ Maintainer\nIncident & Debt"]
     O <--> T["🧪 Tester\nQA Strategy"]
+    O <--> LTM["📅 Long-Term Manager\nMulti-Session Tracking"]
 
     A -.-> SD["🔌 Schema-Designer\nAPI & DB Schemas"]
     SD -.-> A
@@ -43,15 +44,16 @@ flowchart TD
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
 7. **Navigation menus are simplified** to return control to the Orchestrator (`[O] Return to Orchestrator`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
-8. **Sub-skills assist core skills** — `schema-designer` helps `architect`, `frontend-architect` helps `designer`, and `devops-specialist` helps `shipper`.
+8. **Sub-skills and supporting helpers assist core skills** — `project-brainstorm` and `long-term-manager` help `orchestrator`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **All roads return to Orchestrator.** Every agent hands control back to Orchestrator between phases.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 16 skills defined in this bundle.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 18 skills defined in this bundle.
 
 ## How supporting skills plug in
 
 | Supporting skill | Typically invoked by | Returns to |
 |-----------------|---------------------|------------|
 | Product-Manager | Orchestrator | Orchestrator |
+| Long-Term Manager | Orchestrator | Orchestrator |
 | Researcher | Orchestrator | Orchestrator |
 | Maintainer | Orchestrator | Orchestrator |
 | Docs-Writer | Orchestrator or Architect | Orchestrator |
@@ -71,6 +73,7 @@ flowchart TD
 | Bug fix | Orchestrator ⇄ Architect | Lightweight spec |
 | Refactor | Orchestrator ⇄ Architect | Impact analysis needed |
 | Technology choice | Orchestrator ⇄ Researcher | Then ⇄ Architect for ADR |
+| Multi-session project | Orchestrator ⇄ Long-Term Manager | Then ⇄ Architect for spec |
 | Documentation only | Orchestrator ⇄ Docs-Writer | Via Architect for spec |
 | Dependency update | Orchestrator ⇄ Maintainer | Then ⇄ Architect |
 | Security audit | Orchestrator ⇄ Reviewer | Invokes Security-Guard |

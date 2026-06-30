@@ -16,6 +16,7 @@ Complete workflow for the Loop Engineering Agents team.
 | Shipper | `skills/shipper/SKILL.md` | Git operations and PR |
 | Security-Guard | `skills/security-guard/SKILL.md` | Deep-dive security review |
 | Accessibility-Auditor | `skills/accessibility-auditor/SKILL.md` | Accessibility and WCAG review |
+| Long-Term Manager | `skills/long-term-manager/SKILL.md` | Durable tracking for multi-session projects |
 
 ---
 

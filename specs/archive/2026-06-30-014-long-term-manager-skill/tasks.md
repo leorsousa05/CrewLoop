@@ -1,0 +1,25 @@
+# Tasks: `long-term-manager` Skill
+
+- [x] Create `specs/changes/014-long-term-manager-skill/` with `.spec.yaml`, `proposal.md`, `specs/skill.md`, `design.md`, and `tasks.md`.
+- [x] Expand `proposal.md` with docs-as-code constraints.
+- [x] Expand `design.md` with templates, interaction examples, strict conventions, and commit guidance.
+- [x] Expand `specs/skill.md` with docs-as-code discipline and skip conditions.
+- [x] Create `skills/long-term-manager/SKILL.md` from `assets/templates/skill-template.md` with templates reference.
+- [x] Create `skills/long-term-manager/references/templates/long-term-plan.md`.
+- [x] Create `skills/long-term-manager/references/templates/session-log.md`.
+- [x] Create `skills/long-term-manager/references/templates/progress-checklist.md`.
+- [x] Create `skills/long-term-manager/references/templates/context-resume.md`.
+- [x] Add YAML frontmatter with `name: long-term-manager` and a detailed description.
+- [x] Write ROLE, MODE, WORKFLOW, RESPONSE RULES, and ANTI-PATTERNS sections.
+- [x] Define the four artifact files, their schemas, and templates in the skill instructions.
+- [x] Add interaction examples to the skill.
+- [x] Add docs-as-code guidance to the skill.
+- [x] Update `skills/orchestrator/SKILL.md` to describe when to invoke `long-term-manager`.
+- [x] Update `AGENTS.md` to list the new skill in the skills table.
+- [x] Update `README.md` to include `long-term-manager` in the supporting crew and workflow diagram.
+- [x] Update `references/conventions.md` and `references/workflow.md` to reflect 18 skills.
+- [x] Update Docusaurus docs (`skills-and-roles`, `workflow`, `what-is-crewloop`, `why-crewloop`, `installation`, `repository-structure`, `sidebars.js`).
+- [x] Create `docs/docs/supporting/long-term-manager.md`.
+- [x] Run `python scripts/validate-skills.py` and fix any issues.
+- [x] Hand off to Reviewer for spec, skill, and docs review.
+- [ ] Hand off to Shipper to commit and push.
