@@ -6,7 +6,7 @@ sidebar_position: 1
 
 CrewLoop is a team of AI skills that work together as a complete, role-separated software development workflow — from requirements discovery to git push — ensuring no step is skipped and every change is traceable.
 
-Instead of asking a single AI to "build this feature", CrewLoop distributes responsibilities across 13 specialized skills. Each skill owns one phase and never invades another's territory.
+Instead of asking a single AI to "build this feature", CrewLoop distributes responsibilities across 14 specialized skills. Each skill owns one phase and never invades another's territory.
 
 ## The crew at a glance
 

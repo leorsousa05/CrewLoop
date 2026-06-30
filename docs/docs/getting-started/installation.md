@@ -20,7 +20,7 @@ npm install -g @archznn/crewloop-cli
 
 ## Step 2 — Install the skills
 
-Install all 13 skills into your agent's default skill directory:
+Install all 14 skills into your agent's default skill directory:
 
 ```bash
 crewloop install

@@ -94,6 +94,21 @@ Determine what the user is asking for:
 | **Integration** | "Connect to Stripe", "Add OAuth" |
 | **UI/UX Design** | "Design a landing page", "Redesign this page", "Create a page" |
 
+### Step 1b: Decide Whether to Invoke `project-brainstorm`
+
+If the request is new, ambiguous, or describes a whole project rather than a well-scoped task, invoke the `project-brainstorm` skill first. It will run an interactive discovery session and return a structured brief that you can forward to Architect.
+
+**Trigger examples:**
+- "I want to build a game."
+- "Let's create an app for X."
+- "I have an idea for a tool."
+- "Improve the dashboard" (without specifics).
+- "Add a bunch of features to Y."
+
+**How to route:** Load the `project-brainstorm` skill, pass the user's request and any context already gathered, and wait for it to return a brief. Then continue from Step 3 using that brief.
+
+If the request is already well-scoped (e.g., "Fix the login button on the navbar"), skip `project-brainstorm` and gather context yourself.
+
 ### Step 2: Gather Context (Use Subagents Here)
 
 Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.

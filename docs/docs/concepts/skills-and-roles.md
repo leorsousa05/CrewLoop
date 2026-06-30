@@ -15,7 +15,7 @@ A **skill** is a reusable instruction set for an AI agent. In CrewLoop, each ski
 
 Skills live in `skills/<skill-name>/SKILL.md`. They are loaded by compatible agents (Kimi Code, Claude, Codex, AGY) and triggered by conversation context.
 
-## The 13 skills
+## The 14 skills
 
 ### Core Skills
 
@@ -36,6 +36,7 @@ Invoked by Orchestrator or Reviewer when the task needs a specialist.
 
 | Skill | Invoked when |
 |-------|-------------|
+| **Project-Brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **Docs-Writer** | Pure documentation tasks without code changes |
 | **Tester** | Test strategy, QA, coverage analysis, bug reproduction |
 | **Product-Manager** | Prioritization, roadmap, user stories, success metrics |

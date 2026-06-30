@@ -4,14 +4,14 @@ An AI agent crew that runs the complete software development flow — from disco
 
 [![Docs](https://img.shields.io/github/deployments/leorsousa05/CrewLoop/github-pages?label=docs&logo=github)](https://leorsousa05.github.io/CrewLoop/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
-[![Skills](https://img.shields.io/badge/skills-13-blueviolet)](#whats-in-the-box)
+[![Skills](https://img.shields.io/badge/skills-14-blueviolet)](#whats-in-the-box)
 [![Validation](https://img.shields.io/badge/validate--skills-passing-brightgreen)](scripts/validate-skills.py)
 
 📚 **Read the full documentation at [leorsousa05.github.io/CrewLoop](https://leorsousa05.github.io/CrewLoop/)**
 
 ## Highlights
 
-- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, Docs-Writer, Tester, Product-Manager, Maintainer, Researcher, Security-Guard, and Accessibility-Auditor each own one phase and never invade another's territory.
+- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, Project-Brainstorm, Docs-Writer, Tester, Product-Manager, Maintainer, Researcher, Security-Guard, and Accessibility-Auditor each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line bug fix to a full feature, gets a lightweight spec in `specs/` before implementation starts.
 - **Design before code:** When there is a UI, the Designer defines the aesthetic direction before the Engineer writes a single line of HTML or CSS.
 - **Docs by docs-writer:** READMEs, module docs, feature docs, and changelogs are owned by the docs-writer skill — the engineer focuses on code and tests.
@@ -63,6 +63,7 @@ Each skill will be automatically detected and activated according to the convers
 
 | Skill | Emoji | Phase | Learn more |
 |-------|-------|-------|------------|
+| [`project-brainstorm`](skills/project-brainstorm/SKILL.md) | 🧠 | Brainstorm | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/project-brainstorm) |
 | [`docs-writer`](skills/docs-writer/SKILL.md) | 📝 | Docs | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/docs-writer) |
 | [`tester`](skills/tester/SKILL.md) | 🧪 | QA | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/tester) |
 | [`product-manager`](skills/product-manager/SKILL.md) | 📊 | Product | [Docs](https://leorsousa05.github.io/CrewLoop/docs/supporting/product-manager) |
@@ -82,6 +83,7 @@ flowchart TD
     O <--> E["🔧 Engineer\nImplementation"]
     O <--> R["🔍 Reviewer\nQuality Gate"]
     O <--> S["🚀 Shipper\nGit & PR"]
+    O <--> PB["🧠 Project-Brainstorm\nDiscovery"]
     O <--> W["📝 Docs-Writer\nDocumentation"]
     O <--> PM["📊 Product-Manager\nPrioritization"]
     O <--> RS["🔬 Researcher\nTechnology Evaluation"]
@@ -92,6 +94,7 @@ flowchart TD
     SD -.-> A
     D -.-> FA["🧱 Frontend-Architect\nReact Component Spec"]
     FA -.-> D
+    PB -.-> O
     S -.-> DO["🐳 DevOps-Specialist\nCI/CD & Docker"]
     DO -.-> S
 
@@ -110,7 +113,7 @@ flowchart TD
 5. **Engineer never does git, review, or docs** — implements code and returns to Orchestrator, which routes to Reviewer.
 6. **Reviewer is the quality gate** — no code reaches the repository without review.
 7. **Shipper is the only one who touches git** — commit, branch, push, PR.
-8. **Sub-skills assist core skills** — `schema-designer` helps `architect`, `frontend-architect` helps `designer`, and `devops-specialist` helps `shipper`.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator` with discovery for new or ambiguous projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **Specs are archived** — `specs/changes/` folder is moved to `specs/archive/` on commit.
 
 ## Adding a New Skill
@@ -135,7 +138,7 @@ python scripts/validate-skills.py
 
 ```
 CrewLoop/
-├── skills/                    # All 13 team skills
+├── skills/                    # All 14 team skills
 │   ├── orchestrator/
 │   ├── architect/
 │   └── ...

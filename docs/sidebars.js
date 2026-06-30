@@ -38,7 +38,7 @@ const sidebars = {
       label: 'The Crew',
       link: {
         type: 'generated-index',
-        description: 'Reference for all 13 CrewLoop skills.',
+        description: 'Reference for all 14 CrewLoop skills.',
       },
       items: [
         {
@@ -65,6 +65,7 @@ const sidebars = {
             description: 'Optional advisors that extend the core flow.',
           },
           items: [
+            'supporting/project-brainstorm',
             'supporting/docs-writer',
             'supporting/tester',
             'supporting/product-manager',
