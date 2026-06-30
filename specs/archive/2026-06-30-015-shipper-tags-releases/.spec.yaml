@@ -1,0 +1,9 @@
+status: active
+id: "015"
+name: shipper-tags-releases
+created_at: "2026-06-30"
+author: agent
+summary: Expand skills/shipper/SKILL.md with instructions for annotated git tags, release notes, and GitHub/GitLab release messages so the Shipper can consistently handle versioned releases.
+affected_files:
+  - skills/shipper/SKILL.md
+  - docs/docs/core/shipper.md
