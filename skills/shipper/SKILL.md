@@ -85,25 +85,33 @@ Determine the **conventional commit type** by analyzing the diff:
 
 If the project uses versioning (e.g., `package.json` in Node.js, `Cargo.toml` in Rust, `pyproject.toml` in Python):
 
-1. **Verify if a version bump is required:**
-   - Check if package manifests have version changes compared to the `main` branch:
+1. **Determine if the diff touches versioned packages:**
+   - Check if package manifests are in the diff or have version changes compared to the `main` branch:
      ```bash
      git diff origin/main -- package.json packages/cli/package.json
      ```
-   - If the commit type is `feat` or includes breaking changes (`!`), a **minor** (or **major**) bump is recommended.
-   - If the commit type is `fix`, a **patch** bump is recommended.
-   - For `docs`, `test`, `refactor`, `style`, `chore`, version bumps are usually not required.
+   - **If the diff touches versioned packages, a version bump is required.** Do not skip this step.
 
-2. **Align workspace dependencies:**
+2. **Map the conventional commit type to a semver bump:**
+
+   | Commit type | Change kind | Semver bump | Example resulting version |
+   |-------------|-------------|-------------|---------------------------|
+   | `fix` | bugfix | **patch** | `0.0.1` |
+   | `feat` | new feature | **minor** | `0.1.0` |
+   | breaking change (`!` or `BREAKING CHANGE:`) | incompatible change | **major** | `1.0.0` |
+   | `docs`, `test`, `refactor`, `style`, `chore` | internal cleanup | usually **none** | — |
+
+3. **Align workspace dependencies:**
    - In monorepos, check if dependencies between local packages are aligned. For example, if `packages/cli/package.json` depends on `@archznn/crewloop-skills` (the root package), ensure the dependency constraint is updated to match the new version.
 
-3. **Suggest or execute the version bump:**
+4. **Suggest or execute the version bump:**
    - If the version hasn't been bumped yet, warn the user and suggest running:
      ```bash
      npm version <patch | minor | major> --workspaces --no-git-tag-version
      ```
      *(Adapt commands to the project packaging tool if not using Node.js/npm).*
-   - Always ask for user confirmation before running the bump command. Do not run it automatically without confirmation.
+   - **Always ask for user confirmation before running the bump command.** Do not run it automatically without confirmation.
+   - **If you are unsure whether a bump is needed, always ask the user before proceeding.**
 
 ---
 
