@@ -13,7 +13,7 @@
 **How it is consumed:** Install the CLI globally and run `crewloop install`. The CLI copies all skills to the agent's skill directory (e.g., `~/.agents/skills/`) and configures hook files for supported agents so that the real-time dashboard receives tool-use events. Supported agents: Kimi Code, Claude, Codex, AGY.
 
 **What this repository contains:**
-- **Skills** — 13 Markdown skill files, each describing a specialist role
+- **Skills** — 14 Markdown skill files, each describing a specialist role
 - **CLI** (`packages/cli/`) — TypeScript tool that installs skills and configures agent hooks
 - **Dashboard** (`servers/dashboard/`) — real-time WebSocket server + browser UI that shows which skill is active and a live event timeline
 - **Obsidian MCP** (`servers/obsidian-mcp/`) — Python MCP server that bridges skills with an Obsidian vault
@@ -89,13 +89,14 @@ crewloop/
 │   └── obsidian-mcp/                # Obsidian MCP server (Python)
 │       └── src/
 │           └── obsidian_mcp/        # Python package
-├── skills/                          # All 13 skill directories
+├── skills/                          # All 14 skill directories
 │   ├── orchestrator/SKILL.md
 │   ├── architect/SKILL.md
 │   ├── designer/SKILL.md
 │   ├── engineer/SKILL.md
 │   ├── reviewer/SKILL.md
 │   ├── shipper/SKILL.md
+│   ├── project-brainstorm/SKILL.md
 │   ├── accessibility-auditor/SKILL.md
 │   ├── docs-writer/SKILL.md
 │   ├── maintainer/SKILL.md
@@ -152,7 +153,7 @@ crewloop/
 
 ---
 
-## The 13 Skills
+## The 14 Skills
 
 ### Core Skills — mandatory in every task flow
 
@@ -169,6 +170,7 @@ crewloop/
 
 | Skill | Invoked when |
 |-------|-------------|
+| **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
 | **docs-writer** | Pure documentation tasks without code changes |
 | **maintainer** | Bug triage, technical debt, dependency updates, production incidents |
@@ -202,7 +204,7 @@ Rules — no exceptions:
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
 7. **Navigation menus are simplified** to return control to the Orchestrator (`[O] Return to Orchestrator`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
-8. **Sub-skills assist core skills** — `schema-designer` helps `architect`, `frontend-architect` helps `designer`, and `devops-specialist` helps `shipper`.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator` with discovery for new or ambiguous projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **All roads return to Orchestrator.** Every agent hands control back to Orchestrator between phases.
 10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 16 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the Orchestrator/Architect gatekeepers.
 
