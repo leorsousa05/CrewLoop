@@ -304,6 +304,6 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 ## Bundle Lock-In & Self-Consistency Rules
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
-2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 16 skills defined in the CrewLoop bundle. 
+2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 18 skills defined in the CrewLoop bundle. 
 3. **No Direct Execution Routing:** All execution skills must yield control to the Orchestrator by presenting `[O] Return to Orchestrator`. If you receive a direct handoff from another execution skill (e.g. Architect to Engineer without passing through the Orchestrator's routing menu), you must halt, report a routing error, and return control to the Orchestrator.
 

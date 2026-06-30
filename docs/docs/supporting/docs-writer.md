@@ -39,7 +39,7 @@ The Docs-Writer reads the codebase, detects its type, selects the right structur
 ## Concrete Example
 
 **Orchestrator routes a pure documentation task: rewrite AGENTS.md.**
-1. Docs-Writer reads `conventions.md`, `workflow.md`, all 14 `SKILL.md` files, the dashboard `README.md`, and the CLI `README.md`.
+1. Docs-Writer reads `conventions.md`, `workflow.md`, all 18 `SKILL.md` files, the dashboard `README.md`, and the CLI `README.md`.
 2. Gathers the exact project layout and workflow conventions.
 3. Produces a 313-line `AGENTS.md` covering project overview, directory structure, core and supporting skills, mandatory flow rules, AFK mode details, and security audit scan parameters.
 4. Hands off.

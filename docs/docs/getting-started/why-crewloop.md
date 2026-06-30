@@ -31,6 +31,7 @@ Each symptom has the same root cause: **no process**.
 | Security holes | Reviewer scans for secrets, unsafe patterns, and AI artifacts |
 | Messy git history | Shipper generates Conventional Commits messages and proper branches |
 | Undocumented changes | Every change is traced through a spec that is archived on commit |
+| Forgotten context across sessions | Long-Term Manager maintains durable project artifacts between sessions |
 
 ## When CrewLoop shines
 

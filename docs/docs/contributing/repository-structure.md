@@ -39,10 +39,10 @@ crewloop/
 │   │   ├── ui/
 │   │   └── README.md
 │   └── obsidian-mcp/                # Obsidian MCP server (Python, experimental)
-├── skills/                          # All 14 skill directories
+├── skills/                          # All 18 skill directories
 │   ├── orchestrator/SKILL.md
 │   ├── architect/SKILL.md
-│   └── ... (14 total)
+│   └── ... (18 total)
 ├── specs/
 │   ├── changes/                     # Active in-progress specs
 │   ├── archive/                     # Completed specs
