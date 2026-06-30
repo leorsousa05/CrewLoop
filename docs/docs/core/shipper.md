@@ -10,7 +10,7 @@ sidebar_position: 6
 
 ## Role
 
-The Shipper is the only skill authorized to perform git operations. After the Reviewer approves, the Shipper packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, and prepares a PR.
+The Shipper is the only skill authorized to perform git operations. After the Reviewer approves, the Shipper packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, prepares a PR, and can create annotated tags and draft releases when explicitly requested.
 
 ## Responsibilities
 
@@ -23,6 +23,7 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 7. Create the branch: type/short-description in kebab-case.
 8. Stage all changes, commit, and push to the remote.
 9. Generate and display the PR creation link.
+10. When explicitly requested, create an annotated tag (`vX.Y.Z`) with a structured tag message and draft release notes grouped by Conventional Commits type.
 
 ## What Shipper Never Does
 
@@ -31,6 +32,9 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 - ❌ Commit without showing the diff first.
 - ❌ Use vague messages ("update", "fix", "changes").
 - ❌ Force push.
+- ❌ Create tags or releases without explicit user confirmation.
+- ❌ Invent release notes; derive them from commits since the last tag.
+- ❌ Overwrite an existing tag.
 - ❌ Commit `.env` files, secrets, or build directories.
 
 ## Output Artifact
@@ -42,6 +46,8 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 | **Bumped Version** | Staged manifest changes updating project and dependency versions |
 | **Archived spec** | specs/archive/YYYY-MM-DD-NNN-name/ |
 | **PR link** | Platform URL for opening the pull request |
+| **Tag** | Annotated semver tag (when explicitly requested) |
+| **Release notes** | Markdown notes grouped by Conventional Commits type |
 
 ## Concrete Example
 
