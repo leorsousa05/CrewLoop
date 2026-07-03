@@ -51,9 +51,15 @@ export function Overview({ sessions, selectedSession, onSelectSession }: Props) 
       <ViewHeader title="Overview" icon="House" />
       <div className="flex-1 overflow-y-auto p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <ActiveSkillPanel session={selectedSession} />
-          <TelemetryPanel session={selectedSession} />
-          <ActivityGraph session={selectedSession} />
+          <div className="h-[320px]">
+            <ActiveSkillPanel session={selectedSession} />
+          </div>
+          <div className="h-[320px]">
+            <TelemetryPanel session={selectedSession} />
+          </div>
+          <div className="h-[320px]">
+            <ActivityGraph session={selectedSession} />
+          </div>
 
           <section className="panel p-5">
             <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">

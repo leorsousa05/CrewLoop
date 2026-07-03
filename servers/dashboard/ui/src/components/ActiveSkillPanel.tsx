@@ -22,7 +22,7 @@ function lifecycleColor(lifecycle: string): string {
 export function ActiveSkillPanel({ session }: Props) {
   if (!session) {
     return (
-      <section className="panel p-6 flex flex-col items-center justify-center gap-3 text-center min-h-[280px]">
+      <section className="panel p-6 flex flex-col items-center justify-center gap-3 text-center h-full">
         <div className="w-16 h-16 rounded-xl bg-elevated border border-border-default flex items-center justify-center text-text-muted">
           <Icon name="MonitorPlay" className="w-8 h-8" />
         </div>
@@ -38,7 +38,7 @@ export function ActiveSkillPanel({ session }: Props) {
   const endedStatus = session.lifecycle === 'ended' ? session.status || 'ENDED' : undefined;
 
   return (
-    <section className="panel p-6">
+    <section className="panel p-6 h-full">
       <div className={`absolute top-0 left-0 right-0 h-1 ${lifecycleColor(lifecycle)}`} />
       <div className="flex flex-col gap-4">
         <div className={`w-16 h-16 rounded-xl border border-border-default flex items-center justify-center ${hasSkill ? 'bg-elevated text-accent' : 'bg-warning/10 text-warning'}`}>

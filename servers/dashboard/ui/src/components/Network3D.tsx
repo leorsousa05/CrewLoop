@@ -144,10 +144,6 @@ export function Network3D({ graph }: Props) {
             );
           }
         }}
-        onEngineStop={() => {
-          const controls = (fgRef.current as unknown as { zoomToFit?: (duration: number) => void })?.zoomToFit;
-          if (controls) controls(reducedMotion ? 0 : 400);
-        }}
         warmupTicks={reducedMotion ? 0 : 10}
         cooldownTicks={reducedMotion ? 0 : 120}
       />

@@ -56,7 +56,7 @@ export function ActivityGraph({ session }: Props) {
   }, [session]);
 
   return (
-    <section className="panel flex flex-col h-44">
+    <section className="panel flex flex-col h-full">
       <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest px-5 py-4 border-b border-border-default">
         Skill Activity
       </h2>

@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-skills",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "CrewLoop AI agent skills bundle and CLI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -30,6 +30,10 @@
     "prepublishOnly": "npm run build --workspaces"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-force-graph-3d": "^1.26.0",
     "ws": "^8.18.0"
   },
   "workspaces": [
