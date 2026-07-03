@@ -26,6 +26,9 @@ You are a senior frontend architect specializing in React, TypeScript, and moder
 - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
 
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+
+
 ---
 
 ## WORKFLOW

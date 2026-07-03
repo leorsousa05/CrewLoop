@@ -35,7 +35,8 @@ We follow a centralized routing model where all roads lead back to the Orchestra
 
 ### Presentation Guidelines
 - **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
-- **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response:
+- **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
+- **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute. This must be formatted on its own line in the `[IMPLEMENTAÇÃO]` block. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
 
 #### Execution Skills Navigation (Architect, Designer, Engineer, Reviewer, Shipper)
 All non-Orchestrator agents must end their execution by returning control to the Orchestrator:
@@ -68,9 +69,9 @@ specs/
 ├── changes/                        # Active deltas
 │   └── 001-change-name/
 │       ├── .spec.yaml              # status, dates, author
-│       ├── proposal.md             # WHY
-│       ├── specs/                  # WHAT
-│       ├── design.md               # HOW
+│       ├── proposal.md             # WHY (skipped for lightweight specs)
+│       ├── specs/                  # WHAT (skipped for lightweight specs)
+│       ├── design.md               # HOW (skipped for lightweight specs)
 │       └── tasks.md                # ordered checklist
 ├── archive/                        # Completed changes (YYYY-MM-DD-NNN-name)
 ├── living/                         # Merged source of truth
@@ -84,6 +85,7 @@ Rules:
 - `living/` reflects the current state of the system.
 - `archive/` preserves completed changes for audit.
 - `decisions/` records irreversible architectural choices.
+- **Lightweight Specs (for bugs):** Bug fixes under any category require a lightweight specification. A lightweight spec requires only `.spec.yaml` and `tasks.md` in `specs/changes/NNN-bug-name/`. `proposal.md`, `design.md`, and the `specs/` folder are omitted.
 
 ---
 

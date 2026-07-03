@@ -26,6 +26,9 @@ You are a senior database administrator and API architect. Your role is to desig
 - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
 
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+
+
 ---
 
 ## WORKFLOW

@@ -118,6 +118,8 @@ flowchart TD
 7. **Shipper is the only skill that touches git** — commit, branch, push, and PR.
 8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
+10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who yields control to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+
 
 ## Repository Layout
 

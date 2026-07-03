@@ -302,6 +302,9 @@ Context updated. Current state: [describe state, e.g., brief created, specs writ
 - **[O] Return to Orchestrator** — Adjust scope or requirements
 ```
 
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/architect`).*
+
+
 **Critical routing rules:**
 - **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill. Do NOT invoke another skill without explicit user confirmation.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.

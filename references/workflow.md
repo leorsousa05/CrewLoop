@@ -61,3 +61,5 @@ flowchart TD
 6. **Reviewer is the quality gate** — reviews changes, returns control to Orchestrator. If approved, Orchestrator routes to Shipper; if changes needed, Orchestrator routes back to Engineer.
 7. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the Orchestrator or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back and do not touch git.
 8. **Shipper is the only one who touches git** — performs branch, commit, push, PR, and returns control to Orchestrator.
+9. **Bug-Fixing Pipeline** — Triaging and reproduction are handled by the Maintainer, who yields to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+

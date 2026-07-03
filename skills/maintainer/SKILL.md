@@ -47,7 +47,7 @@ Label it as one or more of:
 ### Step 3: Recommend Remediation
 
 Propose a concrete next step:
-- Reproduce the bug and return to Orchestrator to route to engineer.
+- Reproduce the bug, outline remediation, and return to Orchestrator to route to Architect for lightweight specification.
 - Create a debt payoff plan.
 - Pin or upgrade a dependency.
 - Add monitoring or logging.
@@ -59,7 +59,7 @@ Propose a concrete next step:
 - **Start with evidence.** Quote logs, stack traces, or code lines when possible.
 - **Classify before fixing.** A correct label prevents treating debt as a bug.
 - **Estimate risk.** Say if a recommended change is safe, risky, or breaking.
-- **Route fixes to engineer.** Provide a clear handoff with context.
+- **Route fixes to Architect first.** Provide a clear handoff with context via the Orchestrator.
 - **Track recurring issues.** If the same problem appears often, flag it as debt or missing test.
 
 ---
@@ -80,3 +80,6 @@ Call the `ask_question` tool to present options, or refer to the navigation guid
 ```markdown
 - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
+
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+

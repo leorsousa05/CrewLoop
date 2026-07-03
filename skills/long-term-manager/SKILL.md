@@ -258,3 +258,6 @@ Call the `ask_question` tool to present options, or refer to the navigation guid
 ```markdown
 - **[O] Return to Orchestrator** — Hand the updated long-term artifacts back to the Orchestrator for routing.
 ```
+
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+
