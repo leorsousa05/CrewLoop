@@ -28,7 +28,6 @@ venv/
 
 # Docusaurus / Node.js
 node_modules/
-package-lock.json
 packages/cli/node_modules/
 packages/cli/dist/
 servers/dashboard/dist/
