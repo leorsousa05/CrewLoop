@@ -19,20 +19,23 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## WORKFLOW
 
-### Step 1: Verify Git State
+### Step 1: Verify Git State & Remote Configuration
 
 ```bash
 git status --short
-git diff --stat
+git remote -v
+git branch -a
 git log --oneline -5
 ```
 
-- Are we in a git repo?
-- Are there uncommitted changes?
-- What branch are we currently on?
-- Is there a remote configured?
+- **Remote Check:** Is there a remote configured? If `git remote -v` is empty:
+  1. Ask the user: "No remote origin configured. Please provide the Git remote URL to configure."
+  2. Execute: `git remote add origin <url>`.
+- **First Commit Check:** Check if the repository has any commits or remote branches (e.g. `git branch -r` is empty). If this is the repository's first commit/push:
+  - Commit and push directly to the default/`main` branch.
+- **Pre-existing Changes Check:** Examine `git status --short` to see what files are modified. Note which modifications are related to the current task/spec vs which ones are pre-existing or unrelated.
 
-If no changes: "No uncommitted changes detected. Nothing to ship."
+If no changes at all: "No uncommitted changes detected. Nothing to ship."
 
 ---
 
@@ -81,37 +84,34 @@ Determine the **conventional commit type** by analyzing the diff:
 
 ---
 
-### Step 4: Verify & Bump Package Version
+### Step 4: Verify & Bump Package Version (Mandatory Verification)
 
-If the project uses versioning (e.g., `package.json` in Node.js, `Cargo.toml` in Rust, `pyproject.toml` in Python):
+If the project uses versioning (e.g. monorepo or standard package layouts with `package.json`, `Cargo.toml`, or `pyproject.toml`):
 
-1. **Determine if the diff touches versioned packages:**
-   - Check if package manifests are in the diff or have version changes compared to the `main` branch:
+1. **Verify if package files have been modified:**
+   - Run `git diff --name-only` to list all modified files.
+   - Match the file paths to package/workspace directories (e.g. files starting with `packages/cli/` are in the CLI package).
+   - **If any file within a package/workspace folder is modified, and the commit type is `feat` or `fix` (or contains a breaking change `!`), a version bump is MANDATORY for that package.**
+
+2. **Map the commit type to SemVer bump:**
+
+   | Commit type | Semver bump | Description |
+   |-------------|-------------|-------------|
+   | `fix` | **patch** | Bugfix / small patch correction |
+   | `feat` | **minor** | New feature or capability |
+   | breaking change (`!` or `BREAKING CHANGE:`) | **major** | Incompatible API changes |
+
+3. **Check if Version was already bumped:**
+   - Inspect the diff of package manifest files (e.g. `package.json`). If the `version` field was already changed in the diff, the bump requirement is satisfied.
+   - **If the version has not been bumped yet, you MUST prompt the user for the version bump before committing:**
      ```bash
-     git diff origin/main -- package.json packages/cli/package.json
-     ```
-   - **If the diff touches versioned packages, a version bump is required.** Do not skip this step.
-
-2. **Map the conventional commit type to a semver bump:**
-
-   | Commit type | Change kind | Semver bump | Example resulting version |
-   |-------------|-------------|-------------|---------------------------|
-   | `fix` | bugfix | **patch** | `0.0.1` |
-   | `feat` | new feature | **minor** | `0.1.0` |
-   | breaking change (`!` or `BREAKING CHANGE:`) | incompatible change | **major** | `1.0.0` |
-   | `docs`, `test`, `refactor`, `style`, `chore` | internal cleanup | usually **none** | — |
-
-3. **Align workspace dependencies:**
-   - In monorepos, check if dependencies between local packages are aligned. For example, if `packages/cli/package.json` depends on `@archznn/crewloop-skills` (the root package), ensure the dependency constraint is updated to match the new version.
-
-4. **Suggest or execute the version bump:**
-   - If the version hasn't been bumped yet, warn the user and suggest running:
-     ```bash
+     # Example npm workspaces command (adjust according to tech stack):
      npm version <patch | minor | major> --workspaces --no-git-tag-version
      ```
-     *(Adapt commands to the project packaging tool if not using Node.js/npm).*
-   - **Always ask for user confirmation before running the bump command.** Do not run it automatically without confirmation.
-   - **If you are unsure whether a bump is needed, always ask the user before proceeding.**
+   - Do NOT proceed or propose committing without first performing the version bump if required.
+
+4. **Align workspace dependencies:**
+   - Update any internal dependency constraints in the workspace manifests to match the newly bumped package versions.
 
 ---
 
@@ -270,28 +270,36 @@ chore(deps): update eslint to v9
 
 ---
 
-### Step 7: Present to User
+### Step 7: Present to User & Ask Collaboration Mode
 
-Show a formatted summary and ASK before proceeding. Prioritize using the `ask_question` tool to present the choices in an interactive modal, falling back to raw chat text only if the tool is not supported:
+1. **Ask Collaboration Mode:** Prioritize asking the user:
+   - **Solo Mode:** Push directly to the default branch (e.g. `main`). Useful for sole developer projects.
+   - **Teamwork Mode:** Create a separate feature branch and open a Pull Request.
+
+2. **Draft the Classified Change Report:** Show a formatted summary separating target task changes from pre-existing/unrelated changes. Prioritize using the `ask_question` tool to present choices, falling back to raw chat text only if the tool is not supported:
 
 ```markdown
 ## 📦 Ready to Ship
 
-### Files Changed
+### 🎯 Feature / Fix Changes (Target Task)
 | File | Status | Lines | Description |
 |------|--------|-------|-------------|
-| `src/components/Button.tsx` | Modified | +45 -12 | Updated styling and added loading state |
 | `src/hooks/useAuth.ts` | Added | +120 | New authentication hook |
-| `tests/Button.test.tsx` | Modified | +30 -5 | Added loading state tests |
+| `tests/useAuth.test.ts` | Added | +30 | Added auth hook unit tests |
 
-**Total:** 3 files changed, +195 -17
+### 📁 Pre-existing / Unrelated Changes (Stashed for isolation)
+| File | Status | Lines | Description |
+|------|--------|-------|-------------|
+| `config.json` | Modified | +5 -2 | Local database settings changed prior to task |
+
+**Total:** 3 files changed, +155 -2
 
 ### Change Summary
 - **Type:** `feat`
 - **Scope:** `auth`
-- **Description:** Add user authentication with JWT tokens
+- **Description:** add user authentication with JWT tokens
 
-### Proposed Branch
+### Proposed Branch (Teamwork Mode only)
 `feat/jwt-authentication`
 
 ### Proposed Commit Message
@@ -310,17 +318,18 @@ Closes #42
 ```
 
 ### Next Steps
-1. Create branch `feat/jwt-authentication`
+1. Create branch `feat/jwt-authentication` (if Teamwork Mode)
 2. Stage and commit changes
 3. Push to remote
-4. Open PR at: `https://github.com/user/repo/compare/feat/jwt-authentication?expand=1`
+4. Open PR at: `https://github.com/user/repo/compare/feat/jwt-authentication?expand=1` (or automatically via `gh` CLI)
 
 ---
 
 **What would you like to do?**
 
-- **[C] Commit & Push** — Create branch, commit, and push
-- **[P] Commit, Push & Open PR** — All of the above + PR link
+- **[C] Commit & Push (Solo)** — Commit and push directly to `main` (Solo Mode)
+- **[B] Commit & Push (Teamwork)** — Create branch, commit, and push (Teamwork Mode)
+- **[P] Commit, Push & Auto-PR (Teamwork)** — Create branch, commit, push, and open PR automatically (uses `gh pr create` if available)
 - **[E] Edit** — Change commit message, branch name, or scope
 - **[R] Review** — Go back to review the changes
 - **[O] Back to Orchestrator** — New task or continue working
@@ -331,32 +340,53 @@ Closes #42
 
 ### Step 8: Execute (only if user confirms)
 
-**If user confirms commit:**
+#### 8.1 Isolation & Stashing Workflow
+1. **Stash All Changes:** To ensure clean branch creation and isolate modifications:
+   ```bash
+   git stash push -m "shipper-pre-branch-stash"
+   ```
+2. **Create Branch (Teamwork Mode only):**
+   ```bash
+   git checkout -b <branch-name>
+   ```
+3. **Restore Changes & Stage Feature Files Only:**
+   ```bash
+   git stash pop
+   ```
+   *CRITICAL Feature Isolation:* Do not run `git add -A` if there are unrelated modifications. Instead, only stage files related to the target task/spec:
+   ```bash
+   git add skills/docs-writer/SKILL.md specs/archive/...
+   ```
+   *Re-stash Unrelated Files:* If there are remaining unstaged files that belong to another task, stash them again before committing:
+   ```bash
+   git stash push -m "shipper-remaining-unrelated-stash"
+   ```
 
+#### 8.2 Committing & Pushing
+- **Solo Mode:**
+  Stage only target files, commit, and push directly to `main` (or default branch):
+  ```bash
+  git commit -m "<type>(<scope>): <description>"
+  git push origin main
+  ```
+- **Teamwork Mode:**
+  Commit and push to the feature branch:
+  ```bash
+  git commit -m "<type>(<scope>): <description>"
+  git push -u origin <branch-name>
+  ```
+  *(If the first push or branch main doesn't exist, push to main).*
+
+#### 8.3 Auto-PR Creation
+Check if the GitHub CLI (`gh`) is installed and authenticated:
 ```bash
-# Stash any uncommitted changes on current branch
-git stash push -m "shipper-pre-branch-stash"
-
-# Create and checkout new branch
-git checkout -b <branch-name>
-
-# Apply stashed changes
-git stash pop
-
-# Archive specs before committing (move from changes/ to archive/)
-# Example: mv specs/changes/001-auth-jwt specs/archive/2024-01-15-001-auth-jwt/
-
-# Stage all changes
-git add -A
-
-# Commit with message
-git commit -m "<type>(<scope>): <description>"
-
-# Push to remote
-git push -u origin <branch-name>
+gh auth status
 ```
-
-**Generate PR link:**
+If `gh` is available and the user confirmed `[P] Auto-PR`:
+```bash
+gh pr create --fill
+```
+Otherwise, fallback to generating the PR web link:
 
 Detect remote platform:
 ```bash
@@ -390,6 +420,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **Always run the VALIDATION CHECKLIST** before presenting the commit message — reject messages that fail any check.
 - **Always check for specs** — Before shipping, verify specs exist in `specs/changes/NNN-name/`. If no specs found, warn: "No specs found. Architect should create specs before shipping."
 - **Always archive specs on commit** — Move completed specs from `specs/changes/` to `specs/archive/YYYY-MM-DD-NNN-name/` before pushing.
+- **Always verify version bump** — If any files in a versioned package/workspace have been modified, you MUST ensure a version bump was executed and staged. Never ship a `feat` or `fix` without a version bump on versioned packages.
 - **Never create tags or releases without explicit user confirmation** — CI-driven tagging (`release-tag.yml`) is the default; manual tags/releases require approval.
 - **Never invent release notes** — Derive release notes only from commits since the last tag.
 - **Never overwrite an existing tag** — Abort and warn if `git rev-parse "vX.Y.Z"` succeeds.
@@ -412,6 +443,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 ## ANTI-PATTERNS
 
 - ❌ Committing without showing the diff first
+- ❌ Committing a `feat` or `fix` that modifies a versioned package/workspace without executing a version bump
 - ❌ Using vague commit messages like "update" or "fix"
 - ❌ Using invented types like `improvement`, `change`, `update`, `enhance` — stick to the 11 allowed types
 - ❌ Description in past tense: "Added login" instead of "add login"

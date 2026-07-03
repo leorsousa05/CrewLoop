@@ -1,0 +1,7 @@
+title: "Smart Shipper Git Flow and Robust Features Isolation"
+status: "completed"
+author: "architect"
+created_at: "2026-07-02"
+affected_files:
+  - "skills/shipper/SKILL.md"
+  - "skills/shipper/references/tags-and-releases.md"
