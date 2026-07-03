@@ -88,7 +88,6 @@ const sidebars = {
       items: [
         'tools/cli',
         'tools/dashboard',
-        'tools/obsidian-mcp',
       ],
     },
     {

@@ -1,0 +1,11 @@
+title: "README Improvements and Obsidian MCP Cleanup"
+status: "completed"
+author: "architect"
+created_at: "2026-07-03"
+affected_files:
+  - "README.md"
+  - "AGENTS.md"
+  - "servers/obsidian-mcp"
+  - "docs/docs/contributing/repository-structure.md"
+  - "docs/docs/tools/obsidian-mcp.md"
+  - "docs/sidebars.js"

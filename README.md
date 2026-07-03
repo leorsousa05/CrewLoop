@@ -48,6 +48,62 @@ python scripts/validate-skills.py
 
 Each skill is automatically detected and activated according to the conversation context.
 
+## CLI Reference & Options
+
+The `crewloop` CLI provides commands to manage skills and integrate them with your AI coding agents.
+
+### Commands
+
+| Command | Description |
+| :--- | :--- |
+| `crewloop install` | Installs the CrewLoop skills to your local environment. |
+| `crewloop list` | Lists all installed skills and active hooks. |
+| `crewloop dashboard` | Launches the real-time WebSocket dashboard. |
+
+### Global Flags for `crewloop install`
+
+| Flag | Description |
+| :--- | :--- |
+| `--symlink` | Symbolically link skills instead of copying them (ideal for development). |
+| `--force` | Overwrite existing skill configurations or hooks without asking. |
+| `--dry-run` | Output the installation steps without modifying any files. |
+| `--agent <name>` | Configure hooks for a specific agent (e.g., `kimi`, `claude`, `codex`, `agy`). |
+| `--target <path>` | Specify a custom destination path for the skills. |
+| `--skill <name>` | Install only a specific skill (can be specified multiple times). |
+
+## Real-time Activity Dashboard
+
+The dashboard provides a real-time WebSocket visualization of active skills, tool-use events, and execution logs.
+
+By default, the dashboard binds to `http://127.0.0.1:7890`. You can change this port by setting the `CREWLOOP_DASHBOARD_PORT` environment variable.
+
+### Running the Dashboard
+
+You can start the dashboard using the CLI:
+```bash
+crewloop dashboard
+```
+
+Alternatively, you can run it from the source:
+```bash
+cd servers/dashboard
+npm install
+npm run dev
+```
+
+### Keyboard Shortcuts
+- **`Cmd/Ctrl + K`**: Opens the command palette to search events, switch sessions, or manage active skills.
+
+## Supported Agents & Hooks
+
+CrewLoop supports native shimming/hooking for the following AI agents:
+- **Kimi Code** (`kimi`)
+- **Claude** (`claude`)
+- **Codex** (`codex`)
+- **AGY** (`agy`)
+
+During `crewloop install`, the installer modifies the configuration or custom scripts of the selected agent. This shims their execution, allowing tool execution events (such as read/write file, run command, etc.) to be forwarded to the local dashboard WebSocket.
+
 ## What's in the Box?
 
 ### Core Crew
@@ -109,6 +165,9 @@ flowchart TD
 
 **Flow rules:**
 
+> [!IMPORTANT]
+> **Core Routing Rule:** Under the star topology, no execution skill is allowed to hand off directly to another execution skill. All roads return control to the Orchestrator.
+
 1. **Orchestrator is the central hub** — every skill hands control back to Orchestrator at the end of its turn.
 2. **Orchestrator always routes to Architect first** — to create or update specifications.
 3. **Architect is the design gatekeeper** — once the spec is created, control returns to Orchestrator, which routes to Designer (for UI) or Engineer (for code).
@@ -120,6 +179,10 @@ flowchart TD
 9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
 10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who yields control to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
 
+> [!NOTE]
+> **Standard Developer Cycle Example:**
+> `Orchestrator` (Discovery) -> `Architect` (Spec creation) -> `Orchestrator` (Briefing) -> `Engineer` (Build & Tests) -> `Orchestrator` (Handoff) -> `Reviewer` (Quality gate check) -> `Orchestrator` (Approval) -> `Shipper` (Git commit & PR) -> `Orchestrator` (Complete).
+
 
 ## Repository Layout
 
@@ -128,7 +191,6 @@ crewloop/
 ├── skills/                # Role-based SKILL.md instructions
 ├── packages/cli/          # npm-published CLI installer
 ├── servers/dashboard/     # Real-time WebSocket dashboard
-├── servers/obsidian-mcp/  # Obsidian MCP bridge
 ├── docs/                  # Docusaurus documentation site
 ├── references/            # Shared conventions and workflow reference
 ├── scripts/               # Validation and packaging helpers

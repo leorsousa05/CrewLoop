@@ -34,11 +34,10 @@ crewloop/
 │   ├── package-skill.py             # Packages a skill into a .skill archive
 │   └── npm-publish-dry-run.sh       # Dry-run npm publish workflow
 ├── servers/
-│   ├── dashboard/                   # Real-time skill dashboard (TypeScript/Node.js)
-│   │   ├── src/
-│   │   ├── ui/
-│   │   └── README.md
-│   └── obsidian-mcp/                # Obsidian MCP server (Python, experimental)
+│   └── dashboard/                   # Real-time skill dashboard (TypeScript/Node.js)
+│       ├── src/
+│       ├── ui/
+│       └── README.md
 ├── skills/                          # All 18 skill directories
 │   ├── orchestrator/SKILL.md
 │   ├── architect/SKILL.md

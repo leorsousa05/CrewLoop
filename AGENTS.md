@@ -16,7 +16,6 @@
 - **Skills** — 18 Markdown skill files, each describing a specialist role
 - **CLI** (`packages/cli/`) — TypeScript tool that installs skills and configures agent hooks
 - **Dashboard** (`servers/dashboard/`) — real-time WebSocket server + browser UI that shows which skill is active and a live event timeline
-- **Obsidian MCP** (`servers/obsidian-mcp/`) — Python MCP server that bridges skills with an Obsidian vault
 - **Docs site** (`docs/`) — Docusaurus site deployed to GitHub Pages
 - **Helper scripts** — Python/Bash scripts for skill validation and packaging
 
@@ -86,9 +85,6 @@ crewloop/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── README.md
-│   └── obsidian-mcp/                # Obsidian MCP server (Python)
-│       └── src/
-│           └── obsidian_mcp/        # Python package
 ├── skills/                          # All 18 skill directories
 │   ├── orchestrator/SKILL.md
 │   ├── architect/
@@ -154,7 +150,6 @@ crewloop/
 | Skills | Markdown | Role-based workflow instructions for AI agents |
 | CLI | TypeScript (Node.js) | Installs skills and configures agent hooks |
 | Dashboard | TypeScript (Node.js + WebSocket) | Real-time skill and tool activity visualization |
-| Obsidian MCP | Python | MCP server bridging skills with an Obsidian vault |
 | Docs site | Docusaurus | GitHub Pages documentation site |
 | Scripts | Python + Bash | Skill validation, packaging, and publish automation |
 
