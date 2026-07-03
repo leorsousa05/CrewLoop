@@ -18,13 +18,22 @@ README skeletons for each project type. Copy the relevant template, fill placeho
 ## CLI Tool
 
 ```markdown
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" width="220" alt="{{name}} logo">
+  </picture>
+</p>
+
 <h1 align="center">{{name}}</h1>
 
-<p align="center">{{one-liner}}</p>
+<p align="center">
+  <em>{{one-liner}}</em>
+</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/{{name}}"><img src="https://img.shields.io/npm/v/{{name}}.svg" alt="npm version"></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://www.npmjs.com/package/{{name}}"><img src="https://img.shields.io/npm/v/{{name}}?style=flat-square&color=111111" alt="npm version"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT License"></a>
 </p>
 
 - **Feature one:** short explanation.
@@ -44,10 +53,10 @@ Requires Node.js {{node-version}}+.
 \`\`\`bash
 {{name}} {{basic-command}}
 {{name}} {{command-with-flag}}
-{{name}} {{command-with-options}}
 \`\`\`
 
-## Options
+<details>
+<summary><strong>Advanced Options</strong></summary>
 
 \`\`\`
 -o, --output <file>    Description
@@ -55,6 +64,8 @@ Requires Node.js {{node-version}}+.
 -h, --help             Show help
 -V, --version          Show version
 \`\`\`
+
+</details>
 
 ## API
 
@@ -71,11 +82,11 @@ const result = await {{mainExport}}({{args}});
 
 ### Notes
 
-- Lead with centered title + one-liner + badges block for visual impact.
+- Lead with centered logo picture, title + italic slogan + flat-square badges block for visual impact.
 - Feature list goes above the fold (no heading needed, just a bullet list).
 - Show `npm install -g` first (global install for CLIs), then `npx` as alternative if applicable.
 - Usage section: 3-5 real commands, simplest first. Show actual flags, not pseudocode.
-- Options: copy from `--help` output. Keep formatting as a code block, not a table.
+- Use `<details>` collapsible panels for long lists of Options or advanced commands.
 - API section: only include if the CLI also exports a programmatic API. Otherwise omit.
 
 ---
@@ -83,19 +94,53 @@ const result = await {{mainExport}}({{args}});
 ## Library / Package
 
 ```markdown
-<h3 align="center">{{name}}</h3>
-<p align="center">{{one-liner}}</p>
-
 <p align="center">
-  <a href="https://www.npmjs.com/package/{{name}}"><img alt="npm version" src="https://img.shields.io/npm/v/{{name}}"></a>
-  <a href="LICENSE.md"><img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" width="220" alt="{{name}} logo">
+  </picture>
 </p>
 
-## Highlights
+<h1 align="center">{{name}}</h1>
 
-- Highlight one
-- Highlight two
-- Highlight three
+<p align="center">
+  <em>{{one-liner}}</em>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/{{name}}"><img alt="npm version" src="https://img.shields.io/npm/v/{{name}}?style=flat-square&color=111111"></a>
+  <a href="LICENSE.md"><img alt="License" src="https://img.shields.io/badge/license-MIT-111111?style=flat-square"></a>
+</p>
+
+- **Highlight one:** short description.
+- **Highlight two:** short description.
+
+## Before / After
+
+<table>
+<tr>
+<td width="50%">
+
+### 🗣️ Verbose / Traditional
+\`\`\`tsx
+// Old way
+import { Component } from "old-library";
+const app = () => <Component option={true} />;
+\`\`\`
+
+</td>
+<td width="50%">
+
+### ⚡ Clean / Optimized
+\`\`\`tsx
+// With {{name}}
+import { {{mainExport}} } from "{{name}}";
+const app = () => <{{mainExport}} />;
+\`\`\`
+
+</td>
+</tr>
+</table>
 
 ## Quick Start
 
@@ -106,17 +151,14 @@ npm install {{name}}
 \`\`\`tsx
 import { {{mainExport}} } from "{{name}}"
 
-{{minimal-usage-example}}
+const result = {{mainExport}}();
 \`\`\`
 
 ## Usage
 
 \`\`\`tsx
-// Pattern one
-import { A } from "{{name}}"
-
-// Pattern two (tree-shaking)
-import { B } from "{{name}}/b"
+// Pattern description
+import { {{mainExport}} } from "{{name}}"
 \`\`\`
 
 All components/functions accept these props/options:
@@ -130,7 +172,8 @@ All components/functions accept these props/options:
 
 ### Notes
 
-- "Highlights" instead of "Features": it's a library, so show what makes it stand out.
+- Lead with centered logo picture, title + italic slogan + flat-square badges block.
+- Include a visual "Before / After" comparison table showing the improvement or clean API comparison.
 - Quick Start = install + minimal working example in under 10 lines total.
 - Usage section shows import patterns and common configurations.
 - Prop/option list uses inline code for names and defaults.
@@ -141,6 +184,10 @@ All components/functions accept these props/options:
 ## Web App
 
 ```markdown
+<p align="center">
+  <img src="assets/preview-mockup.png" width="860" alt="{{name}} visual preview">
+</p>
+
 # {{name}}
 
 {{one-liner describing what the app does and who it's for}}
@@ -183,8 +230,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Notes
 
-- No badges for apps (they're not published to a registry).
-- No centered title (apps are simpler, less "brand" presence).
+- Lead with a visual banner or desktop screenshot mockup (`assets/preview-mockup.png`) to give a rich visual impression of the application.
+- No registry badges for private apps (since they're not published to npm/crates/PyPI).
 - Getting Started replaces Install: readers need to clone and configure.
 - Environment variables table is critical. Include `.env.example` in the repo.
 - Tech Stack is optional but helps contributors understand the codebase.

@@ -38,7 +38,15 @@ Scoring: Yes = 1, No = 0, N/A = exclude from denominator. Target: all applicable
 21. Spot-check 2-3 links to confirm they are not broken
 22. No references to deprecated APIs, removed features, or old package names
 
+## Visual & Layout (4 checks)
+
+23. Logo picture/banner is properly centered (using HTML align) with valid `alt` text description
+24. Flat-square badges styled with color `111111` aligned cleanly under the slogan (for published packages)
+25. Comparative before/after tables and metrics boxes used instead of plain text bullet lists for stat/code differences
+26. Collapsible `<details>` and `<summary>` tags wrap verbose data, logs, or secondary configuration options
+
 ## Project-Type Specific
+
 
 ### CLI tools
 - `--help` output matches the documented options
@@ -65,3 +73,6 @@ Any of these means the README is not ready:
 - No install or getting started instructions (reader cannot use the project)
 - Default boilerplate README (e.g., unchanged create-next-app template)
 - Code examples that cannot run (syntax errors, missing imports, wrong API)
+- Raw unstyled markdown lists where comparative tables or metrics cards should be used
+- Empty or generic alt tags in graphics/logos
+
