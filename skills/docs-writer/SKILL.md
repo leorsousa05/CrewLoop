@@ -110,9 +110,50 @@ For **module/feature/capability docs**, use:
 - Configuration (if applicable)
 - Related / see also
 
-### Step 5: Write Sections
+### Step 5: Write Sections & Apply Rich Layout Rules
 
-Copy the matching skeleton from `references/section-templates.md` and fill it.
+Copy the matching skeleton from `references/section-templates.md` and fill it. Apply the following rich visual rules:
+
+#### 5.1 Centered Branding & Header (Libraries, CLIs, Frameworks)
+- Center the main title and slogan using HTML:
+  ```markdown
+  <p align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+      <img src="assets/logo.png" width="220" alt="Alt description">
+    </picture>
+  </p>
+  <h1 align="center">Name</h1>
+  <p align="center"><em>Slogan in italic</em></p>
+  ```
+- Logo falls back from theme `<picture>` to default `<img src="..." alt="...">`.
+
+#### 5.2 Flat-Square Badges
+- For published packages or tools, align flat-square badges under the slogan:
+  `img src="https://img.shields.io/badge/key-value-111111?style=flat-square"`
+- Align badges in a single `<p align="center">` block.
+
+#### 5.3 Comparative Tables & Metrics Cards
+- Use side-by-side tables for before/after code comparisons.
+- Use clean ASCII box cards or tabular formats for key stats and performance metrics (e.g. LOC, cost, speed savings).
+
+#### 5.4 Collapsible Details Panels
+- Wrap advanced options, large setup matrices, raw benchmark data, or long configuration lists in `<details>` and `<summary>` tags to maintain clean reading flow:
+  ```markdown
+  <details>
+  <summary><strong>Section Title</strong></summary>
+
+  Content...
+  </details>
+  ```
+
+#### 5.5 GitHub Markdown Alerts
+- Emphasize important context, tips, warnings, or caution notices using GitHub alerts:
+  `> [!NOTE]` or `> [!TIP]` or `> [!WARNING]`.
+
+#### 5.6 Images & Visual Mocks
+- If the project involves a user interface, or if requested by the user, embed a centered visual preview mockup image or banner:
+  `<p align="center"><img src="assets/preview.png" width="800" alt="Preview"></p>`
 
 **Universal rules:**
 - The H1 is the project/module/feature name. The one-liner sits directly below with no heading.
@@ -130,7 +171,7 @@ Copy the matching skeleton from `references/section-templates.md` and fill it.
 
 Skip entirely unless the project publishes to a registry (npm, crates.io, PyPI).
 
-When applicable, load `references/badges-and-shields.md`, place directly under title and one-liner, cap at 4.
+When applicable, load `references/badges-and-shields.md`, place directly under title and one-liner, cap at 4 badges.
 
 ### Step 7: Validate
 
@@ -141,6 +182,9 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - Missing install/getting-started
 - Leftover boilerplate (unchanged create-next-app README)
 - Code example that cannot run
+- Raw unstyled markdown lists where comparative tables or metrics cards should be used
+- Empty or generic alt tags in graphics/logos
+
 
 ---
 
