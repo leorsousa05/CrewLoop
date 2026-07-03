@@ -1,0 +1,7 @@
+title: "Version Bump to 0.10.1"
+status: "completed"
+author: "architect"
+created_at: "2026-07-02"
+affected_files:
+  - "package.json"
+  - "packages/cli/package.json"
