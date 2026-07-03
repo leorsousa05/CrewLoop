@@ -1,6 +1,6 @@
 # CrewLoop
 
-An AI agent crew that runs the complete software development flow — from discovery to deploy — with clear roles, mandatory specs, and no skipped steps.
+![CrewLoop hero banner](assets/images/crewloop-hero.png)
 
 [![NPM version](https://img.shields.io/npm/v/@archznn/crewloop-skills)](https://www.npmjs.com/package/@archznn/crewloop-skills)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
@@ -75,6 +75,8 @@ The `crewloop` CLI provides commands to manage skills and integrate them with yo
 
 The dashboard provides a real-time WebSocket visualization of active skills, tool-use events, and execution logs.
 
+![Dashboard overview](assets/screenshots/dashboard-overview.png)
+
 By default, the dashboard binds to `http://127.0.0.1:7890`. You can change this port by setting the `CREWLOOP_DASHBOARD_PORT` environment variable.
 
 ### Running the Dashboard
@@ -104,18 +106,20 @@ CrewLoop supports native shimming/hooking for the following AI agents:
 
 During `crewloop install`, the installer modifies the configuration or custom scripts of the selected agent. This shims their execution, allowing tool execution events (such as read/write file, run command, etc.) to be forwarded to the local dashboard WebSocket.
 
-## What's in the Box?
+## Meet the Crew
+
+CrewLoop ships 18 specialist skills. The core crew owns the main delivery loop; the supporting crew jumps in when the context demands it.
 
 ### Core Crew
 
 | Skill | Phase | Responsibility |
 |-------|-------|----------------|
-| [`orchestrator`](skills/orchestrator/SKILL.md) | Discovery | Context gathering, requirement clarification, and routing |
-| [`architect`](skills/architect/SKILL.md) | Specs | Spec creation, architecture design, and contracts |
-| [`designer`](skills/designer/SKILL.md) | Design | UI/UX aesthetic direction and design specs |
-| [`engineer`](skills/engineer/SKILL.md) | Build | Implementation, tests, and verification |
-| [`reviewer`](skills/reviewer/SKILL.md) | Review | Code review, quality gate, and security scan |
-| [`shipper`](skills/shipper/SKILL.md) | Ship | Git commit, branch creation, push, and PR |
+| <span style="background:#01579B;color:#fff;padding:2px 8px;border-radius:9999px;">Orchestrator</span> | Discovery | Context gathering, requirement clarification, and routing |
+| <span style="background:#E65100;color:#fff;padding:2px 8px;border-radius:9999px;">Architect</span> | Specs | Spec creation, architecture design, and contracts |
+| <span style="background:#6A1B9A;color:#fff;padding:2px 8px;border-radius:9999px;">Designer</span> | Design | UI/UX aesthetic direction and design specs |
+| <span style="background:#1B5E20;color:#fff;padding:2px 8px;border-radius:9999px;">Engineer</span> | Build | Implementation, tests, and verification |
+| <span style="background:#B71C1C;color:#fff;padding:2px 8px;border-radius:9999px;">Reviewer</span> | Review | Code review, quality gate, and security scan |
+| <span style="background:#00695C;color:#fff;padding:2px 8px;border-radius:9999px;">Shipper</span> | Ship | Git commit, branch creation, push, and PR |
 
 ### Supporting Crew
 
@@ -130,6 +134,10 @@ During `crewloop install`, the installer modifies the configuration or custom sc
 | [`researcher`](skills/researcher/SKILL.md) | Research | Technology evaluation and proof-of-concepts |
 | [`security-guard`](skills/security-guard/SKILL.md) | Security Review | Security review, secret scanning, and auth |
 | [`accessibility-auditor`](skills/accessibility-auditor/SKILL.md) | Accessibility Review | WCAG, screen reader, and keyboard navigation review |
+
+### Skills in Action
+
+![Skill active in agent](assets/screenshots/skill-active.png)
 
 ## Workflow (Hub-and-Spoke)
 

@@ -1,0 +1,14 @@
+name: README redesign with hero banner and dashboard screenshots
+status: completed
+author: architect
+started_at: 2026-07-03
+target_completion: 2026-07-03
+affected_files:
+  - README.md
+  - assets/images/crewloop-hero.png
+  - assets/screenshots/dashboard-overview.png
+  - assets/screenshots/skill-active.png
+  - AGENTS.md
+related_specs:
+  - specs/changes/011-interactive-agent-tools/
+related_decisions: []
