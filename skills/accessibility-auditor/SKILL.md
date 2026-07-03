@@ -58,89 +58,11 @@ If there is no UI work: "No UI changes detected. Accessibility audit is not need
 
 ---
 
-### Step 2: Inspect the Implementation
+### Step 2: Inspect the Implementation & Run Checks
 
-Read every changed UI file. Focus on:
-- HTML/JSX templates and component markup
-- CSS/styling for color, contrast, focus, motion, and responsive layout
-- Event handlers and focus management logic
-- Static assets such as images and icons
+Read every changed UI file. Focus on HTML/JSX markup, CSS styles, focus/motion/color tokens, and assets.
 
-Use the checklist in `references/a11y-checklist.md` as the review backbone.
-
----
-
-### Step 3: Run Accessibility Checks
-
-For each applicable check, produce a verdict: **PASS**, **WARN**, or **FAIL**.
-
-#### 3.1 Semantic Structure
-
-- [ ] Semantic HTML elements (`<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<footer>`, `<button>`, `<a>`, `<label>`) are used appropriately.
-- [ ] Heading hierarchy (`h1` → `h2` → `h3`) is logical and does not skip levels for styling.
-- [ ] Lists use `<ul>`, `<ol>`, and `<li>`; tables use `<table>` semantics when appropriate.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.2 Keyboard & Focus
-
-- [ ] All interactive elements are reachable and operable with a keyboard.
-- [ ] Focus order matches visual reading order.
-- [ ] Focus indicators are visible and have sufficient contrast.
-- [ ] Modals, dialogs, and menus trap focus and restore focus on close.
-- [ ] There are no keyboard traps or unreachable content.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.3 ARIA
-
-- [ ] ARIA roles, states, and properties are used correctly and only when native semantics are insufficient.
-- [ ] Dynamic content updates use `aria-live` regions appropriately.
-- [ ] Custom controls expose name, role, and value via ARIA or native attributes.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.4 Color & Contrast
-
-- [ ] Text meets WCAG 2.1 AA contrast ratios (4.5:1 for normal text, 3:1 for large text).
-- [ ] UI components and graphical objects meet 3:1 contrast against adjacent colors.
-- [ ] Information is not conveyed by color alone (icons, patterns, labels also clarify).
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.5 Forms & Labels
-
-- [ ] Every input has an associated `<label>` or `aria-labelledby`/`aria-label`.
-- [ ] Required fields and errors are communicated programmatically and visually.
-- [ ] Error messages are linked to inputs via `aria-describedby` or similar.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.6 Images & Media
-
-- [ ] Decorative images have empty `alt=""`.
-- [ ] Informative images have descriptive `alt` text.
-- [ ] Complex images have extended descriptions.
-- [ ] Captions and transcripts are provided for video/audio where applicable.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.7 Motion & Responsiveness
-
-- [ ] Animations respect `prefers-reduced-motion`.
-- [ ] Touch targets are at least 44 × 44 CSS pixels.
-- [ ] Layouts remain usable at 200% zoom and on small viewports.
-- [ ] Horizontal scrolling is avoided unless essential.
-
-**Verdict:** PASS / WARN / FAIL
-
-#### 3.8 Screen Reader Support
-
-- [ ] Content order makes sense when linearized.
-- [ ] Hidden content is intentionally hidden (`display: none`, `visibility: hidden`, `aria-hidden`) and does not hide focusable elements.
-- [ ] Status messages and loading states are announced.
-
-**Verdict:** PASS / WARN / FAIL
+Run all checks defined in the [Accessibility Checklist](references/a11y-checklist.md) file. For each applicable check, produce a verdict: **PASS**, **WARN**, or **FAIL**.
 
 ---
 
@@ -154,14 +76,14 @@ Summarize findings in a structured report:
 ### Summary
 | Check | Verdict | Notes |
 |-------|---------|-------|
-| Semantic Structure | PASS/WARN/FAIL | ... |
-| Keyboard & Focus | PASS/WARN/FAIL | ... |
-| ARIA | PASS/WARN/FAIL | ... |
-| Color & Contrast | PASS/WARN/FAIL | ... |
-| Forms & Labels | PASS/WARN/FAIL | ... |
-| Images & Media | PASS/WARN/FAIL | ... |
-| Motion & Responsiveness | PASS/WARN/FAIL | ... |
-| Screen Reader Support | PASS/WARN/FAIL | ... |
+| Semantic Structure | [PASS/WARN/FAIL] | ... |
+| Keyboard & Focus | [PASS/WARN/FAIL] | ... |
+| ARIA | [PASS/WARN/FAIL] | ... |
+| Color & Contrast | [PASS/WARN/FAIL] | ... |
+| Forms & Labels | [PASS/WARN/FAIL] | ... |
+| Images & Media | [PASS/WARN/FAIL] | ... |
+| Motion & Responsiveness | [PASS/WARN/FAIL] | ... |
+| Screen Reader Support | [PASS/WARN/FAIL] | ... |
 
 **Overall:** ✅ PASS / ⚠️ PASS WITH WARNINGS / ❌ FAIL
 
@@ -192,6 +114,8 @@ Present the navigation menu and WAIT for user choice. Call the `ask_question` to
 
 - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
+
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
 
 ---
 

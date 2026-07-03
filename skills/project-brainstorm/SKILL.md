@@ -164,9 +164,18 @@ Fill every section. If a section is unknown, write "Not specified yet" rather th
 
 ### Step 6: Return to Orchestrator
 
-Present the brief and the navigation menu.
+Present the brief and the navigation menu. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
+```markdown
+**What would you like to do?**
+
+- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+```
+
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
 
 ---
+
 
 ## RESPONSE RULES
 

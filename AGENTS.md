@@ -91,14 +91,26 @@ crewloop/
 │           └── obsidian_mcp/        # Python package
 ├── skills/                          # All 18 skill directories
 │   ├── orchestrator/SKILL.md
-│   ├── architect/SKILL.md
-│   ├── designer/SKILL.md
-│   ├── engineer/SKILL.md
-│   ├── reviewer/SKILL.md
-│   ├── shipper/SKILL.md
+│   ├── architect/
+│   │   ├── SKILL.md
+│   │   └── references/              # Local references folder
+│   ├── designer/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── engineer/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── reviewer/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── shipper/
+│   │   ├── SKILL.md
+│   │   └── references/
 │   ├── project-brainstorm/SKILL.md
 │   ├── long-term-manager/SKILL.md
-│   ├── accessibility-auditor/SKILL.md
+│   ├── accessibility-auditor/
+│   │   ├── SKILL.md
+│   │   └── references/
 │   ├── docs-writer/SKILL.md
 │   ├── maintainer/SKILL.md
 │   ├── product-manager/SKILL.md
@@ -209,6 +221,8 @@ Rules — no exceptions:
 8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator` with discovery for new or ambiguous projects; `long-term-manager` helps `orchestrator` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **All roads return to Orchestrator.** Every agent hands control back to Orchestrator between phases.
 10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 18 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the Orchestrator/Architect gatekeepers.
+11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who yields control to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+
 
 ---
 
