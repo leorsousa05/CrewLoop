@@ -213,74 +213,42 @@ Then ask ALL relevant questions from the categories below. Skip only what is alr
 
 ### Step 3: Consolidate into Structured Brief
 
-Once all questions are answered, produce a structured brief. Include EVERY section, even if empty:
+Once all questions are answered, produce a clean, focused task brief. Apply these formatting rules:
+- **Dynamic Omission:** Do NOT output empty headers or bullet points. If a section (like Caching, Database, Security, UI/UX Design, or Performance) is not relevant or has no input/requirements, omit it entirely from the final markdown.
+- **Bullet Metadata:** Format basic metadata as a simple, compact bulleted list instead of a large table or block.
 
 ```markdown
 ## Task Brief
 
-**Type:** [feature | modification | bugfix | refactor | investigation | integration]
-**Domain:** [frontend | backend | fullstack | infrastructure | UI/UX | mobile]
-**Scope:** [new | existing codebase]
-**Priority:** [P0 | P1 | P2]
-**Timeline:** [if specified]
-
-### Context
-[Project type, framework, existing patterns, relevant files, design system]
+- **Type:** [feature | modification | bugfix | refactor | docs]
+- **Scope:** [new | existing codebase]
+- **Priority:** [P0 | P1 | P2]
+- **Timeline:** [if specified]
 
 ### Objective
-[What success looks like - 1-2 sentences]
+[1-2 sentences summarizing the core goal]
 
 ### Requirements
-- Functional: [list]
-- Non-functional: [performance, bundle size, accessibility level]
-- Constraints: [tech stack, dependencies, backward compatibility]
+- [ ] Requirement 1
 
-### Design & Architecture
-- Pattern: [Strategy, Factory, Observer, MVC, MVVM, etc.]
-- Architecture: [Clean, Hexagonal, DDD, modular monolith, etc.]
-- Style: [minimalist | animated | cartoon | professional | brutalist | glassmorphism | neumorphism]
-- Animation: [subtle micro-interactions | bold transitions | page transitions | scroll animations | none]
-- Animation feel: [spring | ease | bounce | snappy | smooth]
-- Motion sensitivity: [respects prefers-reduced-motion | no preference]
-- Visual references: [Dribbble, Figma, specific apps]
-- Typography: [fonts]
-- Color palette: [brand colors, existing, new]
+### Affected Files
+- `path/to/file`
+
+[Only include below sections if populated/relevant]
+
+### Design & Visuals
+- Style/Color: ...
+- Layout: ...
 
 ### Technical Details
-- Location: [file paths or modules]
-- Data flow: [state, APIs, inputs/outputs]
-- State management: [local, global store, URL, server, context]
-- Data fetching: [SSR, SSG, CSR, ISR]
-- Caching: [SWR, React Query, Apollo, custom]
-- Edge cases: [list]
-
-### Performance
-- Budget: [bundle size, FCP, TTI]
-- Lazy loading: [yes/no]
-- Expected traffic: [concurrent users]
-
-### Security
-- Auth: [OAuth, JWT, session, none]
-- Sensitive data: [PII, payment, health]
-- Compliance: [GDPR, HIPAA, SOC2]
-
-### Infrastructure
-- Platform: [Vercel, Netlify, AWS, GCP, Azure, Docker]
-- CI/CD: [GitHub Actions, GitLab CI, CircleCI]
-- Database: [PostgreSQL, MongoDB, Redis, serverless]
+- Location: ...
+- State/Data flow: ...
 
 ### Testing
 - [ ] Unit tests
 - [ ] Integration tests
-- [ ] E2E tests
-- [ ] Accessibility tests
-- [ ] Visual regression
-- [ ] Performance tests
-
-### Deferred / Out of Scope
-[list anything explicitly excluded]
-
 ```
+
 
 ### Step 4: Route to Next Skill
 
