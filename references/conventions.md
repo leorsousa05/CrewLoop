@@ -38,8 +38,8 @@ We follow a centralized routing model where all roads lead back to the Orchestra
 - **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
 - **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute. This must be formatted on its own line in the `[IMPLEMENTAÇÃO]` block. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
 
-#### Execution Skills Navigation (Architect, Designer, Engineer, Reviewer, Shipper)
-All non-Orchestrator agents must end their execution by returning control to the Orchestrator:
+#### Execution Skills Navigation (Engineer, Reviewer, Shipper)
+All interactive non-Orchestrator agents must end their execution by returning control to the Orchestrator:
 
 ```markdown
 **What would you like to do?**
@@ -47,14 +47,16 @@ All non-Orchestrator agents must end their execution by returning control to the
 - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
 ```
 
+*(Note: The Architect and Designer skills are non-interactive/automated. They write specifications directly and return control to the Orchestrator without prompting or presenting menus).*
+
 #### Orchestrator Routing Menu
 Only the Orchestrator acts as the central router and presents the menu of next steps to the user:
 
 ```markdown
 **What would you like to do?**
 
-- **[A] Send to Architect** — Create or update specs (always the first step)
-- **[D] Send to Designer** — Visual/UI design direction (if there is UI)
+- **[A] Send to Architect** — Create or update specs (always the first step, can run automatically)
+- **[D] Send to Designer** — Visual/UI design direction (if there is UI, can run automatically)
 - **[E] Send to Engineer** — Implement the spec (BUILD mode)
 - **[R] Send to Reviewer** — Code review and quality check
 - **[S] Send to Shipper** — Commit, branch, push, and open PR

@@ -27,14 +27,11 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 Before designing, understand the context and commit to a **BOLD aesthetic direction**:
 
-### Step 1: Discovery (2-3 questions)
+### Step 1: Automated Discovery (Non-Interactive)
 
-Ask the user briefly:
-- **Purpose:** What problem does this interface solve? Who uses it?
-- **Tone/Flavor:** Any aesthetic preference? (playful, brutal, luxurious, organic, editorial, futuristic, minimal, maximal)
-- **Constraints:** Target platform (web, mobile, both), framework preference, any brand guidelines?
-
-If the user says "you decide", pick a direction that fits the product type and make it memorable.
+The Designer is a fully automated, non-interactive execution skill. Do NOT ask the user clarifying questions or prompt for choices.
+- Read the existing Task Brief and specifications. All tone/flavor, framework, and target platform constraints must be resolved beforehand during the discovery phase (by Orchestrator or a brainstorm subagent) and passed in the brief.
+- If no aesthetic guidelines are provided, choose one of the 10+ directions below that best fits the product's domain, and document your reasoning.
 
 ### Step 2: Commit to a Direction
 
@@ -261,19 +258,12 @@ Spec out:
 
 ## HANDOFF
 
-When the design spec is complete, present navigation options and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+When the design spec is complete, return control to the Orchestrator immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
 
-```markdown
-**What would you like to do?**
-
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
-```
-
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
-
+*Mandatory: Recommend the next command to execute at the end of the response: `/orchestrator`.*
 
 **Critical rules:**
-- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill.
+- **The Designer is non-interactive.** Write the visual spec design files directly and hand control back to the Orchestrator without waiting.
 - If the user wants changes to the design, return to orchestrator for re-routing.
 
 ---

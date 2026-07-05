@@ -54,9 +54,9 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ### What NOT to delegate
 
-- Writing or editing files (`Write`, `Edit`, `Bash` that mutates state).
+- Writing or editing files (`Write`, `Edit`, `Bash` that mutates state) EXCEPT when delegating to the Architect or Designer skills to generate specification or design spec files autonomously based on discovery inputs.
 - Running builds, tests, installs, or deployments.
-- Making routing choices without user confirmation.
+- Making routing choices without user confirmation (except auto-triggering the Architect or Designer spec generation steps).
 - Asking the user questions (do that in the main thread).
 
 ## AFK MODE & ROLE PREFIX
@@ -274,10 +274,10 @@ Context updated. Current state: [describe state, e.g., brief created, specs writ
 
 
 **Critical routing rules:**
-- **NEVER route automatically.** Always present the navigation menu and WAIT for the user to choose the next skill. Do NOT invoke another skill without explicit user confirmation.
+- **NEVER route automatically** EXCEPT for the Architect and Designer spec-writing phases. Once discovery is complete, the Orchestrator can trigger the Architect and Designer directly (either in the same turn or via a subagent) to generate the specification files automatically without waiting for user confirmation or menu routing inputs. For all other execution skills (Engineer, Reviewer, Shipper), always present the navigation menu and WAIT for the user to choose the next skill.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.
 - **Flow progression:** Architect (creates spec) ⇄ Orchestrator ⇄ Designer (if UI) ⇄ Orchestrator ⇄ Engineer (implements code/tests) ⇄ Orchestrator ⇄ Reviewer (quality check) ⇄ Orchestrator ⇄ Shipper (git operations) ⇄ Orchestrator (complete).
-- **Skill handoffs stay in the main thread.** The next skill should activate in the SAME conversation thread so the user can see and interact with every step.
+- **Skill handoffs stay in the main thread** (unless running Architect or Designer via an autonomous subagent). The next execution skill should activate in the SAME conversation thread so the user can see and interact with every step.
 
 ---
 

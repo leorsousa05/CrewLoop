@@ -1,12 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --accent: 180 100% 50%;
+    --accent-alt: 150 100% 45%;
+    --success: 145 80% 45%;
+    --warning: 38 95% 55%;
+    --error: 355 90% 60%;
+    --info: 215 95% 60%;
+    
+    --color-glass-bg: rgba(11, 10, 15, 0.65);
+    --color-glass-border: rgba(38, 38, 38, 0.4);
+    --glass-blur-amount: blur(16px);
+  }
+
   body {
-    @apply bg-bg-primary text-text-primary font-sans antialiased selection:bg-violet-500/30 selection:text-violet-200;
+    @apply bg-bg-primary text-text-primary font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -33,6 +46,29 @@
   border-color: rgba(6, 182, 212, 0.5);
   box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.25);
   transform: translateY(-4px);
+}
+
+/* Glassmorphic 3D Card Utility */
+.glass-card-3d {
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
+  backdrop-filter: var(--glass-blur-amount);
+  -webkit-backdrop-filter: var(--glass-blur-amount);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    0 10px 50px -10px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* Spring Hover Transitions */
+.hover-spring-physics {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hover-spring-physics:hover {
+  transform: translateY(-6px) scale(1.02);
 }
 
 /* Custom scrollbar for webkit */
@@ -70,5 +106,21 @@
 
 .isometric-right:hover {
   transform: perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+}
+
+/* Shimmer Animation for Skeleton */
+@keyframes shimmerDrift {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(18, 17, 23, 0.8) 25%, 
+    rgba(38, 38, 38, 0.5) 50%, 
+    rgba(18, 17, 23, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerDrift 1.5s infinite;
 }
 
