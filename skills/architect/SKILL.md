@@ -158,27 +158,16 @@ subagents:
 4. **Test plan** — what to test and why.
 5. **Risk assessment** — trade-offs, deferred items.
 6. **Subagent plan** — parallelization analysis (if applicable).
-7. **Confirmation** — Present navigation options and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+7. **Handoff** — The Architect skill is non-interactive. Do NOT wait for user confirmation. Return control to the Orchestrator immediately by calling the routing mechanism or recommending the Orchestrator command at the end of your response.
 
-```markdown
-**What would you like to do?**
-
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
-```
-
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response: `/orchestrator`.*
 
 
----
+## STOP CONDITIONS (NON-INTERACTIVE RULE)
 
-## STOP CONDITIONS
-
-Ask for clarification if:
-- No codebase access + task needs existing code understanding
-- Vague requirement ("improve this", "review this" without criteria)
-- Mixes system design with product/business decisions
-- Refactoring without stated goal (perf, readability, migration)
-- Requires deployment, infrastructure, or tech selection without implementation
+The Architect is a fully automated, non-interactive execution skill. You must NEVER ask the user clarifying questions or halt for inputs.
+- If there is any ambiguity, tech stack choice, or missing parameter, you must use standard default conventions or yield control back to the Orchestrator's discovery phase to resolve them before your execution, instead of asking questions in this phase.
+- Once execution starts, create the specs directory structure and files immediately, then return control to the Orchestrator.
 
 ---
 

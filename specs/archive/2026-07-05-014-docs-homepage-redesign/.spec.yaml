@@ -1,0 +1,20 @@
+title: "Docs Homepage Redesign"
+status: "completed"
+author: "architect"
+created_at: "2026-07-05"
+affected_files:
+  - "docs/src/components/LandingPage.tsx"
+  - "docs/src/components/SkillVisualizer.tsx"
+subagents:
+  approved: true
+  components:
+    - name: "landing-page"
+      scope: "Redesign LandingPage.tsx components and layout sections including hero section terminal simulator, skills catalog cards grid, comparison table, and metrics section, applying ultra-premium glassmorphic 3D styling and animations."
+      files:
+        - "docs/src/components/LandingPage.tsx"
+      constraints: "Do not modify the inner mechanics of SkillVisualizer component directly; import it and place it in its respective section."
+    - name: "skill-visualizer"
+      scope: "Redesign SkillVisualizer.tsx to construct an interactive handoff/communication architecture diagram with fluid animation lines, interactive node selections, and premium glassmorphic styling."
+      files:
+        - "docs/src/components/SkillVisualizer.tsx"
+      constraints: "Do not modify files outside of SkillVisualizer.tsx."
