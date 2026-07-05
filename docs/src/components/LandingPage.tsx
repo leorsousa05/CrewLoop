@@ -221,12 +221,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
         </div>
 
         {/* Compatible IDEs / Agent Clients bar */}
-        <div className="flex items-center justify-center gap-5 mt-4 mb-10 text-slate-500 text-[11px] font-mono select-none">
+        <div className="flex items-center justify-center gap-6 mt-4 mb-10 text-slate-500 text-[11px] font-mono select-none">
           <span className="text-[9px] text-slate-600 tracking-wider mr-2">COMPATIBLE AGENTS:</span>
-          <img src="assets/images/claude-ai-icon.png" alt="Claude AI" className="w-5 h-5 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Claude Code" />
-          <img src="assets/images/kimi-icon.png" alt="Kimi" className="w-5 h-5 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Kimi Code" />
-          <img src="assets/images/antigravity-icon.png" alt="AGY" className="w-5 h-5 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="AGY" />
-          <img src="assets/images/opencode-icon.png" alt="OpenCode" className="w-5 h-5 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="OpenCode" />
+          <img src="assets/images/claude-ai-icon.png" alt="Claude AI" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Claude Code" />
+          <img src="assets/images/kimi-icon.png" alt="Kimi" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Kimi Code" />
+          <img src="assets/images/antigravity-icon.png" alt="AGY" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="AGY" />
+          <img src="assets/images/opencode-icon.png" alt="OpenCode" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="OpenCode" />
         </div>
 
         {/* Primary CTAs */}
