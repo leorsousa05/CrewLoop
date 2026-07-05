@@ -221,13 +221,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
         </div>
 
         {/* Compatible IDEs / Agent Clients bar */}
-        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mt-4 mb-10 text-slate-500 text-xs font-mono select-none">
-          <span className="text-[10px] text-slate-650 tracking-wider">COMPATIBLE AGENTS:</span>
-          <span className="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">Claude Code</span>
-          <span className="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">Cursor IDE</span>
-          <span className="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">Windsurf</span>
-          <span className="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">Kimi Code</span>
-          <span className="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">VS Code Hooks</span>
+        <div className="flex flex-wrap items-center justify-center gap-3.5 md:gap-4.5 mt-4 mb-10 text-slate-500 text-[11px] font-mono select-none">
+          <span className="text-[9px] text-slate-600 tracking-wider">COMPATIBLE AGENTS:</span>
+          <span className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">
+            <svg className="w-3.5 h-3.5 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L15 9H22L16.5 13.5L18.5 20.5L12 16.5L5.5 20.5L7.5 13.5L2 9H9L12 2Z" />
+            </svg>
+            <span>Claude Code</span>
+          </span>
+          <span className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">
+            <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M4 4l7.5 16 3-5.5 5.5-3z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>Cursor IDE</span>
+          </span>
+          <span className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">
+            <svg className="w-3.5 h-3.5 text-teal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M3 6l4 12 5-10 5 10 4-12" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>Windsurf</span>
+          </span>
+          <span className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">
+            <svg className="w-3.5 h-3.5 text-green-455" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <circle cx="12" cy="12" r="8" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
+            <span>Kimi Code</span>
+          </span>
+          <span className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-850 hover:text-cyan-400 transition-colors">
+            <svg className="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Z" />
+              <path d="M8 12h8" />
+            </svg>
+            <span>VS Code Hooks</span>
+          </span>
         </div>
 
         {/* Primary CTAs */}
