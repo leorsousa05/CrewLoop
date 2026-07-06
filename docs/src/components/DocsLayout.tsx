@@ -50,7 +50,10 @@ export const DocsLayout: React.FC<DocsLayoutProps> = ({ activeDocId, onNavigate,
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(activeItem!.path);
+        const basePath = import.meta.env.BASE_URL.endsWith('/') 
+          ? import.meta.env.BASE_URL.slice(0, -1) 
+          : import.meta.env.BASE_URL;
+        const response = await fetch(`${basePath}${activeItem!.path}`);
         if (!response.ok) {
           throw new Error(`Failed to load document (Status ${response.status})`);
         }
