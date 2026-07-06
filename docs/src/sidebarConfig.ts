@@ -54,7 +54,8 @@ export const sidebarConfig: SidebarConfig = [
     label: 'Tools',
     items: [
       { id: 'tools/cli', title: 'CLI', path: '/docs/tools/cli.md' },
-      { id: 'tools/dashboard', title: 'Dashboard', path: '/docs/tools/dashboard.md' }
+      { id: 'tools/dashboard', title: 'Dashboard', path: '/docs/tools/dashboard.md' },
+      { id: 'tools/workflow-test', title: 'Workflow Integration Testing', path: '/docs/tools/workflow-test.md' }
     ]
   },
   {

@@ -140,10 +140,9 @@ Please refer to the shared style guides, TDD skip criteria, and code style rules
 When BUILD succeeds and all tests pass:
 
 1. **Update spec status:** Change `.spec.yaml` status from `active` to `completed`
-2. **Archive the change:** Move `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`
-3. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
-4. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
-5. **Present navigation options and WAIT for user choice.** Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+2. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
+3. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
+4. **Present navigation options and WAIT for user choice.** Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
 **What would you like to do?**

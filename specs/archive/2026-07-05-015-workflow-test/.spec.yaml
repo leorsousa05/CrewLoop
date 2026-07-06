@@ -1,0 +1,6 @@
+title: "Workflow Integration Test Documentation"
+status: "completed"
+author: "architect"
+created_at: "2026-07-05"
+affected_files:
+  - "docs/public/docs/tools/workflow-test.md"
