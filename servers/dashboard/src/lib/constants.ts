@@ -1,5 +1,5 @@
 export const SKILL_ICONS: Record<string, string> = {
-  orchestrator: 'Target',
+  'crewloop-hub': 'Target',
   architect: 'Blueprint',
   designer: 'Palette',
   engineer: 'Wrench',
@@ -41,4 +41,3 @@ export const TYPE_COLORS: Record<string, string> = {
   tool: 'var(--running)',
   file: 'var(--text-secondary)',
 };
-

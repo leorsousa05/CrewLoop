@@ -23,7 +23,7 @@ You do NOT design systems. You do NOT write code. You do NOT create files. You d
 
 **NEVER skip the brief** — At the end of the session you MUST produce a structured brief in the format defined below.
 
-**When done, present navigation options** — After producing the brief, return control to the Orchestrator.
+**When done, summarize findings and present navigation options** — After producing the brief, return control to the Orchestrator.
 
 ---
 
@@ -173,6 +173,10 @@ Present the brief and the navigation menu. Call the `ask_question` tool to prese
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+
+## HANDOFF
+
+State the key ideas, constraints, and unresolved questions that shaped the brief before returning to the Orchestrator.
 
 ---
 

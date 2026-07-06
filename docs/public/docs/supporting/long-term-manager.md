@@ -12,16 +12,16 @@ sidebar_position: 1
 
 The Long-Term Manager keeps project context alive across sessions. When a project is too large to finish in one conversation, it creates and maintains a small set of Markdown artifacts inside the target project. The next time work resumes, the crew can pick up exactly where it left off.
 
-It does not design systems, write implementation code, or run git operations. It produces living documents and hands control back to the Orchestrator.
+It does not design systems, write implementation code, or run git operations. It produces living documents and hands control back to the CrewLoop Hub.
 
 ## Responsibilities
 
-1. Read the brief from `project-brainstorm` or the Orchestrator.
+1. Read the brief from `project-brainstorm` or the CrewLoop Hub.
 2. Check whether long-term tracking artifacts already exist.
 3. Decide whether to create, update, or resume the tracking set.
 4. Ask only the targeted questions needed to fill gaps.
 5. Create or update the four artifact files using the templates in `references/templates/`.
-6. Summarize the current state and next actions for the Orchestrator.
+6. Summarize the current state and next actions for the CrewLoop Hub.
 
 ## What Long-Term Manager Never Does
 
@@ -67,23 +67,23 @@ Every modification refreshes the `updated_at` frontmatter field.
 
 **User:** "I want to build a personal finance app."
 
-**Orchestrator invokes Project Brainstorm, then Long-Term Manager.**
+**CrewLoop Hub invokes Project Brainstorm, then Long-Term Manager.**
 
 1. Long-Term Manager checks `docs/` and finds no artifacts.
 2. Asks: "What is the short project name?" → "finloop".
 3. Asks: "What are the 3 main milestones?" → "setup, MVP, beta".
 4. Creates the four files from templates with consistent frontmatter.
-5. Returns to Orchestrator: *"Created long-term tracking artifacts for 'finloop'. Status: active. Next: Architect can create the technical spec."*
+5. Returns to CrewLoop Hub: *"Created long-term tracking artifacts for 'finloop'. Status: active. Next: Architect can create the technical spec."*
 
-On the next session, the user says "Continue finloop." The Orchestrator invokes Long-Term Manager in update mode, which reads `context-resume.md`, prepends a new session entry, updates deliverable statuses, and returns a concise briefing.
+On the next session, the user says "Continue finloop." The CrewLoop Hub invokes Long-Term Manager in update mode, which reads `context-resume.md`, prepends a new session entry, updates deliverable statuses, and returns a concise briefing.
 
 ## Handoff
 
-**Invoked by:** Orchestrator, usually after `project-brainstorm` or when resuming a multi-session project.  
-**Sends to:** Orchestrator with updated or newly created artifacts.
+**Invoked by:** CrewLoop Hub, usually after `project-brainstorm` or when resuming a multi-session project.  
+**Sends to:** CrewLoop Hub with updated or newly created artifacts.
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Hand the updated long-term artifacts back to the Orchestrator for routing.
+- **[O] Return to CrewLoop Hub** — Hand the updated long-term artifacts back to the CrewLoop Hub for routing.
 ```

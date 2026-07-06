@@ -10,16 +10,16 @@ sidebar_position: 3
 
 `[ Tool Guide ]`
 
-Integration testing in a multi-agent environment verifies that specialized AI skills coordinate seamlessly under the centralized Hub-and-Spoke workflow. Instead of testing individual prompts or tools in isolation, this workflow integration test simulates a real development task—progressing from requirement discovery to final verification—to ensure strict boundary enforcement, precise contract handoffs, and reliable step-by-step execution across all active agent roles. Developers can run this integration test manually by calling each skill in sequence (e.g. `/orchestrator`, `/architect`, `/designer`, etc.) or automatically using AFK mode (by setting `afk: true` in `MEMORY.md`) to let the Orchestrator manage the pipeline transitions. This guide outlines the chronological transition paths, input/output requirements, and success criteria to execute and validate the complete pipeline.
+Integration testing in a multi-agent environment verifies that specialized AI skills coordinate seamlessly under the centralized Hub-and-Spoke workflow. Instead of testing individual prompts or tools in isolation, this workflow integration test simulates a real development task—progressing from requirement discovery to final verification—to ensure strict boundary enforcement, precise contract handoffs, and reliable step-by-step execution across all active agent roles. Developers can run this integration test manually by calling each skill in sequence (e.g. `/crewloop-hub`, `/architect`, `/designer`, etc.) or automatically using AFK mode (by setting `afk: true` in `MEMORY.md`) to let the CrewLoop Hub manage the pipeline transitions. This guide outlines the chronological transition paths, input/output requirements, and success criteria to execute and validate the complete pipeline.
 
 ## Hub-and-Spoke Flowchart
 
-The CrewLoop system runs on a centralized hub-and-spoke model where the Orchestrator regulates all transitions. Every skill yields control back to the Orchestrator before the next phase is invoked.
+The CrewLoop system runs on a centralized hub-and-spoke model where the CrewLoop Hub regulates all transitions. Every skill yields control back to the CrewLoop Hub before the next phase is invoked.
 
 ```mermaid
 graph TD
     %% Node Definitions
-    O(["🎯 Orchestrator"]):::orchestrator
+    O(["🎯 CrewLoop Hub"]):::crewloop-hub
     A["🏗️ Architect"]:::architect
     D["🎨 Designer"]:::designer
     E["🔧 Engineer"]:::engineer
@@ -37,7 +37,7 @@ graph TD
 
     %% Class Definitions (CSS Theme Variables & Contrast Safe Colors)
     classDef default fill:#1e293b,stroke:#475569,stroke-width:1px,color:#f8fafc;
-    classDef orchestrator fill:#0284c7,stroke:#0ea5e9,stroke-dasharray: 0,color:#ffffff,stroke-width:2px;
+    classDef crewloop-hub fill:#0284c7,stroke:#0ea5e9,stroke-dasharray: 0,color:#ffffff,stroke-width:2px;
     classDef architect fill:#7c3aed,stroke:#8b5cf6,color:#ffffff,stroke-width:1px;
     classDef designer fill:#db2777,stroke:#ec4899,color:#ffffff,stroke-width:1px;
     classDef engineer fill:#059669,stroke:#10b981,color:#ffffff,stroke-width:1px;
@@ -50,7 +50,7 @@ graph TD
 
 | Role Badge | Primary Theme Color | Node Geometry | Meaning / Phase |
 | :---: | :--- | :---: | :--- |
-| `🎯 Orchestrator` | Cyan / Sky Blue (`#0284c7`) | Double Rounded Pill | Central router, context discovery and phase controller |
+| `🎯 CrewLoop Hub` | Cyan / Sky Blue (`#0284c7`) | Double Rounded Pill | Central router, context discovery and phase controller |
 | `🏗️ Architect` | Violet / Purple (`#7c3aed`) | Square Box | Specification writer, task list and contract creator |
 | `🎨 Designer` | Magenta / Pink (`#db2777`) | Square Box | UI / UX visual spec designer and layout controller |
 | `🔧 Engineer` | Emerald / Green (`#059669`) | Square Box | Core implementation, builds, and test suites manager |
@@ -60,22 +60,22 @@ graph TD
 
 ---
 
-## 1. Orchestrator Discovery Phase
+## 1. CrewLoop Hub Discovery Phase
 
 - **Objective**: Initiate the session, gather initial context, and formulate the routing plan.
 - **Inputs**: The initial user request, project brief, and active code repositories.
 - **Verification Steps**:
-  1. Confirm the Orchestrator starts with the standard role prefix (`> 🎯 **Orchestrator**`).
+  1. Confirm the CrewLoop Hub starts with the standard role prefix (`> 🎯 **CrewLoop Hub**`).
   2. Verify that the Context Brief table is populated.
   3. Ensure a clear routing decision to the **Architect** is recommended.
 
 ### Deliverables & Boundary Verification
 | Phase | Key Input Path | Key Output Path | Validation Rules |
 | :---: | :--- | :--- | :--- |
-| **🎯 Orchestrator** | Initial prompt | `specs/changes/NNN/.spec.yaml` | Verify context brief contains target files |
+| **🎯 CrewLoop Hub** | Initial prompt | `specs/changes/NNN/.spec.yaml` | Verify context brief contains target files |
 
 :::info
-**Routing Transition**: After completing this phase, control MUST return to the **🎯 Orchestrator** before loading the next skill.
+**Routing Transition**: After completing this phase, control MUST return to the **🎯 CrewLoop Hub** before loading the next skill.
 :::
 
 ---
@@ -83,7 +83,7 @@ graph TD
 ## 2. Architect Specification Phase
 
 - **Objective**: Design the architecture, define system contracts, and establish implementation checklists.
-- **Inputs**: The Orchestrator's Context Brief and existing domain boundaries.
+- **Inputs**: The CrewLoop Hub's Context Brief and existing domain boundaries.
 - **Verification Steps**:
   1. Verify the `specs/changes/NNN-name/` directory is created.
   2. Confirm the existence and validity of `.spec.yaml`, `proposal.md`, `specs/`, `design.md`, and `tasks.md`.
@@ -177,7 +177,7 @@ To declare the workflow integration test complete and correct, the following art
 
 | Phase | Main Deliverable | Verification Tool/Action |
 |---|---|---|
-| **Orchestrator** | Context Brief | Check table correctness and routing output |
+| **CrewLoop Hub** | Context Brief | Check table correctness and routing output |
 | **Architect** | Spec Files Folder | Lint YAML and verify file presence |
 | **Designer** | UI/UX Visual Spec | Check theme tokens and ASCII layout |
 | **Engineer** | Completed Code & Tests | Run compile and execution tests |

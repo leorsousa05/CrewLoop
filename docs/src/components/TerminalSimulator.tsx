@@ -31,7 +31,7 @@ export const TerminalSimulator: React.FC = () => {
         { id: '3', type: 'output', text: '' },
         { id: '4', type: 'header', text: 'crewloop install' },
         { id: '5', type: 'output', text: 'Installed 18 skill(s) to ~/.agents/skills/' },
-        { id: '6', type: 'output', text: '  + orchestrator' },
+        { id: '6', type: 'output', text: '  + crewloop-hub' },
         { id: '7', type: 'output', text: '  + architect' },
         { id: '8', type: 'output', text: '  + designer' },
         { id: '9', type: 'output', text: '  + engineer' },

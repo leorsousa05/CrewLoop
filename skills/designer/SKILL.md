@@ -29,7 +29,7 @@ To translate visual design specifications into concrete component architectures,
 - The UI design involves complex React layouts, bento grids, compound component compositions, or slot patterns.
 - Interactive states (modals, overlays, dropdowns) require React/Next.js state boundaries or custom hooks specs.
 
-Spawn a read-only subagent to run the `frontend-architect` skill and write the component structure files directly into the design folder before returning.
+Spawn a read-only subagent to run the `frontend-architect` skill and return the component structure recommendations. Incorporate the result into the design spec yourself.
 
 ---
 

@@ -39,7 +39,7 @@ crewloop/
 │       ├── ui/
 │       └── README.md
 ├── skills/                          # All 18 skill directories
-│   ├── orchestrator/SKILL.md
+│   ├── crewloop-hub/SKILL.md
 │   ├── architect/SKILL.md
 │   └── ... (18 total)
 ├── specs/

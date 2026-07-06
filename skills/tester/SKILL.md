@@ -21,7 +21,7 @@ You do NOT write production code. You do NOT run git operations. You do NOT repl
 
 **NEVER run git operations** — Branch, commit, and PR belong to the shipper.
 
-**When done, present navigation options** — Return to the standard letter-based menu.
+**When done, summarize findings and present navigation options** — Return to the standard letter-based menu.
 
 ---
 
@@ -50,6 +50,10 @@ Once the Test Spec is approved:
 - Execute the tests and verify application behavior.
 - Compile and present a structured markdown **Test Execution Report** (Report 2) with status, executed test cases, and failures/logs.
 - Immediately clean up any temporary credentials/files.
+
+### Step 4: Handoff Summary
+
+State what was tested, what passed or failed, and what should happen next. Return the report to the Orchestrator.
 
 ---
 
@@ -139,4 +143,3 @@ Call the `ask_question` tool to present options, or refer to the navigation guid
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
-

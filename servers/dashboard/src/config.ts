@@ -56,7 +56,7 @@ export function resolvePackageRoot(): string {
   }
 
   const monorepoRoot = path.resolve(__dirname, '..', '..', '..');
-  if (fs.existsSync(path.join(monorepoRoot, 'skills', 'orchestrator', 'SKILL.md'))) {
+  if (fs.existsSync(path.join(monorepoRoot, 'skills', 'crewloop-hub', 'SKILL.md'))) {
     return monorepoRoot;
   }
 

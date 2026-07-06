@@ -66,6 +66,10 @@ Output a React Component Spec to the design folder detailing:
 - Stubs and Props definitions.
 - Visual component layout maps.
 
+### Step 4: Handoff Summary
+
+State the component boundaries, props/state decisions, and implementation constraints before returning to the Orchestrator.
+
 ---
 
 ## RESPONSE RULES

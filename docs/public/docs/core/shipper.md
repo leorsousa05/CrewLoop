@@ -73,10 +73,10 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 ## Handoff
 
 **Invoked by:** Reviewer.  
-**Sends to:** Orchestrator (returns control to start the next loop).
+**Sends to:** CrewLoop Hub (returns control to start the next loop).
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Next task or adjustments
+- **[O] Return to CrewLoop Hub** — Next task or adjustments
 ```

@@ -21,7 +21,7 @@ You do NOT write production fixes. You do NOT run git operations. You produce cl
 
 **NEVER run git operations** — Branch, commit, and PR belong to the shipper.
 
-**When done, present navigation options** — Return to the standard letter-based menu.
+**When done, summarize findings and present navigation options** — Return to the standard letter-based menu.
 
 ---
 
@@ -51,6 +51,10 @@ Propose a concrete next step:
 - Create a debt payoff plan.
 - Pin or upgrade a dependency.
 - Add monitoring or logging.
+
+### Step 4: Handoff Summary
+
+State what you inspected, how you classified the issue, and what should happen next. Return findings to the Orchestrator.
 
 ---
 
@@ -82,4 +86,3 @@ Call the `ask_question` tool to present options, or refer to the navigation guid
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
-

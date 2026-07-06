@@ -21,7 +21,7 @@ You do NOT write production fixes. You do NOT run git operations. You do not rep
 
 **NEVER run git operations** — Branch, commit, and PR belong to the shipper.
 
-**When done, present navigation options** — Return to the standard letter-based menu.
+**When done, summarize findings and present navigation options** — Return to the standard letter-based menu.
 
 ---
 
@@ -71,6 +71,10 @@ Summarize findings by severity:
 - **Note** — informational.
 
 Include concrete remediation steps and route appropriately.
+
+### Step 7: Handoff Summary
+
+State the security posture, highest-severity issue, and whether findings should go back to the Orchestrator or the invoking review skill.
 
 ---
 
@@ -122,4 +126,3 @@ Call the `ask_question` tool to present options, or refer to the navigation guid
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
-

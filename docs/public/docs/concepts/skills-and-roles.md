@@ -23,7 +23,7 @@ Mandatory in every task flow. No task bypasses any of them.
 
 | Skill | Phase | Role |
 |-------|-------|------|
-| **Orchestrator** | Discovery | Gathers context, asks questions, produces a Task Brief, routes to Architect |
+| **CrewLoop Hub** | Discovery | Gathers context, asks questions, produces a Task Brief, routes to Architect |
 | **Architect** | Specs | Creates spec folders, defines contracts, routes to Designer or Engineer |
 | **Designer** | Design | Commits to aesthetic direction, produces a design spec |
 | **Engineer** | Build | Writes implementation code and tests — the only skill that does |
@@ -32,7 +32,7 @@ Mandatory in every task flow. No task bypasses any of them.
 
 ### Supporting Skills
 
-Invoked by Orchestrator or Reviewer when the task needs a specialist.
+Invoked by CrewLoop Hub or Reviewer when the task needs a specialist.
 
 | Skill | Invoked when |
 |-------|-------------|
@@ -55,7 +55,7 @@ Supporting skills report findings back to the skill that invoked them. They do n
 | Only Engineer writes implementation code | Prevents untested, unreviewed code from other skills |
 | Only Shipper touches git | Ensures every commit is deliberate, reviewed, and Conventional Commits-compliant |
 | Only Reviewer approves changes | Prevents self-review and rubber-stamping |
-| Orchestrator always routes to Architect first | Ensures specs exist before any code is written |
+| CrewLoop Hub always routes to Architect first | Ensures specs exist before any code is written |
 | Designer acts before Engineer on UI | Ensures visual direction is set before implementation |
 
 ## The crew is not a committee

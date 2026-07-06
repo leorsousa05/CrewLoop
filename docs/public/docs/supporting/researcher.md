@@ -43,5 +43,5 @@ The Researcher evaluates technology options, compares alternatives, and produces
 
 ## Handoff
 
-**Invoked by:** Orchestrator.  
-**Sends to:** Orchestrator (which routes to Architect).
+**Invoked by:** CrewLoop Hub.  
+**Sends to:** CrewLoop Hub (which routes to Architect).

@@ -39,10 +39,10 @@ The Product-Manager frames requirements in terms of user pain, success metrics, 
 **Team debates whether to build real-time search or paginated search first:**
 1. Product-Manager frames: "Users abandon search after 3 seconds with no results. Real-time search is P0. Pagination refinements are P2."
 2. Defines success metric: search-to-click rate >= 40%.
-3. Returns framing to Orchestrator.
-4. Orchestrator routes to Architect.
+3. Returns framing to CrewLoop Hub.
+4. CrewLoop Hub routes to Architect.
 
 ## Handoff
 
-**Invoked by:** Orchestrator.  
-**Sends to:** Orchestrator (which routes to Architect).
+**Invoked by:** CrewLoop Hub.  
+**Sends to:** CrewLoop Hub (which routes to Architect).

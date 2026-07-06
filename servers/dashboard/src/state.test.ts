@@ -54,9 +54,9 @@ describe('StateStore', () => {
 
   it('sets explicit active skill from session_start event', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
-    store.applyEvent(makeEvent({ skill: 'orchestrator', event_type: 'session_start' }));
+    store.applyEvent(makeEvent({ skill: 'crewloop-hub', event_type: 'session_start' }));
     const session = store.getSession('sess-1')!;
-    assert.equal(session.active_skill, 'orchestrator');
+    assert.equal(session.active_skill, 'crewloop-hub');
     assert.equal(session.active_confidence, 'explicit');
   });
 

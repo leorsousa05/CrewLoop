@@ -25,7 +25,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 **NEVER run git operations** — Redirect: "Shipper handles git workflow."
 
-**When done, present navigation options** — After completing work, show the letter-based navigation menu.
+**When done, summarize findings and present navigation options** — After completing work, show the letter-based navigation menu.
 
 ---
 
@@ -198,12 +198,16 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - **Never ship a framework's default scaffold README** — replace it wholesale.
 - **Always run the quality checklist** before declaring done.
 - **Always ask the user** what problem the project solves and who the audience is if the code cannot reveal it.
-- **When done, present navigation options** — After completing work, show the menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+- **When done, summarize findings and present navigation options** — After completing work, show the menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
   ```markdown
   **What would you like to do?**
 
   - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
   ```
+
+## HANDOFF
+
+State what documentation you wrote, what audience it targets, and return control to the Orchestrator.
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
 

@@ -31,26 +31,26 @@ Format: `<type>/<short-description>`
 
 ## Letter-Based Navigation & Centralized Routing
 
-We follow a centralized routing model where all roads lead back to the Orchestrator. 
+We follow a centralized routing model where all roads lead back to the CrewLoop Hub. 
 
 ### Presentation Guidelines
 - **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
 - **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
-- **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute. This must be formatted on its own line in the `[IMPLEMENTAÇÃO]` block. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
+- **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute on its own line. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
 
 #### Execution Skills Navigation (Engineer, Reviewer, Shipper)
-All interactive non-Orchestrator agents must end their execution by returning control to the Orchestrator:
+All interactive non-Hub agents must end their execution by returning control to the CrewLoop Hub:
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*(Note: The Architect and Designer skills are non-interactive/automated. They write specifications directly and return control to the Orchestrator without prompting or presenting menus).*
+*(Note: The Architect and Designer skills are non-interactive/automated. They write specifications directly and return control to the CrewLoop Hub without prompting or presenting menus).*
 
-#### Orchestrator Routing Menu
-Only the Orchestrator acts as the central router and presents the menu of next steps to the user:
+#### CrewLoop Hub Routing Menu
+Only the CrewLoop Hub acts as the central router and presents the menu of next steps to the user:
 
 ```markdown
 **What would you like to do?**
@@ -93,27 +93,27 @@ Rules:
 
 ## Mandatory Workflow (Hub-and-Spoke)
 
-All skills communicate with the Orchestrator between phases. No execution skill routes directly to another execution skill.
+All skills communicate with the CrewLoop Hub between phases. No execution skill routes directly to another execution skill.
 
 ```
-Orchestrator ⇄ Architect
-Orchestrator ⇄ Designer (if UI)
-Orchestrator ⇄ Engineer
-Orchestrator ⇄ Reviewer
-Orchestrator ⇄ Shipper
+CrewLoop Hub ⇄ Architect
+CrewLoop Hub ⇄ Designer (if UI)
+CrewLoop Hub ⇄ Engineer
+CrewLoop Hub ⇄ Reviewer
+CrewLoop Hub ⇄ Shipper
 ```
 
 ---
 
 ## AFK Mode
 
-When the user explicitly activates AFK mode, skills route automatically through the workflow via the Orchestrator without presenting navigation menus.
+When the user explicitly activates AFK mode, skills route automatically through the workflow via the CrewLoop Hub without presenting navigation menus.
 
 ### Activation phrases
 
 Case-insensitive matches: `AFK`, `estarei AFK`, `modo AFK`, `vou ficar AFK`.
 
-AFK mode remains active until the workflow returns to Orchestrator after shipping, or until the user explicitly disables it.
+AFK mode remains active until the workflow returns to CrewLoop Hub after shipping, or until the user explicitly disables it.
 
 ### Role prefixes
 
@@ -121,7 +121,7 @@ Every skill response must start with its prefix on its own line:
 
 | Skill | Prefix |
 |-------|--------|
-| Orchestrator | `> 🎯 **Orchestrator**` |
+| CrewLoop Hub | `> 🎯 **CrewLoop Hub**` |
 | Architect | `> 🏗️ **Architect**` |
 | Designer | `> 🎨 **Designer**` |
 | Engineer | `> 🔧 **Engineer**` |
@@ -131,8 +131,8 @@ Every skill response must start with its prefix on its own line:
 ### Automatic routing
 
 When AFK mode is active:
-1. The execution skill performs its task and returns control to the Orchestrator automatically (using the Skill tool to trigger Orchestrator).
-2. The Orchestrator automatically evaluates state and loads the next appropriate skill.
+1. The execution skill performs its task and returns control to the CrewLoop Hub automatically (using the Skill tool to trigger CrewLoop Hub).
+2. The CrewLoop Hub automatically evaluates state and loads the next appropriate skill.
 
 ---
 
@@ -185,7 +185,7 @@ These rules apply to all code proposed or implemented by any agent:
 When running on platforms that support interactive agent tools, agents must prioritize calling these tools to capture inputs and control flow, falling back to raw chat text only if the tool is not supported or errors:
 
 ### 1. Interactive Questions (`ask_question`)
-- **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the options (e.g. `["[O] Return to Orchestrator"]` or the full routing menu).
+- **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the options (e.g. `["[O] Return to CrewLoop Hub"]` or the full routing menu).
 - **Discovery & Questionnaires:** For multi-step questions (e.g. scope discovery or visual styling), group them into structured multiple-choice questions via `ask_question` (using `is_multi_select: false` or `is_multi_select: true` as appropriate) to present checkboxes/radio buttons in a modal.
 - **Confirmations:** Use `ask_question` to ask for confirmations (like before committing or pushing changes).
 
@@ -204,7 +204,7 @@ When running on platforms that support interactive agent tools, agents must prio
 
 To ensure uniform terminal outputs, every skill MUST format its final response following these exact visual blocks:
 
-### 1. Orchestrator CLI Output
+### 1. CrewLoop Hub CLI Output
 ```markdown
 ## 🎯 Context Brief
 
@@ -214,9 +214,16 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 | **Bounded Context** | [Core / CLI / Dashboard / etc.] |
 | **Scoped Files** | [list of files] |
 
-### 💬 Clarification Questions
+### 🧭 What I Did
+- [Discovery summary]
+- [Routing or handoff summary]
+
+### 💬 What I Need From You
 - [Question 1]
 - [Question 2]
+
+### ✨ Next Move
+- [What happens next]
 ```
 
 ### 2. Architect CLI Output
@@ -309,5 +316,4 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
 2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 18 skills defined in the CrewLoop bundle. 
-3. **No Direct Execution Routing:** All execution skills must yield control to the Orchestrator by presenting `[O] Return to Orchestrator`. If you receive a direct handoff from another execution skill (e.g. Architect to Engineer without passing through the Orchestrator's routing menu), you must halt, report a routing error, and return control to the Orchestrator.
-
+3. **No Direct Execution Routing:** All execution skills must yield control to the CrewLoop Hub by presenting `[O] Return to CrewLoop Hub`. If you receive a direct handoff from another execution skill (e.g. Architect to Engineer without passing through the CrewLoop Hub's routing menu), you must halt, report a routing error, and return control to the CrewLoop Hub.

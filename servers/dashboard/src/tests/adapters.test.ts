@@ -153,16 +153,16 @@ describe('normalizeAgy', () => {
       toolCall: {
         name: 'view_file',
         args: {
-          AbsolutePath: '/home/arch/.agents/skills/orchestrator/SKILL.md',
+          AbsolutePath: '/home/arch/.agents/skills/crewloop-hub/SKILL.md',
           IsSkillFile: true,
-          toolSummary: 'Orchestrator skill',
+          toolSummary: 'CrewLoop Hub skill',
         },
       },
     });
 
     assert.ok(event);
     assert.strictEqual(event!.tool, 'Read');
-    assert.strictEqual(event!.skill, 'orchestrator');
+    assert.strictEqual(event!.skill, 'crewloop-hub');
   });
 
   it('does not infer skill for ordinary AGY file reads', () => {

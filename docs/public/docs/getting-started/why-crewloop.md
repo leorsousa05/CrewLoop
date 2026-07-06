@@ -24,7 +24,7 @@ Each symptom has the same root cause: **no process**.
 
 | Problem | CrewLoop solution |
 |---------|-------------------|
-| Wrong requirements | Orchestrator asks clarifying questions and produces a structured brief |
+| Wrong requirements | CrewLoop Hub asks clarifying questions and produces a structured brief |
 | Missing specs | Architect creates mandatory specs for every change, including 1-line fixes |
 | Generic UI | Designer commits to a distinct aesthetic direction before code is written |
 | Untested code | Engineer writes tests alongside implementation |

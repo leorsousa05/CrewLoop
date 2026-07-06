@@ -39,7 +39,7 @@ describe('TerminalSimulator Component', () => {
     });
 
     // Verify command output logs appear
-    // The first command logs contain "Orchestrator" outputs
+    // The first command logs contain "CrewLoop Hub" outputs
     await act(async () => {
       await vi.advanceTimersByTime(500); // delay before rendering logs
     });

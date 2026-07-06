@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-**CrewLoop** is a team of AI skills that operate together as a complete, role-separated software development workflow. Each skill represents a specialist role — orchestrator, architect, designer, engineer, reviewer, shipper, and seven supporting roles — and is distributed as an independent `SKILL.md` file that any compatible AI agent can load and follow.
+**CrewLoop** is a team of AI skills that operate together as a complete, role-separated software development workflow. Each skill represents a specialist role — crewloop-hub, architect, designer, engineer, reviewer, shipper, and twelve supporting roles — and is distributed as an independent `SKILL.md` file that any compatible AI agent can load and follow.
 
 **Why it exists:** Most AI agents operate without a structured process — they jump straight to implementation, skip architecture, and skip review. CrewLoop enforces a mandatory flow where every change goes through context gathering, spec creation, design (if there is UI), implementation, code review, and git operations, each handled by a dedicated skill.
 
@@ -86,7 +86,7 @@ crewloop/
 │   │   ├── tsconfig.json
 │   │   └── README.md
 ├── skills/                          # All 18 skill directories
-│   ├── orchestrator/SKILL.md
+│   ├── crewloop-hub/SKILL.md
 │   ├── architect/
 │   │   ├── SKILL.md
 │   │   └── references/              # Local references folder
@@ -167,25 +167,28 @@ crewloop/
 
 | Skill | Role | Never does |
 |-------|------|-----------|
-| **orchestrator** | Context discovery, requirement gathering, routing | Writes code, designs systems, creates files |
+| **crewloop-hub** | Context discovery, requirement gathering, routing | Writes code, designs systems, creates files |
 | **architect** | Spec creation, architecture design, contracts | Writes implementation code, runs git |
 | **designer** | UI/UX aesthetic direction, design specs | Writes implementation code, runs git |
 | **engineer** | Implementation, tests, BUILD | Git operations, code review, architecture |
 | **reviewer** | Code review, quality gate, security scan | Writes code, runs git operations |
 | **shipper** | Git commit, branch creation, push, PR | Reviews code, writes implementation |
 
-### Supporting Skills — invoked by Orchestrator or Reviewer as needed
+### Supporting Skills — invoked by CrewLoop Hub or Reviewer as needed
 
 | Skill | Invoked when |
 |-------|-------------|
 | **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **long-term-manager** | Projects that span multiple sessions and need durable tracking artifacts across sessions |
 | **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
+| **frontend-architect** | Complex frontend layouts, component architecture, and React/Next.js state boundaries |
 | **docs-writer** | Pure documentation tasks without code changes |
 | **maintainer** | Bug triage, technical debt, dependency updates, production incidents |
 | **product-manager** | Prioritization, roadmap, user stories, success metrics |
 | **researcher** | Technology evaluation, library comparison, proof-of-concept |
+| **schema-designer** | Relational schema design, constraints, indexes, and API payload contracts |
 | **security-guard** | Security review, secret scanning, auth, authorization, PII |
+| **devops-specialist** | Infrastructure configs, deployment scripts, CI/CD pipelines, and release automation |
 | **tester** | Test strategy, QA, coverage analysis, test plans |
 
 Supporting skills report their findings back to the skill that invoked them. They do not write code or run git operations.
@@ -194,29 +197,29 @@ Supporting skills report their findings back to the skill that invoked them. The
 
 ## Mandatory Development Flow (Hub-and-Spoke)
 
-All execution skills return control to the Orchestrator. The Orchestrator manages the task state and handles all routing:
+All execution skills return control to the CrewLoop Hub. The CrewLoop Hub manages the task state and handles all routing:
 
 ```
-Orchestrator ⇄ Architect
-Orchestrator ⇄ Designer (if UI)
-Orchestrator ⇄ Engineer
-Orchestrator ⇄ Reviewer
-Orchestrator ⇄ Shipper
+CrewLoop Hub ⇄ Architect
+CrewLoop Hub ⇄ Designer (if UI)
+CrewLoop Hub ⇄ Engineer
+CrewLoop Hub ⇄ Reviewer
+CrewLoop Hub ⇄ Shipper
 ```
 
 Rules — no exceptions:
 
-1. **Orchestrator always routes to Architect first.** Never directly to Designer or Engineer.
+1. **CrewLoop Hub always routes to Architect first.** Never directly to Designer or Engineer.
 2. **Architect creates a spec** in `specs/changes/NNN-name/` for every change — including 1-line bug fixes.
 3. **Designer acts before Engineer** whenever the change involves a visual interface.
 4. **Engineer never does git operations** and never reviews its own code.
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
-7. **Navigation menus are simplified** to return control to the Orchestrator (`[O] Return to Orchestrator`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
-8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator` with discovery for new or ambiguous projects; `long-term-manager` helps `orchestrator` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
-9. **All roads return to Orchestrator.** Every agent hands control back to Orchestrator between phases.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 18 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the Orchestrator/Architect gatekeepers.
-11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who yields control to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+7. **Navigation menus are simplified** to return control to the CrewLoop Hub (`[O] Return to CrewLoop Hub`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub` with discovery for new or ambiguous projects; `long-term-manager` helps `crewloop-hub` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
+9. **All roads return to CrewLoop Hub.** Every agent hands control back to CrewLoop Hub between phases.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 18 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub/Architect gatekeepers.
+11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who yields control to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
 
 
 ---
@@ -230,10 +233,10 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 **Behavior when active:**
 - Skills skip the interactive navigation prompts.
 - Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **Engineer**`, `> 🔍 **Reviewer**`).
-- Each skill automatically returns control to the Orchestrator, which then automatically routes to and loads the next appropriate skill.
-- The standard routing rules still apply: Orchestrator ⇄ Architect ⇄ Orchestrator ⇄ Designer ⇄ Orchestrator ⇄ Engineer ⇄ Orchestrator ⇄ Reviewer ⇄ Orchestrator ⇄ Shipper.
+   - Each skill automatically returns control to the CrewLoop Hub, which then automatically routes to and loads the next appropriate skill.
+   - The standard routing rules still apply: CrewLoop Hub ⇄ Architect ⇄ CrewLoop Hub ⇄ Designer ⇄ CrewLoop Hub ⇄ Engineer ⇄ CrewLoop Hub ⇄ Reviewer ⇄ CrewLoop Hub ⇄ Shipper.
 
-**Deactivation:** AFK mode ends when Shipper completes and returns control to Orchestrator.
+**Deactivation:** AFK mode ends when Shipper completes and returns control to CrewLoop Hub.
 
 ---
 
@@ -304,12 +307,12 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 
 ## How to Contribute
 
-1. Start with **Orchestrator** — gather context, produce a structured brief, and route to Architect.
-2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then returns to Orchestrator.
-3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then returns to Orchestrator.
-4. **Engineer** implements the spec, runs verification, and returns to Orchestrator.
-5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts, and returns to Orchestrator.
-6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, and returns to Orchestrator.
+1. Start with **CrewLoop Hub** — gather context, produce a structured brief, and route to Architect.
+2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then returns to CrewLoop Hub.
+3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then returns to CrewLoop Hub.
+4. **Engineer** implements the spec, runs verification, and returns to CrewLoop Hub.
+5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts, and returns to CrewLoop Hub.
+6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, and returns to CrewLoop Hub.
 7. Run `python scripts/validate-skills.py` after adding or editing any `SKILL.md`.
 8. Update `README.md` and `AGENTS.md` if the repository structure or team rules change.
 9. Place new skills in `skills/<skill-name>/SKILL.md` using `assets/templates/skill-template.md`.

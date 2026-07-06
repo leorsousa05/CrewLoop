@@ -38,7 +38,7 @@ The Docs-Writer reads the codebase, detects its type, selects the right structur
 
 ## Concrete Example
 
-**Orchestrator routes a pure documentation task: rewrite AGENTS.md.**
+**CrewLoop Hub routes a pure documentation task: rewrite AGENTS.md.**
 1. Docs-Writer reads `conventions.md`, `workflow.md`, all 18 `SKILL.md` files, the dashboard `README.md`, and the CLI `README.md`.
 2. Gathers the exact project layout and workflow conventions.
 3. Produces a 313-line `AGENTS.md` covering project overview, directory structure, core and supporting skills, mandatory flow rules, AFK mode details, and security audit scan parameters.
@@ -46,12 +46,12 @@ The Docs-Writer reads the codebase, detects its type, selects the right structur
 
 ## Handoff
 
-**Invoked by:** Orchestrator or Architect.  
+**Invoked by:** CrewLoop Hub or Architect.  
 **Sends to:** Reviewer or Shipper.
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Adjust scope or requirements
+- **[O] Return to CrewLoop Hub** — Adjust scope or requirements
 - **[S] Send to Shipper** — Commit and ship the documentation
 ```

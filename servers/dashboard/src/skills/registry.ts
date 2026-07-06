@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { SkillMeta } from '../types';
 
 const SKILL_ICONS: Record<string, string> = {
-  orchestrator: 'target',
+  'crewloop-hub': 'target',
   architect: 'blueprint',
   designer: 'palette',
   engineer: 'wrench',

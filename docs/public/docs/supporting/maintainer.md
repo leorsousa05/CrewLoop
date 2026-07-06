@@ -44,5 +44,5 @@ The Maintainer diagnoses production issues, classifies technical debt, plans dep
 
 ## Handoff
 
-**Invoked by:** Orchestrator.  
-**Sends to:** Orchestrator (which routes to Architect).
+**Invoked by:** CrewLoop Hub.  
+**Sends to:** CrewLoop Hub (which routes to Architect).

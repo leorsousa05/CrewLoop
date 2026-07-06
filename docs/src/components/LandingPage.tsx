@@ -58,8 +58,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
 
   const coreSkillsList: SkillDetails[] = [
     { 
-      id: 'core/orchestrator', 
-      name: 'Orchestrator', 
+      id: 'core/crewloop-hub', 
+      name: 'CrewLoop Hub', 
       role: 'Context & Routing',
       desc: 'Analyzes initial context, gathers requirements, and routes workflow tasks between specialist agents.',
       cannotDo: ['Writes code', 'Designs systems', 'Creates files', 'Git operations']
@@ -280,7 +280,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Development Workflow</h2>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            Each phase operates under strict boundaries and returns control to the central Orchestrator between steps.
+            Each phase operates under strict boundaries and returns control to the central CrewLoop Hub between steps.
           </p>
         </div>
         <SkillVisualizer />

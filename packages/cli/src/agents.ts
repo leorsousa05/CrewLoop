@@ -25,8 +25,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.kimi-code', 'config.toml'),
       format: 'toml',
-      beforeToolUseCommand: 'crewloop-shim kimi --default-skill orchestrator',
-      afterToolUseCommand: 'crewloop-shim kimi --default-skill orchestrator',
+      beforeToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
+      afterToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
     },
   },
   {
@@ -36,8 +36,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.claude', 'config.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
-      afterToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
+      beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+      afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
     },
   },
   {
@@ -47,8 +47,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.codex', 'hooks.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
-      afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+      beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+      afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
     },
   },
   {
@@ -58,8 +58,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.gemini', 'config', 'hooks.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
-      afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+      beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+      afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
     },
   },
   {

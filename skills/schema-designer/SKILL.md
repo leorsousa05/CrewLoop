@@ -62,6 +62,10 @@ Review domain specs, entity relationships, and access patterns defined by the Ar
 ### Step 3: Produce Spec Output
 Save schema design files to the spec changes folder `specs/changes/NNN-name/`.
 
+### Step 4: Handoff Summary
+
+State the tables, constraints, API contracts, and migration considerations before returning to the Orchestrator.
+
 ---
 
 ## RESPONSE RULES

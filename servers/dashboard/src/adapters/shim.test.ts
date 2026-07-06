@@ -22,7 +22,7 @@ describe('detectSource', () => {
 
 describe('getDefaultSkill', () => {
   it('reads default skill from argv', () => {
-    assert.equal(getDefaultSkill(['node', 'shim', 'kimi', '--default-skill', 'orchestrator']), 'orchestrator');
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi', '--default-skill', 'crewloop-hub']), 'crewloop-hub');
   });
 
   it('falls back to env var', () => {
@@ -92,17 +92,17 @@ describe('buildEvent', () => {
     const event = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'SessionStart', session_id: 'sess-1', cwd: '/project' },
-      'orchestrator'
+      'crewloop-hub'
     );
     assert.equal(event?.event_type, 'session_start');
-    assert.equal(event?.skill, 'orchestrator');
+    assert.equal(event?.skill, 'crewloop-hub');
   });
 
   it('does not attach default skill to tool events', () => {
     const startEvent = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'PreToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
-      'orchestrator'
+      'crewloop-hub'
     );
     assert.equal(startEvent?.event_type, 'tool_start');
     assert.equal(startEvent?.skill, undefined);
@@ -110,7 +110,7 @@ describe('buildEvent', () => {
     const endEvent = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'PostToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
-      'orchestrator'
+      'crewloop-hub'
     );
     assert.equal(endEvent?.event_type, 'tool_end');
     assert.equal(endEvent?.skill, undefined);
@@ -163,11 +163,11 @@ describe('buildEvent', () => {
           args: { CommandLine: 'git status', Cwd: '/project' },
         },
       },
-      'orchestrator'
+      'crewloop-hub'
     );
     assert.equal(event?.event_type, 'tool_start');
     assert.equal(event?.skill, undefined);
-    assert.equal(event?.default_skill, 'orchestrator');
+    assert.equal(event?.default_skill, 'crewloop-hub');
   });
 
   it('prefers AGY inferred skill over default skill fallback', () => {
@@ -182,7 +182,7 @@ describe('buildEvent', () => {
           args: { AbsolutePath: '/home/arch/.agents/skills/engineer/SKILL.md' },
         },
       },
-      'orchestrator'
+      'crewloop-hub'
     );
     assert.equal(event?.event_type, 'tool_start');
     assert.equal(event?.tool, 'Read');

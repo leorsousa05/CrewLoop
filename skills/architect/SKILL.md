@@ -122,7 +122,7 @@ To translate system contracts and domain boundaries into concrete database desig
 - The task involves creating or modifying relational database tables, unique constraints, foreign keys, or indexes.
 - The task introduces or alters API payloads (GraphQL schemas, OpenAPI specs, tRPC routers).
 
-Spawn a read-only subagent to run the `schema-designer` skill and write the DDL scripts or JSON schemas directly into the active spec folder before returning.
+Spawn a read-only subagent to run the `schema-designer` skill and return the DDL scripts or JSON schema recommendations. Incorporate the results into the active spec folder yourself.
 
 ---
 
@@ -143,9 +143,9 @@ After answering the 7 analysis questions, determine if the implementation can be
 - Tasks where coordination overhead outweighs the speed-up
 
 **If subagents are suitable:**
-Ask the user: "Based on the spec, this task has [N] independent components that could be developed in parallel by subagents. Would you like me to enable parallel development?"
+Record the proposed parallelization in the spec and hand it back to the Orchestrator with the component split. The Orchestrator can decide whether to enable parallel development.
 
-If user says yes, include in the spec:
+If parallelization is recorded, include in the spec:
 ```yaml
 subagents:
   approved: true

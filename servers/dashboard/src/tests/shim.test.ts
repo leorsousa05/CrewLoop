@@ -86,7 +86,7 @@ describe('shim binary', () => {
 
     try {
       const { exitCode } = await runBin(
-        ['kimi', '--default-skill', 'orchestrator'],
+        ['kimi', '--default-skill', 'crewloop-hub'],
         input,
         { CREWLOOP_DASHBOARD_URL: `http://127.0.0.1:${port}` }
       );
@@ -135,7 +135,7 @@ describe('shim binary', () => {
 
     try {
       const { exitCode } = await runBin(
-        ['agy', '--default-skill', 'orchestrator'],
+        ['agy', '--default-skill', 'crewloop-hub'],
         input,
         { CREWLOOP_DASHBOARD_URL: `http://127.0.0.1:${port}` }
       );
@@ -146,7 +146,7 @@ describe('shim binary', () => {
       assert.strictEqual(parsed.event_type, 'tool_start');
       assert.strictEqual(parsed.source, 'agy');
       assert.strictEqual(parsed.skill, undefined);
-      assert.strictEqual(parsed.default_skill, 'orchestrator');
+      assert.strictEqual(parsed.default_skill, 'crewloop-hub');
     } finally {
       server.close();
     }

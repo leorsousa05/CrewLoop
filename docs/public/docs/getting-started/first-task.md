@@ -10,13 +10,13 @@ This tutorial walks through a complete CrewLoop task from start to finish. You w
 
 ---
 
-## Step 1 — Orchestrator: Discovery
+## Step 1 — CrewLoop Hub: Discovery
 
 You describe the task:
 
 > "Add a search bar to the product listing page."
 
-The **Orchestrator** begins by exploring the codebase, then asks clarifying questions:
+The **CrewLoop Hub** begins by exploring the codebase, then asks clarifying questions:
 
 > - What framework? (React, Vue, plain HTML?)
 > - Should search be client-side or server-side?
@@ -24,7 +24,7 @@ The **Orchestrator** begins by exploring the codebase, then asks clarifying ques
 > - Debounce delay? Minimum character count?
 > - Accessibility requirements?
 
-After your answers, the Orchestrator produces a **Task Brief** and presents:
+After your answers, the CrewLoop Hub produces a **Task Brief** and presents:
 
 ```
 [A] Send to Architect — Create specs (always first)
@@ -126,14 +126,14 @@ feat(search): add debounced product search bar
 Spec archived to `specs/archive/2026-06-27-042-product-search/`.
 
 ```
-[O] Return to Orchestrator — Next task
+[O] Return to CrewLoop Hub — Next task
 ```
 
 ---
 
 ## What to explore next
 
-- [Core Skills](../core/orchestrator) — deep reference for each skill
+- [Core Skills](../core/crewloop-hub) — deep reference for each skill
 - [Concepts: Specs](../concepts/specs) — how specs are structured
 - [Concepts: Workflow](../concepts/workflow) — the full routing rules
 - [CLI Reference](../tools/cli) — all CLI commands

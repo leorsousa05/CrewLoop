@@ -16,7 +16,7 @@ At the end of each skill response, a letter-based navigation menu is presented:
 - **[E] Send to Engineer** — Implementation
 - **[R] Send to Reviewer** — Quality gate
 - **[S] Send to Shipper** — Commit and push
-- **[O] Return to Orchestrator** — Adjust scope
+- **[O] Return to CrewLoop Hub** — Adjust scope
 ```
 
 Each skill shows only the letters relevant to its handoff. Skills always wait for explicit user confirmation before routing. The only exception is AFK mode.
@@ -48,4 +48,4 @@ Or add `afk: true` to `MEMORY.md` in the project root.
 
 ### Deactivation
 
-AFK mode ends when the Shipper completes and returns control to the Orchestrator.
+AFK mode ends when the Shipper completes and returns control to the CrewLoop Hub.

@@ -14,7 +14,7 @@ Instead of asking a single AI to "build this feature", CrewLoop distributes resp
 
 | Skill | Phase | What it does |
 |-------|-------|--------------|
-| **Orchestrator** | Discovery | Gathers context, asks the right questions, routes the task |
+| **CrewLoop Hub** | Discovery | Gathers context, asks the right questions, routes the task |
 | **Architect** | Specs | Creates mandatory specs and architectural contracts |
 | **Designer** | Design | Defines aesthetic direction for every UI change |
 | **Engineer** | Build | Writes implementation code and tests — the only one who does |
@@ -38,7 +38,7 @@ Instead of asking a single AI to "build this feature", CrewLoop distributes resp
 
 ```mermaid
 flowchart TD
-    O["🎯 Orchestrator\nDiscovery & Routing"]
+    O["🎯 CrewLoop Hub\nDiscovery & Routing"]
     A["🏗️ Architect\nSpecs & Architecture"]
     D["🎨 Designer\nUI/UX Direction"]
     E["🔧 Engineer\nImplementation"]

@@ -21,7 +21,7 @@ You do NOT write production code. You do NOT run git operations. You do not repl
 
 **NEVER run git operations** — Branch, commit, and PR belong to the shipper.
 
-**When done, present navigation options** — Return to the standard letter-based menu.
+**When done, summarize findings and present navigation options** — Return to the standard letter-based menu.
 
 ---
 
@@ -117,6 +117,10 @@ Present the navigation menu and WAIT for user choice. Call the `ask_question` to
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
 
+### Step 6: Handoff Summary
+
+State the accessibility risks you inspected, the result, and whether the findings should be returned to the Orchestrator or the invoking skill.
+
 ---
 
 ## RESPONSE RULES
@@ -126,7 +130,7 @@ Present the navigation menu and WAIT for user choice. Call the `ask_question` to
 - **Prioritize by impact.** Blockers are issues that prevent users from completing core tasks.
 - **Suggest remediation.** Give engineers concrete fixes, not just problem statements.
 - **Reference the spec and design.** Audits must verify what the spec and design define.
-- **When done, present navigation options** — Always show the menu with clear next steps.
+- **When done, summarize findings and present navigation options** — Always show the menu with clear next steps.
 
 ---
 

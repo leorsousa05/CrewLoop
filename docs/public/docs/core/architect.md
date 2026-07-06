@@ -14,7 +14,7 @@ The Architect is a principal software architect who thinks in systems, boundarie
 
 ## Responsibilities
 
-1. Read the Task Brief from Orchestrator completely before taking any action.
+1. Read the Task Brief from CrewLoop Hub completely before taking any action.
 2. Explore existing specs in specs/, ADRs in specs/decisions/, and relevant codebase patterns.
 3. Answer 7 analysis questions: domain placement, component responsibilities, contracts to define, what needs tests, architecture that minimizes ambiguity, project structure changes, and key trade-offs.
 4. Create the spec folder at specs/changes/NNN-name/ with .spec.yaml, proposal.md, specs/, design.md, and tasks.md.
@@ -53,7 +53,7 @@ The Architect is a principal software architect who thinks in systems, boundarie
 
 ## Handoff
 
-**Invoked by:** Orchestrator.  
+**Invoked by:** CrewLoop Hub.  
 **Sends to:** Designer (if UI/frontend involved), Engineer (if backend or code-only), or Docs-Writer (if pure documentation).
 
 ```markdown
@@ -61,5 +61,5 @@ The Architect is a principal software architect who thinks in systems, boundarie
 
 - **[E] Send to Engineer** — Start implementation (BUILD mode)
 - **[D] Send to Designer** — Visual/UI design specification (if interface)
-- **[O] Return to Orchestrator** — Adjust scope or requirements
+- **[O] Return to CrewLoop Hub** — Adjust scope or requirements
 ```

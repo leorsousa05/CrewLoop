@@ -64,7 +64,7 @@ You should see `PASS` for every skill.
 
 ## What happens after installation
 
-Once installed, skills are automatically detected and activated by your AI agent based on conversation context. Start any task by describing what you want — the **Orchestrator** skill takes over, asks clarifying questions, and routes the task through the crew.
+Once installed, skills are automatically detected and activated by your AI agent based on conversation context. Start any task by describing what you want — the **CrewLoop Hub** skill takes over, asks clarifying questions, and routes the task through the crew.
 
 ## Next steps
 

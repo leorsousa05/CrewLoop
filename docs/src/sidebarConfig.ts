@@ -26,7 +26,7 @@ export const sidebarConfig: SidebarConfig = [
     id: 'core-skills',
     label: 'Core Skills',
     items: [
-      { id: 'core/orchestrator', title: 'Orchestrator', path: '/docs/core/orchestrator.md' },
+      { id: 'core/crewloop-hub', title: 'CrewLoop Hub', path: '/docs/core/crewloop-hub.md' },
       { id: 'core/architect', title: 'Architect', path: '/docs/core/architect.md' },
       { id: 'core/designer', title: 'Designer', path: '/docs/core/designer.md' },
       { id: 'core/engineer', title: 'Engineer', path: '/docs/core/engineer.md' },

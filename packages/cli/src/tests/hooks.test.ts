@@ -24,8 +24,8 @@ function createAgentConfig(
       supported: true,
       configPath: path.join(baseDir, 'config.toml'),
       format: format ?? 'toml',
-      beforeToolUseCommand: `crewloop-shim ${id} --default-skill orchestrator`,
-      afterToolUseCommand: `crewloop-shim ${id} --default-skill orchestrator`,
+      beforeToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-hub`,
+      afterToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-hub`,
       ...hookOverrides,
     },
   };
@@ -51,7 +51,7 @@ describe('installHooksForAgent', () => {
     assert.ok(content.includes('event = "PreToolUse"'));
     assert.ok(content.includes('event = "PostToolUse"'));
     assert.ok(content.includes('matcher = ".*"'));
-    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill orchestrator"'));
+    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill crewloop-hub"'));
   });
 
   it('configures Kimi TOML hooks idempotently', () => {
@@ -100,7 +100,7 @@ describe('installHooksForAgent', () => {
     fs.mkdirSync(agent.skillsDir, { recursive: true });
     fs.writeFileSync(
       agent.hooks.configPath,
-      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill orchestrator"\nafter_tool_use = "crewloop-shim kimi --default-skill orchestrator"\n',
+      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill crewloop-hub"\nafter_tool_use = "crewloop-shim kimi --default-skill crewloop-hub"\n',
       'utf8'
     );
 
@@ -121,7 +121,7 @@ describe('installHooksForAgent', () => {
     fs.mkdirSync(agent.skillsDir, { recursive: true });
     fs.writeFileSync(
       agent.hooks.configPath,
-      '[[hooks]]\nevent = "PreToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n\n[other]\nkey = "value"\n\n[[hooks]]\nevent = "PostToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill orchestrator"\n',
+      '[[hooks]]\nevent = "PreToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-hub"\n\n[other]\nkey = "value"\n\n[[hooks]]\nevent = "PostToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-hub"\n',
       'utf8'
     );
 
@@ -149,8 +149,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
       },
     });
 
@@ -163,7 +163,7 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].type, 'command');
     assert.strictEqual(
       config.hooks.PreToolUse[0].hooks[0].command,
-      'crewloop-shim codex --default-skill orchestrator'
+      'crewloop-shim codex --default-skill crewloop-hub'
     );
     assert.ok(Array.isArray(config.hooks.PostToolUse));
   });
@@ -180,8 +180,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim codex --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
       },
     });
 
@@ -207,8 +207,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim claude --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
       },
     });
 
@@ -218,7 +218,7 @@ describe('installHooksForAgent', () => {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     assert.ok(Array.isArray(config.hooks.PreToolUse));
     assert.strictEqual(config.hooks.PreToolUse[0].matcher, '*');
-    assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].command, 'crewloop-shim claude --default-skill orchestrator');
+    assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].command, 'crewloop-shim claude --default-skill crewloop-hub');
     assert.ok(Array.isArray(config.hooks.PostToolUse));
   });
 
@@ -234,8 +234,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       },
     });
 
@@ -246,7 +246,7 @@ describe('installHooksForAgent', () => {
     assert.ok(config.crewloop);
     assert.ok(Array.isArray(config.crewloop.PreToolUse));
     assert.strictEqual(config.crewloop.PreToolUse[0].matcher, '*');
-    assert.strictEqual(config.crewloop.PreToolUse[0].hooks[0].command, 'crewloop-shim agy --default-skill orchestrator');
+    assert.strictEqual(config.crewloop.PreToolUse[0].hooks[0].command, 'crewloop-shim agy --default-skill crewloop-hub');
     assert.ok(Array.isArray(config.crewloop.PostToolUse));
   });
 
@@ -262,8 +262,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       },
     });
 
@@ -304,8 +304,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill orchestrator',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       },
     });
 
@@ -314,8 +314,8 @@ describe('installHooksForAgent', () => {
       configPath,
       JSON.stringify({
         hooks: {
-          before_tool_use: 'crewloop-shim agy --default-skill orchestrator',
-          after_tool_use: 'crewloop-shim agy --default-skill orchestrator',
+          before_tool_use: 'crewloop-shim agy --default-skill crewloop-hub',
+          after_tool_use: 'crewloop-shim agy --default-skill crewloop-hub',
         },
       }),
       'utf8'

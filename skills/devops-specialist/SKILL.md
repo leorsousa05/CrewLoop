@@ -62,6 +62,10 @@ Inspect current Dockerfiles, package configurations, CI/CD settings, and target 
 ### Step 3: Local Verification
 Verify configurations by running docker builds locally (if allowed) or validating script syntax.
 
+### Step 4: Handoff Summary
+
+State what infrastructure or pipeline changes you inspected or produced and return the summary to the Orchestrator.
+
 ---
 
 ## RESPONSE RULES

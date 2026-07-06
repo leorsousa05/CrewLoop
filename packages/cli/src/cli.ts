@@ -139,7 +139,7 @@ function resolvePackageRoot(): string {
   } catch {
     // Fallback for when the CLI is bundled inside the skills package itself.
     const bundledRoot = path.resolve(__dirname, '..', '..', '..');
-    if (fs.existsSync(path.join(bundledRoot, 'skills', 'orchestrator', 'SKILL.md'))) {
+    if (fs.existsSync(path.join(bundledRoot, 'skills', 'crewloop-hub', 'SKILL.md'))) {
       return bundledRoot;
     }
 

@@ -24,13 +24,13 @@ interface PipelineStep {
 }
 
 export const SkillVisualizer: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<string | null>('orchestrator');
+  const [activeStep, setActiveStep] = useState<string | null>('crewloop-hub');
 
   const steps: PipelineStep[] = [
     {
-      id: 'orchestrator',
+      id: 'crewloop-hub',
       stepNum: '01',
-      name: 'Orchestrator',
+      name: 'CrewLoop Hub',
       role: 'Discovery & Routing Hub',
       icon: <Brain className="w-5.5 h-5.5" />,
       themeColor: 'border-cyan-500/25 text-cyan-400 bg-cyan-950/10 hover:border-cyan-500/50',

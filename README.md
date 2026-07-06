@@ -11,7 +11,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 
 ## Highlights
 
-- **Process-driven workflow:** Orchestrator, Architect, Designer, Engineer, Reviewer, Shipper, and nine supporting roles each own one phase and never invade another's territory.
+- **Process-driven workflow:** CrewLoop Hub, Architect, Designer, Engineer, Reviewer, Shipper, and nine supporting roles each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line fix to a full feature, gets a lightweight spec in `specs/changes/` before implementation starts.
 - **Design before code:** When there is UI, the Designer defines the aesthetic direction before the Engineer writes markup or styles.
 - **Docs by docs-writer:** READMEs, module docs, and changelogs are owned by the docs-writer skill so the engineer can focus on code and tests.
@@ -114,7 +114,7 @@ CrewLoop ships 18 specialist skills. The core crew owns the main delivery loop; 
 
 | Skill | Phase | Responsibility |
 |-------|-------|----------------|
-| <span style="background:#01579B;color:#fff;padding:2px 8px;border-radius:9999px;">Orchestrator</span> | Discovery | Context gathering, requirement clarification, and routing |
+| <span style="background:#01579B;color:#fff;padding:2px 8px;border-radius:9999px;">CrewLoop Hub</span> | Discovery | Context gathering, requirement clarification, and routing |
 | <span style="background:#E65100;color:#fff;padding:2px 8px;border-radius:9999px;">Architect</span> | Specs | Spec creation, architecture design, and contracts |
 | <span style="background:#6A1B9A;color:#fff;padding:2px 8px;border-radius:9999px;">Designer</span> | Design | UI/UX aesthetic direction and design specs |
 | <span style="background:#1B5E20;color:#fff;padding:2px 8px;border-radius:9999px;">Engineer</span> | Build | Implementation, tests, and verification |
@@ -141,11 +141,11 @@ CrewLoop ships 18 specialist skills. The core crew owns the main delivery loop; 
 
 ## Workflow (Hub-and-Spoke)
 
-All execution skills return control to the Orchestrator, which manages task state and handles routing decisions.
+All execution skills return control to the CrewLoop Hub, which manages task state and handles routing decisions.
 
 ```mermaid
 flowchart TD
-    O["Orchestrator\nCentral Hub"] <--> A["Architect\nSpecs & Architecture"]
+    O["CrewLoop Hub\nCentral Hub"] <--> A["Architect\nSpecs & Architecture"]
     O <--> D["Designer\nUI/UX Direction"]
     O <--> E["Engineer\nImplementation"]
     O <--> R["Reviewer\nQuality Gate"]
@@ -174,22 +174,22 @@ flowchart TD
 **Flow rules:**
 
 > [!IMPORTANT]
-> **Core Routing Rule:** Under the star topology, no execution skill is allowed to hand off directly to another execution skill. All roads return control to the Orchestrator.
+> **Core Routing Rule:** Under the star topology, no execution skill is allowed to hand off directly to another execution skill. All roads return control to the CrewLoop Hub.
 
-1. **Orchestrator is the central hub** — every skill hands control back to Orchestrator at the end of its turn.
-2. **Orchestrator always routes to Architect first** — to create or update specifications.
-3. **Architect is the design gatekeeper** — once the spec is created, control returns to Orchestrator, which routes to Designer (for UI) or Engineer (for code).
+1. **CrewLoop Hub is the central hub** — every skill hands control back to CrewLoop Hub at the end of its turn.
+2. **CrewLoop Hub always routes to Architect first** — to create or update specifications.
+3. **Architect is the design gatekeeper** — once the spec is created, control returns to CrewLoop Hub, which routes to Designer (for UI) or Engineer (for code).
 4. **Designer acts before Engineer** — when there is UI, the Designer creates the visual specification before the Engineer implements.
-5. **Engineer never does git, review, or docs** — it implements code and tests, then returns to Orchestrator.
+5. **Engineer never does git, review, or docs** — it implements code and tests, then returns to CrewLoop Hub.
 6. **Reviewer is the quality gate** — no code reaches the repository without review.
 7. **Shipper is the only skill that touches git** — commit, branch, push, and PR.
-8. **Sub-skills assist core skills** — `project-brainstorm` helps `orchestrator`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
-10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who yields control to the Orchestrator. The Orchestrator routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who yields control to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
 
 > [!NOTE]
 > **Standard Developer Cycle Example:**
-> `Orchestrator` (Discovery) -> `Architect` (Spec creation) -> `Orchestrator` (Briefing) -> `Engineer` (Build & Tests) -> `Orchestrator` (Handoff) -> `Reviewer` (Quality gate check) -> `Orchestrator` (Approval) -> `Shipper` (Git commit & PR) -> `Orchestrator` (Complete).
+> `CrewLoop Hub` (Discovery) -> `Architect` (Spec creation) -> `CrewLoop Hub` (Briefing) -> `Engineer` (Build & Tests) -> `CrewLoop Hub` (Handoff) -> `Reviewer` (Quality gate check) -> `CrewLoop Hub` (Approval) -> `Shipper` (Git commit & PR) -> `CrewLoop Hub` (Complete).
 
 
 ## Repository Layout

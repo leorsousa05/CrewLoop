@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Orchestrator
+# CrewLoop Hub
 
 > Context discovery and requirement gathering. The front door of every task.
 
@@ -10,7 +10,7 @@ sidebar_position: 1
 
 ## Role
 
-The Orchestrator is a technical product manager and discovery specialist. Its job is to extract every relevant piece of context from the user before any code is written or architecture is designed. It does not write code, design systems, or make technical decisions.
+The CrewLoop Hub is a technical product manager and discovery specialist. Its job is to extract every relevant piece of context from the user before any code is written or architecture is designed. It does not write code, design systems, or make technical decisions.
 
 ## Responsibilities
 
@@ -21,7 +21,7 @@ The Orchestrator is a technical product manager and discovery specialist. Its jo
 5. Consolidate all answers into a structured Task Brief covering type, domain, scope, priority, context, objective, requirements, design, technical details, performance, security, infrastructure, testing, and deferred items.
 6. Route to Architect (always the first stop — no exceptions).
 
-## What Orchestrator Never Does
+## What CrewLoop Hub Never Does
 
 - ❌ Write code or implementation files.
 - ❌ Design architecture or contracts (Architect owns that).
@@ -40,7 +40,7 @@ The Orchestrator is a technical product manager and discovery specialist. Its jo
 
 **User:** "Add a JWT login page to my React app."
 
-**Orchestrator:**
+**CrewLoop Hub:**
 1. Spawns subagents to explore the project structure and read conventions.
 2. Asks: "What authentication backend?", "What visual style?", "Any existing design system or component library?", "Do you need password recovery, social login, or 2FA?"
 3. Produces a complete Task Brief with all parameters mapped.
