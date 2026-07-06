@@ -409,6 +409,14 @@ Extract owner/repo from remote URL:
 
 Refer to the [Tags & Releases Guidelines](references/tags-and-releases.md) for tag naming, creation, notes formatting, and execution commands.
 
+## SUB-SKILLS DELEGATION
+
+To manage infrastructure configurations or automated pipeline validation, you should delegate to the **DevOps Specialist** (`skills/devops-specialist/SKILL.md`) when:
+- The release requires updates to GitHub Actions workflows, Dockerfiles, or deployment scripts.
+- The build or deployment setup needs pipeline optimization or caching.
+
+Spawn a read-only subagent to run the `devops-specialist` skill and verify the configuration files before shipping.
+
 ---
 
 ## RESPONSE RULES

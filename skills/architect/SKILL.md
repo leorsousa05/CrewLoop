@@ -116,6 +116,16 @@ Answer each in 2-3 sentences:
 
 ---
 
+## SUB-SKILLS DELEGATION
+
+To translate system contracts and domain boundaries into concrete database designs, you should delegate to the **Schema Designer** (`skills/schema-designer/SKILL.md`) when:
+- The task involves creating or modifying relational database tables, unique constraints, foreign keys, or indexes.
+- The task introduces or alters API payloads (GraphQL schemas, OpenAPI specs, tRPC routers).
+
+Spawn a read-only subagent to run the `schema-designer` skill and write the DDL scripts or JSON schemas directly into the active spec folder before returning.
+
+---
+
 ## SUBAGENT PARALLELIZATION ANALYSIS
 
 After answering the 7 analysis questions, determine if the implementation can be split into **2+ independent sub-tasks** for parallel development via subagents.
