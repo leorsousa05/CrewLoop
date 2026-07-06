@@ -1,0 +1,8 @@
+title: "Add Diamondblock Memory Skill"
+status: "completed"
+author: "architect"
+created_at: "2026-07-06"
+affected_files:
+  - "skills/diamondblock/SKILL.md"
+  - "AGENTS.md"
+  - "README.md"

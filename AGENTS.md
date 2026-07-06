@@ -85,7 +85,7 @@ crewloop/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── README.md
-├── skills/                          # All 18 skill directories
+├── skills/                          # All 19 skill directories
 │   ├── crewloop-hub/SKILL.md
 │   ├── architect/
 │   │   ├── SKILL.md
@@ -107,6 +107,7 @@ crewloop/
 │   ├── accessibility-auditor/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   ├── diamondblock/SKILL.md
 │   ├── docs-writer/SKILL.md
 │   ├── maintainer/SKILL.md
 │   ├── product-manager/SKILL.md
@@ -161,7 +162,7 @@ crewloop/
 
 ---
 
-## The 18 Skills
+## The 19 Skills
 
 ### Core Skills — mandatory in every task flow
 
@@ -180,6 +181,7 @@ crewloop/
 |-------|-------------|
 | **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **long-term-manager** | Projects that span multiple sessions and need durable tracking artifacts across sessions |
+| **diamondblock** | Managing multi-session memory, retrieving context, searching knowledge, or logging session histories |
 | **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
 | **frontend-architect** | Complex frontend layouts, component architecture, and React/Next.js state boundaries |
 | **docs-writer** | Pure documentation tasks without code changes |
@@ -218,7 +220,7 @@ Rules — no exceptions:
 7. **Navigation menus are simplified** to return control to the CrewLoop Hub (`[O] Return to CrewLoop Hub`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
 8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub` with discovery for new or ambiguous projects; `long-term-manager` helps `crewloop-hub` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
 9. **All roads return to CrewLoop Hub.** Every agent hands control back to CrewLoop Hub between phases.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 18 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub/Architect gatekeepers.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 19 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub/Architect gatekeepers.
 11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who yields control to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
 
 

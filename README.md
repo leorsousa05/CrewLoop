@@ -108,7 +108,7 @@ During `crewloop install`, the installer modifies the configuration or custom sc
 
 ## Meet the Crew
 
-CrewLoop ships 18 specialist skills. The core crew owns the main delivery loop; the supporting crew jumps in when the context demands it.
+CrewLoop ships 19 specialist skills. The core crew owns the main delivery loop; the supporting crew jumps in when the context demands it.
 
 ### Core Crew
 
@@ -127,6 +127,7 @@ CrewLoop ships 18 specialist skills. The core crew owns the main delivery loop; 
 |-------|-------|----------------|
 | [`project-brainstorm`](skills/project-brainstorm/SKILL.md) | Brainstorm | Discovery for new or ambiguous project ideas |
 | [`long-term-manager`](skills/long-term-manager/SKILL.md) | Tracking | Durable tracking for projects that span multiple sessions |
+| [`diamondblock`](skills/diamondblock/SKILL.md) | Memory | Managing multi-session memory, retrieving context, searching knowledge, or logging session histories |
 | [`docs-writer`](skills/docs-writer/SKILL.md) | Docs | Documentation, READMEs, and changelogs |
 | [`tester`](skills/tester/SKILL.md) | QA | Test strategy, coverage analysis, and test plans |
 | [`product-manager`](skills/product-manager/SKILL.md) | Product | Prioritization, roadmap, and success metrics |
@@ -152,6 +153,7 @@ flowchart TD
     O <--> S["Shipper\nGit & PR"]
     O <--> PB["Project-Brainstorm\nDiscovery"]
     O <--> LTM["Long-Term Manager\nMulti-Session Tracking"]
+    O <--> DB["Diamondblock\nMemory & Distillation"]
     O <--> W["Docs-Writer\nDocumentation"]
     O <--> PM["Product-Manager\nPrioritization"]
     O <--> RS["Researcher\nTechnology Evaluation"]
