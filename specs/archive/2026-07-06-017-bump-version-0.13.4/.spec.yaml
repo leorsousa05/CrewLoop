@@ -1,0 +1,7 @@
+title: "Bump version to 0.13.4 to release new memory skill"
+status: "completed"
+author: "architect"
+created_at: "2026-07-06"
+affected_files:
+  - "package.json"
+  - "package-lock.json"
