@@ -90,38 +90,38 @@ Build on the case-study frame above with 2-3 sentences describing the chosen dir
 
 ### 3. Color System
 
-Define semantic tokens with light and dark variants. Each token must map to a concrete usage.
+Define semantic tokens with light and dark variants. Each token must be custom-derived for the project; do NOT use default or boilerplate colors.
 
 | Token | Light mode | Dark mode | Usage |
 |-------|------------|-----------|-------|
-| `--bg-primary` | `#FFFFFF` | `#0A0A0F` | Main page background |
-| `--bg-surface` | `#F5F5F7` | `#14141B` | Cards, panels, raised surfaces |
-| `--bg-elevated` | `#FFFFFF` | `#1E1E28` | Popovers, dropdowns, modals |
-| `--text-primary` | `#111111` | `#F0F0F5` | Headings, primary body text |
-| `--text-secondary` | `#4A4A55` | `#A0A0B0` | Secondary text, descriptions |
-| `--text-muted` | `#7A7A85` | `#6B6B78` | Placeholders, disabled, meta |
-| `--accent` | pick one | pick one | Primary interactive color |
-| `--success` | `#1DB954` | `#1ED760` | Positive states |
-| `--warning` | `#F59E0B` | `#FBBF24` | Caution states |
-| `--error` | `#DC2626` | `#EF4444` | Error states |
-| `--info` | `#2563EB` | `#3B82F6` | Informational states |
-| `--border` | `#E5E5EA` | `#2A2A35` | Dividers, card borders |
-| `--focus` | accent | accent | Focus rings |
-| `--overlay` | `rgba(0,0,0,0.4)` | `rgba(0,0,0,0.6)` | Modal backdrops |
+| `--bg-primary` | `[Define custom HSL]` | `[Define custom HSL]` | Main page background |
+| `--bg-surface` | `[Define custom HSL]` | `[Define custom HSL]` | Cards, panels, raised surfaces |
+| `--bg-elevated` | `[Define custom HSL]` | `[Define custom HSL]` | Popovers, dropdowns, modals |
+| `--text-primary` | `[Define custom HSL]` | `[Define custom HSL]` | Headings, primary body text |
+| `--text-secondary` | `[Define custom HSL]` | `[Define custom HSL]` | Secondary text, descriptions |
+| `--text-muted` | `[Define custom HSL]` | `[Define custom HSL]` | Placeholders, disabled, meta |
+| `--accent` | `[Define custom HSL]` | `[Define custom HSL]` | Primary interactive color |
+| `--success` | `[Define custom HSL]` | `[Define custom HSL]` | Positive states |
+| `--warning` | `[Define custom HSL]` | `[Define custom HSL]` | Caution states |
+| `--error` | `[Define custom HSL]` | `[Define custom HSL]` | Error states |
+| `--info` | `[Define custom HSL]` | `[Define custom HSL]` | Informational states |
+| `--border` | `[Define custom HSL]` | `[Define custom HSL]` | Dividers, card borders |
+| `--focus` | `[Define custom HSL]` | `[Define custom HSL]` | Focus rings |
+| `--overlay` | `[Define custom HSL]` | `[Define custom HSL]` | Modal backdrops |
 
 ### 4. Typography System
 
-Choose distinctive, intentional fonts. Provide exact values.
+Choose distinctive, intentional fonts. Establish custom sizes, weights, and scales appropriate for the brand character.
 
 | Level | Font | Size | Line-height | Letter-spacing | Weight | Usage |
 |-------|------|------|-------------|----------------|--------|-------|
-| H1 | Display font | 48px / 3rem | 1.1 | -0.02em | 700 | Hero headlines |
-| H2 | Display font | 36px / 2.25rem | 1.2 | -0.01em | 700 | Section titles |
-| H3 | Display font | 24px / 1.5rem | 1.3 | 0 | 600 | Card titles |
-| Body | Body font | 16px / 1rem | 1.6 | 0 | 400 | Paragraphs |
-| Body-sm | Body font | 14px / 0.875rem | 1.5 | 0 | 400 | Captions, meta |
-| Label | Body font | 12px / 0.75rem | 1.4 | 0.02em | 500 | Labels, badges |
-| Button | Body font | 14px / 0.875rem | 1 | 0.01em | 600 | Buttons |
+| H1 | `[Define custom display font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Hero headlines |
+| H2 | `[Define custom display font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Section titles |
+| H3 | `[Define custom display font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Card titles |
+| Body | `[Define custom body font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Paragraphs |
+| Body-sm | `[Define custom body font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Captions, meta |
+| Label | `[Define custom body font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Labels, badges |
+| Button | `[Define custom body font]` | `[Define size]` | `[Define LH]` | `[Define LS]` | `[Weight]` | Buttons |
 
 ### 5. Design Tokens
 
@@ -248,9 +248,9 @@ Spec out:
 ### 15. Pre-Implementation Checklist
 
 - [ ] Brand narrative ties visual direction to audience and problem.
-- [ ] Aesthetic direction is intentional, not generic.
-- [ ] Color system uses semantic tokens for light and dark modes.
-- [ ] Typography system defines exact sizes, weights, and line-heights.
+- [ ] Aesthetic direction is unique, custom, and context-specific; it does NOT copy standard AI templates or themes.
+- [ ] Color system uses custom HSL values derived for the brand; example values from SKILL.md have NOT been copied.
+- [ ] Typography system defines exact sizes, weights, and line-heights tailored to the brand character.
 - [ ] Design tokens cover spacing, radius, elevation, typography, and assets.
 - [ ] Contrast ratios verified (body ≥4.5:1, large text ≥3:1, charts ≥3:1).
 - [ ] Touch targets ≥44px / 48dp.
@@ -263,6 +263,8 @@ Spec out:
 - [ ] Modal focus trap, ESC-to-close, and backdrop close behavior specified.
 - [ ] Keyboard navigation shortcuts and command palette triggers spec'd.
 - [ ] Conversion CTA flow visible above-the-fold and sticky scroll hooks set.
+- [ ] UI is free of AI slop signatures (e.g. decorative-only mesh gradients that disrupt text readability, floating neon glow cards without brand reason).
+- [ ] Grid layout and spatial composition are asymmetrical and customized for content hierarchy, avoiding default 3-column feature grids or boilerplate Bento grids.
 
 ---
 
