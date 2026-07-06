@@ -90,10 +90,13 @@ If the project uses versioning (e.g. monorepo or standard package layouts with `
 
 1. **Verify if package files have been modified:**
    - Run `git diff --name-only` to list all modified files.
-   - Match the file paths to package/workspace directories (e.g. files starting with `packages/cli/` are in the CLI package).
-   - **If any file within a package/workspace folder is modified, and the commit type is `feat` or `fix` (or contains a breaking change `!`), a version bump is MANDATORY for that package.**
+   - Match the file paths to package/workspace directories (e.g. files starting with `packages/cli/` are in the CLI package, and files at the root level or under root directories like `skills/`, `references/`, `assets/` belong to the root package `@archznn/crewloop-skills`).
+   - **If any file within a package/workspace folder or root package folder is modified, and the commit type is `feat` or `fix` (or contains a breaking change `!`), a version bump is MANDATORY for that package.**
 
 2. **Map the commit type to SemVer bump:**
+   - Be strict about the SemVer rules:
+     - A `feat` (new feature or capability) ALWAYS requires a **minor** (or major) version bump. Never use a patch bump (`0.0.1`) for a feature.
+     - A `fix` (bug fix / small patch correction) requires a **patch** version bump.
 
    | Commit type | Semver bump | Description |
    |-------------|-------------|-------------|
