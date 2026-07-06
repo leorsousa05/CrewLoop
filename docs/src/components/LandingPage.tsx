@@ -59,45 +59,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
   const coreSkillsList: SkillDetails[] = [
     { 
       id: 'core/orchestrator', 
-      name: 'Orquestrador', 
-      role: 'Contexto & Roteamento',
-      desc: 'Analisa o contexto inicial, coleta requisitos e direciona o fluxo de trabalho entre os agentes especialistas.',
-      cannotDo: ['Escrever código', 'Desenhar sistemas', 'Criar arquivos', 'Operações git']
+      name: 'Orchestrator', 
+      role: 'Context & Routing',
+      desc: 'Analyzes initial context, gathers requirements, and routes workflow tasks between specialist agents.',
+      cannotDo: ['Writes code', 'Designs systems', 'Creates files', 'Git operations']
     },
     { 
       id: 'core/architect', 
-      name: 'Arquiteto', 
-      role: 'Especificações & Contratos',
-      desc: 'Cria especificações técnicas e listas de tarefas em specs/changes/ antes do início da codificação.',
-      cannotDo: ['Escrever código de implementação', 'Executar comandos git', 'Configurar scripts de build']
+      name: 'Architect', 
+      role: 'Specs & Contracts',
+      desc: 'Creates system specs and task lists in specs/changes/ before coding begins.',
+      cannotDo: ['Writes implementation code', 'Runs git commands', 'Configures build scripts']
     },
     { 
       id: 'core/designer', 
       name: 'Designer', 
-      role: 'Especificações Visuais UI/UX',
-      desc: 'Define tokens de design, layouts responsivos e estruturas de visualização para componentes de interface.',
-      cannotDo: ['Escrever código funcional', 'Operações git', 'Executar migrações de banco de dados']
+      role: 'Visual UI/UX Specs',
+      desc: 'Defines design tokens, responsive layouts, and visual visualizer models for UI components.',
+      cannotDo: ['Writes functional code', 'Git operations', 'Runs database migrations']
     },
     { 
       id: 'core/engineer', 
-      name: 'Engenheiro', 
-      role: 'Implementação de Código',
-      desc: 'Desenvolve código funcional e testes unitários. É a única função autorizada a alterar o código-fonte.',
-      cannotDo: ['Operações git', 'Revisão de código (code review)', 'Modificar a arquitetura']
+      name: 'Engineer', 
+      role: 'Code Implementation',
+      desc: 'Implements source code and unit tests. The only role permitted to modify codebase source files.',
+      cannotDo: ['Git operations', 'Code reviews', 'Modifies system architecture']
     },
     { 
       id: 'core/reviewer', 
-      name: 'Revisor', 
-      role: 'Garantia de Qualidade',
-      desc: 'Audita conformidade das especificações, executa testes locais e realiza varreduras de segurança contra vazamentos de credenciais.',
-      cannotDo: ['Escrever código de correção', 'Executar comandos git', 'Aprovar o próprio código']
+      name: 'Reviewer', 
+      role: 'Quality Assurance',
+      desc: 'Audits spec compliance, runs local tests, and performs security checks for exposed credentials.',
+      cannotDo: ['Writes implementation code', 'Runs git commands', 'Approves own code']
     },
     { 
       id: 'core/shipper', 
       name: 'Shipper', 
-      role: 'Entrega & PR',
-      desc: 'Gerencia ramificações do repositório, envia (push) alterações e cria Pull Requests no formato convencional.',
-      cannotDo: ['Revisar código', 'Escrever código', 'Alterar especificações (specs)']
+      role: 'Git & PR Preparer',
+      desc: 'Manages repository branches, pushes committed changes, and prepares pull requests following Conventional Commits.',
+      cannotDo: ['Reviews code', 'Writes code', 'Alters spec files']
     }
   ];
 
@@ -105,86 +105,86 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
     { 
       id: 'supporting/project-brainstorm', 
       name: 'Project Brainstorm', 
-      role: 'Descoberta de Produto',
-      desc: 'Auxilia na definição de requisitos para tarefas complexas ou ambíguas antes da criação da especificação técnica.',
-      cannotDo: ['Escrever código', 'Operações git']
+      role: 'Product Discovery',
+      desc: 'Aids in defining requirements for ambiguous or complex tasks before specifications are written.',
+      cannotDo: ['Writes code', 'Git operations']
     },
     { 
       id: 'supporting/long-term-manager', 
       name: 'Long-term Manager', 
-      role: 'Gerenciador de Progresso',
-      desc: 'Acompanha o andamento das tarefas e mantém atualizado o checklist de progresso em projetos de longa duração.',
-      cannotDo: ['Escrever código', 'Operações git']
+      role: 'Progress Tracking',
+      desc: 'Monitors long-term tasks across sessions and keeps progress checklists up-to-date.',
+      cannotDo: ['Writes code', 'Git operations']
     },
     { 
       id: 'supporting/docs-writer', 
       name: 'Docs Writer', 
-      role: 'Escrita de Documentação',
-      desc: 'Escreve e atualiza arquivos README, manuais de subsistemas e referências técnicas de APIs.',
-      cannotDo: ['Modificar código lógico', 'Alterar especificações (specs)', 'Configurar builds']
+      role: 'Documentation',
+      desc: 'Writes and updates project READMEs, subsystem manuals, and API guides.',
+      cannotDo: ['Modifies logic code', 'Alters spec files', 'Configures build scripts']
     },
     { 
       id: 'supporting/tester', 
       name: 'Tester', 
-      role: 'Estratégia de QA',
-      desc: 'Desenha planos de verificação, analisa a cobertura de testes e mapeia cenários de teste de borda.',
-      cannotDo: ['Modificar código-fonte', 'Realizar commits git', 'Alterar especificações (specs)']
+      role: 'QA Verification',
+      desc: 'Designs verification plans, analyzes test coverage, and logs edge cases.',
+      cannotDo: ['Modifies source code', 'Runs git commands', 'Alters spec files']
     },
     { 
       id: 'supporting/product-manager', 
       name: 'Product Manager', 
-      role: 'Métricas & Priorização',
-      desc: 'Auxilia na priorização de escopo, mapeamento de histórias de usuários e definição de metas de entrega.',
-      cannotDo: ['Modificar código-fonte', 'Realizar commits git', 'Executar testes']
+      role: 'Prioritization',
+      desc: 'Aids in roadmap prioritization, user stories mapping, and setting delivery goals.',
+      cannotDo: ['Modifies source code', 'Runs git commands', 'Executes tests']
     },
     { 
       id: 'supporting/maintainer', 
       name: 'Maintainer', 
-      role: 'Manutenção & Débito Técnico',
-      desc: 'Realiza a triagem de bugs, refatora códigos legados, limpa débitos técnicos e atualiza bibliotecas obsoletas.',
-      cannotDo: ['Criar especificações (specs)', 'Aprovar as próprias revisões', 'Fazer commits git']
+      role: 'Refactoring & Maintenance',
+      desc: 'Triages bug reports, cleans up code debt, updates outdated packages, and refactors code.',
+      cannotDo: ['Creates spec files', 'Approves own reviews', 'Runs git commits']
     },
     { 
       id: 'supporting/researcher', 
       name: 'Researcher', 
-      role: 'Pesquisa Tecnológica',
-      desc: 'Compara frameworks, avalia bibliotecas e constrói provas de conceito rápidas para embasar decisões técnicas.',
-      cannotDo: ['Escrever código de produção', 'Realizar commits git', 'Abrir Pull Requests']
+      role: 'Tech Investigation',
+      desc: 'Compares alternative frameworks and libraries, building quick proofs-of-concept.',
+      cannotDo: ['Writes production code', 'Runs git commits', 'Opens Pull Requests']
     },
     { 
       id: 'supporting/security-guard', 
       name: 'Security Guard', 
-      role: 'Segurança & Vulnerabilidades',
-      desc: 'Verifica regras de autorização, audita endpoints expostos e inspeciona riscos em dependências externas.',
-      cannotDo: ['Escrever código', 'Modificar configurações git', 'Executar migrações de bancos de dados']
+      role: 'Vulnerabilities',
+      desc: 'Verifies auth rules, audits exposed endpoints, and checks dependency supply chain risk.',
+      cannotDo: ['Writes code', 'Modifies git settings', 'Runs database migrations']
     },
     { 
       id: 'supporting/accessibility-auditor', 
       name: 'Accessibility Auditor', 
-      role: 'Acessibilidade (WCAG)',
-      desc: 'Audita layouts e componentes visuais de acordo com padrões de acessibilidade (leitores de tela e teclado).',
-      cannotDo: ['Escrever código de backend', 'Executar migrações de bancos de dados', 'Realizar commits git']
+      role: 'WCAG Compliance',
+      desc: 'Audits layouts against WCAG guidelines, ensuring screen reader and keyboard nav support.',
+      cannotDo: ['Writes backend code', 'Runs database migrations', 'Runs git commits']
     },
     { 
       id: 'devops-specialist', 
       name: 'DevOps Specialist', 
-      role: 'Infraestrutura CI/CD',
-      desc: 'Configura arquivos do Docker, atualiza automações de CI/CD e gerencia configurações de ambiente de deploy.',
-      cannotDo: ['Escrever lógica de aplicação', 'Modificar especificações (specs)', 'Realizar code reviews']
+      role: 'CI/CD Pipelines',
+      desc: 'Manages Docker configurations, edits GitHub Actions workflows, and maintains deploy settings.',
+      cannotDo: ['Writes application logic', 'Alters specs', 'Performs code reviews']
     },
     { 
       id: 'frontend-architect', 
       name: 'Frontend Architect', 
-      role: 'Arquitetura de Componentes',
-      desc: 'Define a composição de componentes no frontend, estruturas de props e lógica de hooks reutilizáveis.',
-      cannotDo: ['Escrever código de backend', 'Executar operações git', 'Gerenciar revisões de PR']
+      role: 'Component Composition',
+      desc: 'Defines frontend component composition, slot structures, and hook patterns.',
+      cannotDo: ['Writes backend code', 'Runs git commits', 'Approves PR reviews']
     },
     { 
       id: 'schema-designer', 
       name: 'Schema Designer', 
-      role: 'Modelagem de Banco de Dados',
-      desc: 'Modela diagramas de entidades, estruturas de tabelas relacionais e coordena migrações de banco de dados.',
-      cannotDo: ['Escrever lógica de frontend', 'Configurar builds', 'Realizar commits git']
+      role: 'Database Schema',
+      desc: 'Designs relational schemas, table constraints, and coordinates Prisma migrations.',
+      cannotDo: ['Writes frontend logic', 'Configures builds', 'Runs git commits']
     }
   ];
 
@@ -201,18 +201,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
         <div className="lg:col-span-6 space-y-6 text-left animate-fade-in-up">
           <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/20 text-cyan-400 text-xs font-mono font-bold tracking-wider">
             <Sparkle className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
-            <span>FLUXO DE TRABALHO PADRONIZADO PARA DESENVOLVIMENTO COM IA</span>
+            <span>STANDARDIZED AGENT WORKFLOW FOR ELITE DEVELOPERS</span>
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6.5xl font-extrabold tracking-tight text-white leading-[1.08] font-display">
-            Desenvolvimento estruturado <br />
+            Structured software <br />
             <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-xl">
-              com agentes de IA.
+              with AI agents.
             </span>
           </h1>
           
-          <p className="text-base sm:text-lg text-slate-405 max-w-xl leading-relaxed">
-            O CrewLoop organiza a execução de agentes de IA em papéis isolados — do levantamento de requisitos à Pull Request — garantindo previsibilidade e controle absoluto sobre o código.
+          <p className="text-base sm:text-lg text-slate-400 max-w-xl leading-relaxed">
+            CrewLoop organizes AI agent execution into isolated roles — from requirements discovery to Pull Request — ensuring absolute predictability and control.
           </p>
 
           {/* Quick CLI typing installer widget */}
@@ -226,11 +226,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                 <span className="select-text">{cliCommandText}</span>
                 <span className="w-1.5 h-3.5 bg-cyan-500 ml-0.5 animate-pulse" />
               </div>
-              <div className="text-slate-500 group-hover:text-slate-300 transition-colors pl-4 select-none">
+              <div className="text-slate-550 group-hover:text-slate-300 transition-colors pl-4 select-none">
                 {copied ? (
                   <span className="flex items-center space-x-1 text-emerald-400 font-bold">
                     <Check className="w-4 h-4" />
-                    <span>Copiado!</span>
+                    <span>Copied!</span>
                   </span>
                 ) : (
                   <Copy className="w-4.5 h-4.5" />
@@ -245,7 +245,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
               onClick={() => onNavigateToDocs('getting-started/what-is-crewloop')}
               className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 active:scale-98 transition-all text-neutral-950 font-bold font-mono rounded-xl flex items-center justify-center space-x-2 group shadow-xl shadow-cyan-500/10"
             >
-              <span>COMEÇAR AGORA</span>
+              <span>GET STARTED</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
             <button 
@@ -253,13 +253,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
               className="w-full sm:w-auto px-7 py-3.5 bg-neutral-950 border border-neutral-800 hover:border-slate-700 hover:bg-neutral-900 text-slate-200 font-bold font-mono rounded-xl transition-all flex items-center justify-center space-x-2"
             >
               <BookOpen className="w-4.5 h-4.5 text-slate-400" />
-              <span>EXPLORAR A DOCUMENTAÇÃO</span>
+              <span>EXPLORE THE DOCS</span>
             </button>
           </div>
 
           {/* Compatible AI logo agents bar */}
           <div className="flex items-center gap-5 pt-3 text-slate-500 text-[11px] font-mono select-none">
-            <span className="text-[9px] text-slate-600 tracking-wider font-bold">AGENTES COMPATÍVEIS:</span>
+            <span className="text-[9px] text-slate-600 tracking-wider font-bold">COMPATIBLE AGENTS:</span>
             <div className="flex items-center gap-5">
               <img src="assets/images/claude-ai-icon.png" alt="Claude AI" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Claude Code" />
               <img src="assets/images/kimi-icon.png" alt="Kimi" className="w-8 h-8 object-contain hover:scale-115 hover:brightness-125 transition-all cursor-pointer rounded-sm" title="Kimi Code" />
@@ -278,9 +278,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       {/* Stepper section */}
       <section className="max-w-7xl mx-auto px-6 py-16 relative z-10 animate-fade-in-up">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Fluxo de Desenvolvimento</h2>
+          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Development Workflow</h2>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            Cada fase do processo possui limites operacionais estritos e devolve o controle ao Orquestrador entre as etapas.
+            Each phase operates under strict boundaries and returns control to the central Orchestrator between steps.
           </p>
         </div>
         <SkillVisualizer />
@@ -289,9 +289,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       {/* Bento-grid catalog list directory of 18 skills */}
       <section className="max-w-7xl mx-auto px-6 py-20 z-10 relative border-t border-neutral-900/50">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-3">Diretório de Skills</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-3">Skills Directory</h2>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            As 18 especialidades disponíveis para compor a equipe de desenvolvimento. Clique no card para inspecionar restrições operacionais.
+            The 18 specialized roles available to compose your development team. Click any card to inspect constraints.
           </p>
         </div>
 
@@ -300,7 +300,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
           <div>
             <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest mb-6 flex items-center">
               <span className="w-2 h-2 rounded-full bg-cyan-500 mr-2.5 animate-pulse" />
-              Pipeline Core (Equipe Principal)
+              Core Sequential Pipeline
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {coreSkillsList.map((skill) => (
@@ -324,7 +324,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                     </p>
                   </div>
                   <div className="mt-4 pt-3 border-t border-neutral-900/60 text-[10.5px] font-mono text-slate-500">
-                    Ver Limites & Restrições
+                    Inspect Limits & Constraints
                   </div>
                 </div>
               ))}
@@ -335,7 +335,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
           <div>
             <h3 className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-6 flex items-center">
               <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2.5 animate-pulse" />
-              Especialistas & Papéis de Suporte
+              Specialists & Support Roles
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {supportingSkillsList.map((skill) => (
@@ -347,7 +347,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/30 text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
-                        Especialista
+                        Specialist
                       </span>
                       <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                     </div>
@@ -359,7 +359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                     </p>
                   </div>
                   <div className="mt-4 pt-2.5 border-t border-neutral-900/60 text-[10px] font-mono text-slate-500">
-                    Ver Limites
+                    Inspect Limits
                   </div>
                 </div>
               ))}
@@ -371,9 +371,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       {/* Observability Section */}
       <section className="max-w-7xl mx-auto px-6 py-20 z-10 relative border-t border-neutral-900/50 space-y-28">
         <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">Monitoramento do Workspace</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">Workspace Observability</h2>
           <p className="text-slate-450 text-sm md:text-base">
-            Monitore o andamento das tarefas e audite o histórico de execuções através do console WebSocket local.
+            Monitor task progress and audit active session logs in real time through the local WebSocket console.
           </p>
         </div>
 
@@ -383,15 +383,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             <div 
               onClick={() => setActiveModalImg({
                 src: 'assets/screenshots/skill-active.png',
-                title: 'Painel de Atividade da Skill',
-                desc: 'Exibe o tempo decorrido, o workspace ativo, arquivos modificados na sessão e a transmissão direta de logs da execução.'
+                title: 'Skill Activity Panel',
+                desc: 'Displays execution duration, the active workspace scope, modified files, and raw stream outputs.'
               })}
               className="group glass-card-3d rounded-2xl overflow-hidden border border-neutral-800/40 shadow-[0_20px_50px_rgba(6,182,212,0.05)] cursor-zoom-in hover:border-cyan-500/40 transition-all duration-300"
             >
               <div className="aspect-video bg-black overflow-hidden relative">
                 <img 
                   src="assets/screenshots/skill-active.png" 
-                  alt="Dashboard de Atividade" 
+                  alt="Activity Dashboard" 
                   className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -400,7 +400,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                 {/* Fallback visual block if screenshot is missing */}
                 <div className="w-full h-full bg-neutral-950 flex flex-col items-center justify-center p-8 text-center text-slate-500">
                   <Terminal className="w-12 h-12 text-cyan-500 mb-3 animate-pulse" />
-                  <span className="font-mono text-xs text-slate-400">Transmissão de logs de execução em tempo real</span>
+                  <span className="font-mono text-xs text-slate-400">Real-time log stream mockup</span>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
               </div>
@@ -408,11 +408,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
           </div>
           <div className="lg:col-span-5 space-y-4">
             <div className="inline-block px-3 py-1 rounded-md bg-cyan-950/20 border border-cyan-800/30 text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider">
-              Auditoria & Logs
+              Audit & Logs
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold font-display text-white">Visualização de Atividade</h3>
+            <h3 className="text-2xl md:text-3xl font-bold font-display text-white">Activity Monitoring</h3>
             <p className="text-sm md:text-base text-slate-400 leading-relaxed">
-              O painel do dashboard exibe os logs e arquivos afetados pela skill ativa no momento. É possível pausar, inspecionar a saída do terminal do agente e auditar as chamadas de ferramentas diretamente.
+              The dashboard displays output logs and changes made by the active skill. Developers can pause execution, inspect agent shell streams, and review tool calls in real time.
             </p>
           </div>
         </div>
@@ -421,26 +421,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5 order-2 lg:order-1 space-y-4">
             <div className="inline-block px-3 py-1 rounded-md bg-emerald-950/20 border border-emerald-800/30 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">
-              Checklists de Tarefas
+              Task Checklists
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold font-display text-white">Acompanhamento de Specs</h3>
+            <h3 className="text-2xl md:text-3xl font-bold font-display text-white">Specs Tracing</h3>
             <p className="text-sm md:text-base text-slate-400 leading-relaxed">
-              O CrewLoop impõe o desenvolvimento orientado a especificações. O Arquiteto documenta o plano em `specs/changes/` e o dashboard acompanha automaticamente a lista de tarefas, sinalizando quais etapas foram implementadas e testadas.
+              CrewLoop enforces a spec-first cycle. The Architect documents specs in `specs/changes/` and the dashboard tracks checklist status, highlighting implemented and verified tasks.
             </p>
           </div>
           <div className="lg:col-span-7 order-1 lg:order-2">
             <div 
               onClick={() => setActiveModalImg({
                 src: 'assets/screenshots/dashboard-overview.png',
-                title: 'Visão Geral das Sessões',
-                desc: 'Linha do tempo de conexões ativas, sessões de agentes iniciadas e logs WebSocket de eventos.'
+                title: 'Sessions Overview',
+                desc: 'Historical session timelines, connected shims, and raw WebSocket connection telemetry.'
               })}
               className="group glass-card-3d rounded-2xl overflow-hidden border border-neutral-800/40 shadow-[0_20px_50px_rgba(16,185,129,0.05)] cursor-zoom-in hover:border-emerald-500/40 transition-all duration-300"
             >
               <div className="aspect-video bg-black overflow-hidden relative">
                 <img 
                   src="assets/screenshots/dashboard-overview.png" 
-                  alt="Visão Geral do Dashboard" 
+                  alt="Dashboard Overview" 
                   className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -448,7 +448,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                 />
                 <div className="w-full h-full bg-neutral-950 flex flex-col items-center justify-center p-8 text-center text-slate-500">
                   <GitFork className="w-12 h-12 text-emerald-400 mb-3 animate-pulse" />
-                  <span className="font-mono text-xs text-slate-400">Painel de gerenciamento de sessões ativas</span>
+                  <span className="font-mono text-xs text-slate-400">Session management console mockup</span>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
               </div>
@@ -460,9 +460,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       {/* Comparison Grid Section: Traditional vs CrewLoop */}
       <section className="max-w-7xl mx-auto px-6 py-20 z-10 relative border-t border-neutral-900/50">
         <div className="text-center mb-16">
-          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Comparativo de Fluxo</h2>
+          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Workflow Comparison</h2>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            A diferença prática entre a execução livre e o fluxo estruturado com divisão de papéis.
+            The difference between free execution and a structured workflow with role isolation.
           </p>
         </div>
 
@@ -473,24 +473,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
               <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-900/30 shadow-inner">
                 <ShieldWarning className="w-5 h-5" />
               </div>
-              <h4 className="text-xl">Execução Tradicional de IA</h4>
+              <h4 className="text-xl">Standard AI Coding</h4>
             </div>
-            <ul className="space-y-4 text-[13px] text-slate-450">
+            <ul className="space-y-4 text-[13px] text-slate-400">
               <li className="flex items-start space-x-3">
                 <span className="text-red-500 font-bold text-base select-none">✕</span>
-                <span>Modificações de código feitas diretamente, sem validação arquitetural ou de requisitos.</span>
+                <span>Alters files immediately without technical specifications or task blueprints.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-red-500 font-bold text-base select-none">✕</span>
-                <span>Edições em múltiplos arquivos sem isolamento de contexto, aumentando a chance de regressões.</span>
+                <span>Modifies multiple directories without context boundaries, leading to compilation breakage.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-red-500 font-bold text-base select-none">✕</span>
-                <span>Commits automáticos sem linter ou validação prévia de compilação da base.</span>
+                <span>Pushes untested changes directly to the remote repository.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-red-500 font-bold text-base select-none">✕</span>
-                <span>Inexistência de revisão de código, facilitando vazamento de credenciais.</span>
+                <span>Skips static verification and security analysis, risking credential leaks.</span>
               </li>
             </ul>
           </div>
@@ -501,24 +501,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
               <div className="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-900/30 shadow-inner">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
               </div>
-              <h4 className="text-xl">Fluxo CrewLoop</h4>
+              <h4 className="text-xl">CrewLoop Enforced Flow</h4>
             </div>
-            <ul className="space-y-4 text-[13px] text-slate-300">
+            <ul className="space-y-4 text-[13px] text-slate-350">
               <li className="flex items-start space-x-3">
                 <span className="text-emerald-400 font-bold text-base select-none">✓</span>
-                <span>Definição obrigatória do plano de tarefas e specs antes de qualquer alteração no código.</span>
+                <span>Requires task definitions and architecture specs before coding begins.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-emerald-400 font-bold text-base select-none">✓</span>
-                <span>Divisão estrita de papéis: Engenheiro escreve código; Revisor audita; Shipper cria commits.</span>
+                <span>Strict role isolation: Engineer codes, Reviewer audits, Shipper commits.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-emerald-400 font-bold text-base select-none">✓</span>
-                <span>Padronização automatizada de commits e ramificações usando Commits Convencionais.</span>
+                <span>Automatic formatting of branch structures and commits following Conventional Commits.</span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-emerald-400 font-bold text-base select-none">✓</span>
-                <span>Execução de testes locais e auditoria de segurança integrada antes da abertura do PR.</span>
+                <span>Integrates local test sweeps and security scanning prior to PR creation.</span>
               </li>
             </ul>
           </div>
@@ -528,9 +528,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       {/* Metrics Section */}
       <section className="max-w-7xl mx-auto px-6 py-16 z-10 relative border-t border-neutral-900/50">
         <div className="text-center mb-14">
-          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Métricas de Eficiência</h2>
+          <h2 className="text-2xl md:text-3.5xl font-bold font-display text-white mb-3">Efficiency Metrics</h2>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            Resultados práticos obtidos com a aplicação do fluxo estruturado em repositórios de testes reais.
+            Practical performance indicators achieved by enforcing the structured workflow.
           </p>
         </div>
 
@@ -542,10 +542,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             </div>
             <div>
               <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Erros em Compilação
+                Compilation Failures
               </div>
-              <p className="text-xs text-slate-500 italic leading-relaxed">
-                "Os gates de auditoria local barram quebras de build e inconsistências de linter antes da entrega final."
+              <p className="text-xs text-slate-555 italic leading-relaxed">
+                "Mandatory quality gates verify syntax checks and linting before code leaves the local workspace."
               </p>
             </div>
           </div>
@@ -557,10 +557,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             </div>
             <div>
               <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Rastreamento de Modificações
+                Specs Traceability
               </div>
-              <p className="text-xs text-slate-500 italic leading-relaxed">
-                "Todo arquivo modificado possui um plano mapeado pelo Arquiteto, garantindo histórico claro em specs/changes/."
+              <p className="text-xs text-slate-555 italic leading-relaxed">
+                "No code modifications are written without an associated task checklist and spec file in specs/changes/."
               </p>
             </div>
           </div>
@@ -572,10 +572,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             </div>
             <div>
               <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Sessões Executadas
+                Sessions Ran
               </div>
-              <p className="text-xs text-slate-500 italic leading-relaxed">
-                "Integração contínua e autônoma validando o fluxo de mudanças em repositórios reais sem quebras."
+              <p className="text-xs text-slate-555 italic leading-relaxed">
+                "Enforcing stable code additions and PR releases automatically across multiple scale repositories."
               </p>
             </div>
           </div>
@@ -603,14 +603,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             
             <div className="p-6 space-y-5 bg-neutral-950/40">
               <div>
-                <h5 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1.5">Descrição da Função</h5>
+                <h5 className="text-[10px] font-mono font-bold text-slate-550 uppercase tracking-wider mb-1.5">Role Description</h5>
                 <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{selectedSkillForModal.desc}</p>
               </div>
 
               <div className="bg-neutral-950 border border-neutral-900 rounded-xl p-5">
                 <h5 className="text-[10px] font-mono font-bold text-rose-400 flex items-center mb-3.5 tracking-wider">
                   <Warning className="w-4 h-4 mr-2 text-rose-400" />
-                  RESTRIÇÕES: O QUE NUNCA FAZ
+                  CONSTRAINTS: NEVER DOES
                 </h5>
                 <ul className="space-y-2.5">
                   {selectedSkillForModal.cannotDo.map((item, idx) => (
@@ -631,14 +631,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                 }}
                 className="px-4 py-2 border border-neutral-850 hover:border-cyan-500/50 hover:bg-cyan-950/10 text-xs font-mono text-cyan-400 rounded-lg transition-colors flex items-center space-x-1.5"
               >
-                <span>Ler Guia Completo</span>
+                <span>Read Full Guide</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <button 
                 onClick={() => setSelectedSkillForModal(null)}
                 className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-xs font-mono text-slate-300 rounded-lg transition-colors"
               >
-                Fechar
+                Close
               </button>
             </div>
           </div>
