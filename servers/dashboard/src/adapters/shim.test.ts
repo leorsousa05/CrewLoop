@@ -118,6 +118,53 @@ describe('buildEvent', () => {
     assert.equal(endEvent?.skill, undefined);
   });
 
+  it('attaches default_skill fallback to tool events of every source', () => {
+    const kimi = buildEvent(
+      'kimi' as AgentSource,
+      { hook_event_name: 'PreToolUse', session_id: 's1', cwd: '/p', tool_name: 'Read' },
+      'crewloop-hub'
+    );
+    assert.equal(kimi?.default_skill, 'crewloop-hub');
+
+    const claude = buildEvent(
+      'claude' as AgentSource,
+      { hook_event_name: 'PreToolUse', session_id: 's2', tool_name: 'Edit' },
+      'crewloop-hub'
+    );
+    assert.equal(claude?.default_skill, 'crewloop-hub');
+
+    const codex = buildEvent(
+      'codex' as AgentSource,
+      { hook_event_name: 'PreToolUse', sessionId: 's3', toolName: 'Bash' },
+      'crewloop-hub'
+    );
+    assert.equal(codex?.default_skill, 'crewloop-hub');
+  });
+
+  it('does not attach default_skill when the event carries an explicit skill', () => {
+    const event = buildEvent(
+      'kimi' as AgentSource,
+      {
+        hook_event_name: 'PreToolUse',
+        session_id: 's1',
+        cwd: '/p',
+        tool_name: 'Read',
+        skill: 'architect',
+      },
+      'crewloop-hub'
+    );
+    assert.equal(event?.skill, 'architect');
+    assert.equal(event?.default_skill, undefined);
+  });
+
+  it('maps Codex SessionEnd to session_end', () => {
+    const event = buildEvent('codex' as AgentSource, {
+      hook_event_name: 'SessionEnd',
+      sessionId: 'sess-codex',
+    });
+    assert.equal(event?.event_type, 'session_end');
+  });
+
   it('forwards explicit payload skill for kimi', () => {
     const event = buildEvent('kimi' as AgentSource, {
       hook_event_name: 'SessionStart',

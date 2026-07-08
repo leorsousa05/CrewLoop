@@ -74,7 +74,10 @@ export function buildEvent(
 
   if (base.event_type === 'session_start' && defaultSkill) {
     base.skill = defaultSkill;
-  } else if (source === 'agy' && defaultSkill && !base.skill) {
+  } else if (defaultSkill && !base.skill) {
+    // Every source gets the default-skill fallback: if the explicit
+    // session_start is missed (lazy start), the inference engine can still
+    // fall back to this instead of reporting the skill as unknown.
     base.default_skill = defaultSkill;
   }
 

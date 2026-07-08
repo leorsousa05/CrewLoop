@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
