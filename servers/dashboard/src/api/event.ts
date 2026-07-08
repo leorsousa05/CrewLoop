@@ -2,7 +2,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { DashboardEvent, ClientWebSocketMessage } from '../types';
 import { StateStore } from '../state';
 import { SkillInferenceEngine } from '../skills/infer';
-import { sanitizeEventBoundary } from '../filters/sanitize';
+import { sanitizeEventBoundary, sanitizeToolPayload } from '../filters/sanitize';
+import { classifyOperation } from '../lib/operations';
 import { createUpdateMessage } from '../presenter';
 
 export interface EventHandlerDependencies {
@@ -50,6 +51,14 @@ export function createEventHandler(deps: EventHandlerDependencies) {
       res.statusCode = 400;
       res.end(JSON.stringify({ error: 'Missing required fields' }));
       return;
+    }
+
+    // Defense in depth: events can be POSTed by arbitrary clients, so the
+    // payloads are re-sanitized and classified here regardless of the shim.
+    event.input = sanitizeToolPayload(event.input);
+    event.output = sanitizeToolPayload(event.output);
+    if (!event.operationType && event.tool) {
+      event.operationType = classifyOperation(event.tool);
     }
 
     const session = deps.state.applyEvent(event);

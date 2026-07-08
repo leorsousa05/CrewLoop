@@ -3,12 +3,16 @@ import os from 'node:os';
 
 export type HookFormat = 'toml' | 'json' | 'none';
 
+export type AgentLifecycleEvent = 'SessionStart' | 'SessionEnd' | 'Stop';
+
 export interface AgentHookConfig {
   supported: boolean;
   configPath: string;
   format: HookFormat;
   beforeToolUseCommand?: string;
   afterToolUseCommand?: string;
+  /** Lifecycle hook events natively emitted by the agent (session start/end). */
+  lifecycleEvents?: AgentLifecycleEvent[];
 }
 
 export interface AgentConfig {
@@ -27,6 +31,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'toml',
       beforeToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
       afterToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
+      lifecycleEvents: ['SessionStart', 'SessionEnd', 'Stop'],
     },
   },
   {
@@ -34,10 +39,11 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
     skillsDir: path.join(os.homedir(), '.claude', 'skills'),
     hooks: {
       supported: true,
-      configPath: path.join(os.homedir(), '.claude', 'config.json'),
+      configPath: path.join(os.homedir(), '.claude', 'settings.json'),
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
       afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+      lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
   },
   {
@@ -49,6 +55,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
       afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+      lifecycleEvents: ['SessionStart', 'Stop'],
     },
   },
   {

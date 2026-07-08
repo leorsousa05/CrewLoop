@@ -47,7 +47,7 @@ describe('shim binary', () => {
     const { exitCode, stderr } = await runBin(['unknown']);
     assert.strictEqual(exitCode, 1);
     assert.ok(stderr.includes('unknown source'));
-    assert.ok(stderr.includes('crewloop-shim <kimi|codex|agy>'));
+    assert.ok(stderr.includes('crewloop-shim <kimi|claude|codex|agy>'));
   });
 
   it('exits 0 for agy source with empty stdin', async () => {

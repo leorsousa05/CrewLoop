@@ -119,3 +119,75 @@ describe('SkillInferenceEngine', () => {
     assert.equal(result.confidence, 'heuristic');
   });
 });
+
+describe('SkillInferenceEngine fallback priority', () => {
+  it('1) direct invocation via Skill tool input wins over everything', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const session = makeSession({ active_skill: 'architect' });
+    const event = makeEvent({
+      tool: 'Skill',
+      input: { skill: 'engineer' },
+      default_skill: 'crewloop-hub',
+    });
+    const result = engine.infer(event, session);
+    assert.equal(result.skill, 'engineer');
+    assert.equal(result.confidence, 'explicit');
+  });
+
+  it('1) supports use_skill tool naming variant', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({ tool: 'use_skill', input: { skill: 'researcher' } });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, 'researcher');
+    assert.equal(result.confidence, 'explicit');
+  });
+
+  it('2) infers from SKILL.md read when there is no direct invocation', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const session = makeSession({ active_skill: 'architect' });
+    const event = makeEvent({
+      tool: 'Read',
+      detail: '/home/user/.claude/skills/shipper/SKILL.md',
+      default_skill: 'crewloop-hub',
+    });
+    const result = engine.infer(event, session);
+    assert.equal(result.skill, 'shipper');
+    assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('2) infers from SKILL.md read via input file_path on Windows paths', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({
+      tool: 'read_file',
+      input: { file_path: 'C:\\Users\\arch\\.agents\\skills\\engineer\\SKILL.md' },
+    });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, 'engineer');
+    assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('3) falls back to session metadata when no invocation or skill read', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const session = makeSession({ active_skill: 'architect' });
+    const event = makeEvent({ tool: 'Read', detail: 'README.md', default_skill: 'crewloop-hub' });
+    const result = engine.infer(event, session);
+    assert.equal(result.skill, 'architect');
+    assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('4) falls back to default_skill when session has no metadata', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({ tool: 'Read', detail: 'README.md', default_skill: 'crewloop-hub' });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, 'crewloop-hub');
+    assert.equal(result.confidence, 'heuristic');
+  });
+
+  it('5) returns unknown only when every strategy fails', () => {
+    const engine = new SkillInferenceEngine(skills);
+    const event = makeEvent({ tool: 'Read', detail: 'README.md' });
+    const result = engine.infer(event, makeSession());
+    assert.equal(result.skill, undefined);
+    assert.equal(result.confidence, 'unknown');
+  });
+});

@@ -222,6 +222,37 @@ describe('installHooksForAgent', () => {
     assert.ok(Array.isArray(config.hooks.PostToolUse));
   });
 
+  it('installs lifecycle hooks for agents that declare them', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-claude-lifecycle-')),
+      'settings.json'
+    );
+    const agent = createAgentConfig({
+      id: 'claude',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+        lifecycleEvents: ['SessionStart', 'SessionEnd'],
+      },
+    });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assertResult(result, 'configured');
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    for (const event of ['SessionStart', 'SessionEnd']) {
+      assert.ok(Array.isArray(config.hooks[event]), `expected ${event} hooks`);
+      assert.strictEqual(
+        config.hooks[event][0].hooks[0].command,
+        'crewloop-shim claude --default-skill crewloop-hub'
+      );
+    }
+  });
+
   it('configures AGY grouped JSON hooks under crewloop group', () => {
     const configPath = path.join(
       fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-')),

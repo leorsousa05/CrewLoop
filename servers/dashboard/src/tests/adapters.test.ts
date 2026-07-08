@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { normalizeKimi } from '../adapters/kimi';
+import { normalizeClaude } from '../adapters/claude';
 import { normalizeCodex } from '../adapters/codex';
 import { normalizeAgy } from '../adapters/agy';
 
@@ -48,6 +49,72 @@ describe('normalizeKimi', () => {
 
     assert.ok(event);
     assert.deepStrictEqual(event!.output, { output: 'hello\n' });
+  });
+});
+
+describe('normalizeClaude', () => {
+  it('normalizes PreToolUse with full input', () => {
+    const event = normalizeClaude({
+      hook_event_name: 'PreToolUse',
+      session_id: 'session-c1',
+      cwd: '/tmp',
+      tool_name: 'Edit',
+      tool_input: { file_path: '/tmp/a.ts', old_string: 'a', new_string: 'b' },
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.source, 'claude');
+    assert.strictEqual(event!.event_type, 'tool_start');
+    assert.strictEqual(event!.tool, 'Edit');
+    assert.deepStrictEqual(event!.input, {
+      file_path: '/tmp/a.ts',
+      old_string: 'a',
+      new_string: 'b',
+    });
+  });
+
+  it('normalizes PostToolUse and wraps string tool_response', () => {
+    const event = normalizeClaude({
+      hook_event_name: 'PostToolUse',
+      session_id: 'session-c1',
+      tool_name: 'Read',
+      tool_input: { file_path: '/tmp/a.ts' },
+      tool_response: 'file contents',
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.event_type, 'tool_end');
+    assert.deepStrictEqual(event!.output, { output: 'file contents' });
+  });
+
+  it('normalizes session lifecycle events', () => {
+    const start = normalizeClaude({
+      hook_event_name: 'SessionStart',
+      session_id: 'session-c1',
+      source: 'startup',
+    });
+    assert.ok(start);
+    assert.strictEqual(start!.event_type, 'session_start');
+
+    const end = normalizeClaude({
+      hook_event_name: 'SessionEnd',
+      session_id: 'session-c1',
+      reason: 'logout',
+    });
+    assert.ok(end);
+    assert.strictEqual(end!.event_type, 'session_end');
+    assert.strictEqual(end!.detail, 'logout');
+  });
+
+  it('ignores unsupported hook events like Stop and Notification', () => {
+    assert.strictEqual(
+      normalizeClaude({ hook_event_name: 'Stop', session_id: 's' }),
+      undefined
+    );
+    assert.strictEqual(
+      normalizeClaude({ hook_event_name: 'Notification', session_id: 's' }),
+      undefined
+    );
   });
 });
 
