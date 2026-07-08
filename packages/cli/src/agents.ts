@@ -67,6 +67,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       format: 'json',
       beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+      lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
   },
   {
