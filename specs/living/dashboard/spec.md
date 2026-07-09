@@ -16,13 +16,13 @@ The CrewLoop dashboard accepts normalized events from multiple agent hook source
 The `crewloop-shim` binary dispatches on the source name passed as the first positional argument:
 
 ```bash
-crewloop-shim <kimi|codex|agy|opencode|log-watcher> --default-skill orchestrator
+crewloop-shim <kimi|codex|agy|opencode|log-watcher> --default-skill crewloop-hub
 ```
 
 For sources whose payloads do not include the event name (such as AGY), the event type can be forced with `--event-type`:
 
 ```bash
-crewloop-shim agy --default-skill orchestrator --event-type tool_start
+crewloop-shim agy --default-skill crewloop-hub --event-type tool_start
 ```
 
 ## Normalization

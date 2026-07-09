@@ -112,14 +112,14 @@ Present the navigation menu and WAIT for user choice. Call the `ask_question` to
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
 
 ### Step 6: Handoff Summary
 
-State the accessibility risks you inspected, the result, and whether the findings should be returned to the Orchestrator or the invoking skill.
+State the accessibility risks you inspected, the result, and whether the findings should be returned to the CrewLoop Hub or the invoking skill.
 
 ---
 

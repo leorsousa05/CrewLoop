@@ -28,7 +28,7 @@ Supported agents: `kimi`, `claude`, `codex`, `agy`.
 `crewloop install` registers `before_tool_use` and `after_tool_use` hooks in each detected agent's config file. The hooks invoke:
 
 ```
-crewloop-shim <agent> --default-skill orchestrator
+crewloop-shim <agent> --default-skill crewloop-hub
 ```
 
 The shim reads the agent payload from stdin, normalizes it to a `DashboardEvent`, and POSTs it to the dashboard at `http://127.0.0.1:7890/event`.

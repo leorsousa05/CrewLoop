@@ -12,12 +12,12 @@ TOML array-of-tables (`[[hooks]]`). Each hook is a separate block:
 [[hooks]]
 event = "PreToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill orchestrator"
+command = "crewloop-shim kimi --default-skill crewloop-hub"
 
 [[hooks]]
 event = "PostToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill orchestrator"
+command = "crewloop-shim kimi --default-skill crewloop-hub"
 ```
 
 ### Codex (`~/.codex/hooks.json`) and Claude (`~/.claude/config.json`)
@@ -33,7 +33,7 @@ JSON with top-level `"hooks"` object. Each event maps to an array of matcher blo
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill orchestrator"
+            "command": "crewloop-shim codex --default-skill crewloop-hub"
           }
         ]
       }
@@ -44,7 +44,7 @@ JSON with top-level `"hooks"` object. Each event maps to an array of matcher blo
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill orchestrator"
+            "command": "crewloop-shim codex --default-skill crewloop-hub"
           }
         ]
       }
@@ -66,7 +66,7 @@ JSON grouped object format. CrewLoop uses the `"crewloop"` group to isolate its 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill orchestrator"
+            "command": "crewloop-shim agy --default-skill crewloop-hub"
           }
         ]
       }
@@ -77,7 +77,7 @@ JSON grouped object format. CrewLoop uses the `"crewloop"` group to isolate its 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill orchestrator"
+            "command": "crewloop-shim agy --default-skill crewloop-hub"
           }
         ]
       }

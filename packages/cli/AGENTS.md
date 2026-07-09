@@ -55,12 +55,12 @@ Uses TOML array-of-tables. Each hook is a separate `[[hooks]]` block:
 [[hooks]]
 event = "PreToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill orchestrator"
+command = "crewloop-shim kimi --default-skill crewloop-hub"
 
 [[hooks]]
 event = "PostToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill orchestrator"
+command = "crewloop-shim kimi --default-skill crewloop-hub"
 ```
 
 - `event` — when the hook fires (`PreToolUse`, `PostToolUse`).
@@ -81,7 +81,7 @@ Uses a top-level `"hooks"` object. Each event maps to an array of matcher blocks
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill orchestrator"
+            "command": "crewloop-shim codex --default-skill crewloop-hub"
           }
         ]
       }
@@ -92,7 +92,7 @@ Uses a top-level `"hooks"` object. Each event maps to an array of matcher blocks
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill orchestrator"
+            "command": "crewloop-shim codex --default-skill crewloop-hub"
           }
         ]
       }
@@ -114,7 +114,7 @@ Uses grouped objects. The top level is a map of hook-group names. CrewLoop uses 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill orchestrator"
+            "command": "crewloop-shim agy --default-skill crewloop-hub"
           }
         ]
       }
@@ -125,7 +125,7 @@ Uses grouped objects. The top level is a map of hook-group names. CrewLoop uses 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill orchestrator"
+            "command": "crewloop-shim agy --default-skill crewloop-hub"
           }
         ]
       }
@@ -165,10 +165,10 @@ If you change a matcher, you risk losing events.
 The command passed to every CrewLoop hook is:
 
 ```
-crewloop-shim <agent-id> --default-skill orchestrator
+crewloop-shim <agent-id> --default-skill crewloop-hub
 ```
 
-Example: `crewloop-shim kimi --default-skill orchestrator`.
+Example: `crewloop-shim kimi --default-skill crewloop-hub`.
 
 The shim receives event context via stdin, which is the standard mechanism for agent hooks. Do not change this command string unless the shim contract is also updated.
 

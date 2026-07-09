@@ -9,7 +9,7 @@
 - [x] Fix linear workflow reference in `README.md` (Workflow diagram, rules, and step 4 contributing section)
 - [x] Fix linear workflow reference in `AGENTS.md` (Workflow diagram, rules, AFK behavior, and contribution section)
 - [x] Embed the "Bundle Lock-In" constraint in `AGENTS.md`
-- [x] Correct residual direct routing in `skills/orchestrator/SKILL.md` (Line 77 next skill logic)
+- [x] Correct residual direct routing in `skills/crewloop-hub/SKILL.md` (Line 77 next skill logic)
 - [x] Correct residual direct routing in `skills/engineer/SKILL.md` (Line 32 code review routing)
 - [x] Correct residual direct routing in `skills/maintainer/SKILL.md` (Line 50 route to engineer)
 

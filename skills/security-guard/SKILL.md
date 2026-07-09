@@ -74,7 +74,7 @@ Include concrete remediation steps and route appropriately.
 
 ### Step 7: Handoff Summary
 
-State the security posture, highest-severity issue, and whether findings should go back to the Orchestrator or the invoking review skill.
+State the security posture, highest-severity issue, and whether findings should go back to the CrewLoop Hub or the invoking review skill.
 
 ---
 
@@ -122,7 +122,7 @@ Print this prefix on its own line before the first line of every response.
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

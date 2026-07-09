@@ -12,6 +12,8 @@ export interface InstallOptions {
   dryRun?: boolean;
 }
 
+const SHARED_DIRS = ['references', 'assets'];
+
 function ensureDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -41,39 +43,26 @@ function createSymlink(source: string, target: string): void {
   fs.symlinkSync(source, target, type);
 }
 
+function rewriteSharedLinks(skillPath: string): void {
+  const skillFile = path.join(skillPath, 'SKILL.md');
+  if (!fs.existsSync(skillFile)) {
+    return;
+  }
+
+  const content = fs.readFileSync(skillFile, 'utf-8');
+  const updated = content
+    .replace(/\.\.\/\.\.\/references\//g, 'references/')
+    .replace(/\.\.\/\.\.\/assets\//g, 'assets/');
+
+  if (updated !== content) {
+    fs.writeFileSync(skillFile, updated, 'utf-8');
+  }
+}
+
 export interface InstallResult {
   installed: string[];
   skipped: string[];
   errors: Error[];
-}
-
-export function mergeSharedDirs(
-  targetDir: string,
-  sharedRoot: string,
-  options: { dryRun?: boolean; symlink?: boolean }
-): void {
-  const sharedDirs = ['references', 'assets'];
-  const sharedTargetDir = path.resolve(targetDir, '..');
-
-  for (const dir of sharedDirs) {
-    const sourceDir = path.join(sharedRoot, dir);
-    if (!fs.existsSync(sourceDir)) {
-      continue;
-    }
-
-    const targetPath = path.join(sharedTargetDir, dir);
-
-    if (options.dryRun) {
-      continue;
-    }
-
-    if (options.symlink) {
-      fs.rmSync(targetPath, { recursive: true, force: true });
-      createSymlink(sourceDir, targetPath);
-    } else {
-      copyDir(sourceDir, targetPath);
-    }
-  }
 }
 
 export function installSkills(
@@ -117,18 +106,29 @@ export function installSkills(
         copyDir(skill.sourcePath, targetPath);
       }
 
-      result.installed.push(skill.name);
-    } catch (error) {
-      result.errors.push(error instanceof Error ? error : new Error(String(error)));
-    }
-  }
+      if (sharedRoot) {
+        for (const dir of SHARED_DIRS) {
+          const sourceDir = path.join(sharedRoot, dir);
+          if (!fs.existsSync(sourceDir)) {
+            continue;
+          }
 
-  if (sharedRoot) {
-    try {
-      mergeSharedDirs(targetDir, sharedRoot, {
-        dryRun: options.dryRun,
-        symlink: options.symlink,
-      });
+          const sharedTargetPath = path.join(targetPath, dir);
+
+          if (options.symlink) {
+            fs.rmSync(sharedTargetPath, { recursive: true, force: true });
+            createSymlink(sourceDir, sharedTargetPath);
+          } else {
+            copyDir(sourceDir, sharedTargetPath);
+          }
+        }
+
+        if (!options.symlink) {
+          rewriteSharedLinks(targetPath);
+        }
+      }
+
+      result.installed.push(skill.name);
     } catch (error) {
       result.errors.push(error instanceof Error ? error : new Error(String(error)));
     }

@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { installSkills, mergeSharedDirs } from '../installer';
+import { installSkills } from '../installer';
 import type { SkillManifest } from '../resolver';
 
 describe('installer', () => {
@@ -68,15 +68,13 @@ describe('installer', () => {
   });
 });
 
-describe('mergeSharedDirs', () => {
+describe('shared references and assets', () => {
   let sharedRoot: string;
-  let targetParent: string;
   let targetDir: string;
 
   before(() => {
     sharedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-shared-'));
-    targetParent = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-target-parent-'));
-    targetDir = fs.mkdtempSync(path.join(targetParent, 'skills-'));
+    targetDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-target-'));
 
     fs.mkdirSync(path.join(sharedRoot, 'references'), { recursive: true });
     fs.writeFileSync(path.join(sharedRoot, 'references', 'conventions.md'), '# Conventions\n');
@@ -87,88 +85,94 @@ describe('mergeSharedDirs', () => {
 
   after(() => {
     fs.rmSync(sharedRoot, { recursive: true, force: true });
-    fs.rmSync(targetParent, { recursive: true, force: true });
+    fs.rmSync(targetDir, { recursive: true, force: true });
   });
 
-  it('copies shared references and assets into parent of target directory', () => {
-    mergeSharedDirs(targetDir, sharedRoot, {});
-
-    assert.ok(fs.existsSync(path.join(targetParent, 'references', 'conventions.md')));
-    assert.ok(fs.existsSync(path.join(targetParent, 'assets', 'templates', 'skill.md')));
-  });
-
-  it('overwrites existing shared files with shared copies', () => {
-    fs.mkdirSync(path.join(targetParent, 'references'), { recursive: true });
-    fs.writeFileSync(path.join(targetParent, 'references', 'conventions.md'), '# Skill-specific\n');
-
-    mergeSharedDirs(targetDir, sharedRoot, {});
-
-    const content = fs.readFileSync(path.join(targetParent, 'references', 'conventions.md'), 'utf-8');
-    assert.strictEqual(content, '# Conventions\n');
-  });
-
-  it('respects dry-run', () => {
-    const dryParent = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-dry-parent-'));
-    const dryTarget = fs.mkdtempSync(path.join(dryParent, 'skills-'));
-
-    mergeSharedDirs(dryTarget, sharedRoot, { dryRun: true });
-
-    assert.ok(!fs.existsSync(path.join(dryParent, 'references')));
-    assert.ok(!fs.existsSync(path.join(dryParent, 'assets')));
-
-    fs.rmSync(dryParent, { recursive: true, force: true });
-  });
-
-  it('installs shared dirs at parent of skills target directory', () => {
+  it('copies shared references and assets into each installed skill', () => {
     const skillSource = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skillsource-'));
-    const skillTargetParent = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skilltarget-parent-'));
-    const skillTarget = fs.mkdtempSync(path.join(skillTargetParent, 'skills-'));
-
     fs.writeFileSync(path.join(skillSource, 'SKILL.md'), '# Skill\n');
 
     const skills: SkillManifest[] = [
       { name: 'example', description: '', sourcePath: skillSource },
     ];
 
-    const result = installSkills(skills, skillTarget, {}, sharedRoot);
+    const result = installSkills(skills, targetDir, {}, sharedRoot);
     assert.deepStrictEqual(result.installed, ['example']);
-    assert.ok(fs.existsSync(path.join(skillTargetParent, 'references', 'conventions.md')));
-    assert.ok(fs.existsSync(path.join(skillTargetParent, 'assets', 'templates', 'skill.md')));
+
+    const installedSkillPath = path.join(targetDir, 'example');
+    assert.ok(fs.existsSync(path.join(installedSkillPath, 'references', 'conventions.md')));
+    assert.ok(fs.existsSync(path.join(installedSkillPath, 'assets', 'templates', 'skill.md')));
 
     fs.rmSync(skillSource, { recursive: true, force: true });
-    fs.rmSync(skillTargetParent, { recursive: true, force: true });
   });
 
-  it('creates symlinks for shared dirs at parent of skills target in symlink mode', () => {
+  it('rewrites relative shared links in SKILL.md to local paths', () => {
     const skillSource = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skillsource-'));
-    const skillTargetParent = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skilltarget-parent-'));
-    const skillTarget = fs.mkdtempSync(path.join(skillTargetParent, 'skills-'));
+    fs.writeFileSync(
+      path.join(skillSource, 'SKILL.md'),
+      'See [conventions](../../references/conventions.md) and [workflow](../../references/workflow.md).\n'
+    );
 
+    const skills: SkillManifest[] = [
+      { name: 'example', description: '', sourcePath: skillSource },
+    ];
+
+    const result = installSkills(skills, targetDir, { force: true }, sharedRoot);
+    assert.deepStrictEqual(result.installed, ['example']);
+
+    const installedSkillFile = path.join(targetDir, 'example', 'SKILL.md');
+    const content = fs.readFileSync(installedSkillFile, 'utf-8');
+    assert.ok(!content.includes('../../references/'));
+    assert.ok(content.includes('references/conventions.md'));
+    assert.ok(content.includes('references/workflow.md'));
+
+    fs.rmSync(skillSource, { recursive: true, force: true });
+  });
+
+  it('does not write shared files during dry-run', () => {
+    const dryTarget = path.join(targetDir, 'dry');
+    const skillSource = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skillsource-'));
     fs.writeFileSync(path.join(skillSource, 'SKILL.md'), '# Skill\n');
 
     const skills: SkillManifest[] = [
       { name: 'example', description: '', sourcePath: skillSource },
     ];
 
-    const result = installSkills(skills, skillTarget, { symlink: true }, sharedRoot);
+    const result = installSkills(skills, dryTarget, { dryRun: true }, sharedRoot);
+    assert.deepStrictEqual(result.installed, ['example']);
+    assert.ok(!fs.existsSync(dryTarget));
+
+    fs.rmSync(skillSource, { recursive: true, force: true });
+  });
+
+  it('creates symlinks for shared dirs inside the skill in symlink mode', () => {
+    const skillSource = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-skillsource-'));
+    fs.writeFileSync(
+      path.join(skillSource, 'SKILL.md'),
+      'See [conventions](../../references/conventions.md).\n'
+    );
+
+    const skills: SkillManifest[] = [
+      { name: 'example', description: '', sourcePath: skillSource },
+    ];
+
+    const result = installSkills(skills, targetDir, { force: true, symlink: true }, sharedRoot);
     assert.deepStrictEqual(result.installed, ['example']);
 
-    const installedSkillPath = path.join(skillTarget, 'example');
-    assert.ok(fs.lstatSync(installedSkillPath).isSymbolicLink() || fs.lstatSync(installedSkillPath).isDirectory());
-    assert.ok(!fs.existsSync(path.join(installedSkillPath, 'references')));
-    assert.ok(!fs.existsSync(path.join(installedSkillPath, 'assets')));
+    const installedSkillPath = path.join(targetDir, 'example');
+    assert.ok(fs.lstatSync(installedSkillPath).isSymbolicLink());
 
-    const sharedReferencesLink = path.join(skillTargetParent, 'references');
-    const sharedAssetsLink = path.join(skillTargetParent, 'assets');
+    const sharedReferencesLink = path.join(installedSkillPath, 'references');
+    const sharedAssetsLink = path.join(installedSkillPath, 'assets');
     assert.ok(fs.lstatSync(sharedReferencesLink).isSymbolicLink());
     assert.ok(fs.lstatSync(sharedAssetsLink).isSymbolicLink());
     assert.ok(fs.existsSync(path.join(sharedReferencesLink, 'conventions.md')));
     assert.ok(fs.existsSync(path.join(sharedAssetsLink, 'templates', 'skill.md')));
 
-    assert.ok(!fs.existsSync(path.join(skillSource, 'references')));
-    assert.ok(!fs.existsSync(path.join(skillSource, 'assets')));
+    const skillFile = path.join(installedSkillPath, 'SKILL.md');
+    const content = fs.readFileSync(skillFile, 'utf-8');
+    assert.ok(content.includes('../../references/conventions.md'));
 
     fs.rmSync(skillSource, { recursive: true, force: true });
-    fs.rmSync(skillTargetParent, { recursive: true, force: true });
   });
 });

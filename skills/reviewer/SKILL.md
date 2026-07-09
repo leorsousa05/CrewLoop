@@ -122,10 +122,10 @@ Present the navigation menu and WAIT for user choice. Call the `ask_question` to
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
 
 ## RESPONSE RULES
 

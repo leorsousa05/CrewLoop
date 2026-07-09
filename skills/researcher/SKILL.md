@@ -51,7 +51,7 @@ Present a concise comparison:
 
 ### Step 4: Handoff Summary
 
-State what you compared, what evidence mattered, and the recommendation to return to the Orchestrator.
+State what you compared, what evidence mattered, and the recommendation to return to the CrewLoop Hub.
 
 ---
 
@@ -79,7 +79,7 @@ State what you compared, what evidence mattered, and the recommendation to retur
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

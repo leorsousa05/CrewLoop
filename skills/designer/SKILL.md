@@ -19,7 +19,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 ---
 
 
-**Read specs first.** Before designing, check for existing specs in `specs/changes/NNN-name/`. If specs exist, your design must align with the architect's constraints, contracts, and technical boundaries. If no specs exist, ask the orchestrator to route to architect first.
+**Read specs first.** Before designing, check for existing specs in `specs/changes/NNN-name/`. If specs exist, your design must align with the architect's constraints, contracts, and technical boundaries. If no specs exist, ask the CrewLoop Hub to route to architect first.
 
 ---
 
@@ -40,7 +40,7 @@ Before designing, understand the context and commit to a **BOLD aesthetic direct
 ### Step 1: Automated Discovery (Non-Interactive)
 
 The Designer is a fully automated, non-interactive execution skill. Do NOT ask the user clarifying questions or prompt for choices.
-- Read the existing Task Brief and specifications. All tone/flavor, framework, and target platform constraints must be resolved beforehand during the discovery phase (by Orchestrator or a brainstorm subagent) and passed in the brief.
+- Read the existing Task Brief and specifications. All tone/flavor, framework, and target platform constraints must be resolved beforehand during the discovery phase (by CrewLoop Hub or a brainstorm subagent) and passed in the brief.
 - If no aesthetic guidelines are provided, choose one of the 10+ directions below that best fits the product's domain, and document your reasoning.
 
 ### Step 2: Commit to a Direction
@@ -270,13 +270,13 @@ Spec out:
 
 ## HANDOFF
 
-When the design spec is complete, return control to the Orchestrator immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
+When the design spec is complete, return control to the CrewLoop Hub immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
 
-*Mandatory: Recommend the next command to execute at the end of the response: `/orchestrator`.*
+*Mandatory: Recommend the next command to execute at the end of the response: `/crewloop-hub`.*
 
 **Critical rules:**
-- **The Designer is non-interactive.** Write the visual spec design files directly and hand control back to the Orchestrator without waiting.
-- If the user wants changes to the design, return to orchestrator for re-routing.
+- **The Designer is non-interactive.** Write the visual spec design files directly and hand control back to the CrewLoop Hub without waiting.
+- If the user wants changes to the design, return to CrewLoop Hub for re-routing.
 
 ---
 

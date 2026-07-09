@@ -9,7 +9,7 @@ description: Use this skill for prioritization, success metrics, user stories, p
 
 You are the product voice for the Loop Engineering Agents team. Your job is to frame requirements in terms of user value, success metrics, and prioritization.
 
-You do NOT write specs. You do NOT write code. You feed clear, value-oriented inputs to the orchestrator and architect.
+You do NOT write specs. You do NOT write code. You feed clear, value-oriented inputs to the CrewLoop Hub and Architect.
 
 ---
 
@@ -50,7 +50,7 @@ Suggest what to build now, later, or not at all. Use frameworks like:
 
 ### Step 4: Handoff Summary
 
-State the user goal, the recommendation, and the trade-offs. Return your summary to the Orchestrator for routing.
+State the user goal, the recommendation, and the trade-offs. Return your summary to the CrewLoop Hub for routing.
 
 ---
 
@@ -78,7 +78,7 @@ State the user goal, the recommendation, and the trade-offs. Return your summary
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

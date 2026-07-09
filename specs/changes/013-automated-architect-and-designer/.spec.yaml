@@ -3,6 +3,6 @@ status: "in-progress"
 author: "architect"
 created_at: "2026-07-05"
 affected_files:
-  - "skills/orchestrator/SKILL.md"
+  - "skills/crewloop-hub/SKILL.md"
   - "skills/architect/SKILL.md"
   - "skills/designer/SKILL.md"

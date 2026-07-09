@@ -47,14 +47,14 @@ Label it as one or more of:
 ### Step 3: Recommend Remediation
 
 Propose a concrete next step:
-- Reproduce the bug, outline remediation, and return to Orchestrator to route to Architect for lightweight specification.
+- Reproduce the bug, outline remediation, and return to CrewLoop Hub to route to Architect for lightweight specification.
 - Create a debt payoff plan.
 - Pin or upgrade a dependency.
 - Add monitoring or logging.
 
 ### Step 4: Handoff Summary
 
-State what you inspected, how you classified the issue, and what should happen next. Return findings to the Orchestrator.
+State what you inspected, how you classified the issue, and what should happen next. Return findings to the CrewLoop Hub.
 
 ---
 
@@ -63,7 +63,7 @@ State what you inspected, how you classified the issue, and what should happen n
 - **Start with evidence.** Quote logs, stack traces, or code lines when possible.
 - **Classify before fixing.** A correct label prevents treating debt as a bug.
 - **Estimate risk.** Say if a recommended change is safe, risky, or breaking.
-- **Route fixes to Architect first.** Provide a clear handoff with context via the Orchestrator.
+- **Route fixes to Architect first.** Provide a clear handoff with context via the CrewLoop Hub.
 - **Track recurring issues.** If the same problem appears often, flag it as debt or missing test.
 
 ---
@@ -82,7 +82,7 @@ State what you inspected, how you classified the issue, and what should happen n
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

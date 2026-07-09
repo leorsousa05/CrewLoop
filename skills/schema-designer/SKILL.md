@@ -35,16 +35,16 @@ Print this prefix on its own line before the first line of every response.
 - State the next skill being activated.
 - Load the next skill via the Skill tool (do not wait for user choice).
 
-**Next skill:** Orchestrator (to return database schema and API contract specifications).
+**Next skill:** CrewLoop Hub (to return database schema and API contract specifications).
 
 ---
 
 **What would you like to do?**
 
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
 
 
 ---
@@ -64,7 +64,7 @@ Save schema design files to the spec changes folder `specs/changes/NNN-name/`.
 
 ### Step 4: Handoff Summary
 
-State the tables, constraints, API contracts, and migration considerations before returning to the Orchestrator.
+State the tables, constraints, API contracts, and migration considerations before returning to the CrewLoop Hub.
 
 ---
 

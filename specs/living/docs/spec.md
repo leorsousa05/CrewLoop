@@ -33,7 +33,7 @@ docs/
 #### TARGET REDESIGN BEHAVIOR
 - **Hero Grid Division**: Splitting the main hero into a 12-column grid:
   - **Left 7 Columns**: Heading, pill badge, descriptive text, and CTA buttons.
-  - **Right 5 Columns**: Highly-styled interactive Terminal Simulator widget, featuring animated prompt sequences simulating `orchestrator` -> `architect` -> `engineer` -> `reviewer` -> `shipper` outputs.
+  - **Right 5 Columns**: Highly-styled interactive Terminal Simulator widget, featuring animated prompt sequences simulating `crewloop-hub` -> `architect` -> `engineer` -> `reviewer` -> `shipper` outputs.
 - **CLI Installer Widget**: Redesigned CLI container featuring an automatic typewriter text display, interactive copy, and floating 3D borders.
 - **Skills Directory Grid**:
   - Eliminates the vertical list sidebar.
