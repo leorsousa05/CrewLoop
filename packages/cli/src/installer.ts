@@ -48,11 +48,12 @@ export interface InstallResult {
 }
 
 export function mergeSharedDirs(
-  targetSkillPath: string,
+  targetDir: string,
   sharedRoot: string,
-  options: { dryRun?: boolean }
+  options: { dryRun?: boolean; symlink?: boolean }
 ): void {
   const sharedDirs = ['references', 'assets'];
+  const sharedTargetDir = path.resolve(targetDir, '..');
 
   for (const dir of sharedDirs) {
     const sourceDir = path.join(sharedRoot, dir);
@@ -60,13 +61,18 @@ export function mergeSharedDirs(
       continue;
     }
 
-    const targetDir = path.join(targetSkillPath, dir);
+    const targetPath = path.join(sharedTargetDir, dir);
 
     if (options.dryRun) {
       continue;
     }
 
-    copyDir(sourceDir, targetDir);
+    if (options.symlink) {
+      fs.rmSync(targetPath, { recursive: true, force: true });
+      createSymlink(sourceDir, targetPath);
+    } else {
+      copyDir(sourceDir, targetPath);
+    }
   }
 }
 
@@ -111,11 +117,18 @@ export function installSkills(
         copyDir(skill.sourcePath, targetPath);
       }
 
-      if (sharedRoot && !options.symlink) {
-        mergeSharedDirs(targetPath, sharedRoot, { dryRun: options.dryRun });
-      }
-
       result.installed.push(skill.name);
+    } catch (error) {
+      result.errors.push(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
+  if (sharedRoot) {
+    try {
+      mergeSharedDirs(targetDir, sharedRoot, {
+        dryRun: options.dryRun,
+        symlink: options.symlink,
+      });
     } catch (error) {
       result.errors.push(error instanceof Error ? error : new Error(String(error)));
     }
