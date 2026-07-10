@@ -38,6 +38,7 @@ export function normalizeClaude(payload: ClaudeHookPayload): DashboardEvent | un
     detail: event_type === 'session_end' ? payload.reason : undefined,
     input: payload.tool_input,
     output: normalizeOutput(payload.tool_response),
+    workspacePath: payload.cwd,
   };
 }
 

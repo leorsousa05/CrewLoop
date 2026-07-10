@@ -35,6 +35,7 @@ export function presentSession(session: Session): ClientSession {
     lastActivity: session.last_event_at,
     endedAt: session.ended_at,
     toolCounts: session.tool_counts,
+    workspaceRoot: session.workspaceRoot,
   };
 }
 

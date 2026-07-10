@@ -25,6 +25,10 @@ export interface FileOp {
   timestamp: number;
   tool: string;
   snippet?: string;
+  skill?: string;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  lineHint?: string;
 }
 
 export interface FileEntry {
@@ -94,6 +98,7 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
         inv.durationMs = ev.duration_ms;
         inv.output = ev.output;
         inv.detail = ev.detail || inv.detail;
+        inv.skill = ev.skill || inv.skill;
         continue;
       }
 
@@ -148,13 +153,42 @@ export function buildFileActivity(
       files.set(path, { path, ops: [] });
     }
     const entry = files.get(path)!;
+    const snippetCandidates = [
+      inv.output?.diff,
+      inv.output?.contentSnippet,
+      inv.output?.content,
+      inv.output?.result,
+      inv.output?.snippet,
+      inv.output?.output
+    ];
+    let resolvedSnippet: string | undefined;
+    for (const cand of snippetCandidates) {
+      if (typeof cand === 'string' && cand.length > 0) {
+        resolvedSnippet = cand;
+        break;
+      }
+    }
+
+    let lineHint: string | undefined;
+    if (inv.input) {
+      const startLine = inv.input.StartLine ?? inv.input.startLine ?? inv.input.Startline ?? inv.input.line ?? inv.input.Line;
+      const endLine = inv.input.EndLine ?? inv.input.endLine ?? inv.input.Endline;
+      if (startLine !== undefined) {
+        lineHint = endLine !== undefined ? `Lines ${startLine}-${endLine}` : `Line ${startLine}`;
+      }
+    }
+
     entry.ops.push({
       id: inv.id,
       type: operationType(inv.tool),
       status: inv.status,
       timestamp: inv.startTime,
       tool: inv.tool,
-      snippet: (inv.output?.diff as string | undefined) || (inv.output?.contentSnippet as string | undefined),
+      snippet: resolvedSnippet,
+      skill: inv.skill,
+      input: inv.input,
+      output: inv.output,
+      lineHint,
     });
   }
 

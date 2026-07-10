@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { formatDuration, formatTime, truncate, escapeHtml, prettyJson } from '../lib/format';
+import { listWorkspaceFiles } from '../server';
 import { resolvePath } from '../lib/paths';
 import { projectInvocations, buildFileActivity, operationType } from '../lib/invocations';
 import { buildGraph3D } from '../lib/graph';
@@ -48,6 +49,14 @@ describe('resolvePath', () => {
 
   it('resolves camelCase filePath', () => {
     assert.equal(resolvePath({ filePath: 'camel.txt' }), 'camel.txt');
+  });
+
+  it('resolves AbsolutePath and TargetFile and lowercase variants', () => {
+    assert.equal(resolvePath({ AbsolutePath: 'abs.txt' }), 'abs.txt');
+    assert.equal(resolvePath({ TargetFile: 'tgt.txt' }), 'tgt.txt');
+    assert.equal(resolvePath({ args: { AbsolutePath: 'args-abs.txt' } }), 'args-abs.txt');
+    assert.equal(resolvePath({ args: { TargetFile: 'args-tgt.txt' } }), 'args-tgt.txt');
+    assert.equal(resolvePath({ targetfile: 'low-tgt.txt' }), 'low-tgt.txt');
   });
 });
 
@@ -97,6 +106,15 @@ describe('buildFileActivity', () => {
     assert.equal(activity[0].path, 'a.txt');
     assert.equal(activity[0].snippet, '+x');
   });
+
+  it('resolves Kimi content read as snippet', () => {
+    const invs = [
+      { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'b.txt' }, output: { content: 'kimi read output content' } },
+    ];
+    const activity = buildFileActivity(invs, resolvePath);
+    assert.equal(activity.length, 1);
+    assert.equal(activity[0].snippet, 'kimi read output content');
+  });
 });
 
 describe('operationType', () => {
@@ -129,5 +147,39 @@ describe('buildGraph3D', () => {
     assert.ok(graph.nodes.some((n) => n.id === 'tool:Read'));
     assert.ok(graph.nodes.some((n) => n.id === 'file:a.txt'));
     assert.equal(graph.links.length, 2);
+  });
+
+  it('builds graph with multiple distinct skill nodes', () => {
+    const session: ClientSession = {
+      id: 's2',
+      source: 'kimi',
+      activeSkill: { name: 'engineer', confidence: 'explicit' },
+      lifecycle: 'running',
+      events: [],
+      startTime: 0,
+      lastActivity: 0,
+      toolCounts: {},
+    };
+    const invs = [
+      { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: {}, skill: 'architect' },
+      { id: '2', tool: 'Write', eventType: 'tool_end', startTime: 1100, status: 'success', input: { path: 'b.txt' }, output: {}, skill: 'engineer' },
+    ];
+    const graph = buildGraph3D(session, invs);
+    assert.equal(graph.nodes.length, 6);
+    assert.ok(graph.nodes.some((n) => n.id === 'skill:architect'));
+    assert.ok(graph.nodes.some((n) => n.id === 'skill:engineer'));
+    assert.ok(graph.links.some((l) => l.source === 'skill:architect' && l.target === 'tool:Read'));
+    assert.ok(graph.links.some((l) => l.source === 'skill:engineer' && l.target === 'tool:Write'));
+  });
+});
+
+describe('listWorkspaceFiles', () => {
+  it('excludes git and node_modules and returns relative paths', () => {
+    const root = process.cwd();
+    const files = listWorkspaceFiles(root, root);
+    assert.ok(files.length > 0);
+    assert.ok(!files.some((f) => f.startsWith(root)));
+    assert.ok(!files.some((f) => f.includes('node_modules')));
+    assert.ok(!files.some((f) => f.includes('.git/')));
   });
 });

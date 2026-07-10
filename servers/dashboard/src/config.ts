@@ -36,6 +36,7 @@ export const SAFE_PAYLOAD_KEYS = new Set([
   'notebook_path',
   'content',
   'contentsnippet',
+  'result',
   'diff',
   'snippet',
   'old_string',

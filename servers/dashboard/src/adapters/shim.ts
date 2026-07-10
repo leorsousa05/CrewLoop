@@ -110,6 +110,7 @@ export function buildEvent(
     duration_ms: sanitized.duration_ms,
     input: sanitizeToolPayload(base.input),
     output: sanitizeToolPayload(base.output),
+    workspacePath: base.workspacePath || (typeof raw.cwd === 'string' ? raw.cwd : undefined) || (typeof raw.workspacePath === 'string' ? raw.workspacePath : undefined) || process.cwd(),
   };
 }
 

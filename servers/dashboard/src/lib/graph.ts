@@ -27,10 +27,6 @@ export function buildGraph3D(session: ClientSession | undefined, invocations: To
   const nodes = new Map<string, GraphNode>();
   const links: GraphLink[] = [];
 
-  const skillName = session?.activeSkill?.name || session?.skill || 'unknown';
-  const skillId = `skill:${skillName}`;
-  nodes.set(skillId, { id: skillId, type: 'skill', label: skillName, weight: 1 });
-
   function ensureNode(id: string, type: GraphNode['type'], label: string, weight = 0): GraphNode {
     const existing = nodes.get(id);
     if (existing) {
@@ -51,11 +47,21 @@ export function buildGraph3D(session: ClientSession | undefined, invocations: To
     }
   }
 
+  const currentSkillName = session?.activeSkill?.name || session?.skill || 'unknown';
+  const currentSkillId = `skill:${currentSkillName}`;
+  ensureNode(currentSkillId, 'skill', currentSkillName, 1);
+
   for (const inv of invocations) {
     if (inv.meta) continue;
+
+    const invSkillName = inv.skill || currentSkillName;
+    const invSkillId = `skill:${invSkillName}`;
+
+    ensureNode(invSkillId, 'skill', invSkillName, 1);
+
     const toolId = `tool:${inv.tool}`;
     ensureNode(toolId, 'tool', inv.tool, 1);
-    addLink(skillId, toolId, 1);
+    addLink(invSkillId, toolId, 1);
 
     const path = resolvePath(inv.input, inv.output);
     if (path) {

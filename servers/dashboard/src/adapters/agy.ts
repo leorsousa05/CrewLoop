@@ -135,5 +135,6 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
     detail: extractDetail(tool, args),
     input: args,
     output: payload.error !== undefined ? { error: payload.error } : undefined,
+    workspacePath: payload.workspacePaths?.[0],
   };
 }
