@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -25,7 +25,9 @@
     "build": "npm run build:server && npm run build:ui",
     "build:server": "tsc",
     "build:ui": "cd ui && vite build",
-    "dev": "cd ui && vite",
+    "dev": "cd ui && vite --port ${1:-7890}",
+    "dev:server": "tsc -w",
+    "dev:start": "node --watch dist/index.js",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
     "test": "npm run test:server && npm run test:ui",
     "test:server": "node --test dist/**/*.test.js",
