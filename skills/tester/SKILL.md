@@ -41,7 +41,7 @@ Analyze the codebase and compile a **Test Specification / Plan** (Report 1) deta
 - Detail the test coverage scenarios (happy path, edge cases, error paths).
 - Select the testing frameworks and tools.
 - Identify integration points and required environment configurations.
-- **Stop Condition**: Present this spec in the chat and await explicit user/orchestrator approval before writing or running any tests.
+- **Stop Condition**: Present this spec in the chat and await explicit user/CrewLoop Hub approval before writing or running any tests.
 
 ### Step 3: Execute & Generate Execution Report (Stage 2 Report)
 
@@ -53,7 +53,7 @@ Once the Test Spec is approved:
 
 ### Step 4: Handoff Summary
 
-State what was tested, what passed or failed, and what should happen next. Return the report to the Orchestrator.
+State what was tested, what passed or failed, and what should happen next. Return the report to the CrewLoop Hub.
 
 ---
 
@@ -86,7 +86,7 @@ Every testing lifecycle must produce two separate deliverables:
 - **Report 1: Test Specification / Plan (Planning Stage)**:
   - Must outline test cases (happy path, boundary conditions, exception triggers).
   - Must define target frameworks (JUnit, Playwright, pytest, etc.) and mocked systems.
-  - Presented to the user/orchestrator in the chat to confirm the test plan is comprehensive before implementation.
+  - Presented to the user/CrewLoop Hub in the chat to confirm the test plan is comprehensive before implementation.
 - **Report 2: Test Execution Report (Execution Stage)**:
   - Must summarize the execution outcome (PASS/FAIL).
   - Must list all executed test cases in a clear markdown table with status.
@@ -130,7 +130,7 @@ Print this prefix on its own line before the first line of every response.
 - State the next skill being activated.
 - Load the next skill via the Skill tool (do not wait for user choice).
 
-**Next skill:** Orchestrator (to return validation findings).
+**Next skill:** CrewLoop Hub (to return validation findings).
 
 ---
 
@@ -139,7 +139,7 @@ Print this prefix on its own line before the first line of every response.
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

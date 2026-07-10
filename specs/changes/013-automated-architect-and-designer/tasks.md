@@ -1,7 +1,7 @@
 # Tasks: Automated Architect and Designer Workflow
 
 ## Step 1: Orchestrator Skill Refactoring
-- [x] Edit `skills/orchestrator/SKILL.md` to:
+- [x] Edit `skills/crewloop-hub/SKILL.md` to:
   - Spec that discovery must resolve all tech stack and UI/UX design preferences.
   - Instruct the Orchestrator to automatically invoke or delegate to the Architect and Designer, omitting manual confirmation stages for these two spec-gathering phases.
 

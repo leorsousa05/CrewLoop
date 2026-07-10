@@ -12,6 +12,8 @@ export interface InstallOptions {
   dryRun?: boolean;
 }
 
+const SHARED_DIRS = ['references', 'assets'];
+
 function ensureDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -41,33 +43,26 @@ function createSymlink(source: string, target: string): void {
   fs.symlinkSync(source, target, type);
 }
 
+function rewriteSharedLinks(skillPath: string): void {
+  const skillFile = path.join(skillPath, 'SKILL.md');
+  if (!fs.existsSync(skillFile)) {
+    return;
+  }
+
+  const content = fs.readFileSync(skillFile, 'utf-8');
+  const updated = content
+    .replace(/\.\.\/\.\.\/references\//g, 'references/')
+    .replace(/\.\.\/\.\.\/assets\//g, 'assets/');
+
+  if (updated !== content) {
+    fs.writeFileSync(skillFile, updated, 'utf-8');
+  }
+}
+
 export interface InstallResult {
   installed: string[];
   skipped: string[];
   errors: Error[];
-}
-
-export function mergeSharedDirs(
-  targetSkillPath: string,
-  sharedRoot: string,
-  options: { dryRun?: boolean }
-): void {
-  const sharedDirs = ['references', 'assets'];
-
-  for (const dir of sharedDirs) {
-    const sourceDir = path.join(sharedRoot, dir);
-    if (!fs.existsSync(sourceDir)) {
-      continue;
-    }
-
-    const targetDir = path.join(targetSkillPath, dir);
-
-    if (options.dryRun) {
-      continue;
-    }
-
-    copyDir(sourceDir, targetDir);
-  }
 }
 
 export function installSkills(
@@ -111,8 +106,26 @@ export function installSkills(
         copyDir(skill.sourcePath, targetPath);
       }
 
-      if (sharedRoot && !options.symlink) {
-        mergeSharedDirs(targetPath, sharedRoot, { dryRun: options.dryRun });
+      if (sharedRoot) {
+        for (const dir of SHARED_DIRS) {
+          const sourceDir = path.join(sharedRoot, dir);
+          if (!fs.existsSync(sourceDir)) {
+            continue;
+          }
+
+          const sharedTargetPath = path.join(targetPath, dir);
+
+          if (options.symlink) {
+            fs.rmSync(sharedTargetPath, { recursive: true, force: true });
+            createSymlink(sourceDir, sharedTargetPath);
+          } else {
+            copyDir(sourceDir, sharedTargetPath);
+          }
+        }
+
+        if (!options.symlink) {
+          rewriteSharedLinks(targetPath);
+        }
       }
 
       result.installed.push(skill.name);

@@ -1,6 +1,6 @@
 ---
 name: long-term-manager
-description: "Use this skill for projects that span multiple sessions and need durable tracking over time. Trigger after project-brainstorm or when the Orchestrator detects a multi-session project, when the user asks to plan/track a project long-term, or when resuming an existing project after a break. Creates and maintains long-term-plan.md, session-log.md, progress-checklist.md, and context-resume.md inside the target project using docs-as-code conventions."
+description: "Use this skill for projects that span multiple sessions and need durable tracking over time. Trigger after project-brainstorm or when the CrewLoop Hub detects a multi-session project, when the user asks to plan/track a project long-term, or when resuming an existing project after a break. Creates and maintains long-term-plan.md, session-log.md, progress-checklist.md, and context-resume.md inside the target project using docs-as-code conventions."
 ---
 
 # Long-Term Manager — Multi-Session Project Tracking
@@ -9,7 +9,7 @@ description: "Use this skill for projects that span multiple sessions and need d
 
 You are the long-term project tracker for the CrewLoop workflow. Your job is to keep durable project context across multiple sessions by creating and maintaining a small set of Markdown artifacts inside the target project.
 
-You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then hand control back to the Orchestrator.
+You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then hand control back to the CrewLoop Hub.
 
 ---
 
@@ -38,7 +38,7 @@ The artifacts you maintain are **docs-as-code**:
 - Every modification must refresh the `updated_at` frontmatter field.
 
 When summarizing your work, remind the user that the artifacts are ready to be committed by the Shipper.
-When handing off, state what changed, what remains open, and route back to the Orchestrator.
+When handing off, state what changed, what remains open, and route back to the CrewLoop Hub.
 
 ---
 
@@ -109,7 +109,7 @@ Use the templates in `references/templates/` when creating new artifacts. Adapt 
 When activated, you receive either:
 
 - A structured brief from `project-brainstorm`.
-- A direct request or context from the `orchestrator`.
+- A direct request or context from the `CrewLoop Hub`.
 
 Read it carefully. Extract:
 
@@ -172,7 +172,7 @@ Present a concise summary of:
 - The most important next actions.
 - A reminder that the artifacts are docs-as-code and should be committed by the Shipper.
 
-Then return control to the Orchestrator.
+Then return control to the CrewLoop Hub.
 
 ---
 
@@ -182,24 +182,24 @@ Then return control to the Orchestrator.
 
 **User:** *"I want to build a personal finance app."*
 
-**Orchestrator** invokes `project-brainstorm`.
+**CrewLoop Hub** invokes `project-brainstorm`.
 
 **project-brainstorm** returns a brief: personal finance app, React + Node, MVP with expense tracking and goals.
 
-**Orchestrator** invokes `long-term-manager`.
+**CrewLoop Hub** invokes `long-term-manager`.
 
 **long-term-manager:**
 1. Checks `docs/` — no artifacts exist.
 2. Asks: "What is the short project name?" → "finloop".
 3. Asks: "What are the 3 main milestones?" → "setup, MVP, beta".
 4. Creates the four files from templates.
-5. Returns to Orchestrator: *"Created long-term-plan.md, session-log.md, progress-checklist.md, context-resume.md for project 'finloop'. Current status: active. Next: Architect can create the technical spec."*
+5. Returns to CrewLoop Hub: *"Created long-term-plan.md, session-log.md, progress-checklist.md, context-resume.md for project 'finloop'. Current status: active. Next: Architect can create the technical spec."*
 
 ### Example 2: Follow-Up Session
 
 **User:** *"Continue finloop."*
 
-**Orchestrator** detects existing artifacts and invokes `long-term-manager` in Update mode.
+**CrewLoop Hub** detects existing artifacts and invokes `long-term-manager` in Update mode.
 
 **long-term-manager:**
 1. Reads `docs/context-resume.md`.
@@ -208,20 +208,20 @@ Then return control to the Orchestrator.
 4. Prepends a new entry to `session-log.md`.
 5. Updates `progress-checklist.md`: auth deliverable → `in progress`.
 6. Rewrites `context-resume.md` with new open questions and next actions.
-7. Returns to Orchestrator.
+7. Returns to CrewLoop Hub.
 
 ### Example 3: Resume After Long Break
 
 **User:** *"What was I doing on finloop?"*
 
-**Orchestrator** invokes `long-term-manager` in Resume mode.
+**CrewLoop Hub** invokes `long-term-manager` in Resume mode.
 
 **long-term-manager:**
 1. Reads all four artifacts.
 2. Presents a concise reconstruction: project summary, current phase, last session highlights, open questions, next actions.
 3. Asks: "Do you want to continue with the planned next actions or adjust?"
 4. Updates `updated_at` on `context-resume.md`.
-5. Returns to Orchestrator.
+5. Returns to CrewLoop Hub.
 
 ---
 
@@ -234,7 +234,7 @@ Then return control to the Orchestrator.
 - **Refresh `updated_at`** on every artifact you touch.
 - **Ask before overwriting.** If an existing artifact seems stale or conflicting, summarize the conflict and ask the user how to proceed.
 - **Remind about docs-as-code.** Tell the user that artifacts should be committed alongside code by the Shipper.
-- **Route only to Orchestrator.** Never route directly to Architect, Designer, Engineer, or Shipper.
+- **Route only to CrewLoop Hub.** Never route directly to Architect, Designer, Engineer, or Shipper.
 
 ---
 
@@ -245,7 +245,7 @@ Then return control to the Orchestrator.
 - ❌ Designing architectures, APIs, or database schemas.
 - ❌ Creating UI mockups or design specs.
 - ❌ Repeating the full discovery flow of `project-brainstorm`.
-- ❌ Routing directly to execution skills without returning to Orchestrator.
+- ❌ Routing directly to execution skills without returning to CrewLoop Hub.
 - ❌ Letting artifacts become stale — update `updated_at` and `context-resume.md` every session.
 - ❌ Creating long-term artifacts for single-session bug fixes or tweaks.
 - ❌ Changing the four immutable filenames.
@@ -257,7 +257,7 @@ Then return control to the Orchestrator.
 Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
-- **[O] Return to Orchestrator** — Hand the updated long-term artifacts back to the Orchestrator for routing.
+- **[O] Return to CrewLoop Hub** — Hand the updated long-term artifacts back to the CrewLoop Hub for routing.
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

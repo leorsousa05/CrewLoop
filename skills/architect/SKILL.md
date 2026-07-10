@@ -1,6 +1,6 @@
 ---
 name: architect
-description: "Software architecture and spec-writing skill. ALWAYS use as the first step after orchestrator. Creates specs in specs/ for every change. Trigger after orchestrator briefs or on analyze, design, architecture, plan, spec, refactor plan, system design, create specs, proceed to architect."
+description: "Software architecture and spec-writing skill. ALWAYS use as the first step after CrewLoop Hub. Creates specs in specs/ for every change. Trigger after CrewLoop Hub briefs or on analyze, design, architecture, plan, spec, refactor plan, system design, create specs, proceed to architect."
 ---
 
 # Architect — Design & Analysis Mode
@@ -143,7 +143,7 @@ After answering the 7 analysis questions, determine if the implementation can be
 - Tasks where coordination overhead outweighs the speed-up
 
 **If subagents are suitable:**
-Record the proposed parallelization in the spec and hand it back to the Orchestrator with the component split. The Orchestrator can decide whether to enable parallel development.
+Record the proposed parallelization in the spec and hand it back to the CrewLoop Hub with the component split. The CrewLoop Hub can decide whether to enable parallel development.
 
 If parallelization is recorded, include in the spec:
 ```yaml
@@ -168,16 +168,16 @@ subagents:
 4. **Test plan** — what to test and why.
 5. **Risk assessment** — trade-offs, deferred items.
 6. **Subagent plan** — parallelization analysis (if applicable).
-7. **Handoff** — The Architect skill is non-interactive. Do NOT wait for user confirmation. Return control to the Orchestrator immediately by calling the routing mechanism or recommending the Orchestrator command at the end of your response.
+7. **Handoff** — The Architect skill is non-interactive. Do NOT wait for user confirmation. Return control to the CrewLoop Hub immediately by calling the routing mechanism or recommending the CrewLoop Hub command at the end of your response.
 
-*Mandatory: Recommend the next command to execute at the end of the response: `/orchestrator`.*
+*Mandatory: Recommend the next command to execute at the end of the response: `/crewloop-hub`.*
 
 
 ## STOP CONDITIONS (NON-INTERACTIVE RULE)
 
 The Architect is a fully automated, non-interactive execution skill. You must NEVER ask the user clarifying questions or halt for inputs.
-- If there is any ambiguity, tech stack choice, or missing parameter, you must use standard default conventions or yield control back to the Orchestrator's discovery phase to resolve them before your execution, instead of asking questions in this phase.
-- Once execution starts, create the specs directory structure and files immediately, then return control to the Orchestrator.
+- If there is any ambiguity, tech stack choice, or missing parameter, you must use standard default conventions or yield control back to the CrewLoop Hub's discovery phase to resolve them before your execution, instead of asking questions in this phase.
+- Once execution starts, create the specs directory structure and files immediately, then return control to the CrewLoop Hub.
 
 ---
 

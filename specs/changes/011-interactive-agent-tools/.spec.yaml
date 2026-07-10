@@ -7,7 +7,7 @@ affected_files:
   - "references/workflow.md"
   - "AGENTS.md"
   - "README.md"
-  - "skills/orchestrator/SKILL.md"
+  - "skills/crewloop-hub/SKILL.md"
   - "skills/architect/SKILL.md"
   - "skills/designer/SKILL.md"
   - "skills/engineer/SKILL.md"

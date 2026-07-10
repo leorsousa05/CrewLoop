@@ -84,6 +84,8 @@ export function createEventHandler(deps: EventHandlerDependencies) {
     const root = event.workspacePath || process.cwd();
     event = normalizePathsToRelative(event, root) as DashboardEvent;
 
+    // Defense in depth: events can be POSTed by arbitrary clients, so the
+    // payloads are re-sanitized and classified here regardless of the shim.
     event.input = sanitizeToolPayload(event.input);
     event.output = sanitizeToolPayload(event.output);
     if (!event.operationType && event.tool) {

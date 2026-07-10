@@ -1,6 +1,6 @@
 ---
 name: docs-writer
-description: Write or rewrite project documentation tailored to type and audience. Use for READMEs, module/feature/capability docs, or any project docs, and when orchestrator routes pure documentation tasks without code changes. Invoked by orchestrator only; route to architect if context is missing.
+description: Write or rewrite project documentation tailored to type and audience. Use for READMEs, module/feature/capability docs, or any project docs, and when CrewLoop Hub routes pure documentation tasks without code changes. Invoked by CrewLoop Hub only; route to architect if context is missing.
 ---
 
 # Docs-Writer — Documentation Authoring
@@ -202,14 +202,14 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
   ```markdown
   **What would you like to do?**
 
-  - **[O] Return to Orchestrator** — Hand control back to the Orchestrator for the next routing decision.
+  - **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
   ```
 
 ## HANDOFF
 
-State what documentation you wrote, what audience it targets, and return control to the Orchestrator.
+State what documentation you wrote, what audience it targets, and return control to the CrewLoop Hub.
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/orchestrator`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
 
 ---
 

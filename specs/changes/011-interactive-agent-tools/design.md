@@ -20,7 +20,7 @@
 
 ### Phase 1: Interactive Tools & Navigation Unification
 1. Update `references/conventions.md` and `references/workflow.md` to establish the star workflow and tool instructions.
-2. Refactor existing skills (`orchestrator`, `architect`, `designer`, `engineer`, `reviewer`, `shipper`, `accessibility-auditor`, `docs-writer`, `maintainer`, `product-manager`, `researcher`, `security-guard`, `tester`) to simplified menus and tool-based navigation.
+2. Refactor existing skills (`crewloop-hub`, `architect`, `designer`, `engineer`, `reviewer`, `shipper`, `accessibility-auditor`, `docs-writer`, `maintainer`, `product-manager`, `researcher`, `security-guard`, `tester`) to simplified menus and tool-based navigation.
 3. Remove linear workflow references from the skills (e.g. engineer direct review routing, maintainer direct engineer routing).
 
 ### Phase 2: Create 3 New Supporting Skills

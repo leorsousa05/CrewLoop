@@ -13,14 +13,14 @@ The core Loop Engineering Agents workflow covers discovery, specs, design, imple
 
 ## Routing
 
-The orchestrator or reviewer may optionally route to supporting skills before sending work to the architect, engineer, or shipper:
+The CrewLoop Hub or reviewer may optionally route to supporting skills before sending work to the architect, engineer, or shipper:
 
 - `product-manager` / `researcher` / `maintainer` → `architect`
 - `tester` ↔ `engineer` (QA feedback loop)
 - `security-guard` → `engineer` or `reviewer`
 - `accessibility-auditor` → `engineer`, `designer`, or `reviewer`
 
-All skills eventually return to the orchestrator.
+All skills eventually return to the CrewLoop Hub.
 
 ## Files
 

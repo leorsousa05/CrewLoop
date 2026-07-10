@@ -1,0 +1,11 @@
+name: fix-installed-skill-reference-paths
+description: Fix shared reference resolution for installed CrewLoop skills
+status: completed
+author: crewloop-hub
+created_at: 2026-07-09
+updated_at: 2026-07-09
+priority: P1
+type: fix
+scope:
+  - packages/cli/src/installer.ts
+  - packages/cli/src/tests/installer.test.ts
