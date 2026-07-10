@@ -20,6 +20,9 @@ export interface AgyHookPayload {
 const EVENT_MAP: Record<string, EventType> = {
   PreToolUse: 'tool_start',
   PostToolUse: 'tool_end',
+  SessionStart: 'session_start',
+  SessionEnd: 'session_end',
+  Stop: 'session_end',
 };
 
 const TOOL_NAME_MAP: Record<string, string> = {

@@ -18,6 +18,19 @@ export class StateStore {
 
     if (!session) {
       session = this.createSession(event.session_id, event.source);
+      // Lazy start: agents that never emit an explicit SessionStart still get
+      // a valid session_start event recorded before their first tool event.
+      if (event.event_type !== 'session_start') {
+        session.events.unshift({
+          id: `${event.session_id}:session-start:inferred`,
+          timestamp: event.timestamp,
+          source: event.source,
+          session_id: event.session_id,
+          event_type: 'session_start',
+          detail: 'inferred from first event (lazy start)',
+          status: 'running',
+        });
+      }
     }
 
     session.source = event.source;
@@ -82,6 +95,23 @@ export class StateStore {
     return {
       sessions: Object.fromEntries(this.sessions),
     };
+  }
+
+  /**
+   * Marks sessions with no activity for `idleTimeoutMs` as ended. This is the
+   * fallback for agents that die without emitting SessionEnd (e.g. SIGKILL).
+   * Returns the sessions that were transitioned so callers can broadcast them.
+   */
+  markIdleSessionsEnded(idleTimeoutMs: number, now: number = Date.now()): Session[] {
+    const ended: Session[] = [];
+    for (const session of this.sessions.values()) {
+      if (session.lifecycle !== 'ended' && now - session.last_event_at > idleTimeoutMs) {
+        session.lifecycle = 'ended';
+        session.ended_at = session.last_event_at;
+        ended.push(session);
+      }
+    }
+    return ended;
   }
 
   pruneInactive(now: number = Date.now()): number {

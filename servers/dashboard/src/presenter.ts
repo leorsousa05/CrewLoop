@@ -6,6 +6,7 @@ export function presentEvent(event: Session['events'][number]): ClientEvent {
     timestamp: event.timestamp,
     event_type: event.event_type,
     tool: event.tool,
+    operationType: event.operationType,
     detail: event.detail,
     status: event.status,
     duration_ms: event.duration_ms,

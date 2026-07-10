@@ -22,7 +22,9 @@ describe('StateStore', () => {
     const session = store.applyEvent(makeEvent());
     assert.equal(session.id, 'sess-1');
     assert.equal(session.source, 'kimi');
-    assert.equal(session.events.length, 1);
+    // First event is a tool event, so a session_start is synthesized (lazy start).
+    assert.equal(session.events.length, 2);
+    assert.equal(session.events[1].event_type, 'session_start');
   });
 
   it('caps events per session', () => {

@@ -33,6 +33,7 @@ function makeConfig(port: number, packageRoot: string): ServerConfig {
     packageRoot,
     maxEventsPerSession: 100,
     sessionMaxAgeMs: 60000,
+    sessionIdleTimeoutMs: 60000,
     pruneIntervalMs: 60000,
   };
 }

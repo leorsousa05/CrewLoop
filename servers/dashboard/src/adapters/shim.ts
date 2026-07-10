@@ -1,9 +1,13 @@
 import http from 'node:http';
 import type { AgentSource, DashboardEvent } from '../types';
 import { normalizeKimi, type KimiHookPayload } from './kimi';
+import { normalizeClaude, type ClaudeHookPayload } from './claude';
 import { normalizeCodex, type CodexHookPayload } from './codex';
 import { normalizeAgy, type AgyHookPayload } from './agy';
-import { sanitize } from '../filters/sanitize';
+import { sanitize, sanitizeToolPayload } from '../filters/sanitize';
+import { classifyOperation, extractFileDetail } from '../lib/operations';
+
+export { classifyOperation, extractFileDetail };
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:7890';
 
@@ -16,20 +20,23 @@ export function getDefaultSkill(argv: string[]): string | undefined {
   return env || undefined;
 }
 
+const KNOWN_SOURCES: ReadonlySet<string> = new Set([
+  'kimi',
+  'claude',
+  'codex',
+  'opencode',
+  'log-watcher',
+  'agy',
+]);
+
 export function detectSource(argv: string[]): AgentSource | undefined {
   const arg = argv[2];
-  if (arg === 'kimi' || arg === 'codex' || arg === 'opencode' || arg === 'log-watcher' || arg === 'agy') {
-    return arg;
+  if (arg && KNOWN_SOURCES.has(arg)) {
+    return arg as AgentSource;
   }
   const env = process.env.CREWLOOP_DASHBOARD_SOURCE;
-  if (
-    env === 'kimi' ||
-    env === 'codex' ||
-    env === 'opencode' ||
-    env === 'log-watcher' ||
-    env === 'agy'
-  ) {
-    return env;
+  if (env && KNOWN_SOURCES.has(env)) {
+    return env as AgentSource;
   }
   return undefined;
 }
@@ -44,6 +51,8 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
   switch (source) {
     case 'kimi':
       return normalizeKimi(payload as unknown as KimiHookPayload);
+    case 'claude':
+      return normalizeClaude(payload as unknown as ClaudeHookPayload);
     case 'codex':
       return normalizeCodex(payload as unknown as CodexHookPayload);
     case 'agy':
@@ -65,25 +74,42 @@ export function buildEvent(
 
   if (base.event_type === 'session_start' && defaultSkill) {
     base.skill = defaultSkill;
-  } else if (source === 'agy' && defaultSkill && !base.skill) {
+  } else if (defaultSkill && !base.skill) {
+    // Every source gets the default-skill fallback: if the explicit
+    // session_start is missed (lazy start), the inference engine can still
+    // fall back to this instead of reporting the skill as unknown.
     base.default_skill = defaultSkill;
   }
 
   const isPost = base.event_type === 'tool_end';
+  const rawInput = (base.input || raw.tool_input || raw.toolInput) as
+    | Record<string, unknown>
+    | undefined;
+  const rawOutput = (base.output || raw.tool_response || raw.toolResponse) as
+    | Record<string, unknown>
+    | undefined;
+
   const sanitized = sanitize(
     {
       tool_name: base.tool || '',
-      tool_input: (base.input || raw.tool_input || raw.toolInput) as Record<string, unknown> | undefined,
-      tool_response: (base.output || raw.tool_response || raw.toolResponse) as Record<string, unknown> | undefined,
+      tool_input: rawInput,
+      tool_response: rawOutput,
     },
     isPost ? 'post' : 'pre'
   );
 
+  const isToolEvent = base.event_type === 'tool_start' || base.event_type === 'tool_end';
+  const operationType = isToolEvent && base.tool ? classifyOperation(base.tool) : undefined;
+  const fileDetail = isToolEvent ? extractFileDetail(base.tool, rawInput) : undefined;
+
   return {
     ...base,
-    detail: sanitized.detail ?? base.detail,
+    operationType,
+    detail: sanitized.detail ?? base.detail ?? fileDetail,
     status: sanitized.status,
     duration_ms: sanitized.duration_ms,
+    input: sanitizeToolPayload(base.input),
+    output: sanitizeToolPayload(base.output),
   };
 }
 
@@ -129,7 +155,7 @@ export function postEvent(event: DashboardEvent, onDone?: () => void): void {
 export function runShim(): void {
   const source = detectSource(process.argv);
   if (!source) {
-    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|codex|agy>\n');
+    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|claude|codex|agy>\n');
     process.exit(1);
   }
 

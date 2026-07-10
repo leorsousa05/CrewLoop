@@ -1,4 +1,6 @@
-export type AgentSource = 'kimi' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
+export type AgentSource = 'kimi' | 'claude' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
+
+export type OperationType = 'read' | 'edit' | 'other';
 
 export type EventType =
   | 'session_start'
@@ -18,6 +20,7 @@ export interface DashboardEvent {
   skill?: string;
   default_skill?: string;
   tool?: string;
+  operationType?: OperationType;
   detail?: string;
   status?: EventStatus;
   duration_ms?: number;
@@ -53,6 +56,7 @@ export interface ClientEvent {
   timestamp: number;
   event_type: EventType;
   tool?: string;
+  operationType?: OperationType;
   detail?: string;
   status?: EventStatus;
   duration_ms?: number;
@@ -112,6 +116,7 @@ export interface ServerConfig {
   packageRoot: string;
   maxEventsPerSession: number;
   sessionMaxAgeMs: number;
+  sessionIdleTimeoutMs: number;
   pruneIntervalMs: number;
 }
 

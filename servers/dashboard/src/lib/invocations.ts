@@ -1,4 +1,5 @@
 import type { ClientEvent } from '../types';
+import { classifyOperation } from './operations';
 
 const MAX_EVENTS = 100;
 
@@ -37,10 +38,7 @@ function statusFromEvent(ev: ClientEvent): string {
 }
 
 export function operationType(tool: string): 'read' | 'edit' | 'other' {
-  const t = tool.toLowerCase();
-  if (t === 'read') return 'read';
-  if (['write', 'edit', 'editfile'].includes(t)) return 'edit';
-  return 'other';
+  return classifyOperation(tool);
 }
 
 export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {

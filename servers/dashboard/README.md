@@ -67,7 +67,7 @@ The CLI looks for the dashboard server inside the `@archznn/crewloop-skills` pac
 
 ## Agent integration
 
-Agents send JSON events to `POST http://127.0.0.1:7890/event`. The included shim (`dist/adapters/shim.js`) normalizes Kimi and Codex hook payloads and forwards them.
+Agents send JSON events to `POST http://127.0.0.1:7890/event`. The included shim (`dist/adapters/shim.js`) normalizes Kimi, Claude, Codex, and AGY hook payloads and forwards them. Tool events are classified (`read`/`edit`/`other`), the affected file path is extracted into `detail`, and input/output payloads are sanitized (secrets removed, base64 blobs truncated) before leaving the shim.
 
 See `config-examples/` for:
 - `kimi-code-config.toml` — Kimi Code hook configuration.
@@ -80,14 +80,18 @@ See `config-examples/` for:
 interface DashboardEvent {
   id: string;
   timestamp: number;
-  source: 'kimi' | 'codex' | 'opencode' | 'log-watcher';
+  source: 'kimi' | 'claude' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
   session_id: string;
   event_type: 'session_start' | 'session_end' | 'tool_start' | 'tool_end' | 'skill_change';
   skill?: string;
+  default_skill?: string;
   tool?: string;
-  detail?: string;
+  operationType?: 'read' | 'edit' | 'other';
+  detail?: string;                      // affected file path for read/edit tools
   status?: 'running' | 'success' | 'error';
   duration_ms?: number;
+  input?: Record<string, unknown>;      // sanitized tool input
+  output?: Record<string, unknown>;     // sanitized tool output (tool_end only)
 }
 ```
 
@@ -124,8 +128,10 @@ Settings are persisted to `localStorage` under `crewloop-dashboard-settings`:
 ## Security
 
 - The server binds to `127.0.0.1` by default.
-- Dangerous keys (`command`, `content`, `token`, `api_key`, etc.) are stripped before storage and broadcast.
+- Secret-bearing keys (`token`, `api_key`, `password`, `authorization`, `credentials`, etc.) are recursively stripped from tool input/output payloads before storage and broadcast.
+- Long base64 blobs and oversized strings are truncated; keys the UI renders (`content`, `diff`, `snippet`, file paths, queries) are preserved up to a hard length cap.
 - Events containing dangerous top-level keys are rejected.
+- Sanitization is applied both in the shim and again at the `/event` boundary (defense in depth for events posted directly).
 
 ## Development
 
@@ -137,5 +143,8 @@ npm test
 
 ## Known limitations
 
+- **Session lifecycle on forced kills** — if an agent process is killed with `SIGKILL` (or crashes hard), it never emits `SessionEnd`. The server compensates with an idle timeout (`CREWLOOP_SESSION_IDLE_TIMEOUT_MS`, default 10 minutes): sessions with no activity for that window are marked as ended. Until the timeout fires, the session still shows as running.
+- **Lazy session start** — agents that never emit an explicit `SessionStart` get one synthesized from their first event. The synthesized start carries the timestamp of that first event, so time spent before the first tool call is not visible.
+- **Diff/snippet size limits** — payload sanitization truncates strings above 8 000 characters and base64-looking blobs above 512 characters. Large diffs therefore render truncated in the Files view, with a `…[truncated N chars]` marker.
 - Codex file-edit hooks do not always expose the tool name; in those cases skill inference falls back to the session's previous active skill.
 - The log watcher adapter is a deferred fallback and not yet implemented.

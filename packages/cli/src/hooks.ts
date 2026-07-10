@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import type { AgentConfig, HookFormat } from './agents';
 
-export type AgentHookEvent = 'PreToolUse' | 'PostToolUse';
+export type AgentHookEvent = 'PreToolUse' | 'PostToolUse' | 'SessionStart' | 'SessionEnd' | 'Stop';
 
 export interface HookEntry {
   event: AgentHookEvent;
@@ -473,17 +473,25 @@ export function installHooksForAgent(
   }
 
   try {
+    const shimCommand = agent.hooks.beforeToolUseCommand || `crewloop-shim ${agent.id}`;
     const hooks: HookEntry[] = [
       {
         event: 'PreToolUse',
         matcher: '*',
-        command: agent.hooks.beforeToolUseCommand || `crewloop-shim ${agent.id}`,
+        command: shimCommand,
       },
       {
         event: 'PostToolUse',
         matcher: '*',
         command: agent.hooks.afterToolUseCommand || `crewloop-shim ${agent.id}`,
       },
+      // Lifecycle events captured at the source so the dashboard receives
+      // SessionStart/SessionEnd without having to infer them.
+      ...(agent.hooks.lifecycleEvents || []).map((event) => ({
+        event: event as AgentHookEvent,
+        matcher: '*',
+        command: shimCommand,
+      })),
     ];
 
     let config = writer.readConfig();

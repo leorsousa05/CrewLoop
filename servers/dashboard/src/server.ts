@@ -8,7 +8,7 @@ import { SkillRegistry } from './skills/registry';
 import { SkillInferenceEngine } from './skills/infer';
 import { createEventHandler } from './api/event';
 import { createSkillsHandler } from './api/skills';
-import { createSnapshotMessage } from './presenter';
+import { createSnapshotMessage, createUpdateMessage } from './presenter';
 
 export interface DashboardServer {
   httpServer: http.Server;
@@ -119,6 +119,11 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
   });
 
   const pruneInterval = setInterval(() => {
+    // Fallback SessionEnd for agents killed without emitting one (e.g. SIGKILL).
+    const endedSessions = state.markIdleSessionsEnded(config.sessionIdleTimeoutMs);
+    for (const session of endedSessions) {
+      broadcast(createUpdateMessage(session, activeSessionId));
+    }
     state.pruneInactive();
   }, config.pruneIntervalMs);
 

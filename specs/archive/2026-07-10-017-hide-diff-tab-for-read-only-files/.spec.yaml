@@ -1,0 +1,6 @@
+title: "Hide Diff Tab for Read-Only Files"
+status: "completed"
+created_at: "2026-07-10"
+author: "architect"
+affected_files:
+  - "servers/dashboard/ui/src/components/FileDiff.tsx"
