@@ -96,10 +96,10 @@ The shim runs the raw payload through `sanitize()` before forwarding. Dangerous 
 
 Kimi sends tool inputs and responses in slightly different shapes from other sources. The sanitizer normalizes them before the UI sees them:
 
-- **Path resolution** checks `path`, `file_path`, `filePath`, nested `args.*`, and Kimi's `operations[].path` / `operations[].file_path` arrays.
-- **Write tools** produce a `contentSnippet` from `content`, `text`, or `code`.
+- **Path resolution** checks path-bearing keys including `path`, `file_path`, `filePath`, `AbsolutePath`, `TargetFile`, nested `args.*`, and `operations[].path` arrays case-insensitively.
+- **Write/Read tools** preserve and extract snippets or content from `diff`, `contentSnippet`, `content`, `result`, `snippet`, or `output`.
 - **Edit tools** produce a unified `diff` from `old_string`/`new_string`, `oldString`/`newString`, or `old`/`new`.
-- **Tool responses** produce a `contentSnippet` from, in order: `content`, `result` (string or array joined with `\n`), `stdout`, `stderr`, or `output`. The shim also accepts Kimi's `tool_output` field as an alias for `tool_response`.
+- **Tool responses** preserve safe content keys (`content`, `result`, `contentsnippet`) to render code views and diffs.
 
 ## Client views
 
@@ -108,8 +108,8 @@ The dashboard UI is a Vercel-style command center with a persistent sidebar, a t
 1. **Overview** — high-level health cards for the selected session (active skill, telemetry, activity graph), plus cross-session summaries (total/active/pinned sessions, top skills, top tools, recent sessions).
 2. **Sessions** — sortable, filterable, pinnable session list. Pinned sessions stay at the top and persist in `localStorage`.
 3. **Timeline** — reverse-chronological tool invocations (newest at top). A `tool_start` and its matching `tool_end` are collapsed into one row that changes color from running (blue) to success (green) or error (red). Rows can be expanded to view sanitized `input` and `output`; rows with no details show a fallback message. Events can be copied to the clipboard or exported as JSON.
-4. **Network** — interactive 3D force-directed graph (`react-force-graph-3d`) with the active skill at the center, connected to tool nodes, which in turn connect to file nodes discovered from tool input/output paths (including nested `args.path`). Nodes are colored by type (skill, tool, file) and sized by activity weight. Users can orbit, zoom, hover, and click nodes to view details. The layout respects `prefers-reduced-motion`.
-5. **Files** — two-pane layout with a file list and a diff/content viewer. Selecting a file shows the latest non-empty diff or content snippet across all operations on that file, so a later `Read` does not hide an earlier `Write`/`Edit` diff.
+4. **Network** — interactive 3D force-directed graph (`react-force-graph-3d`) that creates a distinct skill node for each skill used during the session, linking tools and files to the specific skill active at the time. Nodes are colored by type (skill, tool, file) and sized by activity weight. The layout respects `prefers-reduced-motion`.
+5. **Files** — two-pane Explorer layout with a file list (indicating read/edit/other badges with premium selection highlights) and a viewer that dynamically switches between code reader format (with line numbers for read operations) and diff comparison format (for edits).
 6. **Skills** — aggregate skill, tool, and file usage for the selected session's visible invocations.
 7. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session. Settings persist to `localStorage`.
 
@@ -147,4 +147,10 @@ The dashboard does **not** guess a skill from generic tool usage. `SkillInferenc
 - Sanitization lives in `servers/dashboard/src/filters/sanitize.ts`.
 - View-model helpers live in `servers/dashboard/src/lib/` and are tested with Node's built-in test runner.
 - The React UI lives in `servers/dashboard/ui/`, is built by Vite into `dist/public/`, and is served by the dashboard server on `http://127.0.0.1:7890`.
-- The server exposes `POST /event` and a WebSocket for live updates.
+- The server exposes:
+  - `POST /event` for receiving hooks payloads.
+  - `GET /api/skills` to fetch configured skills.
+  - `GET /api/workspace-files` to fetch the list of relative workspace files.
+  - `GET /api/file-content?path=...` to safely fetch full file contents.
+  - `GET /api/file-diff?path=...` to safely fetch uncommitted git diffs relative to HEAD.
+  - A WebSocket for live updates.

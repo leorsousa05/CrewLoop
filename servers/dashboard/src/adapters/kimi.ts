@@ -36,6 +36,7 @@ export function normalizeKimi(payload: KimiHookPayload): DashboardEvent | undefi
     skill: payload.skill,
     input: payload.tool_input,
     output: normalizeOutput(payload.tool_output),
+    workspacePath: payload.cwd,
   };
 }
 
@@ -43,7 +44,20 @@ function normalizeOutput(
   output: string | Record<string, unknown> | undefined
 ): Record<string, unknown> | undefined {
   if (output === undefined) return undefined;
-  if (typeof output === 'string') return { output };
+  if (typeof output === 'string') {
+    const trimmed = output.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(output);
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+          return parsed as Record<string, unknown>;
+        }
+      } catch {
+        // Fallback to wrapping as { output }
+      }
+    }
+    return { output };
+  }
   return output;
 }
 

@@ -316,7 +316,7 @@ export default function App() {
       case 'network':
         return <NetworkView graph={filteredGraph} filterOptions={filterOptions} />;
       case 'files':
-        return <FilesView files={filteredFiles} filterOptions={filterOptions} />;
+        return <FilesView files={filteredFiles} filterOptions={filterOptions} selectedSessionId={selectedSessionId} />;
       case 'skills':
         return <SkillsView invocations={filteredInvocations} filterOptions={filterOptions} />;
       case 'settings':

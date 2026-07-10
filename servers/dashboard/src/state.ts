@@ -1,4 +1,29 @@
 import type { DashboardEvent, Session, DashboardState, AgentSource, EventStatus } from './types';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
+
+const RUNTIME_ROOTS_FILE = path.join(os.tmpdir(), 'crewloop-session-roots.json');
+
+function saveSessionRootMapping(sessionId: string, workspaceRoot: string) {
+  try {
+    let current: Record<string, string> = {};
+    if (fs.existsSync(RUNTIME_ROOTS_FILE)) {
+      current = JSON.parse(fs.readFileSync(RUNTIME_ROOTS_FILE, 'utf-8'));
+    }
+    current[sessionId] = workspaceRoot;
+    fs.writeFileSync(RUNTIME_ROOTS_FILE, JSON.stringify(current, null, 2));
+  } catch {}
+}
+
+function loadSessionRootMappings(): Record<string, string> {
+  try {
+    if (fs.existsSync(RUNTIME_ROOTS_FILE)) {
+      return JSON.parse(fs.readFileSync(RUNTIME_ROOTS_FILE, 'utf-8'));
+    }
+  } catch {}
+  return {};
+}
 
 export interface StateStoreOptions {
   maxEventsPerSession: number;
@@ -35,14 +60,10 @@ export class StateStore {
 
     session.source = event.source;
     session.last_event_at = event.timestamp;
-    session.events.unshift(event);
 
-    if (session.events.length > this.options.maxEventsPerSession) {
-      session.events.length = this.options.maxEventsPerSession;
-    }
-
-    if (event.tool) {
-      session.tool_counts[event.tool] = (session.tool_counts[event.tool] || 0) + 1;
+    if (event.workspacePath) {
+      session.workspaceRoot = event.workspacePath;
+      saveSessionRootMapping(event.session_id, event.workspacePath);
     }
 
     if (event.event_type === 'session_start' && event.skill) {
@@ -54,6 +75,20 @@ export class StateStore {
     } else if (!session.active_skill && event.default_skill) {
       session.active_skill = event.default_skill;
       session.active_confidence = 'heuristic';
+    }
+
+    if (!event.skill && session.active_skill) {
+      event.skill = session.active_skill;
+    }
+
+    session.events.unshift(event);
+
+    if (session.events.length > this.options.maxEventsPerSession) {
+      session.events.length = this.options.maxEventsPerSession;
+    }
+
+    if (event.tool) {
+      session.tool_counts[event.tool] = (session.tool_counts[event.tool] || 0) + 1;
     }
 
     if (event.event_type === 'session_end') {
@@ -136,6 +171,10 @@ export class StateStore {
       started_at: now,
       last_event_at: now,
     };
+    const mappings = loadSessionRootMappings();
+    if (mappings[id]) {
+      session.workspaceRoot = mappings[id];
+    }
     this.sessions.set(id, session);
     return session;
   }

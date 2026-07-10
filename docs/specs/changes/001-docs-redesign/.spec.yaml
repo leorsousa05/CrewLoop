@@ -1,0 +1,20 @@
+status: proposed
+type: feature
+title: Docs frontend redesign
+author: codex
+created: 2026-07-05
+updated: 2026-07-05
+priority: P2
+scope: docs frontend shell and content surfaces
+summary: Replace the current neon/glass presentation with a distinct editorial interface for CrewLoop docs.
+affected_files:
+  - src/App.tsx
+  - src/index.css
+  - src/sidebarConfig.ts
+  - src/components/LandingPage.tsx
+  - src/components/DocsLayout.tsx
+  - src/components/MarkdownRenderer.tsx
+  - src/components/SkillVisualizer.tsx
+  - src/components/TerminalSimulator.tsx
+  - src/components/tests/TerminalSimulator.test.tsx
+  - tailwind.config.js

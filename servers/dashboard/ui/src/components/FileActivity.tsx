@@ -6,15 +6,16 @@ interface Props {
   files: FileEntry[];
   selectedPath: string | null;
   onSelect: (path: string) => void;
+  sessionId?: string;
 }
 
-export function FileActivity({ files, selectedPath, onSelect }: Props) {
+export function FileActivity({ files, selectedPath, onSelect, sessionId }: Props) {
   const selectedFile = files.find((f) => f.path === selectedPath);
 
   return (
     <div className="flex-1 flex min-h-0 overflow-hidden">
       <FileList files={files} selectedPath={selectedPath} onSelect={onSelect} />
-      <FileDiff file={selectedFile} />
+      <FileDiff file={selectedFile} sessionId={sessionId} />
     </div>
   );
 }

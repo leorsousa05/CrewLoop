@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import path from 'node:path';
 import type { DashboardEvent, ClientWebSocketMessage } from '../types';
 import { StateStore } from '../state';
 import { SkillInferenceEngine } from '../skills/infer';
@@ -12,6 +13,33 @@ export interface EventHandlerDependencies {
   broadcast: (message: ClientWebSocketMessage) => void;
   getActiveSessionId: () => string | undefined;
   setActiveSessionId: (id: string) => void;
+}
+
+function normalizePathsToRelative(obj: any, root: string): any {
+  if (typeof obj === 'string') {
+    if (path.isAbsolute(obj) && obj.startsWith(root)) {
+      let rel = path.relative(root, obj);
+      return rel.replace(/\\/g, '/');
+    }
+    if (obj.includes(root)) {
+      const rootPattern = root.replace(/\\/g, '/');
+      const escapedRoot = rootPattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(escapedRoot + '[/\\\\]?', 'g');
+      return obj.replace(regex, '');
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => normalizePathsToRelative(item, root));
+  }
+  if (typeof obj === 'object' && obj !== null) {
+    const res: any = {};
+    for (const key of Object.keys(obj)) {
+      res[key] = normalizePathsToRelative(obj[key], root);
+    }
+    return res;
+  }
+  return obj;
 }
 
 export function createEventHandler(deps: EventHandlerDependencies) {
@@ -53,8 +81,9 @@ export function createEventHandler(deps: EventHandlerDependencies) {
       return;
     }
 
-    // Defense in depth: events can be POSTed by arbitrary clients, so the
-    // payloads are re-sanitized and classified here regardless of the shim.
+    const root = event.workspacePath || process.cwd();
+    event = normalizePathsToRelative(event, root) as DashboardEvent;
+
     event.input = sanitizeToolPayload(event.input);
     event.output = sanitizeToolPayload(event.output);
     if (!event.operationType && event.tool) {

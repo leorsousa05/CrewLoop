@@ -11,6 +11,21 @@ export default defineConfig({
     outDir: path.resolve(__dirname, '../dist/public'),
     emptyOutDir: true,
     sourcemap: true,
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-force-graph') || id.includes('three') || id.includes('d3')) {
+              return 'vendor-graph';
+            }
+            if (id.includes('@phosphor-icons')) {
+              return 'vendor-icons';
+            }
+          }
+        },
+      },
+    },
   },
   resolve: {
     alias: {

@@ -47,6 +47,7 @@ export function normalizeCodex(payload: CodexHookPayload): DashboardEvent | unde
     skill: payload.skill,
     input: payload.toolInput,
     output: payload.toolResponse,
+    workspacePath: payload.cwd,
   };
 }
 

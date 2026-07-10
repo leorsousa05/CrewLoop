@@ -26,6 +26,7 @@ export interface DashboardEvent {
   duration_ms?: number;
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
+  workspacePath?: string;
 }
 
 export interface Session {
@@ -40,6 +41,7 @@ export interface Session {
   started_at: number;
   last_event_at: number;
   ended_at?: number;
+  workspaceRoot?: string;
 }
 
 export interface DashboardState {
@@ -77,6 +79,7 @@ export interface ClientSession {
   lastActivity: number;
   endedAt?: number;
   toolCounts: Record<string, number>;
+  workspaceRoot?: string;
 }
 
 export interface ClientSnapshotMessage {

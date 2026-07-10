@@ -14,9 +14,14 @@ Real-time skill dashboard for CrewLoop agents. It shows which skill an agent is 
   - **Sessions** — sortable, filterable, pinnable session list.
   - **Timeline** — reverse-chronological events with filters, export, and copy.
   - **Network** — interactive 3D skill/tool/file graph.
-  - **Files** — two-pane file activity with operation badges and diff/content snippets.
+  - **Files** — two-pane file activity with operation badges, syntax highlighting, and diff/content snippets.
   - **Skills** — aggregate skill/tool/file usage for the selected session.
   - **Settings** — theme, density, reduced motion, auto-follow, and max-events preferences.
+- **Dynamic Multi-Session Workspaces:** Paths and git operations resolve relative to each session's dynamic working directory/workspace root.
+- **Auto-Root Inference:** Automatically reconstructs the repository root using `.git` or `package.json` lookups when CWD metadata is absent.
+- **Syntax Highlighting:** Zero-dependency lexical token-based syntax highlighting for common language constructs in diff and code views.
+- **Bypass Traversal Security:** Restricts filesystem reading to the session's workspace root, permitting access to external files (like global skills in `~/.agents`) only if they are actively registered in the session's execution history.
+- **Bundle Chunk-Splitting:** Custom Rollup chunk splitting for heavy 3D graphs and icons, keeping the main entry script lightweight (~213kB).
 - Advanced filters by source, skill, status, time window, tool, and operation type.
 - Session pinning with localStorage persistence.
 - JSON export of the visible timeline or file events.
@@ -37,13 +42,22 @@ npm start
 
 Open `http://127.0.0.1:7890`.
 
-### UI development mode
+### UI and backend development mode (hot-reloading)
+
+To run a full-stack development environment where both the frontend (Vite dev server) and the backend (TypeScript Node server) automatically rebuild and restart on changes, run these in separate terminals:
 
 ```bash
+# Terminal 1: Watch compile the backend
 cd servers/dashboard
-npm install
-npm run build:server   # compile the WebSocket backend once
-npm run dev            # Vite dev server (serves the UI and proxies API/WebSocket to the backend)
+npm run dev:server
+
+# Terminal 2: Auto-restart backend server
+cd servers/dashboard
+npm run dev:start
+
+# Terminal 3: Vite dev server for UI
+cd servers/dashboard
+npm run dev
 ```
 
 In dev mode the backend runs on `CREWLOOP_DASHBOARD_PORT` (`7890` by default) and Vite serves the UI on its own port, proxying `/event` and `/ws` to the backend.
@@ -92,6 +106,7 @@ interface DashboardEvent {
   duration_ms?: number;
   input?: Record<string, unknown>;      // sanitized tool input
   output?: Record<string, unknown>;     // sanitized tool output (tool_end only)
+  workspacePath?: string;               // current working directory or workspace path of the agent
 }
 ```
 

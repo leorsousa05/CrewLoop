@@ -1,0 +1,26 @@
+name: dashboard-views-corrections
+description: >
+  Corrige três bugs na visualização do dashboard (Network 3D renomeia nós em vez de criar novos;
+  AGY não lista arquivos lidos na view Files; Kimi lista arquivos mas não exibe conteúdo) e evolui
+  a view Files para um file explorer com arquivos "abertos" e indicação visual de leitura/edição.
+status: completed
+created_at: 2026-07-10
+author: architect
+scope:
+  - servers/dashboard/src/lib/graph.ts
+  - servers/dashboard/src/lib/paths.ts
+  - servers/dashboard/src/lib/invocations.ts
+  - servers/dashboard/src/adapters/kimi.ts
+  - servers/dashboard/src/adapters/agy.ts
+  - servers/dashboard/src/filters/sanitize.ts
+  - servers/dashboard/src/config.ts
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/state.ts
+  - servers/dashboard/src/presenter.ts
+  - servers/dashboard/ui/src/components/Network3D.tsx
+  - servers/dashboard/ui/src/components/views/FilesView.tsx
+  - servers/dashboard/ui/src/components/FileActivity.tsx
+  - servers/dashboard/ui/src/components/FileList.tsx
+  - servers/dashboard/ui/src/components/FileDiff.tsx
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/lib/filter.ts
