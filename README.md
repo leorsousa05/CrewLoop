@@ -140,58 +140,59 @@ CrewLoop ships 19 specialist skills. The core crew owns the main delivery loop; 
 
 ![Skill active in agent](assets/screenshots/skill-active.png)
 
-## Workflow (Hub-and-Spoke)
+## Workflow (Direct Routing)
 
-All execution skills return control to the CrewLoop Hub, which manages task state and handles routing decisions.
+Skills hand off directly to the next skill via their ending menu; the user confirms each
+transition. The CrewLoop Hub mediates only as the entry point for new tasks and as the
+automatic router in AFK mode.
 
 ```mermaid
 flowchart TD
-    O["CrewLoop Hub\nCentral Hub"] <--> A["Architect\nSpecs & Architecture"]
-    O <--> D["Designer\nUI/UX Direction"]
-    O <--> E["Engineer\nImplementation"]
-    O <--> R["Reviewer\nQuality Gate"]
-    O <--> S["Shipper\nGit & PR"]
-    O <--> PB["Project-Brainstorm\nDiscovery"]
-    O <--> LTM["Long-Term Manager\nMulti-Session Tracking"]
-    O <--> DB["Diamondblock\nMemory & Distillation"]
-    O <--> W["Docs-Writer\nDocumentation"]
-    O <--> PM["Product-Manager\nPrioritization"]
-    O <--> RS["Researcher\nTechnology Evaluation"]
-    O <--> MN["Maintainer\nIncident & Debt"]
-    O <--> T["Tester\nQA Strategy"]
+    O["CrewLoop Hub\nEntry: Discovery & First Routing\n+ AFK Auto-Router"] --> A["Architect\nSpecs & Architecture"]
+    A --> D["Designer\nUI/UX Direction"]
+    A --> E["Engineer\nImplementation"]
+    D --> E
+    E --> R["Reviewer\nQuality Gate"]
+    R -->|PASS| S["Shipper\nGit & PR"]
+    R -->|FAIL| E
+    S -->|new task| O
 
-    A -.-> SD["Schema-Designer\nAPI & DB Schemas"]
-    SD -.-> A
-    D -.-> FA["Frontend-Architect\nComponent Spec"]
-    FA -.-> D
-    S -.-> DO["DevOps-Specialist\nCI/CD & Docker"]
-    DO -.-> S
+    PB["Project-Brainstorm\nDiscovery"] -.-> A
+    LTM["Long-Term Manager\nMulti-Session Tracking"] <-.-> O
+    DB["Diamondblock\nMemory & Distillation"] <-.-> O
+    W["Docs-Writer\nDocumentation"] <-.-> O
+    PM["Product-Manager\nPrioritization"] <-.-> O
+    RS["Researcher\nTechnology Evaluation"] <-.-> O
+    MN["Maintainer\nIncident & Debt"] -.-> A
+    T["Tester\nQA Strategy"] <-.-> E
 
-    SG["Security-Guard\nSecurity Review"] -.-> R
-    AA["Accessibility-Auditor\nAccessibility Review"] -.-> R
-    R -.-> SG
-    R -.-> AA
+    A <-.-> SD["Schema-Designer\nAPI & DB Schemas"]
+    D <-.-> FA["Frontend-Architect\nComponent Spec"]
+    S <-.-> DO["DevOps-Specialist\nCI/CD & Docker"]
+    R <-.-> SG["Security-Guard\nSecurity Review"]
+    R <-.-> AA["Accessibility-Auditor\nAccessibility Review"]
 ```
 
 **Flow rules:**
 
 > [!IMPORTANT]
-> **Core Routing Rule:** Under the star topology, no execution skill is allowed to hand off directly to another execution skill. All roads return control to the CrewLoop Hub.
+> **Core Routing Rule:** Skills route directly to the next skill per the transition contract in `references/conventions.md`. The CrewLoop Hub mediates only at task entry and in AFK mode.
 
-1. **CrewLoop Hub is the central hub** — every skill hands control back to CrewLoop Hub at the end of its turn.
+1. **CrewLoop Hub is the entry point** — discovery for new tasks, then Architect first. Outside AFK mode it does not mediate mid-flow.
 2. **CrewLoop Hub always routes to Architect first** — to create or update specifications.
-3. **Architect is the design gatekeeper** — once the spec is created, control returns to CrewLoop Hub, which routes to Designer (for UI) or Engineer (for code).
+3. **Architect is the design gatekeeper** — once the spec is created, it recommends Designer (for UI) or Engineer (for code).
 4. **Designer acts before Engineer** — when there is UI, the Designer creates the visual specification before the Engineer implements.
-5. **Engineer never does git, review, or docs** — it implements code and tests, then returns to CrewLoop Hub.
-6. **Reviewer is the quality gate** — no code reaches the repository without review.
-7. **Shipper is the only skill that touches git** — commit, branch, push, and PR.
-8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
+5. **Engineer never does git, review, or docs** — it implements code and tests, then its menu recommends the Reviewer.
+6. **Reviewer is the quality gate** — no code reaches the repository without review. PASS recommends Shipper; FAIL recommends Engineer.
+7. **Shipper is the only skill that touches git** — commit, branch, push, and PR. After shipping it offers a new task (CrewLoop Hub) or done.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`. Supporting skills end by recommending a return to the skill that invoked them.
 9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
-10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who yields control to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who recommends the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then the standard chain applies: Engineer → Reviewer → Shipper (commit/ship and archive the spec).
+11. **AFK mode is the exception** — with AFK active, every skill returns control to the CrewLoop Hub automatically and the Hub loads the next skill, with no menus.
 
 > [!NOTE]
 > **Standard Developer Cycle Example:**
-> `CrewLoop Hub` (Discovery) -> `Architect` (Spec creation) -> `CrewLoop Hub` (Briefing) -> `Engineer` (Build & Tests) -> `CrewLoop Hub` (Handoff) -> `Reviewer` (Quality gate check) -> `CrewLoop Hub` (Approval) -> `Shipper` (Git commit & PR) -> `CrewLoop Hub` (Complete).
+> `CrewLoop Hub` (Discovery) -> `Architect` (Spec creation) -> `Engineer` (Build & Tests) -> `Reviewer` (Quality gate check) -> `Shipper` (Git commit & PR) -> done. Each transition is confirmed via the ending menu of the current skill.
 
 
 ## Repository Layout

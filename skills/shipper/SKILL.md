@@ -335,7 +335,6 @@ Closes #42
 - **[P] Commit, Push & Auto-PR (Teamwork)** — Create branch, commit, push, and open PR automatically (uses `gh pr create` if available)
 - **[E] Edit** — Change commit message, branch name, or scope
 - **[R] Review** — Go back to review the changes
-- **[O] Back to CrewLoop Hub** — New task or continue working
 - **[N] Cancel** — Do nothing, keep changes unstaged
 ```
 
@@ -446,10 +445,11 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[N] New task via CrewLoop Hub** — Start discovery for a new task
+- **[D] Done (Recommended)** — Flow complete, stop here
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub` for a new task).*
 
 
 ---

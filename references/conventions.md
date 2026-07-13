@@ -29,9 +29,12 @@ Format: `<type>/<short-description>`
 
 ---
 
-## Letter-Based Navigation & Centralized Routing
+## Letter-Based Navigation & Direct Routing
 
-We follow a centralized routing model where all roads lead back to the CrewLoop Hub. 
+Skills route **directly** to the next skill in the flow. Each skill owns its ending: it
+presents the valid next steps from its position, and the user decides. The CrewLoop Hub
+mediates only as the **entry point for new tasks** and as the **automatic router in AFK
+mode** — never in the middle of an interactive flow.
 
 ### Presentation Guidelines
 - **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
@@ -39,29 +42,66 @@ We follow a centralized routing model where all roads lead back to the CrewLoop 
 - **Handling Tool Responses:** If your current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
 - **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute on its own line. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
 
+### The Transition Contract
 
-#### Execution Skills Navigation (Engineer, Reviewer, Shipper)
-All interactive non-Hub agents must end their execution by returning control to the CrewLoop Hub:
+Each skill ends with a menu of the valid next steps from its position in the flow. Exactly
+one option is marked `(Recommended)`, chosen by the phase outcome.
+
+| Skill | Options (key → command) | Recommended when |
+|-------|------------------------|------------------|
+| crewloop-hub (entry) | `[A]` → /architect, `[B]` → /project-brainstorm, `[T]` → /long-term-manager | `[A]` for any well-scoped task |
+| architect (non-interactive) | → /designer or /engineer | /designer if the spec touches UI, else /engineer |
+| designer (non-interactive) | → /engineer | always |
+| engineer | `[R]` → /reviewer, `[E]` → keep implementing, `[A]` → /architect | `[R]` when all tasks are checked and verification passed |
+| reviewer | `[S]` → /shipper, `[E]` → /engineer | `[S]` on PASS, `[E]` on FAIL |
+| shipper | `[N]` → /crewloop-hub (new task), `[D]` → done | `[D]` after a successful push |
+| maintainer | `[A]` → /architect, `[H]` → /crewloop-hub | `[A]` for confirmed bugs (lightweight spec) |
+| project-brainstorm | `[A]` → /architect, `[H]` → /crewloop-hub | `[A]` once the brief is complete |
+| supporting skills | `[I]` → invoker, `[H]` → /crewloop-hub (or `[C]` → continue, when the invoker already is the Hub) | `[I]` always |
+
+**Default invokers for supporting skills** (controls which option is recommended; if the
+user invoked the skill from a different parent, both options are shown and the user picks):
+
+| Supporting skill | Default invoker | Command |
+|------------------|-----------------|---------|
+| security-guard | reviewer | /reviewer |
+| accessibility-auditor | reviewer | /reviewer |
+| schema-designer | architect | /architect |
+| frontend-architect | designer | /designer |
+| devops-specialist | shipper | /shipper |
+| tester | engineer | /engineer |
+| docs-writer | crewloop-hub | /crewloop-hub |
+| researcher | crewloop-hub | /crewloop-hub |
+| product-manager | crewloop-hub | /crewloop-hub |
+| long-term-manager | crewloop-hub | /crewloop-hub |
+| diamondblock | crewloop-hub | /crewloop-hub |
+
+### Menu Block Format
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[R] Send to Reviewer (Recommended)** — Code review and quality check
+- **[E] Keep implementing** — Return to the spec task list
+- **[A] Back to Architect** — A spec gap was found
 ```
 
-*(Note: The Architect and Designer skills are non-interactive/automated. They write specifications directly and return control to the CrewLoop Hub without prompting or presenting menus).*
+Rules:
+1. Present via `ask_question`; markdown list is the fallback.
+2. Exactly one option carries `(Recommended)` — chosen by the outcome condition in the transition table.
+3. Non-interactive skills (Architect, Designer) skip the menu and output only the mandatory command recommendation line.
+4. Every menu must offer a fallback so there are no dead ends (invoker, `[C] Continue` to keep iterating, or the Hub for a new task).
+5. The recommendation example at the end of each skill's navigation section uses that skill's recommended command (e.g. `/reviewer`), never a hardcoded `/crewloop-hub` unless the Hub is the recommended target.
 
-#### CrewLoop Hub Routing Menu
-Only the CrewLoop Hub acts as the central router and presents the menu of next steps to the user:
+#### CrewLoop Hub Entry Menu (new tasks only)
+The Hub presents a menu only after discovery for a new task, or when mediating in AFK mode:
 
 ```markdown
 **What would you like to do?**
 
-- **[A] Send to Architect** — Create or update specs (always the first step, can run automatically)
-- **[D] Send to Designer** — Visual/UI design direction (if there is UI, can run automatically)
-- **[E] Send to Engineer** — Implement the spec (BUILD mode)
-- **[R] Send to Reviewer** — Code review and quality check
-- **[S] Send to Shipper** — Commit, branch, push, and open PR
+- **[A] Send to Architect (Recommended)** — Create or update specs (always the first step)
+- **[B] Send to Project-Brainstorm** — Interactive discovery for a new or ambiguous idea
+- **[T] Send to Long-Term Manager** — Durable tracking for a multi-session project
 ```
 
 ---
@@ -70,17 +110,28 @@ Only the CrewLoop Hub acts as the central router and presents the menu of next s
 
 ```
 specs/
-├── changes/                        # Active deltas
+├── changes/                        ← Active deltas
 │   └── 001-change-name/
-│       ├── .spec.yaml              # status, dates, author
-│       ├── proposal.md             # WHY (skipped for lightweight specs)
-│       ├── specs/                  # WHAT (skipped for lightweight specs)
-│       ├── design.md               # HOW (skipped for lightweight specs)
-│       └── tasks.md                # ordered checklist
-├── archive/                        # Completed changes (YYYY-MM-DD-NNN-name)
-├── living/                         # Merged source of truth
-├── decisions/                      # ADRs
-└── templates/                      # Reusable templates
+│       ├── .spec.yaml              ← status, dates, author
+│       ├── proposal.md             ← WHY (skipped for lightweight specs)
+│       ├── specs/                  ← WHAT (skipped for lightweight specs)
+│       ├── design.md               ← HOW (skipped for lightweight specs)
+│       └── tasks.md                ← ordered checklist
+│
+├── archive/                        ← Completed changes (YYYY-MM-DD-NNN-name)
+│
+├── living/                         ← Merged source of truth
+│   └── auth/
+│       └── spec.md
+│
+├── decisions/                      ← ADRs
+│   └── 001-architecture-choice.md
+│
+└── templates/                      ← Reusable templates
+    ├── proposal-template.md
+    ├── spec-delta-template.md
+    ├── design-template.md
+    └── tasks-template.md
 ```
 
 Rules:
@@ -93,23 +144,26 @@ Rules:
 
 ---
 
-## Mandatory Workflow (Hub-and-Spoke)
+## Mandatory Workflow (Direct Routing)
 
-All skills communicate with the CrewLoop Hub between phases. No execution skill routes directly to another execution skill.
+The flow is a linear chain with dynamic branches. Skills hand off directly to the next
+skill per the transition contract; the user confirms each transition via the ending menu.
+The CrewLoop Hub mediates only at task entry and in AFK mode.
 
 ```
-CrewLoop Hub ⇄ Architect
-CrewLoop Hub ⇄ Designer (if UI)
-CrewLoop Hub ⇄ Engineer
-CrewLoop Hub ⇄ Reviewer
-CrewLoop Hub ⇄ Shipper
+CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done
+                                                            ↑________ FAIL ________|
+Supporting skills → back to the invoking skill
+New task → CrewLoop Hub
 ```
 
 ---
 
 ## AFK Mode
 
-When the user explicitly activates AFK mode, skills route automatically through the workflow via the CrewLoop Hub without presenting navigation menus.
+When the user explicitly activates AFK mode, skills route automatically through the
+workflow via the CrewLoop Hub without presenting navigation menus. **AFK is the only mode
+where the Hub mediates mid-flow.**
 
 ### Activation phrases
 
@@ -134,7 +188,7 @@ Every skill response must start with its prefix on its own line:
 
 When AFK mode is active:
 1. The execution skill performs its task and returns control to the CrewLoop Hub automatically (using the Skill tool to trigger CrewLoop Hub).
-2. The CrewLoop Hub automatically evaluates state and loads the next appropriate skill.
+2. The CrewLoop Hub automatically evaluates state and loads the next appropriate skill per the transition contract.
 
 ---
 
@@ -187,7 +241,7 @@ These rules apply to all code proposed or implemented by any agent:
 When running on platforms that support interactive agent tools, agents must prioritize calling these tools to capture inputs and control flow, falling back to raw chat text only if the tool is not supported or errors:
 
 ### 1. Interactive Questions (`ask_question`)
-- **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the options (e.g. `["[O] Return to CrewLoop Hub"]` or the full routing menu).
+- **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the transition options for the current skill (e.g. `["[R] Send to Reviewer", "[E] Keep implementing", "[A] Back to Architect"]`).
 - **Discovery & Questionnaires:** For multi-step questions (e.g. scope discovery or visual styling), group them into structured multiple-choice questions via `ask_question` (using `is_multi_select: false` or `is_multi_select: true` as appropriate) to present checkboxes/radio buttons in a modal.
 - **Confirmations:** Use `ask_question` to ask for confirmations (like before committing or pushing changes).
 
@@ -318,4 +372,4 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
 2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 18 skills defined in the CrewLoop bundle. 
-3. **No Direct Execution Routing:** All execution skills must yield control to the CrewLoop Hub by presenting `[O] Return to CrewLoop Hub`. If you receive a direct handoff from another execution skill (e.g. Architect to Engineer without passing through the CrewLoop Hub's routing menu), you must halt, report a routing error, and return control to the CrewLoop Hub.
+3. **Direct Routing:** Execution skills hand off directly to the next skill per the transition contract — the CrewLoop Hub mediates only as the new-task entry point and in AFK mode. Every skill must end its turn per the contract (menu + command recommendation). If you receive a handoff that violates the transition contract (e.g. a phase skipped without the user choosing it), note the deviation and recommend the correct next skill.

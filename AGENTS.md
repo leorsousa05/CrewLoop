@@ -197,16 +197,15 @@ Supporting skills report their findings back to the skill that invoked them. The
 
 ---
 
-## Mandatory Development Flow (Hub-and-Spoke)
+## Mandatory Development Flow (Direct Routing)
 
-All execution skills return control to the CrewLoop Hub. The CrewLoop Hub manages the task state and handles all routing:
+Skills hand off directly to the next skill via their ending menu; the user confirms each
+transition. The CrewLoop Hub mediates only as the entry point for new tasks and as the
+automatic router in AFK mode:
 
 ```
-CrewLoop Hub ⇄ Architect
-CrewLoop Hub ⇄ Designer (if UI)
-CrewLoop Hub ⇄ Engineer
-CrewLoop Hub ⇄ Reviewer
-CrewLoop Hub ⇄ Shipper
+CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done
+Supporting skills → back to the invoking skill
 ```
 
 Rules — no exceptions:
@@ -217,11 +216,11 @@ Rules — no exceptions:
 4. **Engineer never does git operations** and never reviews its own code.
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
-7. **Navigation menus are simplified** to return control to the CrewLoop Hub (`[O] Return to CrewLoop Hub`). Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported.
-8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub` with discovery for new or ambiguous projects; `long-term-manager` helps `crewloop-hub` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`.
-9. **All roads return to CrewLoop Hub.** Every agent hands control back to CrewLoop Hub between phases.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 19 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub/Architect gatekeepers.
-11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who yields control to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
+7. **Navigation menus present the real next steps** of the flow (transition contract in `references/conventions.md`), with one outcome-driven option marked `(Recommended)`. Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported. No more `[O] Return to CrewLoop Hub` as the default ending.
+8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub` with discovery for new or ambiguous projects; `long-term-manager` helps `crewloop-hub` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`. Supporting skills end by recommending a return to the skill that invoked them.
+9. **Direct handoffs between phases.** Every agent ends by recommending the next skill per the transition contract; the CrewLoop Hub only mediates at task entry and in AFK mode.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 19 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub (entry)/Architect gatekeepers.
+11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who ends by recommending `/architect` for a lightweight specification (`.spec.yaml` + `tasks.md`). From there the standard chain applies: Architect → Engineer → Reviewer → Shipper (commit/ship and archive the spec).
 
 
 ---
@@ -235,8 +234,8 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 **Behavior when active:**
 - Skills skip the interactive navigation prompts.
 - Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **Engineer**`, `> 🔍 **Reviewer**`).
-   - Each skill automatically returns control to the CrewLoop Hub, which then automatically routes to and loads the next appropriate skill.
-   - The standard routing rules still apply: CrewLoop Hub ⇄ Architect ⇄ CrewLoop Hub ⇄ Designer ⇄ CrewLoop Hub ⇄ Engineer ⇄ CrewLoop Hub ⇄ Reviewer ⇄ CrewLoop Hub ⇄ Shipper.
+   - AFK is the only mode where the CrewLoop Hub mediates mid-flow: each skill automatically returns control to the CrewLoop Hub, which then automatically routes to and loads the next appropriate skill per the transition contract.
+   - The standard phase order still applies: Architect → Designer (if UI) → Engineer → Reviewer → Shipper, with the Hub routing between them.
 
 **Deactivation:** AFK mode ends when Shipper completes and returns control to CrewLoop Hub.
 
@@ -310,11 +309,11 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 ## How to Contribute
 
 1. Start with **CrewLoop Hub** — gather context, produce a structured brief, and route to Architect.
-2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then returns to CrewLoop Hub.
-3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then returns to CrewLoop Hub.
-4. **Engineer** implements the spec, runs verification, and returns to CrewLoop Hub.
-5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts, and returns to CrewLoop Hub.
-6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, and returns to CrewLoop Hub.
+2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then recommends Designer (UI) or Engineer.
+3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then recommends Engineer.
+4. **Engineer** implements the spec, runs verification, and its menu offers Reviewer (recommended).
+5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts; PASS recommends Shipper, FAIL recommends Engineer.
+6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, then offers a new task (CrewLoop Hub) or done.
 7. Run `python scripts/validate-skills.py` after adding or editing any `SKILL.md`.
 8. Update `README.md` and `AGENTS.md` if the repository structure or team rules change.
 9. Place new skills in `skills/<skill-name>/SKILL.md` using `assets/templates/skill-template.md`.

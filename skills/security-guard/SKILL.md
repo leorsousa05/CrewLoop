@@ -125,7 +125,8 @@ Present the navigation menu and WAIT for user choice:
 
 
 ```markdown
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[I] Return to Reviewer (Recommended)** — Hand security findings back to the Reviewer
+- **[H] New task via CrewLoop Hub** — Start discovery for a new task
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/reviewer`).*

@@ -29,7 +29,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 **NEVER run git operations** — `git commit`, `git push`, `git branch`, `git merge`, `git tag`, `git stash`, `git rebase`, `git cherry-pick`, PR creation, or any repository mutation is STRICTLY FORBIDDEN. These belong to the shipper skill. You may use `git status` or `git diff` ONLY to inspect the current state before handing off. If the user asks to commit, push, or create a branch, redirect to the shipper skill.
 
-**NEVER do code review** — Code review is the reviewer's job. After BUILD completes, return control to CrewLoop Hub to route to reviewer. Do not self-review or approve your own code.
+**NEVER do code review** — Code review is the reviewer's job. After BUILD completes, present the ending menu recommending the reviewer. Do not self-review or approve your own code.
 
 **NEVER write documentation** — READMEs, module docs, feature docs, API docs, and changelogs belong to the `docs-writer` skill. Focus on code and tests. If a task requires docs, redirect to docs-writer.
 
@@ -150,10 +150,12 @@ When BUILD succeeds and all tests pass:
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[R] Send to Reviewer (Recommended)** — Code review and quality check
+- **[E] Keep implementing** — Return to the spec task list
+- **[A] Back to Architect** — A spec gap was found
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/reviewer`).*
 
 
 ---

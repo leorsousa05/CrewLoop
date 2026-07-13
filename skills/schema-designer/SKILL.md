@@ -41,10 +41,11 @@ Print this prefix on its own line before the first line of every response.
 
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[I] Return to Architect (Recommended)** — Hand the schema and API contracts back to the Architect
+- **[H] New task via CrewLoop Hub** — Start discovery for a new task
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/architect`).*
 
 
 ---

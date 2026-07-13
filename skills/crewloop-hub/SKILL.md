@@ -261,32 +261,32 @@ Once all questions are answered, produce a clean, focused task brief. Apply thes
 
 ### Step 4: Route to Next Skill
 
-All execution skills return control to the CrewLoop Hub. When a skill hands back to you:
-1. Briefly acknowledge and summarize what that skill accomplished.
-2. **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
-3. Otherwise, check the task's current state and present the next step choices to the user using the `ask_question` tool (or standard markdown menu as fallback). Refer to [conventions.md](../../references/conventions.md) for tool guidelines.
+The Hub routes in two situations only — never in the middle of an interactive flow:
 
-**Handoff / Routing menu format (to be used in `ask_question` or chat fallback):**
+**A. After discovery (new task):** present the entry menu via `ask_question` (markdown fallback). You may trigger the Architect and Designer spec-writing phases directly without waiting for user confirmation.
+
+**Entry menu format (to be used in `ask_question` or chat fallback):**
 ```markdown
-Context updated. Current state: [describe state, e.g., brief created, specs written, UI designed, implementation done, review complete].
+Context updated. Current state: [describe state, e.g., brief created for a new task].
 
 **What would you like to do next?**
 
-- **[A] Send to Architect** — Create or update specs (always the first step)
-- **[D] Send to Designer** — Visual/UI design direction (if there is UI)
-- **[E] Send to Engineer** — Implement the spec (BUILD mode)
-- **[R] Send to Reviewer** — Code review and quality check
-- **[S] Send to Shipper** — Commit, branch, push, and open PR
-- **[O] Return to CrewLoop Hub** — Adjust scope or requirements
+- **[A] Send to Architect (Recommended)** — Create or update specs (always the first step)
+- **[B] Send to Project-Brainstorm** — Interactive discovery for a new or ambiguous idea
+- **[T] Send to Long-Term Manager** — Durable tracking for a multi-session project
 ```
+
+**B. AFK mode:** execution skills return control to you automatically. Briefly acknowledge what the skill accomplished, evaluate the task state, and load the next skill per the transition contract in [conventions.md](../../references/conventions.md) — no menus, no waiting.
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/architect`).*
 
 
 **Critical routing rules:**
-- **NEVER route automatically** EXCEPT for the Architect and Designer spec-writing phases. Once discovery is complete, the CrewLoop Hub can trigger the Architect and Designer directly (either in the same turn or via a subagent) to generate the specification files automatically without waiting for user confirmation or menu routing inputs. For all other execution skills (Engineer, Reviewer, Shipper), always present the navigation menu and WAIT for the user to choose the next skill.
+- **Direct routing is the default.** Outside AFK mode, execution skills hand off to the next skill themselves via their ending menus. Do not insert the Hub between phases.
+- **NEVER route automatically** EXCEPT for the Architect and Designer spec-writing phases after discovery, and for every transition when AFK mode is active. For all other cases, present the entry menu and WAIT for the user to choose.
+- **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.
-- **Flow progression:** Architect (creates spec) ⇄ CrewLoop Hub ⇄ Designer (if UI) ⇄ CrewLoop Hub ⇄ Engineer (implements code/tests) ⇄ CrewLoop Hub ⇄ Reviewer (quality check) ⇄ CrewLoop Hub ⇄ Shipper (git operations) ⇄ CrewLoop Hub (complete).
+- **Flow progression:** CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done. Reviewer FAIL loops back to Engineer.
 - **Skill handoffs stay in the main thread** (unless running Architect or Designer via an autonomous subagent). The next execution skill should activate in the SAME conversation thread so the user can see and interact with every step.
 
 ---
@@ -307,7 +307,7 @@ Please refer to the shared response style guidelines in [conventions.md](../../r
 ## ANTI-PATTERNS
 
 Refer to [conventions.md](../../references/conventions.md) for general anti-patterns. CrewLoop Hub-specific anti-patterns:
-- ❌ Routing directly between execution skills without returning to CrewLoop Hub
+- ❌ Inserting the Hub mid-flow outside AFK mode — execution skills route directly to the next skill
 - ❌ "Here's how I would build it..." (not your job)
 - ❌ "Let me start coding..." (wrong skill)
 - ❌ "Here's the design I thought of..." (not your job — designer handles this)

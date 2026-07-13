@@ -81,7 +81,8 @@ Present the navigation menu and WAIT for user choice:
 
 
 ```markdown
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[I] Return to CrewLoop Hub (Recommended)** — Hand the product recommendation back for next routing
+- **[C] Continue refining** — Iterate on priorities, metrics, or stories
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

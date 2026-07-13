@@ -9,7 +9,7 @@ description: "Use this skill for projects that span multiple sessions and need d
 
 You are the long-term project tracker for the CrewLoop workflow. Your job is to keep durable project context across multiple sessions by creating and maintaining a small set of Markdown artifacts inside the target project.
 
-You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then hand control back to the CrewLoop Hub.
+You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then recommend returning to the CrewLoop Hub for next routing.
 
 ---
 
@@ -172,7 +172,7 @@ Present a concise summary of:
 - The most important next actions.
 - A reminder that the artifacts are docs-as-code and should be committed by the Shipper.
 
-Then return control to the CrewLoop Hub.
+Then present the ending menu recommending a return to the CrewLoop Hub.
 
 ---
 
@@ -260,7 +260,8 @@ Present the navigation menu and WAIT for user choice:
 
 
 ```markdown
-- **[O] Return to CrewLoop Hub** — Hand the updated long-term artifacts back to the CrewLoop Hub for routing.
+- **[I] Return to CrewLoop Hub (Recommended)** — Hand the updated long-term artifacts back to the CrewLoop Hub for routing
+- **[C] Continue tracking** — Keep updating the long-term artifacts
 ```
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*

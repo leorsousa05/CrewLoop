@@ -8,7 +8,7 @@ Complete workflow for the Loop Engineering Agents team.
 
 | Role | File | Responsibility |
 |------|------|----------------|
-| CrewLoop Hub | `skills/crewloop-hub/SKILL.md` | Context discovery and routing |
+| CrewLoop Hub | `skills/crewloop-hub/SKILL.md` | Entry point: context discovery and first routing; AFK auto-router |
 | Architect | `skills/architect/SKILL.md` | Specs, contracts, architecture |
 | Designer | `skills/designer/SKILL.md` | Visual/UI direction |
 | Engineer | `skills/engineer/SKILL.md` | Implementation and tests |
@@ -28,24 +28,28 @@ Complete workflow for the Loop Engineering Agents team.
 
 ---
 
-## Flow Diagram (Hub-and-Spoke)
+## Flow Diagram (Direct Routing)
 
-All execution skills return control to the CrewLoop Hub. The CrewLoop Hub manages the task state and routes to the next step.
+Skills hand off directly to the next skill via their ending menu; the user confirms each
+transition. The CrewLoop Hub mediates only at task entry and in AFK mode.
 
 ```mermaid
 flowchart TD
-    O["🎯 CrewLoop Hub<br>Discovery & Routing Hub"] <--> A["🏗️ Architect<br>Specs & Architecture"]
-    O <--> D["🎨 Designer<br>UI/UX Direction"]
-    O <--> E["🔧 Engineer<br>Implementation"]
-    O <--> R["🔍 Reviewer<br>Quality Gate"]
-    O <--> S["🚀 Shipper<br>Git & PR"]
+    O["🎯 CrewLoop Hub<br>Entry: Discovery & First Routing<br>+ AFK Auto-Router"] --> A["🏗️ Architect<br>Specs & Architecture"]
+    A --> D["🎨 Designer<br>UI/UX Direction"]
+    A --> E["🔧 Engineer<br>Implementation"]
+    D --> E
+    E --> R["🔍 Reviewer<br>Quality Gate"]
+    R -->|PASS| S["🚀 Shipper<br>Git & PR"]
+    R -->|FAIL| E
+    S -->|new task| O
 
-    SG["🛡️ Security-Guard<br>Security Review"] -.-> R
-    AA["♿ Accessibility-Auditor<br>Accessibility Review"] -.-> R
-    R -.-> SG
-    R -.-> AA
-    SG -.-> R
-    AA -.-> R
+    SG["🛡️ Security-Guard<br>Security Review"] <-.-> R
+    AA["♿ Accessibility-Auditor<br>Accessibility Review"] <-.-> R
+    SD["🗃️ Schema Designer"] <-.-> A
+    FA["🧩 Frontend Architect"] <-.-> D
+    DO["⚙️ DevOps Specialist"] <-.-> S
+    T["🧪 Tester"] <-.-> E
 
     style O fill:#01579b,color:#fff
     style A fill:#e65100,color:#fff
@@ -53,21 +57,45 @@ flowchart TD
     style E fill:#1b5e20,color:#fff
     style R fill:#b71c1c,color:#fff
     style S fill:#00695c,color:#fff
-    style SG fill:#b71c1c,color:#fff
-    style AA fill:#6a1b9a,color:#fff
 ```
 
 ---
 
 ## Routing Rules
 
-1. **CrewLoop Hub is the Central Hub** — every agent hands control back to CrewLoop Hub at the end of their turn.
-2. **CrewLoop Hub ALWAYS sends to Architect first** — to create or update specifications.
-3. **Architect is the design gatekeeper** — once the spec is created, they return control to CrewLoop Hub, which routes to Designer (for UI) or Engineer (for code).
-4. **Designer acts BEFORE Engineer** — visual spec is designed, control returns to CrewLoop Hub, which then routes to Engineer.
-5. **Engineer never does git or review** — implements code/tests, then returns control to CrewLoop Hub, which routes to Reviewer.
-6. **Reviewer is the quality gate** — reviews changes, returns control to CrewLoop Hub. If approved, CrewLoop Hub routes to Shipper; if changes needed, CrewLoop Hub routes back to Engineer.
-7. **Security-Guard and Accessibility-Auditor are optional review specialists** — invoked by the CrewLoop Hub or Reviewer when the change involves security-sensitive work or UI accessibility. They report findings back to the invoking skill and do not touch git.
-8. **Shipper is the only one who touches git** — performs branch, commit, push, PR, and returns control to CrewLoop Hub.
-9. **Bug-Fixing Pipeline** — Triaging and reproduction are handled by the Maintainer, who yields to the CrewLoop Hub. The CrewLoop Hub routes to the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then to the Engineer for implementation and testing, to the Reviewer for verification, and to the Shipper to commit/ship and archive the spec.
-10. **Specialist Helpers** — When a task clearly needs frontend architecture, schema design, or release automation support, route the relevant core skill and let it invoke `frontend-architect`, `schema-designer`, or `devops-specialist` as a subskill helper.
+1. **CrewLoop Hub is the entry point** — it runs discovery for new tasks and routes to
+   Architect first. Outside AFK mode, it does not mediate mid-flow transitions.
+2. **Skills route directly** — each skill ends by presenting the valid next-step options
+   from its position in the flow (transition contract in `conventions.md`), with one
+   outcome-driven option marked `(Recommended)`. The user picks; the skill ends with the
+   command recommendation.
+3. **Architect is ALWAYS the first stop** — every task (bug fix, feature, design,
+   refactor) gets a spec before implementation. Architect is non-interactive and ends by
+   recommending `/designer` (UI) or `/engineer`.
+4. **Designer acts BEFORE Engineer** — when the change involves UI, Designer ends by
+   recommending `/engineer`.
+5. **Engineer never does git or review** — implements code/tests, then its menu offers
+   Reviewer (recommended), keep implementing, or back to Architect.
+6. **Reviewer is the quality gate** — verdict drives the menu: PASS → Shipper
+   (recommended); FAIL → Engineer (recommended).
+7. **Security-Guard and Accessibility-Auditor are review specialists** — invoked by the
+   Reviewer; they end by recommending a return to the Reviewer.
+8. **Shipper is the only one who touches git** — after shipping, its menu offers a new
+   task (CrewLoop Hub entry) or done.
+9. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then ends by recommending
+   `/architect` for a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
+   standard chain applies: Architect → Engineer → Reviewer → Shipper.
+10. **Specialist Helpers return to their invoker** — `schema-designer` → Architect,
+    `frontend-architect` → Designer, `devops-specialist` → Shipper, `tester` → Engineer.
+11. **AFK mode is the exception** — with AFK active, every skill returns control to the
+    CrewLoop Hub automatically and the Hub loads the next skill per the transition
+    contract, with no menus.
+
+---
+
+## AFK Flow
+
+1. Skill finishes → loads CrewLoop Hub automatically (Skill tool)
+2. Hub evaluates state → loads next skill per the transition contract
+3. No menus; role prefixes on every response
+4. Ends when Shipper completes and returns to the Hub

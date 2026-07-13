@@ -85,7 +85,8 @@ Present the navigation menu and WAIT for user choice:
 
 
 ```markdown
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[A] Send to Architect (Recommended)** — Create a lightweight bug spec (`.spec.yaml` + `tasks.md`)
+- **[H] New task via CrewLoop Hub** — Start discovery for a new task
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/architect`).*

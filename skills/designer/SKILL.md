@@ -270,13 +270,13 @@ Spec out:
 
 ## HANDOFF
 
-When the design spec is complete, return control to the CrewLoop Hub immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
+When the design spec is complete, end your response by recommending `/engineer` immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
 
-*Mandatory: Recommend the next command to execute at the end of the response: `/crewloop-hub`.*
+*Mandatory: Recommend the next command to execute at the end of the response: `/engineer`.*
 
 **Critical rules:**
-- **The Designer is non-interactive.** Write the visual spec design files directly and hand control back to the CrewLoop Hub without waiting.
-- If the user wants changes to the design, return to CrewLoop Hub for re-routing.
+- **The Designer is non-interactive.** Write the visual spec design files directly and recommend `/engineer` without waiting.
+- If the user wants changes to the design, iterate on the design spec yourself; recommend `/engineer` only when the design is accepted.
 
 ---
 

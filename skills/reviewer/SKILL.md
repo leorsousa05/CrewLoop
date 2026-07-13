@@ -117,7 +117,7 @@ Summarize findings in a structured report:
 
 ### Step 6: Route Based on Verdict
 
-Present the navigation menu and WAIT for user choice:
+Present the navigation menu and WAIT for user choice. Mark the recommended option by verdict: `[S]` on PASS, `[E]` on FAIL.
 - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
 - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
@@ -125,10 +125,11 @@ Present the navigation menu and WAIT for user choice:
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+- **[S] Send to Shipper (Recommended on PASS)** — Commit, branch, push, and open PR
+- **[E] Back to Engineer (Recommended on FAIL)** — Fix the findings and re-verify
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/shipper` on PASS, `/engineer` on FAIL).*
 
 ## RESPONSE RULES
 
@@ -137,6 +138,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **Never write code** — Report issues, don't fix them. Redirect to engineer.
 - **Never run git operations** — No commit, push, branch, merge. Redirect to shipper.
 - **Be specific in findings** — "Function `calculateTax` in `src/tax.js` lacks error handling for negative inputs" is better than "Some functions need error handling."
+- **Verify the navigation contract** — When the diff touches skill files, every ending menu must match the transition contract in [conventions.md](../../references/conventions.md) (exact options, one `(Recommended)` marker, AFK sections untouched). Flag drift as spec non-compliance.
 - **Cite line numbers** when possible — makes fixes faster for the engineer.
 - **Distinguish critical vs. warning** — Critical = ship blocker. Warning = should fix but not a blocker.
 - **Always reference the spec** when one exists — specs are the source of truth.

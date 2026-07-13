@@ -13,14 +13,15 @@ The core Loop Engineering Agents workflow covers discovery, specs, design, imple
 
 ## Routing
 
-The CrewLoop Hub or reviewer may optionally route to supporting skills before sending work to the architect, engineer, or shipper:
+The CrewLoop Hub or reviewer may optionally route to supporting skills before sending work to the architect, engineer, or shipper. Under direct routing, each supporting skill ends by recommending a return to the skill that invoked it (default invoker):
 
-- `product-manager` / `researcher` / `maintainer` → `architect`
-- `tester` ↔ `engineer` (QA feedback loop)
-- `security-guard` → `engineer` or `reviewer`
-- `accessibility-auditor` → `engineer`, `designer`, or `reviewer`
+- `product-manager` / `researcher` → `crewloop-hub` (discovery support)
+- `maintainer` → `architect` (lightweight bug spec)
+- `tester` → `engineer` (QA feedback loop)
+- `security-guard` / `accessibility-auditor` → `reviewer`
+- `schema-designer` → `architect`; `frontend-architect` → `designer`; `devops-specialist` → `shipper`
 
-All skills eventually return to the CrewLoop Hub.
+The CrewLoop Hub mediates mid-flow only in AFK mode.
 
 ## Files
 

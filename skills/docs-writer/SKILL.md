@@ -205,12 +205,13 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
   ```markdown
   **What would you like to do?**
 
-  - **[O] Return to CrewLoop Hub** — Hand control back to the CrewLoop Hub for the next routing decision.
+  - **[I] Return to CrewLoop Hub (Recommended)** — Hand the documentation back for next routing
+  - **[C] Continue writing** — Iterate on the documentation
   ```
 
 ## HANDOFF
 
-State what documentation you wrote, what audience it targets, and return control to the CrewLoop Hub.
+State what documentation you wrote, what audience it targets, and recommend returning to the CrewLoop Hub (its default invoker).
 
 *Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
 
