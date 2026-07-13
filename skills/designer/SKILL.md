@@ -21,6 +21,19 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 **Read specs first.** Before designing, check for existing specs in `specs/changes/NNN-name/`. If specs exist, your design must align with the architect's constraints, contracts, and technical boundaries. If no specs exist, ask the CrewLoop Hub to route to architect first.
 
+**Reference discipline.** The design output must be grounded in the reference library, not improvised from memory. At minimum, read:
+- `references/aesthetic-guidelines.md`
+- `references/reference-library.md`
+- `references/anti-patterns.md`
+- `references/case-study-template.md`
+- `references/output-checklist.md`
+
+Then select the 2-4 topical files that match the product domain:
+- `references/layout-patterns.md`
+- `references/typography-playbook.md`
+- `references/color-playbook.md`
+- `references/motion-playbook.md`
+
 ---
 
 ## SUB-SKILLS DELEGATION
@@ -37,37 +50,60 @@ Spawn a read-only subagent to run the `frontend-architect` skill and return the 
 
 Before designing, understand the context and commit to a **BOLD aesthetic direction**:
 
-### Step 1: Automated Discovery (Non-Interactive)
+### Step 1: Resolve the brief
 
-The Designer is a fully automated, non-interactive execution skill. Do NOT ask the user clarifying questions or prompt for choices.
-- Read the existing Task Brief and specifications. All tone/flavor, framework, and target platform constraints must be resolved beforehand during the discovery phase (by CrewLoop Hub or a brainstorm subagent) and passed in the brief.
-- If no aesthetic guidelines are provided, choose one of the 10+ directions below that best fits the product's domain, and document your reasoning.
+Read the task brief, spec files, and the reference library before making a single visual decision. If the brief is vague, infer the strongest fit from product type and audience instead of asking the user to choose a style. The Designer is non-interactive.
 
-### Step 2: Commit to a Direction
+### Step 2: Commit to one thesis
 
-Choose ONE clear aesthetic direction and execute it with precision. Bold maximalism and refined minimalism both work — the key is **intentionality**, not intensity.
+Choose exactly one primary aesthetic thesis and defend it throughout the spec. The allowed thesis families are:
 
-| Direction | Vibe | When to Use |
-|-----------|------|-------------|
-| **Brutalist** | Raw, unpolished, high contrast, system fonts, exposed structure | Portfolios, creative agencies, edgy brands |
-| **Maximalist** | Dense, layered, vibrant, ornate, rich textures | Entertainment, gaming, cultural products |
-| **Retro-futuristic** | Neon, grids, chrome, 80s sci-fi aesthetics | Tech products, music, creative tools |
-| **Luxury/Refined** | Generous whitespace, elegant typography, muted palette, subtle motion | High-end services, fashion, finance |
-| **Organic/Natural** | Soft shapes, earthy tones, flowing curves, handmade feel | Wellness, food, sustainability, lifestyle |
-| **Editorial/Magazine** | Strong typographic hierarchy, asymmetric layouts, dramatic photography | Content platforms, blogs, news |
-| **Playful/Toy-like** | Rounded everything, bright colors, bouncy animations, friendly icons | Education, kids, casual apps |
-| **Industrial/Utilitarian** | Monospace fonts, grid systems, functional colors, no decoration | Developer tools, dashboards, logistics |
-| **Soft/Pastel** | Muted pastels, glassmorphism, gentle shadows, airy spacing | SaaS, productivity, wellness |
-| **Art Deco/Geometric** | Symmetry, gold accents, strong geometry, dramatic contrasts | Luxury, events, hospitality |
-| **Bento Grid / Modular** | Card-based grid layout with asymmetric sizing, dense micro-hierarchies | Dashboards, complex SaaS homepages, tool index screens |
-| **Linear-like Minimalist** | Ultra-refined dark mode, compressed display fonts, 1px subtle borders, clean charts | High-performance developer tools, SaaS apps, web consoles |
-| **Terminal Monospace** | High contrast, monospace fonts, exposed status frames ([OK]/[FAIL]), ASCII panel boxes | Developer platforms, command consoles, retro-futuristic SaaS |
-| **Futuristic Glassmorphic** | Semi-transparent panels, backdrop blurs, mesh gradient lights, glowing neon borders | Crypto dashboards, analytics tools, futuristic SaaS apps |
+| Direction | Best fit |
+|-----------|----------|
+| Editorial / Magazine | Reading-heavy products, docs, thought leadership, content systems |
+| Luxury / Refined | High-trust, premium, high-consideration services |
+| Industrial / Utilitarian | Developer tools, ops surfaces, dashboards, consoles |
+| Bento Grid / Modular | Product index pages, complex SaaS homepages, information-dense systems |
+| Linear-like Minimalist | High-performance SaaS, terminals, product shells |
+| Brutalist | Opinionated brands, creative tools, sharp identity plays |
+| Retro-futuristic | Tools that benefit from energy, velocity, and a digital edge |
+| Futuristic Glassmorphic | Data-heavy interfaces that want depth and atmosphere |
+| Organic / Natural | Wellness, food, sustainability, lifestyle |
+| Playful / Toy-like | Education, casual products, friendly consumer apps |
 
-**CRITICAL:** Do not mix directions randomly. Every choice — font, color, spacing, motion — must serve the chosen direction.
+Use the reference library to prove the choice. Do not blend multiple directions unless the spec explicitly calls for a hybrid, and even then one direction must remain dominant.
+
+### Step 3: Build the system from the thesis
+
+Convert the chosen direction into a complete design system:
+- one dominant palette plus one accent family,
+- one display font and one body font,
+- one motion language,
+- one spatial grammar,
+- one set of component states.
+
+If the output starts to look like a default startup page, stop and re-anchor it against the anti-pattern reference.
+
+### Reference selection rules
+
+Always read `reference-library.md` and `anti-patterns.md`. Then select the supporting files that match the product:
+- `layout-patterns.md` for page structure and composition,
+- `typography-playbook.md` for type hierarchy,
+- `color-playbook.md` for palette construction,
+- `motion-playbook.md` for animation guidance.
+
+When writing the spec, cite which references shaped the final direction. That keeps the design auditable and prevents drift.
 
 ## REFERENCES
 - [UI/UX Aesthetic Pillars & Technical Guardrails](references/aesthetic-guidelines.md)
+- [Reference Library](references/reference-library.md)
+- [Anti-Patterns](references/anti-patterns.md)
+- [Layout Patterns](references/layout-patterns.md)
+- [Typography Playbook](references/typography-playbook.md)
+- [Color Playbook](references/color-playbook.md)
+- [Motion Playbook](references/motion-playbook.md)
+- [Case Study Template](references/case-study-template.md)
+- [Output Checklist](references/output-checklist.md)
 
 ---
 
@@ -87,6 +123,8 @@ Set up the design as a product story. Be specific and brief.
 ### 2. Aesthetic Direction Statement
 
 Build on the case-study frame above with 2-3 sentences describing the chosen direction and why it fits the product, audience, and insight. Avoid generic adjectives; name the emotional effect you want the interface to create.
+
+Call out the specific reference files that informed the direction, and explain what each one contributed. The objective is not to copy them, but to make the visual thesis traceable.
 
 ### 3. Color System
 
@@ -263,8 +301,9 @@ Spec out:
 - [ ] Modal focus trap, ESC-to-close, and backdrop close behavior specified.
 - [ ] Keyboard navigation shortcuts and command palette triggers spec'd.
 - [ ] Conversion CTA flow visible above-the-fold and sticky scroll hooks set.
-- [ ] UI is free of AI slop signatures (e.g. decorative-only mesh gradients that disrupt text readability, floating neon glow cards without brand reason).
+- [ ] UI is free of AI slop signatures (e.g. decorative-only mesh gradients that disrupt text readability, floating neon glow cards without brand reason, generic purple-blue gradient heroes, default startup cards, or copy-pasted template sections).
 - [ ] Grid layout and spatial composition are asymmetrical and customized for content hierarchy, avoiding default 3-column feature grids or boilerplate Bento grids.
+- [ ] The design spec explicitly names the chosen thesis and the reference files that support it.
 
 ---
 
@@ -272,11 +311,7 @@ Spec out:
 
 When the design spec is complete, end your response by recommending `/engineer` immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
 
-*Mandatory: Recommend the next command to execute at the end of the response: `/engineer`.*
-
-**Critical rules:**
-- **The Designer is non-interactive.** Write the visual spec design files directly and recommend `/engineer` without waiting.
-- If the user wants changes to the design, iterate on the design spec yourself; recommend `/engineer` only when the design is accepted.
+**To proceed, execute: `/engineer`**
 
 ---
 
@@ -310,3 +345,5 @@ Refer to [conventions.md](../../references/conventions.md) for general anti-patt
 - ❌ Writing HTML/CSS/JS implementation code
 - ❌ Skipping loading, empty, error, skeleton, success, or offline states
 - ❌ Leaving design tokens vague or incomplete
+- ❌ Failing to cite the reference files that informed the direction
+- ❌ Mixing multiple visual theses without a clear dominant direction

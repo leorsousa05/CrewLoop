@@ -1,0 +1,37 @@
+---
+title: "Designer skill art direction hardening and optional Vite bootstrap"
+status: "completed"
+author: "architect"
+created_at: "2026-07-13"
+updated_at: "2026-07-13"
+affected_files:
+  - "skills/designer/SKILL.md"
+  - "skills/designer/references/aesthetic-guidelines.md"
+  - "skills/designer/references/anti-patterns.md"
+  - "skills/designer/references/reference-library.md"
+  - "skills/designer/references/layout-patterns.md"
+  - "skills/designer/references/typography-playbook.md"
+  - "skills/designer/references/color-playbook.md"
+  - "skills/designer/references/motion-playbook.md"
+  - "skills/designer/references/case-study-template.md"
+  - "skills/designer/references/output-checklist.md"
+  - "scripts/bootstrap-vite.sh"
+  - "docs/public/docs/core/designer.md"
+  - "docs/public/docs/contributing/writing-a-skill.md"
+subagents:
+  approved: true
+  components:
+    - name: "designer-instructions-and-references"
+      scope: "Refine the designer skill so it forces a single strong visual thesis, deep reference usage, explicit anti-pattern rejection, and richer output structure."
+      files:
+        - "skills/designer/SKILL.md"
+        - "skills/designer/references/*.md"
+        - "docs/public/docs/core/designer.md"
+      constraints: "Do not add implementation code or loosen the non-interactive design contract."
+    - name: "vite-bootstrap-helper"
+      scope: "Add an optional shell helper that scaffolds a Vite project when the user chooses that path."
+      files:
+        - "scripts/bootstrap-vite.sh"
+        - "docs/public/docs/contributing/writing-a-skill.md"
+      constraints: "Keep the helper optional, explicit, and safe. Do not auto-run installs or mutate unrelated directories."
+---

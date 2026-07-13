@@ -59,6 +59,15 @@ Key rules:
 - Every skill must end with a letter-based navigation menu.
 - Shared conventions belong in `references/`, not inside the skill.
 - Skill-specific references belong in `skills/<skill-name>/references/`.
+- Reference folders can be split into narrow topical files when the skill benefits from a larger playbook, for example:
+  - `references/anti-patterns.md`
+  - `references/reference-library.md`
+  - `references/layout-patterns.md`
+  - `references/typography-playbook.md`
+  - `references/color-playbook.md`
+  - `references/motion-playbook.md`
+  - `references/case-study-template.md`
+  - `references/output-checklist.md`
 
 ### 4. Run the validator
 
@@ -82,5 +91,6 @@ CrewLoop Hub ⇄ Architect ⇄ CrewLoop Hub ⇄ Engineer ⇄ CrewLoop Hub ⇄ Re
 - Missing "never does" section — boundaries must be explicit.
 - Frontmatter without `name` and `description`.
 - Shared conventions written inside the skill instead of `references/`.
+- Reference guidance that stays generic when the skill needs a deeper playbook.
 - A skill that skips the navigation menu at the end.
 - A skill that routes automatically without user confirmation (except in AFK mode).
