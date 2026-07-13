@@ -142,7 +142,10 @@ When BUILD succeeds and all tests pass:
 1. **Update spec status:** Change `.spec.yaml` status from `active` to `completed`
 2. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
 3. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
-4. **Present navigation options and WAIT for user choice.** Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+4. **Present navigation options and WAIT for user choice:**
+   - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+   - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
 
 ```markdown
 **What would you like to do?**

@@ -198,7 +198,10 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - **Never ship a framework's default scaffold README** — replace it wholesale.
 - **Always run the quality checklist** before declaring done.
 - **Always ask the user** what problem the project solves and who the audience is if the code cannot reveal it.
-- **When done, summarize findings and present navigation options** — After completing work, show the menu and WAIT for user choice. Call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+- **When done, summarize findings and present navigation options** — After completing work, present the navigation menu and WAIT for user choice:
+  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+  - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+
   ```markdown
   **What would you like to do?**
 

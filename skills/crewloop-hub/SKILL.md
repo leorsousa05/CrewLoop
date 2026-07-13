@@ -263,7 +263,8 @@ Once all questions are answered, produce a clean, focused task brief. Apply thes
 
 All execution skills return control to the CrewLoop Hub. When a skill hands back to you:
 1. Briefly acknowledge and summarize what that skill accomplished.
-2. Check the task's current state and present the next step choices to the user using the `ask_question` tool (or standard markdown menu as fallback). Refer to [conventions.md](../../references/conventions.md) for tool guidelines.
+2. **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+3. Otherwise, check the task's current state and present the next step choices to the user using the `ask_question` tool (or standard markdown menu as fallback). Refer to [conventions.md](../../references/conventions.md) for tool guidelines.
 
 **Handoff / Routing menu format (to be used in `ask_question` or chat fallback):**
 ```markdown

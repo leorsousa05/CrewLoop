@@ -36,7 +36,9 @@ We follow a centralized routing model where all roads lead back to the CrewLoop 
 ### Presentation Guidelines
 - **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
 - **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
+- **Handling Tool Responses:** If your current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
 - **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute on its own line. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
+
 
 #### Execution Skills Navigation (Engineer, Reviewer, Shipper)
 All interactive non-Hub agents must end their execution by returning control to the CrewLoop Hub:

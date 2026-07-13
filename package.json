@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-skills",
-  "version": "0.13.7",
+  "version": "0.13.8",
   "description": "CrewLoop AI agent skills bundle and CLI",
   "license": "MIT",
   "author": "leorsousa05",
