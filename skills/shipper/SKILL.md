@@ -438,7 +438,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **Never accept invented commit types** — If the diff doesn't fit any of the 11 types, analyze again until it fits.
 - **Respect .gitignore** — Don't suggest committing ignored files.
 - **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice:
-  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
   - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 
@@ -449,7 +449,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **[D] Done (Recommended)** — Flow complete, stop here
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub` for a new task).*
+*Mandatory: Handoff directly to CrewLoop Hub for a new task, or end the turn, without requiring any typed command.*
 
 
 ---

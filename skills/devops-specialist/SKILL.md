@@ -45,7 +45,7 @@ Print this prefix on its own line before the first line of every response.
 - **[H] New task via CrewLoop Hub** — Start discovery for a new task
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/shipper`).*
+*Mandatory: Handoff directly to Shipper without requiring any typed command.*
 
 
 ---

@@ -143,7 +143,7 @@ When BUILD succeeds and all tests pass:
 2. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
 3. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
 4. **Present navigation options and WAIT for user choice:**
-   - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+   - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
    - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 
@@ -155,7 +155,7 @@ When BUILD succeeds and all tests pass:
 - **[A] Back to Architect** — A spec gap was found
 ```
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/reviewer`).*
+*Mandatory: Handoff directly to Reviewer when tasks are complete, or continue implementing / return to Architect if needed, without requiring any typed command.*
 
 
 ---

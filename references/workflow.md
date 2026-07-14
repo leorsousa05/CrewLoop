@@ -25,6 +25,7 @@ Complete workflow for the Loop Engineering Agents team.
 | Frontend Architect | `skills/frontend-architect/SKILL.md` | Frontend component architecture and React state boundaries |
 | Schema Designer | `skills/schema-designer/SKILL.md` | Database schema and API contract design |
 | DevOps Specialist | `skills/devops-specialist/SKILL.md` | Release automation and infrastructure validation |
+| DiamondBlock | `skills/diamondblock/SKILL.md` | Default discovery helper for session memory, context retrieval, and semantic codebase search |
 
 ---
 
@@ -36,6 +37,8 @@ transition. The CrewLoop Hub mediates only at task entry and in AFK mode.
 ```mermaid
 flowchart TD
     O["🎯 CrewLoop Hub<br>Entry: Discovery & First Routing<br>+ AFK Auto-Router"] --> A["🏗️ Architect<br>Specs & Architecture"]
+    O -.-> DB["💎 DiamondBlock<br>Session memory + semantic codebase search"]
+    DB -.-> O
     A --> D["🎨 Designer<br>UI/UX Direction"]
     A --> E["🔧 Engineer<br>Implementation"]
     D --> E
@@ -65,29 +68,34 @@ flowchart TD
 
 1. **CrewLoop Hub is the entry point** — it runs discovery for new tasks and routes to
    Architect first. Outside AFK mode, it does not mediate mid-flow transitions.
-2. **Skills route directly** — each skill ends by presenting the valid next-step options
+2. **DiamondBlock is the default read-only discovery layer** — when configured and
+   installed, the Hub uses DiamondBlock before any broad manual inspection to retrieve
+   session memory, prior decisions, semantic codebase search results, and other read-only
+   context.
+3. **Skills route directly** — each skill ends by presenting the valid next-step options
    from its position in the flow (transition contract in `conventions.md`), with one
-   outcome-driven option marked `(Recommended)`. The user picks; the skill ends with the
-   command recommendation.
-3. **Architect is ALWAYS the first stop** — every task (bug fix, feature, design,
-   refactor) gets a spec before implementation. Architect is non-interactive and ends by
-   recommending `/designer` (UI) or `/engineer`.
-4. **Designer acts BEFORE Engineer** — when the change involves UI, Designer ends by
-   recommending `/engineer`.
-5. **Engineer never does git or review** — implements code/tests, then its menu offers
-   Reviewer (recommended), keep implementing, or back to Architect.
-6. **Reviewer is the quality gate** — verdict drives the menu: PASS → Shipper
-   (recommended); FAIL → Engineer (recommended).
-7. **Security-Guard and Accessibility-Auditor are review specialists** — invoked by the
+   outcome-driven option marked `(Recommended)`. The user picks; the skill continues
+   directly into the chosen next skill.
+4. **Architect is ALWAYS the first stop** — every task (bug fix, feature, design,
+   refactor) gets a spec before implementation. Architect is non-interactive and hands off
+   directly to Designer (UI) or Engineer.
+5. **Designer acts BEFORE Engineer** — when the change involves UI, Designer hands off
+   directly to Engineer.
+6. **Engineer never does git or review** — implements code/tests, then its menu offers
+   Reviewer (recommended), keep implementing, or back to Architect, then continues directly
+   into the selected route.
+7. **Reviewer is the quality gate** — verdict drives the menu: PASS → Shipper
+   (recommended); FAIL → Engineer (recommended), then continues directly into the selected route.
+8. **Security-Guard and Accessibility-Auditor are review specialists** — invoked by the
    Reviewer; they end by recommending a return to the Reviewer.
-8. **Shipper is the only one who touches git** — after shipping, its menu offers a new
-   task (CrewLoop Hub entry) or done.
-9. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then ends by recommending
-   `/architect` for a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
+9. **Shipper is the only one who touches git** — after shipping, its menu offers a new
+   task (CrewLoop Hub entry) or done, then continues directly into the selected route.
+10. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then hands off directly to
+   Architect with a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
    standard chain applies: Architect → Engineer → Reviewer → Shipper.
-10. **Specialist Helpers return to their invoker** — `schema-designer` → Architect,
+11. **Specialist Helpers return to their invoker** — `schema-designer` → Architect,
     `frontend-architect` → Designer, `devops-specialist` → Shipper, `tester` → Engineer.
-11. **AFK mode is the exception** — with AFK active, every skill returns control to the
+12. **AFK mode is the exception** — with AFK active, every skill returns control to the
     CrewLoop Hub automatically and the Hub loads the next skill per the transition
     contract, with no menus.
 
