@@ -1,0 +1,13 @@
+status: completed
+created: 2026-07-13
+updated: 2026-07-13
+author: @codex
+title: Make DiamondBlock a first-class context and codebase search helper
+type: docs
+scope: repository-wide
+affected_files:
+  - AGENTS.md
+  - references/conventions.md
+  - references/workflow.md
+  - skills/crewloop-hub/SKILL.md
+  - skills/diamondblock/SKILL.md

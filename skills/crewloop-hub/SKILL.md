@@ -29,7 +29,8 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ### What to delegate
 
-- **Initial codebase exploration** — find relevant files, modules, conventions, and entry points.
+- **DiamondBlock-first discovery** — when the `diamondblock` MCP server is configured and active, use it before any manual file reads to fetch session context, prior decisions, long-term memory, and semantic codebase search results.
+- **Initial codebase exploration** — if DiamondBlock cannot answer the question, find relevant files, modules, conventions, and entry points with manual inspection.
 - **Reference and memory reading** — read `conventions.md`, `workflow.md`, `AGENTS.md`, `README.md`, and local skill references, then return a concise summary.
 - **Pattern and spec analysis** — analyze existing specs, ADRs, or prior changes to identify patterns the new task should follow.
 - **Task-type inference from code** — given a user request, inspect the codebase to propose the most likely task type, domain, and affected files.
@@ -53,6 +54,7 @@ To preserve the main conversation context, offload read-only, context-heavy work
 - Launch independent subagents in the same turn when possible.
 - When subagents return, briefly acknowledge their findings in your own words before using them.
 - Prefer specialist helpers early when the request clearly matches their domain. Examples: `project-brainstorm` for ambiguous requests, `long-term-manager` for multi-session work, `maintainer` for triage, `researcher` for tool/library evaluation, `tester` for edge-case analysis, `security-guard` for security-sensitive work, and `accessibility-auditor` for UI accessibility.
+- When `diamondblock` is active, prefer it for any read-only discovery: context retrieval, semantic code search, prior decisions, and broad file mapping before manual reads.
 
 ### What NOT to delegate
 
@@ -130,7 +132,8 @@ If the task is a single-session change (e.g., a one-line bug fix or a small twea
 
 Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.
 
-- Spawn an `explore` subagent to map the project structure and find files relevant to the user's request.
+- Spawn a `diamondblock`-focused subagent first when the server is configured to retrieve session context and semantic codebase search results.
+- Spawn an `explore` subagent after that to map any remaining project structure and find files relevant to the user's request.
 - Spawn another subagent to read and summarize `conventions.md`, `workflow.md`, `AGENTS.md`, and any local skill references.
 - If the task mentions existing specs or prior changes, spawn a subagent to check `specs/` and `archive/`.
 - Use the subagent findings to skip already-answered questions and ask sharper ones.
@@ -278,13 +281,13 @@ Context updated. Current state: [describe state, e.g., brief created for a new t
 
 **B. AFK mode:** execution skills return control to you automatically. Briefly acknowledge what the skill accomplished, evaluate the task state, and load the next skill per the transition contract in [conventions.md](../../references/conventions.md) — no menus, no waiting.
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/architect`).*
+*Mandatory: Handoff directly to Architect at the end of the response without requiring any typed command.*
 
 
 **Critical routing rules:**
 - **Direct routing is the default.** Outside AFK mode, execution skills hand off to the next skill themselves via their ending menus. Do not insert the Hub between phases.
 - **NEVER route automatically** EXCEPT for the Architect and Designer spec-writing phases after discovery, and for every transition when AFK mode is active. For all other cases, present the entry menu and WAIT for the user to choose.
-- **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+- **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.
 - **Flow progression:** CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done. Reviewer FAIL loops back to Engineer.
 - **Skill handoffs stay in the main thread** (unless running Architect or Designer via an autonomous subagent). The next execution skill should activate in the SAME conversation thread so the user can see and interact with every step.

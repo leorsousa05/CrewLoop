@@ -199,7 +199,7 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - **Always run the quality checklist** before declaring done.
 - **Always ask the user** what problem the project solves and who the audience is if the code cannot reveal it.
 - **When done, summarize findings and present navigation options** — After completing work, present the navigation menu and WAIT for user choice:
-  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
+  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
   - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
   ```markdown
@@ -213,7 +213,7 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 
 State what documentation you wrote, what audience it targets, and recommend returning to the CrewLoop Hub (its default invoker).
 
-*Mandatory: Recommend the next command to execute at the end of the response (e.g. `/crewloop-hub`).*
+*Mandatory: Handoff directly to the invoker or CrewLoop Hub without requiring any typed command.*
 
 ---
 

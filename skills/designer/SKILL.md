@@ -309,9 +309,9 @@ Spec out:
 
 ## HANDOFF
 
-When the design spec is complete, end your response by recommending `/engineer` immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
+When the design spec is complete, hand off directly to Engineer immediately. The Designer skill is non-interactive; do NOT wait for user confirmation.
 
-**To proceed, execute: `/engineer`**
+Direct handoff to Engineer.
 
 ---
 

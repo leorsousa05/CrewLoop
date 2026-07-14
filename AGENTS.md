@@ -181,7 +181,7 @@ crewloop/
 |-------|-------------|
 | **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **long-term-manager** | Projects that span multiple sessions and need durable tracking artifacts across sessions |
-| **diamondblock** | Managing multi-session memory, retrieving context, searching knowledge, or logging session histories |
+| **diamondblock** | Default discovery helper for multi-session memory, context retrieval, searching knowledge, indexing codebases, and logging session histories |
 | **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
 | **frontend-architect** | Complex frontend layouts, component architecture, and React/Next.js state boundaries |
 | **docs-writer** | Pure documentation tasks without code changes |
@@ -194,6 +194,8 @@ crewloop/
 | **tester** | Test strategy, QA, coverage analysis, test plans |
 
 Supporting skills report their findings back to the skill that invoked them. They do not write code or run git operations.
+
+When `diamondblock` is configured and installed, the CrewLoop Hub should use it first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection.
 
 ---
 
@@ -216,11 +218,11 @@ Rules — no exceptions:
 4. **Engineer never does git operations** and never reviews its own code.
 5. **Reviewer never writes code** and never runs git operations.
 6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
-7. **Navigation menus present the real next steps** of the flow (transition contract in `references/conventions.md`), with one outcome-driven option marked `(Recommended)`. Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported. No more `[O] Return to CrewLoop Hub` as the default ending.
+7. **Navigation menus present the real next steps** of the flow (transition contract in `references/conventions.md`), with one outcome-driven option marked `(Recommended)`. Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported. After a user picks an option, the skill continues directly into the chosen next skill.
 8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub` with discovery for new or ambiguous projects; `long-term-manager` helps `crewloop-hub` track multi-session projects; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`. Supporting skills end by recommending a return to the skill that invoked them.
 9. **Direct handoffs between phases.** Every agent ends by recommending the next skill per the transition contract; the CrewLoop Hub only mediates at task entry and in AFK mode.
 10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 19 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub (entry)/Architect gatekeepers.
-11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who ends by recommending `/architect` for a lightweight specification (`.spec.yaml` + `tasks.md`). From there the standard chain applies: Architect → Engineer → Reviewer → Shipper (commit/ship and archive the spec).
+11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who hands off directly to Architect for a lightweight specification (`.spec.yaml` + `tasks.md`). From there the standard chain applies: Architect → Engineer → Reviewer → Shipper (commit/ship and archive the spec).
 
 
 ---

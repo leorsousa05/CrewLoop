@@ -168,16 +168,16 @@ subagents:
 4. **Test plan** — what to test and why.
 5. **Risk assessment** — trade-offs, deferred items.
 6. **Subagent plan** — parallelization analysis (if applicable).
-7. **Handoff** — The Architect skill is non-interactive. Do NOT wait for user confirmation. End your response by recommending the next skill directly: `/designer` if the spec touches a visual interface, otherwise `/engineer`.
+7. **Handoff** — The Architect skill is non-interactive. Do NOT wait for user confirmation. End your response by handing off directly to Designer if the spec touches a visual interface, otherwise Engineer.
 
-*Mandatory: Recommend the next command to execute at the end of the response: `/designer` (if UI) or `/engineer`.*
+*Mandatory: Hand off directly to Designer (if UI) or Engineer without requiring any typed command.*
 
 
 ## STOP CONDITIONS (NON-INTERACTIVE RULE)
 
 The Architect is a fully automated, non-interactive execution skill. You must NEVER ask the user clarifying questions or halt for inputs.
 - If there is any ambiguity, tech stack choice, or missing parameter, you must use standard default conventions or yield control back to the CrewLoop Hub's discovery phase to resolve them before your execution, instead of asking questions in this phase.
-- Once execution starts, create the specs directory structure and files immediately, then recommend the next skill (`/designer` if UI, else `/engineer`).
+- Once execution starts, create the specs directory structure and files immediately, then hand off directly to Designer (if UI) or Engineer.
 
 ---
 

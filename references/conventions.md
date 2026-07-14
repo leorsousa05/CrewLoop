@@ -39,42 +39,44 @@ mode** — never in the middle of an interactive flow.
 ### Presentation Guidelines
 - **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
 - **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
-- **Handling Tool Responses:** If your current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately output the mandatory command recommendation (e.g., `To proceed, execute: /<command>`) and end your turn.
-- **Mandatory Command Recommendation:** Every response from any skill MUST end with an explicit, bold recommendation of the next command for the user to execute on its own line. E.g.: `Para continuar, execute: /<command>` or `To proceed, execute: /<command>`.
+- **Handling Tool Responses:** If your current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
+- **Direct Handoff:** After a menu selection, the response must not include a slash command, command label, or instruction for the user to manually invoke the next skill.
 
 ### The Transition Contract
 
 Each skill ends with a menu of the valid next steps from its position in the flow. Exactly
 one option is marked `(Recommended)`, chosen by the phase outcome.
 
-| Skill | Options (key → command) | Recommended when |
+| Skill | Options (key → next skill) | Recommended when |
 |-------|------------------------|------------------|
-| crewloop-hub (entry) | `[A]` → /architect, `[B]` → /project-brainstorm, `[T]` → /long-term-manager | `[A]` for any well-scoped task |
-| architect (non-interactive) | → /designer or /engineer | /designer if the spec touches UI, else /engineer |
-| designer (non-interactive) | → /engineer | always |
-| engineer | `[R]` → /reviewer, `[E]` → keep implementing, `[A]` → /architect | `[R]` when all tasks are checked and verification passed |
-| reviewer | `[S]` → /shipper, `[E]` → /engineer | `[S]` on PASS, `[E]` on FAIL |
-| shipper | `[N]` → /crewloop-hub (new task), `[D]` → done | `[D]` after a successful push |
-| maintainer | `[A]` → /architect, `[H]` → /crewloop-hub | `[A]` for confirmed bugs (lightweight spec) |
-| project-brainstorm | `[A]` → /architect, `[H]` → /crewloop-hub | `[A]` once the brief is complete |
-| supporting skills | `[I]` → invoker, `[H]` → /crewloop-hub (or `[C]` → continue, when the invoker already is the Hub) | `[I]` always |
+| crewloop-hub (entry) | `[A]` → Architect, `[B]` → Project-Brainstorm, `[T]` → Long-Term Manager | `[A]` for any well-scoped task |
+| architect (non-interactive) | → Designer or Engineer | Designer if the spec touches UI, else Engineer |
+| designer (non-interactive) | → Engineer | always |
+| engineer | `[R]` → Reviewer, `[E]` → keep implementing, `[A]` → Architect | `[R]` when all tasks are checked and verification passed |
+| reviewer | `[S]` → Shipper, `[E]` → Engineer | `[S]` on PASS, `[E]` on FAIL |
+| shipper | `[N]` → CrewLoop Hub (new task), `[D]` → done | `[D]` after a successful push |
+| maintainer | `[A]` → Architect, `[H]` → CrewLoop Hub | `[A]` for confirmed bugs (lightweight spec) |
+| project-brainstorm | `[A]` → Architect, `[H]` → CrewLoop Hub | `[A]` once the brief is complete |
+| supporting skills | `[I]` → invoker, `[H]` → CrewLoop Hub (or `[C]` → continue, when the invoker already is the Hub) | `[I]` always |
 
 **Default invokers for supporting skills** (controls which option is recommended; if the
 user invoked the skill from a different parent, both options are shown and the user picks):
 
-| Supporting skill | Default invoker | Command |
+| Supporting skill | Default invoker | Next skill |
 |------------------|-----------------|---------|
-| security-guard | reviewer | /reviewer |
-| accessibility-auditor | reviewer | /reviewer |
-| schema-designer | architect | /architect |
-| frontend-architect | designer | /designer |
-| devops-specialist | shipper | /shipper |
-| tester | engineer | /engineer |
-| docs-writer | crewloop-hub | /crewloop-hub |
-| researcher | crewloop-hub | /crewloop-hub |
-| product-manager | crewloop-hub | /crewloop-hub |
-| long-term-manager | crewloop-hub | /crewloop-hub |
-| diamondblock | crewloop-hub | /crewloop-hub |
+| security-guard | reviewer | Reviewer |
+| accessibility-auditor | reviewer | Reviewer |
+| schema-designer | architect | Architect |
+| frontend-architect | designer | Designer |
+| devops-specialist | shipper | Shipper |
+| tester | engineer | Engineer |
+| docs-writer | crewloop-hub | CrewLoop Hub |
+| researcher | crewloop-hub | CrewLoop Hub |
+| product-manager | crewloop-hub | CrewLoop Hub |
+| long-term-manager | crewloop-hub | CrewLoop Hub |
+| diamondblock | crewloop-hub | CrewLoop Hub |
+
+When DiamondBlock is configured and installed, the CrewLoop Hub should use it first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection.
 
 ### Menu Block Format
 
@@ -89,9 +91,9 @@ user invoked the skill from a different parent, both options are shown and the u
 Rules:
 1. Present via `ask_question`; markdown list is the fallback.
 2. Exactly one option carries `(Recommended)` — chosen by the outcome condition in the transition table.
-3. Non-interactive skills (Architect, Designer) skip the menu and output only the mandatory command recommendation line.
+3. Non-interactive skills (Architect, Designer) skip the menu and hand off directly to the next skill.
 4. Every menu must offer a fallback so there are no dead ends (invoker, `[C] Continue` to keep iterating, or the Hub for a new task).
-5. The recommendation example at the end of each skill's navigation section uses that skill's recommended command (e.g. `/reviewer`), never a hardcoded `/crewloop-hub` unless the Hub is the recommended target.
+5. The recommended next skill at the end of each skill's navigation section uses that skill's recommended target (e.g. `Reviewer`), never a hardcoded `/crewloop-hub` unless the Hub is the recommended target.
 
 #### CrewLoop Hub Entry Menu (new tasks only)
 The Hub presents a menu only after discovery for a new task, or when mediating in AFK mode:
@@ -372,4 +374,4 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
 2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 18 skills defined in the CrewLoop bundle. 
-3. **Direct Routing:** Execution skills hand off directly to the next skill per the transition contract — the CrewLoop Hub mediates only as the new-task entry point and in AFK mode. Every skill must end its turn per the contract (menu + command recommendation). If you receive a handoff that violates the transition contract (e.g. a phase skipped without the user choosing it), note the deviation and recommend the correct next skill.
+3. **Direct Routing:** Execution skills hand off directly to the next skill per the transition contract — the CrewLoop Hub mediates only as the new-task entry point and in AFK mode. Every skill must end its turn per the contract (menu + direct handoff). If you receive a handoff that violates the transition contract (e.g. a phase skipped without the user choosing it), note the deviation and continue the correct next skill.
