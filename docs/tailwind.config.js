@@ -2,6 +2,7 @@ import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,43 +10,52 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: {
-          primary: "#000000",
-          surface: "#0b0a0f",
-          elevated: "#121117",
-        },
-        text: {
-          primary: "#f8fafc",
-          secondary: "#94a3b8",
-          muted: "#475569",
-        },
+        base: 'var(--bg-base)',
+        surface: 'var(--bg-surface)',
+        elevated: 'var(--bg-elevated)',
+        inset: 'var(--bg-inset)',
+        'border-default': 'var(--border-default)',
+        'border-strong': 'var(--border-strong)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-muted': 'var(--text-muted)',
+        accent: 'var(--accent)',
+        'accent-strong': 'var(--accent-strong)',
+        'accent-dim': 'var(--accent-dim)',
+        'accent-subtle': 'var(--accent-subtle)',
+        success: 'var(--success)',
+        error: 'var(--error)',
+        warning: 'var(--warning)',
+        running: 'var(--running)',
+        focus: 'var(--focus)',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-        display: ['Space Grotesk', 'Outfit', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        display: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        prose: ['"Plus Jakarta Sans"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-3xl': ['var(--text-display-3xl)', { lineHeight: 'var(--leading-display)' }],
+        'display-2xl': ['var(--text-display-2xl)', { lineHeight: 'var(--leading-display)' }],
+        'display-xl': ['var(--text-display-xl)', { lineHeight: 'var(--leading-display)' }],
+        'display-lg': ['var(--text-display-lg)', { lineHeight: 'var(--leading-tight)' }],
+        heading: ['var(--text-heading)', { lineHeight: 'var(--leading-tight)' }],
+        body: ['var(--text-body)', { lineHeight: 'var(--leading-normal)' }],
+        label: ['var(--text-label)', { lineHeight: 'var(--leading-normal)' }],
+        caption: ['var(--text-caption)', { lineHeight: 'var(--leading-normal)' }],
+        micro: ['var(--text-micro)', { lineHeight: 'var(--leading-normal)' }],
+        prose: ['var(--text-prose)', { lineHeight: 'var(--leading-prose)' }],
+        'prose-sm': ['var(--text-prose-sm)', { lineHeight: 'var(--leading-normal)' }],
       },
       animation: {
-        'fade-in-up': 'fadeInUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
-        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-        'glow-drift': 'glowDrift 20s infinite ease-in-out',
+        pulse: 'pulse 1.5s ease-in-out infinite',
       },
       keyframes: {
-        fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(12px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        pulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
         },
-        glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 4px rgba(6, 182, 212, 0.1), 0 0 12px rgba(6, 182, 212, 0.05)' },
-          '50%': { boxShadow: '0 0 16px rgba(6, 182, 212, 0.3), 0 0 32px rgba(6, 182, 212, 0.15)' },
-        },
-        glowDrift: {
-          '0%': { transform: 'translate(0px, 0px) scale(1)' },
-          '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-          '66%': { transform: 'translate(-20px, 20px) scale(0.95)' },
-          '100%': { transform: 'translate(0px, 0px) scale(1)' },
-        }
-      }
+      },
     },
   },
   plugins: [typography],

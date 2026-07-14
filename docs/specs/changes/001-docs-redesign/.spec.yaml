@@ -1,12 +1,14 @@
-status: proposed
+status: superseded
 type: feature
 title: Docs frontend redesign
 author: codex
 created: 2026-07-05
-updated: 2026-07-05
+updated: 2026-07-14
 priority: P2
 scope: docs frontend shell and content surfaces
 summary: Replace the current neon/glass presentation with a distinct editorial interface for CrewLoop docs.
+superseded_by: specs/changes/024-docs-quiet-console-restyle
+note: Never implemented. The user directive on 2026-07-14 set the docs site style to match the dashboard's 'Quiet Console' system (spec 023), which replaces this warm editorial direction. Scope inventory, constraints, and contracts from this spec were carried into 024 where still valid.
 affected_files:
   - src/App.tsx
   - src/index.css

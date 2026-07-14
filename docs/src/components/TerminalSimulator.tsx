@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, Copy, Check, ArrowClockwise, Circle } from '@phosphor-icons/react';
+import { Terminal, Copy, Check, ArrowClockwise } from '@phosphor-icons/react';
 
 interface TerminalLine {
   id: string;
@@ -137,30 +137,25 @@ export const TerminalSimulator: React.FC = () => {
   };
 
   return (
-    <div className="w-full glass-card rounded-xl border border-neutral-800/80 overflow-hidden shadow-2xl font-mono text-[13px] leading-relaxed flex flex-col min-h-[380px] md:min-h-[420px]">
-      {/* Top Header Mockup */}
-      <div className="bg-neutral-950 px-4 py-3 border-b border-neutral-900 flex items-center justify-between select-none">
-        <div className="flex items-center space-x-2">
-          <Circle weight="fill" className="w-3 h-3 text-red-500/80" />
-          <Circle weight="fill" className="w-3 h-3 text-yellow-500/80" />
-          <Circle weight="fill" className="w-3 h-3 text-green-500/80" />
-          <span className="text-slate-500 text-xs ml-3 flex items-center gap-1.5 font-mono">
-            <Terminal className="w-3.5 h-3.5" />
-            crewloop-terminal-sim
-          </span>
-        </div>
-        <div className="flex items-center space-x-2.5">
+    <div className="w-full panel !p-0 overflow-hidden font-mono text-label leading-relaxed flex flex-col min-h-[380px] md:min-h-[420px]">
+      {/* Header — reference panel chrome: hairline, micro uppercase label */}
+      <div className="bg-base px-4 py-3 border-b border-border-default flex items-center justify-between select-none">
+        <span className="text-micro font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+          <Terminal className="w-3.5 h-3.5" />
+          crewloop-terminal-sim
+        </span>
+        <div className="flex items-center gap-1">
           <button 
             onClick={handleCopyLogs}
             disabled={visibleLogs.length === 0}
-            className="p-1.5 rounded hover:bg-neutral-900 text-slate-500 hover:text-slate-300 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            className="p-1.5 rounded-sm text-text-muted hover:text-text-primary hover:bg-elevated disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-muted transition-colors"
             title="Copy logs output"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
           </button>
           <button 
             onClick={handleRestart}
-            className="p-1.5 rounded hover:bg-neutral-900 text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-1.5 rounded-sm text-text-muted hover:text-text-primary hover:bg-elevated transition-colors"
             title="Restart simulation"
           >
             <ArrowClockwise className="w-4 h-4" />
@@ -169,26 +164,26 @@ export const TerminalSimulator: React.FC = () => {
       </div>
 
       {/* Terminal Output Body */}
-      <div className="p-5 flex-1 bg-black/60 overflow-y-auto max-h-[360px] text-slate-300 flex flex-col justify-start">
+      <div className="p-5 flex-1 bg-inset overflow-y-auto max-h-[360px] text-text-secondary flex flex-col justify-start">
         {/* Render prior logs */}
         {visibleLogs.map((log) => {
-          let colorClass = 'text-slate-300';
-          if (log.type === 'header') colorClass = 'text-slate-500 font-bold border-b border-neutral-900/60 pb-1 mb-2';
-          if (log.type === 'success') colorClass = 'text-emerald-400 font-semibold';
-          if (log.type === 'error') colorClass = 'text-rose-500';
+          let colorClass = 'text-text-secondary';
+          if (log.type === 'header') colorClass = 'text-text-muted font-semibold border-b border-border-default pb-1 mb-2';
+          if (log.type === 'success') colorClass = 'text-success font-semibold';
+          if (log.type === 'error') colorClass = 'text-error';
           
           return (
-            <div key={log.id} className={`${colorClass} whitespace-pre-wrap animate-fade-in-up`}>
+            <div key={log.id} className={`${colorClass} whitespace-pre-wrap animate-fade-in`}>
               {log.text}
             </div>
           );
         })}
 
-        {/* Render currently typing prompt */}
-        <div className="flex items-center text-cyan-400 mt-2 font-bold select-none">
-          <span className="text-slate-500 mr-2">$</span>
+        {/* Render currently typing prompt — running line, same semantics as the dashboard timeline */}
+        <div className="flex items-center text-running mt-2 font-semibold select-none">
+          <span className="text-text-muted mr-2">$</span>
           <span>{typedCommand}</span>
-          <span className="w-2 h-4 bg-cyan-400 ml-1 animate-pulse" />
+          <span className="w-2 h-4 bg-running ml-1 animate-caret-blink" />
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@
 - **Skills** — 18 Markdown skill files, each describing a specialist role
 - **CLI** (`packages/cli/`) — TypeScript tool that installs skills and configures agent hooks
 - **Dashboard** (`servers/dashboard/`) — real-time WebSocket server + browser UI that shows which skill is active and a live event timeline
-- **Docs site** (`docs/`) — Docusaurus site deployed to GitHub Pages
+- **Docs site** (`docs/`) — Vite + React + Tailwind SPA deployed to GitHub Pages
 - **Helper scripts** — Python/Bash scripts for skill validation and packaging
 
 **Key constraint:** This is a documentation-first project. The skills folder has no runtime application. Do not execute build commands, install dependencies, or create runtime config files unless an explicit spec requires it.
@@ -37,12 +37,13 @@ crewloop/
 ├── assets/
 │   └── templates/
 │       └── skill-template.md        # Template for new SKILL.md files
-├── docs/                            # Docusaurus documentation site
-│   ├── docusaurus.config.js
-│   ├── sidebars.js
-│   ├── docs/
+├── docs/                            # Docs site (Vite + React + Tailwind SPA)
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   ├── public/
 │   ├── src/
-│   └── static/
+│   └── specs/
 ├── packages/
 │   └── cli/                         # @archznn/crewloop-cli (TypeScript)
 │       ├── src/
@@ -151,7 +152,7 @@ crewloop/
 | Skills | Markdown | Role-based workflow instructions for AI agents |
 | CLI | TypeScript (Node.js) | Installs skills and configures agent hooks |
 | Dashboard | TypeScript (Node.js + WebSocket) | Real-time skill and tool activity visualization |
-| Docs site | Docusaurus | GitHub Pages documentation site |
+| Docs site | Vite + React + Tailwind | GitHub Pages documentation site (SPA) |
 | Scripts | Python + Bash | Skill validation, packaging, and publish automation |
 
 **Architecture:** Modular by role. Each skill is an autonomous, self-describing Markdown document. The CLI and dashboard are independent packages in an npm workspace. Skills do not import or depend on each other.

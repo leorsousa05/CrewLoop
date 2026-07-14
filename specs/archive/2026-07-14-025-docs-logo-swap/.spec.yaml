@@ -1,0 +1,14 @@
+id: "025"
+title: "Docs Logo Swap (orbit mark)"
+status: "completed"
+created_at: "2026-07-14"
+author: "Architect"
+builds_on: "024-docs-quiet-console-restyle"
+affected_files:
+  - docs/public/assets/images/crewloop-logo.png
+  - docs/index.html
+  - docs/src/App.tsx
+  - docs/public/favicon.svg
+subagents:
+  approved: false
+  reason: "Single-surface asset swap (<10 lines of markup plus one static file); sequential and trivial, coordination overhead would exceed the work."

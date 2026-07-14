@@ -1,0 +1,25 @@
+id: "024"
+title: "Docs Site Quiet Console Restyle"
+status: "completed"
+created_at: "2026-07-14"
+author: "Architect"
+builds_on: "023-dashboard-full-redesign"
+supersedes: "docs/specs/changes/001-docs-redesign"
+affected_files:
+  - docs/tailwind.config.js
+  - docs/src/index.css
+  - docs/index.html
+  - docs/src/App.tsx
+  - docs/src/components/LandingPage.tsx
+  - docs/src/components/DocsLayout.tsx
+  - docs/src/components/MarkdownRenderer.tsx
+  - docs/src/components/SkillVisualizer.tsx
+  - docs/src/components/TerminalSimulator.tsx
+  - docs/src/components/tests/TerminalSimulator.test.tsx
+  - docs/src/hooks/useTheme.ts
+  - docs/src/components/ThemeToggle.tsx
+  - AGENTS.md
+  - specs/living/docs/spec.md
+subagents:
+  approved: false
+  reason: "Token layer (index.css, tailwind.config.js) is a shared chokepoint for every component; phases must be sequential (tokens -> theme infra -> shell -> surfaces), same as spec 023."

@@ -2,12 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="%BASE_URL%assets/images/crewloop-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrewLoop — AI Agent Crew for Software Development</title>
     <meta name="description" content="CrewLoop is a team of autonomous AI skills that run together as a complete, role-separated software development cycle." />
+    <script>
+      // Anti-FOUC: apply the persisted theme before first paint (dark is the default).
+      try {
+        if (localStorage.getItem('crewloop-docs-theme') === 'light') {
+          document.documentElement.classList.add('light');
+        }
+      } catch (e) { /* private mode: keep default dark */ }
+    </script>
   </head>
-  <body class="bg-[#020617]">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
