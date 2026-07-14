@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ClientSession } from '../../../src/types';
 import { formatDuration } from '../../../src/lib/format';
+import { resolvePath } from '../../../src/lib/paths';
 
 interface Props {
   session: ClientSession | undefined;
@@ -14,41 +15,51 @@ export function TelemetryPanel({ session }: Props) {
     return () => clearInterval(id);
   }, []);
 
-  const toolEvents = useMemo(
-    () => (session?.events || []).filter((e) => e.event_type === 'tool_start' || e.event_type === 'tool_end'),
-    [session]
-  );
-
-  const eventRate = useMemo(() => {
+  const stats = useMemo(() => {
+    const events = session?.events || [];
+    const toolEvents = events.filter((e) => e.event_type === 'tool_start' || e.event_type === 'tool_end');
     const windowStart = now - 60000;
-    return (session?.events || []).filter((e) => e.timestamp > windowStart).length;
+    const rate = events.filter((e) => e.timestamp > windowStart).length;
+    const end = session ? session.endedAt || session.lastActivity || now : now;
+    const duration = session ? end - session.startTime : 0;
+    const files = new Set<string>();
+    for (const e of events) {
+      if (!e.tool) continue;
+      const path = resolvePath(e.input, e.output);
+      if (path) files.add(path);
+    }
+    const errors = events.filter((e) => e.status === 'error').length;
+    return {
+      tools: Math.ceil(toolEvents.length / 2),
+      duration: formatDuration(duration),
+      rate,
+      files: files.size,
+      errors,
+    };
   }, [session, now]);
 
-  const duration = useMemo(() => {
-    if (!session) return 0;
-    const end = session.endedAt || session.lastActivity || now;
-    return end - session.startTime;
-  }, [session, now]);
-
-  const cards = [
-    { label: 'Tools', value: Math.ceil(toolEvents.length / 2) },
-    { label: 'Duration', value: formatDuration(duration) },
-    { label: 'Rate/m', value: eventRate },
+  const cells = [
+    { label: 'Tools', value: stats.tools },
+    { label: 'Duration', value: stats.duration },
+    { label: 'Rate/min', value: stats.rate },
+    { label: 'Files', value: stats.files },
+    { label: 'Errors', value: stats.errors, error: stats.errors > 0 },
   ];
 
   return (
-    <section className="panel p-5">
-      <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-4 border-b border-border-default">
-        Telemetry
-      </h2>
-      <div className="pt-4 flex flex-col gap-4">
-        {cards.map((c) => (
+    <section className="panel px-5 py-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-x-3 gap-y-3 md:gap-x-0 md:gap-y-0 md:divide-x md:divide-border-default">
+        {cells.map((c) => (
           <div
             key={c.label}
-            className="flex flex-col gap-1 p-3 bg-inset border border-border-default rounded"
+            className={`flex flex-col gap-0.5 px-0 md:px-3 md:first:pl-0 md:last:pr-0 ${
+              c.error ? 'col-span-2 md:col-span-1' : ''
+            }`}
           >
-            <span className="text-2xl font-medium tabular text-accent">{c.value}</span>
-            <span className="text-xs text-text-muted uppercase tracking-widest">{c.label}</span>
+            <span className="text-caption uppercase tracking-wide text-text-muted">{c.label}</span>
+            <span className={`font-display text-display-xl tabular ${c.error ? 'text-error' : 'text-text-primary'}`}>
+              {c.value}
+            </span>
           </div>
         ))}
       </div>

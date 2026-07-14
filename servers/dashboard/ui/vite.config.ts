@@ -16,9 +16,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react-force-graph') || id.includes('three') || id.includes('d3')) {
-              return 'vendor-graph';
-            }
             if (id.includes('@phosphor-icons')) {
               return 'vendor-icons';
             }

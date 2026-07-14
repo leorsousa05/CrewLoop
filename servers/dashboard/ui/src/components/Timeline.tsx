@@ -5,11 +5,21 @@ interface Props {
   invocations: ToolInvocation[];
   expandedIds: Set<string>;
   onToggle: (id: string) => void;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
 
-export function Timeline({ invocations, expandedIds, onToggle, onMouseEnter, onMouseLeave }: Props) {
+export function Timeline({
+  invocations,
+  expandedIds,
+  onToggle,
+  selectedId,
+  onSelect,
+  onMouseEnter,
+  onMouseLeave,
+}: Props) {
   async function handleCopy(inv: ToolInvocation) {
     const text = JSON.stringify(
       {
@@ -33,12 +43,12 @@ export function Timeline({ invocations, expandedIds, onToggle, onMouseEnter, onM
 
   return (
     <div
-      className="flex-1 overflow-y-auto px-5 py-3"
+      className="flex-1 overflow-y-auto px-4 md:px-5 py-3"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {invocations.length === 0 ? (
-        <p className="text-center py-8 text-text-muted text-sm">No events match the filters.</p>
+        <p className="text-center py-8 text-text-muted text-body">No events match the filters.</p>
       ) : (
         <ul className="relative list-none m-0 p-0 before:content-[''] before:absolute before:top-3 before:bottom-3 before:left-[32px] before:w-px before:bg-border-default">
           {invocations.map((inv) => (
@@ -46,7 +56,9 @@ export function Timeline({ invocations, expandedIds, onToggle, onMouseEnter, onM
               key={inv.id}
               inv={inv}
               expanded={expandedIds.has(inv.id)}
+              selected={inv.id === selectedId}
               onToggle={() => onToggle(inv.id)}
+              onSelect={() => onSelect(inv.id)}
               onCopy={() => handleCopy(inv)}
             />
           ))}

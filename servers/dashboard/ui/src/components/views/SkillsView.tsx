@@ -2,10 +2,8 @@ import { useMemo } from 'react';
 import type { ToolInvocation } from '../../../../src/lib/invocations';
 import { operationType } from '../../../../src/lib/invocations';
 import { resolvePath } from '../../../../src/lib/paths';
-import { ViewHeader } from '../ViewHeader';
 import { FilterBar } from '../FilterBar';
 import type { FilterOptions } from '../../lib/types';
-import { Icon } from '../ui/Icon';
 
 interface Props {
   invocations: ToolInvocation[];
@@ -32,57 +30,80 @@ export function SkillsView({ invocations, filterOptions }: Props) {
     };
   }, [invocations]);
 
+  const cells = [
+    { label: 'Skills', value: stats.skills.length },
+    { label: 'Tools', value: stats.tools.length },
+    { label: 'Files touched', value: stats.fileCount },
+  ];
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <ViewHeader title="Skills" icon="ChartPie" />
       <FilterBar options={filterOptions} resultCount={invocations.length} />
-      <div className="flex-1 overflow-y-auto p-5">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="panel p-4 flex flex-col gap-1">
-            <span className="font-display text-4xl text-accent">{stats.skills.length}</span>
-            <span className="text-[11px] uppercase tracking-widest text-text-muted">Skills</span>
+      <div className="flex-1 overflow-y-auto p-4 md:p-5">
+        <section className="panel px-5 py-3 mb-4">
+          <div className="grid grid-cols-3 divide-x divide-border-default">
+            {cells.map((c, i) => (
+              <div key={c.label} className={`flex flex-col gap-0.5 ${i === 0 ? 'pr-3' : i === cells.length - 1 ? 'pl-3' : 'px-3'}`}>
+                <span className="text-caption uppercase tracking-wide text-text-muted">{c.label}</span>
+                <span className="font-display text-display-xl tabular text-text-primary">{c.value}</span>
+              </div>
+            ))}
           </div>
-          <div className="panel p-4 flex flex-col gap-1">
-            <span className="font-display text-4xl text-accent">{stats.tools.length}</span>
-            <span className="text-[11px] uppercase tracking-widest text-text-muted">Tools</span>
-          </div>
-          <div className="panel p-4 flex flex-col gap-1">
-            <span className="font-display text-4xl text-accent">{stats.fileCount}</span>
-            <span className="text-[11px] uppercase tracking-widest text-text-muted">Files touched</span>
-          </div>
-        </div>
+        </section>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <section className="panel p-5">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
+          <section className="panel">
+            <h2 className="text-caption uppercase tracking-wide text-text-muted pb-3 border-b border-border-default">
               Skill usage
             </h2>
-            <div className="pt-3 flex flex-col gap-2">
-              {stats.skills.length === 0 && <p className="text-sm text-text-muted">No skills observed.</p>}
-              {stats.skills.map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <Icon name="Circle" className="w-2 h-2 text-accent" />
-                    <span className="text-text-primary">{name}</span>
+            <div className="pt-3 flex flex-col gap-3">
+              {stats.skills.length === 0 && <p className="text-body text-text-muted">No skills observed.</p>}
+              {stats.skills.map(([name, count], i) => {
+                const max = stats.skills[0]?.[1] || 1;
+                return (
+                  <div key={name} className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-micro text-text-muted tabular w-5 text-right">{i + 1}</span>
+                        <span className="text-label text-text-primary truncate">{name}</span>
+                      </div>
+                      <span className="text-micro text-text-muted tabular">{count}</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-inset overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-accent/70 animate-bar-in"
+                        style={{ width: `${Math.max(4, (count / max) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <span className="text-text-muted tabular">{count}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
-          <section className="panel p-5">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
+          <section className="panel">
+            <h2 className="text-caption uppercase tracking-wide text-text-muted pb-3 border-b border-border-default">
               Tool usage
             </h2>
-            <div className="pt-3 flex flex-col gap-2">
-              {stats.tools.length === 0 && <p className="text-sm text-text-muted">No tools observed.</p>}
-              {stats.tools.map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between text-sm">
-                  <span className="font-mono text-text-primary">{name}</span>
-                  <span className="text-text-muted tabular">{count}</span>
-                </div>
-              ))}
+            <div className="pt-3 flex flex-col gap-3">
+              {stats.tools.length === 0 && <p className="text-body text-text-muted">No tools observed.</p>}
+              {stats.tools.map(([name, count]) => {
+                const max = stats.tools[0]?.[1] || 1;
+                return (
+                  <div key={name} className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-label text-text-primary truncate">{name}</span>
+                      <span className="text-micro text-text-muted tabular">{count}</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-inset overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-running/70 animate-bar-in"
+                        style={{ width: `${Math.max(4, (count / max) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         </div>

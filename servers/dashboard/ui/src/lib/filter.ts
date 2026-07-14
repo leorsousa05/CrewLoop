@@ -1,15 +1,8 @@
 import type { AgentSource, ClientSession, EventStatus } from '../../../src/types';
 import type { ToolInvocation } from '../../../src/lib/invocations';
-import type { Graph3D, GraphNode, GraphLink } from '../../../src/lib/graph';
 import { operationType } from '../../../src/lib/invocations';
-import type { FilterOptions, FilterState, PinnedSession, TimeRange } from './types';
+import type { FilterOptions, FilterState, PinnedSession, SessionSortKey, TimeRange } from './types';
 import { matchesInvocation } from './search';
-
-function linkEndpointId(endpoint: string | { id?: unknown } | number): string {
-  if (typeof endpoint === 'string') return endpoint;
-  if (endpoint && typeof endpoint === 'object' && 'id' in endpoint) return String(endpoint.id);
-  return String(endpoint);
-}
 
 function timeRangeToMs(range: TimeRange): number | null {
   switch (range) {
@@ -121,58 +114,42 @@ export function filterSessions(
   });
 }
 
-export function filterGraph(
-  graph: Graph3D,
-  invocations: ToolInvocation[],
-  filters: FilterState
-): Graph3D {
-  const query = filters.query.trim().toLowerCase();
-  const toolSet = new Set(filters.tools);
-  const opSet = new Set(filters.opTypes);
+export function sortSessions(
+  sessions: ClientSession[],
+  key: SessionSortKey,
+  pins: PinnedSession[],
+  now: number
+): ClientSession[] {
+  const pinOrder = new Map(pins.map((p, i) => [p.id, i]));
 
-  const matchedTools = new Set<string>();
-  for (const inv of invocations) {
-    const keepTool =
-      (toolSet.size === 0 || toolSet.has(inv.tool)) &&
-      (opSet.size === 0 || opSet.has(operationType(inv.tool)));
-    if (keepTool) matchedTools.add(`tool:${inv.tool}`);
-  }
-
-  const skillNodes = graph.nodes.filter((n) => n.type === 'skill');
-
-  const keptNodes = new Map<string, GraphNode>();
-  for (const n of skillNodes) keptNodes.set(n.id, n);
-
-  const keptLinks: GraphLink[] = [];
-
-  for (const n of graph.nodes) {
-    if (n.type === 'tool') {
-      const matchesTool = matchedTools.has(n.id);
-      const matchesQuery = query ? n.label.toLowerCase().includes(query) : true;
-      if (matchesTool && matchesQuery) keptNodes.set(n.id, n);
+  const byKey = (a: ClientSession, b: ClientSession): number => {
+    switch (key) {
+      case 'duration': {
+        const durA = (a.endedAt ?? now) - a.startTime;
+        const durB = (b.endedAt ?? now) - b.startTime;
+        return durB - durA;
+      }
+      case 'events':
+        return b.events.length - a.events.length;
+      case 'name': {
+        const nameA = (a.activeSkill?.name || a.skill || a.id).toLowerCase();
+        const nameB = (b.activeSkill?.name || b.skill || b.id).toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+      case 'recent':
+      default:
+        return (b.lastActivity || 0) - (a.lastActivity || 0);
     }
-  }
+  };
 
-  for (const n of graph.nodes) {
-    if (n.type === 'file') {
-      const matchesQuery = query ? n.label.toLowerCase().includes(query) : true;
-      if (!matchesQuery) continue;
-      const hasToolLink = graph.links.some((l) => {
-        const sourceId = linkEndpointId(l.source);
-        const targetId = linkEndpointId(l.target);
-        return keptNodes.has(sourceId) && targetId === n.id;
-      });
-      if (hasToolLink) keptNodes.set(n.id, n);
+  return [...sessions].sort((a, b) => {
+    const aPin = pinOrder.has(a.id);
+    const bPin = pinOrder.has(b.id);
+    if (aPin && !bPin) return -1;
+    if (!aPin && bPin) return 1;
+    if (aPin && bPin) {
+      return (pinOrder.get(a.id) ?? 0) - (pinOrder.get(b.id) ?? 0);
     }
-  }
-
-  for (const l of graph.links) {
-    const sourceId = linkEndpointId(l.source);
-    const targetId = linkEndpointId(l.target);
-    if (keptNodes.has(sourceId) && keptNodes.has(targetId)) {
-      keptLinks.push(l);
-    }
-  }
-
-  return { nodes: Array.from(keptNodes.values()), links: keptLinks };
+    return byKey(a, b);
+  });
 }

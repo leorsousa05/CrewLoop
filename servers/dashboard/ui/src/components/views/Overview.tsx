@@ -1,140 +1,119 @@
 import { useMemo } from 'react';
 import type { ClientSession } from '../../../../src/types';
+import type { ToolInvocation } from '../../../../src/lib/invocations';
 import { ActiveSkillPanel } from '../ActiveSkillPanel';
 import { TelemetryPanel } from '../TelemetryPanel';
 import { ActivityGraph } from '../ActivityGraph';
-import { ViewHeader } from '../ViewHeader';
-import { usePinnedSessions } from '../../contexts/PinnedSessionsContext';
 import { sourceIcon } from '../../../../src/lib/constants';
 import { Icon } from '../ui/Icon';
-import { truncate } from '../../../../src/lib/format';
+import { formatTime, truncate } from '../../../../src/lib/format';
 
 interface Props {
   sessions: Map<string, ClientSession>;
   selectedSession: ClientSession | undefined;
-  onSelectSession: (id: string) => void;
+  invocations: ToolInvocation[];
+  onSelectSession: (id: string | null) => void;
+  onOpenTimeline: () => void;
 }
 
-export function Overview({ sessions, selectedSession, onSelectSession }: Props) {
-  const { pins } = usePinnedSessions();
+export function Overview({ sessions, selectedSession, invocations, onSelectSession, onOpenTimeline }: Props) {
   const allSessions = useMemo(() => Array.from(sessions.values()), [sessions]);
-  const activeCount = useMemo(
-    () => allSessions.filter((s) => s.lifecycle === 'running').length,
+  const recentSessions = useMemo(
+    () => [...allSessions].sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0)).slice(0, 8),
     [allSessions]
   );
+  const livePreview = useMemo(() => invocations.slice(-5).reverse(), [invocations]);
 
-  const topSkills = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of allSessions) {
-      const name = s.activeSkill?.name || s.skill;
-      if (name) counts.set(name, (counts.get(name) || 0) + 1);
-    }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-  }, [allSessions]);
-
-  const topTools = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of allSessions) {
-      for (const e of s.events) {
-        if (e.tool) counts.set(e.tool, (counts.get(e.tool) || 0) + 1);
-      }
-    }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-  }, [allSessions]);
+  if (allSessions.length === 0) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center gap-3 text-center p-6">
+        <Icon name="TerminalWindow" className="w-8 h-8 text-text-muted" />
+        <h1 className="font-display text-display-lg text-text-primary">No sessions yet</h1>
+        <p className="text-body text-text-secondary max-w-sm">
+          Start an agent session with CrewLoop installed and events will stream here in real time.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <ViewHeader title="Overview" icon="House" />
-      <div className="flex-1 overflow-y-auto p-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <div className="h-[320px]">
-            <ActiveSkillPanel session={selectedSession} />
-          </div>
-          <div className="h-[320px]">
-            <TelemetryPanel session={selectedSession} />
-          </div>
-          <div className="h-[320px]">
-            <ActivityGraph session={selectedSession} />
-          </div>
-
-          <section className="panel p-5">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
-              Sessions
-            </h2>
-            <div className="pt-4 grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <span className="font-display text-4xl text-accent">{allSessions.length}</span>
-                <span className="text-[11px] uppercase tracking-widest text-text-muted">Total</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="font-display text-4xl text-running">{activeCount}</span>
-                <span className="text-[11px] uppercase tracking-widest text-text-muted">Active</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="font-display text-4xl text-accent">{pins.length}</span>
-                <span className="text-[11px] uppercase tracking-widest text-text-muted">Pinned</span>
-              </div>
-            </div>
-          </section>
-
-          <section className="panel p-5">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
-              Top Skills
-            </h2>
-            <div className="pt-3 flex flex-col gap-2">
-              {topSkills.length === 0 && <p className="text-sm text-text-muted">No skills observed.</p>}
-              {topSkills.map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between text-sm">
-                  <span className="text-text-primary">{name}</span>
-                  <span className="text-text-muted tabular">{count}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel p-5">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
-              Top Tools
-            </h2>
-            <div className="pt-3 flex flex-col gap-2">
-              {topTools.length === 0 && <p className="text-sm text-text-muted">No tools observed.</p>}
-              {topTools.map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between text-sm">
-                  <span className="font-mono text-text-primary">{name}</span>
-                  <span className="text-text-muted tabular">{count}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel p-5 md:col-span-2 xl:col-span-3">
-            <h2 className="text-xs font-medium text-text-muted uppercase tracking-widest pb-3 border-b border-border-default">
-              Recent Sessions
-            </h2>
-            <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {allSessions.slice(0, 6).map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => onSelectSession(s.id)}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border-default bg-elevated hover:border-accent transition-colors text-left"
-                >
-                  <Icon name={sourceIcon(s.source)} className="w-5 h-5 text-text-secondary" />
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm text-text-primary font-mono truncate">
-                      {truncate(s.activeSkill?.name || 'No active skill', 24)}
-                    </span>
-                    <span className="text-[11px] text-text-muted uppercase">{s.source}</span>
-                  </div>
-                </button>
-              ))}
-              {allSessions.length === 0 && <p className="text-sm text-text-muted">No sessions yet.</p>}
-            </div>
-          </section>
+    <div className="h-full overflow-y-auto">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 p-4 md:p-6">
+        <div className="xl:col-span-3">
+          <ActiveSkillPanel session={selectedSession} />
         </div>
+
+        <div className="xl:col-span-3">
+          <TelemetryPanel session={selectedSession} />
+        </div>
+
+        <div className="xl:col-span-2">
+          <ActivityGraph session={selectedSession} />
+        </div>
+
+        <section className="panel flex flex-col">
+          <h2 className="text-caption uppercase tracking-wide text-text-muted px-5 py-3 border-b border-border-default">
+            Live
+          </h2>
+          <div className="overflow-y-auto px-5 py-2 flex flex-col">
+            {livePreview.length === 0 ? (
+              <p className="text-body text-text-muted py-4">No tool activity yet.</p>
+            ) : (
+              livePreview.map((inv, i) => (
+                <div key={inv.id} className={`items-baseline gap-2.5 py-1.5 min-w-0 ${i >= 3 ? 'hidden md:flex' : 'flex'}`}>
+                  <span className="text-micro text-text-muted tabular flex-shrink-0">{formatTime(inv.startTime)}</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${
+                      inv.status === 'running'
+                        ? 'bg-running'
+                        : inv.status === 'error'
+                        ? 'bg-error'
+                        : 'bg-success'
+                    }`}
+                  />
+                  <span className="font-mono text-label text-text-primary flex-shrink-0">{inv.tool}</span>
+                  <span className="text-label text-text-secondary truncate min-w-0">
+                    {inv.detail || inv.skill || ''}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+          <button
+            onClick={onOpenTimeline}
+            className="flex items-center gap-1 px-5 py-2.5 border-t border-border-default text-label text-accent hover:bg-elevated transition-colors"
+          >
+            Open timeline
+            <Icon name="CaretRight" className="w-3.5 h-3.5" />
+          </button>
+        </section>
+
+        <section className="panel xl:col-span-3">
+          <h2 className="text-caption uppercase tracking-wide text-text-muted px-5 py-3 border-b border-border-default">
+            Recent Sessions
+          </h2>
+          <div className="p-3 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+            {recentSessions.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => onSelectSession(s.id)}
+                className={`snap-start w-48 flex-shrink-0 flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
+                  s.id === selectedSession?.id
+                    ? 'border-accent bg-accent-subtle'
+                    : 'border-border-default bg-elevated hover:border-border-strong'
+                }`}
+              >
+                <Icon name={sourceIcon(s.source)} className="w-5 h-5 text-text-secondary flex-shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-body text-text-primary font-mono truncate">
+                    {truncate(s.activeSkill?.name || 'No active skill', 24)}
+                  </span>
+                  <span className="text-micro text-text-muted uppercase">{s.source}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

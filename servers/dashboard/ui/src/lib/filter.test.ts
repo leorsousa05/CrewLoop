@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildOptions, filterInvocations, filterSessions, filterGraph } from './filter';
+import { buildOptions, filterInvocations, filterSessions, sortSessions } from './filter';
 import type { AgentSource, ClientSession, EventStatus } from '../../../src/types';
 import type { ToolInvocation } from '../../../src/lib/invocations';
-import type { Graph3D } from '../../../src/lib/graph';
 import { DEFAULT_FILTER_STATE } from './types';
 
 function makeSession(id: string, source: ClientSession['source'], overrides?: Partial<ClientSession>): ClientSession {
@@ -72,24 +71,31 @@ describe('filter', () => {
     expect(result.map((s) => s.id)).toEqual(['a', 'b']);
   });
 
-  it('filters graph while keeping skill root', () => {
-    const graph: Graph3D = {
-      nodes: [
-        { id: 'skill:eng', type: 'skill', label: 'engineer', weight: 1 },
-        { id: 'tool:Read', type: 'tool', label: 'Read', weight: 1 },
-        { id: 'tool:Edit', type: 'tool', label: 'Edit', weight: 1 },
-        { id: 'file:a', type: 'file', label: 'a', weight: 1 },
+  it('sortSessions keeps pins first and sorts unpinned by key', () => {
+    const a = makeSession('a', 'kimi', {
+      lastActivity: 1000,
+      startTime: 0,
+      endedAt: 5000,
+      events: [{ id: 'e1', timestamp: 0, event_type: 'tool_end', tool: 'Read' }],
+    });
+    const b = makeSession('b', 'codex', { lastActivity: 3000, startTime: 0, endedAt: 1000 });
+    const c = makeSession('c', 'claude', {
+      lastActivity: 2000,
+      startTime: 0,
+      events: [
+        { id: 'e1', timestamp: 0, event_type: 'tool_end', tool: 'Read' },
+        { id: 'e2', timestamp: 1, event_type: 'tool_end', tool: 'Edit' },
       ],
-      links: [
-        { source: 'skill:eng', target: 'tool:Read', weight: 1 },
-        { source: 'skill:eng', target: 'tool:Edit', weight: 1 },
-        { source: 'tool:Read', target: 'file:a', weight: 1 },
-      ],
-    };
-    const invs = [makeInv('Read'), makeInv('Edit')];
-    const filters = { ...DEFAULT_FILTER_STATE, tools: ['Read'] };
-    const result = filterGraph(graph, invs, filters);
-    expect(result.nodes.map((n) => n.id).sort()).toEqual(['file:a', 'skill:eng', 'tool:Read']);
-    expect(result.links).toHaveLength(2);
+    });
+    const pins = [{ id: 'a', pinnedAt: 0 }];
+    expect(sortSessions([a, b, c], 'recent', pins, 10000).map((s) => s.id)).toEqual(['a', 'b', 'c']);
+    expect(sortSessions([a, b, c], 'duration', [], 10000).map((s) => s.id)).toEqual(['c', 'a', 'b']);
+    expect(sortSessions([a, b, c], 'events', [], 10000).map((s) => s.id)).toEqual(['c', 'a', 'b']);
+  });
+
+  it('sortSessions sorts by name case-insensitively', () => {
+    const a = makeSession('a', 'kimi', { activeSkill: { name: 'Zebra', confidence: 'explicit' } });
+    const b = makeSession('b', 'codex', { activeSkill: { name: 'apple', confidence: 'explicit' } });
+    expect(sortSessions([a, b], 'name', [], 10000).map((s) => s.id)).toEqual(['b', 'a']);
   });
 });

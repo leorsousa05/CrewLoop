@@ -1,0 +1,15 @@
+id: "020"
+title: "Dashboard Redesign and CLI Feature Integration"
+status: "cancelled"
+created_at: "2026-07-14"
+author: "Architect"
+superseded_by: "021-dashboard-console-redesign"
+cancellation_note: "Implementation was never committed and was reverted per user decision (blue theme direction rejected). CLI integration work is recoverable from git history if a future spec reinstates it."
+affected_files:
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/api/cli.ts
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/components/CLIConfigPanel.tsx
+  - servers/dashboard/ui/src/index.css
+subagents:
+  approved: false

@@ -1,0 +1,38 @@
+id: "022"
+title: "Dashboard SaaS Minimalist Redesign"
+status: "completed"
+created_at: "2026-07-14"
+author: "Architect"
+supersedes: "021-dashboard-console-redesign"
+affected_files:
+  - servers/dashboard/ui/src/styles/index.css
+  - servers/dashboard/ui/tailwind.config.js
+  - servers/dashboard/ui/src/lib/types.ts
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/components/TopBar.tsx
+  - servers/dashboard/ui/src/components/Sidebar.tsx
+  - servers/dashboard/ui/src/components/CommandPalette.tsx
+  - servers/dashboard/ui/src/components/ViewHeader.tsx
+  - servers/dashboard/ui/src/components/FilterBar.tsx
+  - servers/dashboard/ui/src/components/SessionSelector.tsx
+  - servers/dashboard/ui/src/components/ActiveSkillPanel.tsx
+  - servers/dashboard/ui/src/components/TelemetryPanel.tsx
+  - servers/dashboard/ui/src/components/ActivityGraph.tsx
+  - servers/dashboard/ui/src/components/Timeline.tsx
+  - servers/dashboard/ui/src/components/TimelineRow.tsx
+  - servers/dashboard/ui/src/components/FileList.tsx
+  - servers/dashboard/ui/src/components/FileDiff.tsx
+  - servers/dashboard/ui/src/components/FileActivity.tsx
+  - servers/dashboard/ui/src/components/Network3D.tsx
+  - servers/dashboard/ui/src/components/views/NetworkView.tsx
+  - servers/dashboard/ui/src/components/views/Overview.tsx
+  - servers/dashboard/ui/src/components/views/SessionsView.tsx
+  - servers/dashboard/ui/src/components/views/TimelineView.tsx
+  - servers/dashboard/ui/src/components/views/FilesView.tsx
+  - servers/dashboard/ui/src/components/views/SkillsView.tsx
+  - servers/dashboard/ui/src/components/views/SettingsView.tsx
+  - servers/dashboard/ui/src/components/ui/Icon.tsx
+  - servers/dashboard/ui/src/components/ui/StatusBadge.tsx
+  - servers/dashboard/package.json
+subagents:
+  approved: false

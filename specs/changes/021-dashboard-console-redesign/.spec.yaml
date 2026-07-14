@@ -1,0 +1,42 @@
+id: "021"
+title: "Dashboard Developer-Console Redesign"
+status: "superseded"
+created_at: "2026-07-14"
+author: "Architect"
+supersedes: "020-dashboard-redesign"
+superseded_by: "022-dashboard-saas-minimalist-redesign"
+affected_files:
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/api/cli.ts
+  - servers/dashboard/ui/index.html
+  - servers/dashboard/ui/src/styles/index.css
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/components/TopBar.tsx
+  - servers/dashboard/ui/src/components/Sidebar.tsx
+  - servers/dashboard/ui/src/components/CommandPalette.tsx
+  - servers/dashboard/ui/src/components/ViewHeader.tsx
+  - servers/dashboard/ui/src/components/FilterBar.tsx
+  - servers/dashboard/ui/src/components/SessionSelector.tsx
+  - servers/dashboard/ui/src/components/ActiveSkillPanel.tsx
+  - servers/dashboard/ui/src/components/TelemetryPanel.tsx
+  - servers/dashboard/ui/src/components/ActivityGraph.tsx
+  - servers/dashboard/ui/src/components/Timeline.tsx
+  - servers/dashboard/ui/src/components/TimelineRow.tsx
+  - servers/dashboard/ui/src/components/FileList.tsx
+  - servers/dashboard/ui/src/components/FileDiff.tsx
+  - servers/dashboard/ui/src/components/FileActivity.tsx
+  - servers/dashboard/ui/src/components/Network3D.tsx
+  - servers/dashboard/ui/src/components/CLIConfigPanel.tsx
+  - servers/dashboard/ui/src/components/ui/Icon.tsx
+  - servers/dashboard/ui/src/components/ui/StatusBadge.tsx
+  - servers/dashboard/ui/src/components/views/Overview.tsx
+  - servers/dashboard/ui/src/components/views/SessionsView.tsx
+  - servers/dashboard/ui/src/components/views/TimelineView.tsx
+  - servers/dashboard/ui/src/components/views/NetworkView.tsx
+  - servers/dashboard/ui/src/components/views/FilesView.tsx
+  - servers/dashboard/ui/src/components/views/SkillsView.tsx
+  - servers/dashboard/ui/src/components/views/SettingsView.tsx
+  - servers/dashboard/ui/src/lib/types.ts
+  - servers/dashboard/ui/src/lib/tree.test.ts
+subagents:
+  approved: false

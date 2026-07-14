@@ -1,5 +1,4 @@
 import type { AgentSource, ClientSession, EventStatus } from '../../../src/types';
-import type { Graph3D } from '../../../src/lib/graph';
 import type { ToolInvocation } from '../../../src/lib/invocations';
 
 export type { ToolInvocation };
@@ -8,7 +7,6 @@ export type View =
   | 'overview'
   | 'sessions'
   | 'timeline'
-  | 'network'
   | 'files'
   | 'skills'
   | 'settings';
@@ -115,10 +113,24 @@ export interface FilterEngine {
     pins: PinnedSession[],
     now: number
   ): ClientSession[];
+}
 
-  filterGraph(
-    graph: Graph3D,
-    invocations: ToolInvocation[],
-    filters: FilterState
-  ): Graph3D;
+export type SessionSortKey = 'recent' | 'duration' | 'events' | 'name';
+
+export interface SerializedFilterState {
+  q: string;
+  sources: string;
+  skills: string;
+  statuses: string;
+  tools: string;
+  ops: string;
+  time: TimeRange;
+}
+
+export interface RouteState {
+  view: View;
+  sessionId: string | null;
+  filters: Partial<SerializedFilterState>;
+  filePath: string | null;
+  sort: SessionSortKey | null;
 }

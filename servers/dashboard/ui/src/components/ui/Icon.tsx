@@ -25,6 +25,8 @@ import {
   Moon,
   Sun,
   CaretDown,
+  CaretLeft,
+  CaretRight,
   MonitorPlay,
   Check,
   X,
@@ -38,6 +40,7 @@ import {
   Gear,
   ArrowsInLineVertical,
   ArrowsOutLineVertical,
+  ArrowsDownUp,
   PushPin,
   PushPinSlash,
   DownloadSimple,
@@ -45,6 +48,14 @@ import {
   XCircle,
   Faders,
   List,
+  Folder,
+  FolderOpen,
+  Pause,
+  Play,
+  Pulse,
+  TerminalWindow,
+  Keyboard,
+  Star,
 } from '@phosphor-icons/react';
 
 const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
@@ -73,6 +84,8 @@ const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
   Moon,
   Sun,
   CaretDown,
+  CaretLeft,
+  CaretRight,
   MonitorPlay,
   Check,
   X,
@@ -86,6 +99,7 @@ const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
   Gear,
   ArrowsInLineVertical,
   ArrowsOutLineVertical,
+  ArrowsDownUp,
   PushPin,
   PushPinSlash,
   DownloadSimple,
@@ -93,6 +107,14 @@ const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
   XCircle,
   Faders,
   List,
+  Folder,
+  FolderOpen,
+  Pause,
+  Play,
+  Pulse,
+  TerminalWindow,
+  Keyboard,
+  Star,
 };
 
 interface Props extends Omit<IconProps, 'ref'> {

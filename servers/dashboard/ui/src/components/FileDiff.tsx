@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { escapeHtml } from '../../../src/lib/format';
 import type { FileEntry } from '../../../src/lib/invocations';
+import { Icon } from './ui/Icon';
 import { StatusBadge } from './ui/StatusBadge';
 
 interface Props {
   file: FileEntry | undefined;
   sessionId?: string;
+  onBack?: () => void;
+  isDirectory?: boolean;
+  childCount?: number;
 }
 
 function highlightCode(text: string, filename: string): string {
@@ -59,12 +63,13 @@ function highlightCode(text: string, filename: string): string {
   return escaped;
 }
 
-export function FileDiff({ file, sessionId }: Props) {
+export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: Props) {
   const [activeTab, setActiveTab] = useState<'content' | 'diff'>('diff');
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [gitDiff, setGitDiff] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   const hasEdit = file?.ops.some((op) => op.type === 'edit') ?? false;
 
@@ -79,7 +84,8 @@ export function FileDiff({ file, sessionId }: Props) {
   }, [file?.path, hasEdit]);
 
   useEffect(() => {
-    if (!file) return;
+    // Directories have no file content — skip the fetch entirely.
+    if (!file || isDirectory) return;
 
     setLoading(true);
     setError(null);
@@ -116,12 +122,49 @@ export function FileDiff({ file, sessionId }: Props) {
           setLoading(false);
         });
     }
-  }, [file?.path, activeTab, sessionId]);
+  }, [file?.path, activeTab, sessionId, retryKey, isDirectory]);
 
   if (!file) {
     return (
-      <div className="flex-1 flex items-center justify-center text-text-muted text-sm bg-base/50">
+      <div className="flex-1 flex items-center justify-center text-text-muted text-body bg-base/50">
         Select a file to view activity.
+      </div>
+    );
+  }
+
+  if (isDirectory) {
+    return (
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-base/50 animate-drill-in md:animate-none">
+        <header className="flex flex-col gap-2.5 p-4 border-b border-border-default bg-elevated/10">
+          <div className="flex items-center gap-2 min-w-0">
+            {onBack && (
+              <button
+                onClick={onBack}
+                aria-label="Back to file list"
+                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+              >
+                <Icon name="CaretLeft" className="w-4 h-4" />
+                Files
+              </button>
+            )}
+            <Icon name="Folder" className="w-4 h-4 text-accent/70 flex-shrink-0" />
+            <span className="text-text-primary break-all text-body font-mono font-semibold" title={file.path}>
+              {file.path}
+            </span>
+            <span className="text-micro font-semibold uppercase px-1.5 py-0.5 rounded border text-text-secondary border-border-default bg-elevated/30 flex-shrink-0">
+              Directory
+            </span>
+          </div>
+        </header>
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 text-text-muted">
+          <Icon name="FolderOpen" className="w-8 h-8 text-text-muted" />
+          <p className="text-body">Directory read by the agent</p>
+          <p className="text-label text-text-muted">
+            {childCount && childCount > 0
+              ? `${childCount} known file${childCount === 1 ? '' : 's'} inside`
+              : 'No file content to display.'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -138,7 +181,7 @@ export function FileDiff({ file, sessionId }: Props) {
       const parsed = parseInt(s, 10);
       if (!isNaN(parsed)) startHighlight = parsed;
     }
-    
+
     if (typeof e === 'number') endHighlight = e;
     else if (typeof e === 'string') {
       const parsed = parseInt(e, 10);
@@ -159,12 +202,12 @@ export function FileDiff({ file, sessionId }: Props) {
           const lineNum = i + 1;
           const isHighlighted = startHighlight !== undefined && endHighlight !== undefined &&
                                 lineNum >= startHighlight && lineNum <= endHighlight;
-          
+
           let lineBg = 'hover:bg-elevated/30';
           if (isHighlighted) {
             lineBg = latest?.type === 'read' ? 'bg-running/10 border-l border-running' : 'bg-success/10 border-l border-success';
           }
-          
+
           return (
             <div key={i} className={`flex px-1 py-0.5 rounded ${lineBg}`}>
               <span className="w-10 text-text-muted select-none text-right pr-2 border-r border-border-default/30 mr-3 font-mono">
@@ -181,14 +224,14 @@ export function FileDiff({ file, sessionId }: Props) {
   const renderDiffLines = () => {
     const diffToUse = gitDiff || latest?.snippet || '';
     if (!diffToUse) {
-      return <p className="text-text-muted">Nenhuma alteração Git pendente ou snippet de diff disponível.</p>;
+      return <p className="text-text-muted">No pending git changes or diff snippet available.</p>;
     }
     const lines = diffToUse.split('\n');
     return (
       <div className="min-w-full inline-block">
         {!gitDiff && latest?.snippet && (
-          <p className="text-[11px] text-text-muted border-b border-border-default/30 pb-2 mb-2 font-sans">
-            Sem alterações ativas detectadas no Git local. Exibindo snippet capturado da ferramenta:
+          <p className="text-caption text-text-muted border-b border-border-default/30 pb-2 mb-2">
+            No active changes detected in local git. Showing the snippet captured from the tool:
           </p>
         )}
         {lines.map((line, i) => {
@@ -207,19 +250,36 @@ export function FileDiff({ file, sessionId }: Props) {
     );
   };
 
+  const tabClass = (active: boolean) =>
+    `py-2 text-caption font-mono font-semibold relative transition-colors ${
+      active ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
+    }`;
+
   return (
-    <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-base/50">
+    <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-base/50 animate-drill-in md:animate-none">
       <header className="flex flex-col gap-2.5 p-4 pb-0 border-b border-border-default bg-elevated/10">
         <div className="flex items-start justify-between gap-4">
-          <span className="text-text-primary break-all text-sm font-mono font-semibold" title={file.path}>
-            {file.path}
-          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            {onBack && (
+              <button
+                onClick={onBack}
+                aria-label="Back to file list"
+                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+              >
+                <Icon name="CaretLeft" className="w-4 h-4" />
+                Files
+              </button>
+            )}
+            <span className="text-text-primary break-all text-body font-mono font-semibold" title={file.path}>
+              {file.path}
+            </span>
+          </div>
           {latest && <StatusBadge status={latest.status} />}
         </div>
-        
+
         {latest && (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary pb-2.5">
-            <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded border ${
+          <div className="flex flex-wrap items-center gap-2 text-label text-text-secondary pb-2.5">
+            <span className={`text-micro font-semibold uppercase px-1.5 py-0.5 rounded border ${
               latest.type === 'read'
                 ? 'text-running border-running/35 bg-running/5'
                 : latest.type === 'edit'
@@ -228,21 +288,21 @@ export function FileDiff({ file, sessionId }: Props) {
             }`}>
               {latest.type}
             </span>
-            
-            <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-[11px]">
+
+            <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-caption">
               tool: <strong className="text-text-primary">{latest.tool}</strong>
             </span>
             {latest.skill && (
-              <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-[11px]">
+              <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-caption">
                 skill: <strong className="text-text-primary">{latest.skill}</strong>
               </span>
             )}
             {latest.lineHint && (
-              <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-[11px]">
+              <span className="flex items-center gap-1 bg-elevated px-2 py-0.5 rounded border border-border-default/60 font-mono text-caption">
                 range: <strong className="text-text-primary">{latest.lineHint}</strong>
               </span>
             )}
-            <span className="text-text-muted text-[11px] ml-auto font-mono">
+            <span className="text-text-muted text-caption ml-auto font-mono">
               {new Date(latest.timestamp).toLocaleTimeString()}
             </span>
           </div>
@@ -250,39 +310,34 @@ export function FileDiff({ file, sessionId }: Props) {
 
         <div className="flex border-t border-border-default/30 px-1 gap-6">
           {hasEdit && (
-            <button
-              onClick={() => setActiveTab('diff')}
-              className={`py-2 text-[11px] font-mono font-semibold relative transition-colors ${
-                activeTab === 'diff' ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Diff da Operação
+            <button onClick={() => setActiveTab('diff')} className={tabClass(activeTab === 'diff')}>
+              Operation Diff
               {activeTab === 'diff' && (
                 <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
               )}
             </button>
           )}
-          <button
-            onClick={() => setActiveTab('content')}
-            className={`py-2 text-[11px] font-mono font-semibold relative transition-colors ${
-              activeTab === 'content' ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            Conteúdo Completo
+          <button onClick={() => setActiveTab('content')} className={tabClass(activeTab === 'content')}>
+            Full Content
             {activeTab === 'content' && (
               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
             )}
           </button>
         </div>
       </header>
-      
-      <div className="flex-1 overflow-auto p-4 font-mono text-[13px]">
+
+      <div className="flex-1 overflow-auto p-4 font-mono text-body">
         {loading ? (
-          <p className="text-text-muted animate-pulse">Carregando arquivo...</p>
+          <p className="text-text-muted animate-pulse">Loading file…</p>
         ) : error ? (
-          <p className="text-error font-sans text-xs bg-error/5 p-3 rounded border border-error/25">
-            Erro ao carregar o arquivo: {error}. Ele pode ser binário ou ter sido excluído localmente.
-          </p>
+          <div className="flex items-center gap-3 p-3 rounded border-l-2 border-error bg-inset">
+            <p className="text-label text-text-secondary flex-1">
+              Failed to load file: {error}. It may be binary or have been deleted locally.
+            </p>
+            <button onClick={() => setRetryKey((k) => k + 1)} className="btn-ghost text-label flex-shrink-0">
+              Retry
+            </button>
+          </div>
         ) : activeTab === 'content' ? (
           renderContentLines()
         ) : (

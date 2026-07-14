@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -41,7 +41,6 @@
     "@phosphor-icons/react": "^2.1.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-force-graph-3d": "^1.26.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {

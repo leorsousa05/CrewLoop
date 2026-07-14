@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { FileEntry } from '../../../../src/lib/invocations';
-import { ViewHeader } from '../ViewHeader';
 import { FilterBar } from '../FilterBar';
 import { FileActivity } from '../FileActivity';
+import { computeDirectoryPaths } from '../../lib/dirs';
 import type { FilterOptions } from '../../lib/types';
 
 interface Props {
   files: FileEntry[];
   filterOptions: FilterOptions;
   selectedSessionId: string | null;
+  selectedPath: string | null;
+  onSelectPath: (path: string | null) => void;
 }
 
-export function FilesView({ files, filterOptions, selectedSessionId }: Props) {
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+export function FilesView({ files, filterOptions, selectedSessionId, selectedPath, onSelectPath }: Props) {
   const [allPaths, setAllPaths] = useState<string[]>([]);
 
   useEffect(() => {
@@ -43,15 +44,22 @@ export function FilesView({ files, filterOptions, selectedSessionId }: Props) {
 
   mergedFiles.sort((a, b) => a.path.localeCompare(b.path));
 
+  // Paths that are known to contain other paths are directories, even when
+  // they appear as leaf entries (the agent read the directory itself).
+  const directoryPaths = useMemo(
+    () => computeDirectoryPaths(mergedFiles.map((f) => f.path)),
+    [allPaths, files],
+  );
+
   return (
     <div className="flex-col h-full overflow-hidden flex">
-      <ViewHeader title="Files" icon="Files" />
       <FilterBar options={filterOptions} resultCount={mergedFiles.length} />
       <FileActivity
         files={mergedFiles}
         selectedPath={selectedPath}
-        onSelect={setSelectedPath}
+        onSelect={onSelectPath}
         sessionId={selectedSessionId || undefined}
+        directoryPaths={directoryPaths}
       />
     </div>
   );

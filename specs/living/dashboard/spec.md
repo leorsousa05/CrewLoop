@@ -103,32 +103,43 @@ Kimi sends tool inputs and responses in slightly different shapes from other sou
 
 ## Client views
 
-The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar, and a main content area. It exposes seven views:
+The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + session selector + connection indicator + command palette trigger), and a main content area. It exposes six views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):
 
-1. **Overview** — high-level health cards for the selected session (active skill, telemetry, activity graph), plus cross-session summaries (total/active/pinned sessions, top skills, top tools, recent sessions).
-2. **Sessions** — sortable, filterable, pinnable session list. Pinned sessions stay at the top and persist in `localStorage`.
-3. **Timeline** — reverse-chronological tool invocations (newest at top). A `tool_start` and its matching `tool_end` are collapsed into one row that changes color from running (blue) to success (green) or error (red). Rows can be expanded to view sanitized `input` and `output`; rows with no details show a fallback message. Events can be copied to the clipboard or exported as JSON.
-4. **Network** — interactive 3D force-directed graph (`react-force-graph-3d`) that creates a distinct skill node for each skill used during the session, linking tools and files to the specific skill active at the time. Nodes are colored by type (skill, tool, file) and sized by activity weight. The layout respects `prefers-reduced-motion`.
-5. **Files** — two-pane Explorer layout with a file list (indicating read/edit/other badges with premium selection highlights) and a viewer that dynamically switches between code reader format (with line numbers for read operations) and diff comparison format (for edits).
-6. **Skills** — aggregate skill, tool, and file usage for the selected session's visible invocations.
-7. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session. Settings persist to `localStorage`.
+1. **Overview** — command center for the selected session: a compact Now strip (active skill, lifecycle, confidence, source, elapsed), a dense telemetry strip (Tools, Duration, Rate/min, Files, Errors), an activity graph, a live preview of the last 5 tool invocations with an "Open timeline" entry point, and a horizontally scrollable recent-sessions strip. With zero sessions it renders an empty state.
+2. **Sessions** — filterable, pinnable session list with a segmented sort control (`recent` / `duration` / `events` / `name`) driven by the URL. Pinned sessions stay at the top and persist in `localStorage`. Rows are `div[role=button]` (keyboard-operable) with a real pin button inside.
+3. **Timeline** — tool invocations for the selected session. A `tool_start` and its matching `tool_end` are collapsed into one row that changes color from running (blue) to success (green) or error (red). Rows are `div[role="button"][aria-expanded]` and expand to view sanitized `input`/`output`; events can be copied to the clipboard or exported as JSON. Supports `j`/`k` row selection and `Enter` to expand/collapse. A hover-or-manual pause model buffers live updates while paused and shows a banner with the buffered count and a resume action (manual toggle: `p`).
+4. **Files** — master-detail Explorer: a file tree (read/edit/other badges, `role="tree"` semantics) and a viewer that switches between code reader format (line numbers) and diff comparison format. Below the `md` breakpoint it drills down to the detail pane with a back action; the selected path lives in the URL.
+5. **Skills** — sole owner of aggregate rankings: skill and tool usage bars plus a stat strip (skills, tools, files touched) for the selected session's visible invocations.
+6. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session, plus a keyboard-shortcuts reference generated from the `SHORTCUTS` registry. Settings persist to `localStorage`.
+
+## Navigation & routing
+
+Navigation state lives in the URL hash (`#/view?...`), managed by `ui/src/hooks/useHashRoute.ts` and (de)serialized by `ui/src/lib/route.ts`. The route carries: `view`, `sessionId`, `filePath`, `sort`, and serialized filters (`q`, `sources`, `skills`, `statuses`, `tools`, `ops`, `time`). On mount, contexts and session selection hydrate from the URL; subsequent state changes write through to the hash (`push` for view changes, `replace` for filter mirrors), so refresh restores the exact view/session/filters/file and back/forward works. Switching views via sidebar or palette resets filters.
+
+## Keyboard shortcuts
+
+Global shortcuts are guarded against form fields: `⌘/Ctrl+K` opens the command palette, digits `1`–`6` switch views by position, `/` focuses the filter search, and `Esc` closes the topmost overlay. Timeline scope: `j`/`k` select rows, `Enter` expands/collapses, `p` toggles manual pause. The canonical registry is `ui/src/lib/shortcuts.ts` (`SHORTCUTS`), which also feeds the Settings reference section.
 
 ## Command palette
 
-A global command palette is triggered by `Cmd/Ctrl+K` or the search button in the top bar. It provides fuzzy search across views, sessions, skills, tools, files, recent events, and actions (e.g., export JSON, toggle density, open settings). Selecting an item executes its action and closes the palette. The palette traps focus while open.
+A global command palette is triggered by `Cmd/Ctrl+K` or the search button in the top bar. It provides fuzzy search across views (from `NAV_ITEMS`), sessions, skills, tools, files, recent events, and actions (e.g., export JSON, toggle density, open settings). Selecting an item executes its action — unified through the same `navigate` path as the sidebar — and closes the palette. The palette traps focus while open.
 
 ## Filters
 
-A shared filter bar appears on list and graph views. Filters apply to invocations and sessions by:
+A shared filter bar appears on list views. Filters apply to invocations and sessions by:
 
 - **Source** — agent source.
 - **Skill** — active skill name.
 - **Status** — `running`, `success`, `error`.
 - **Tool** — individual tool name.
 - **Operation type** — `read`, `edit`, `other`.
-- **Time range** — `1m`, `5m`, `15m`, `1h`, `24h`, `session`, or `all`.
+- **Time range** — `1m`, `5m`, `15m`, `1h`, `24h`, `session`, or `all` (radio semantics).
 
-Filter state is global and ephemeral (not persisted across reloads).
+Filter state is global, ephemeral (not persisted across reloads beyond the URL), and mirrored into the hash. Popovers close on `Esc` and flip to the right edge when clipped; below the `md` breakpoint the bar collapses into a bottom sheet.
+
+## Design system
+
+The UI uses an 8-step named type scale registered both as CSS variables (`:root` + `html.light`) and as Tailwind `fontSize` tokens: `display-2xl`, `display-xl`, `display-lg`, `heading`, `body` (13px base), `label`, `caption`, `micro`. Color tokens include `accent-strong`, `accent-subtle`, and `focus` alongside the base palette; arbitrary font-size utilities (`text-[…]`) are banned in favor of the named scale. Motion is tokenized (`sheet-in`, `sheet-scrim-in`, `banner-in`, `drill-in`, `row-in`, `fade-in`) and respects the reduced-motion setting.
 
 ## Skill inference
 
