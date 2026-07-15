@@ -1,0 +1,17 @@
+status: active
+created: 2026-07-14
+updated: 2026-07-14
+author: @opencode
+title: Safe skill installation layout
+type: fix
+scope: cli-installer
+priority: P0
+affected_files:
+  - packages/cli/src/installer.ts
+  - packages/cli/src/tests/installer.test.ts
+  - packages/cli/src/cli.ts
+  - packages/cli/README.md
+  - specs/decisions/004-safe-skill-installation-layout.md
+subagents:
+  approved: false
+  reason: Installer behavior and its tests share one filesystem contract and should change sequentially.

@@ -13,13 +13,31 @@ export interface InstallOptions {
 }
 
 const SHARED_DIRS = ['references', 'assets'];
+const SHARED_NAMESPACE = '_crewloop';
 
 function ensureDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true });
 }
 
 function removeDir(dir: string): void {
-  fs.rmSync(dir, { recursive: true, force: true });
+  const stats = fs.lstatSync(dir);
+  if (stats.isDirectory() && !stats.isSymbolicLink()) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  } else {
+    fs.unlinkSync(dir);
+  }
+}
+
+function pathEntryExists(entryPath: string): boolean {
+  try {
+    fs.lstatSync(entryPath);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function copyDir(source: string, target: string): void {
@@ -38,25 +56,83 @@ function copyDir(source: string, target: string): void {
   }
 }
 
-function createSymlink(source: string, target: string): void {
-  const type = os.platform() === 'win32' ? 'junction' : 'dir';
+function createSymlink(source: string, target: string, isDirectory: boolean): void {
+  const type = os.platform() === 'win32' && isDirectory ? 'junction' : isDirectory ? 'dir' : 'file';
   fs.symlinkSync(source, target, type);
 }
 
-function rewriteSharedLinks(skillPath: string): void {
-  const skillFile = path.join(skillPath, 'SKILL.md');
-  if (!fs.existsSync(skillFile)) {
+function rewriteSharedLinks(content: string): string {
+  return content
+    .replace(/\.\.\/\.\.\/references\//g, `${SHARED_NAMESPACE}/references/`)
+    .replace(/\.\.\/\.\.\/assets\//g, `${SHARED_NAMESPACE}/assets/`);
+}
+
+function assertReservedNamespaceAvailable(sourcePath: string): void {
+  if (fs.existsSync(path.join(sourcePath, SHARED_NAMESPACE))) {
+    throw new Error(`Skill source reserves the installer namespace "${SHARED_NAMESPACE}": ${sourcePath}`);
+  }
+}
+
+function writeInstalledSkill(sourcePath: string, targetPath: string, rewriteLinks: boolean): void {
+  const content = fs.readFileSync(path.join(sourcePath, 'SKILL.md'), 'utf-8');
+  fs.writeFileSync(
+    path.join(targetPath, 'SKILL.md'),
+    rewriteLinks ? rewriteSharedLinks(content) : content,
+    'utf-8'
+  );
+}
+
+function installSharedDirectories(
+  targetPath: string,
+  sharedRoot: string | undefined,
+  symlink: boolean
+): void {
+  if (!sharedRoot) {
     return;
   }
 
-  const content = fs.readFileSync(skillFile, 'utf-8');
-  const updated = content
-    .replace(/\.\.\/\.\.\/references\//g, 'references/')
-    .replace(/\.\.\/\.\.\/assets\//g, 'assets/');
-
-  if (updated !== content) {
-    fs.writeFileSync(skillFile, updated, 'utf-8');
+  const availableDirs = SHARED_DIRS.filter((dir) => fs.existsSync(path.join(sharedRoot, dir)));
+  if (availableDirs.length === 0) {
+    return;
   }
+
+  const namespacePath = path.join(targetPath, SHARED_NAMESPACE);
+  ensureDir(namespacePath);
+
+  for (const dir of availableDirs) {
+    const sourceDir = path.join(sharedRoot, dir);
+    const sharedTargetPath = path.join(namespacePath, dir);
+    if (symlink) {
+      createSymlink(sourceDir, sharedTargetPath, true);
+    } else {
+      copyDir(sourceDir, sharedTargetPath);
+    }
+  }
+}
+
+function installCopiedSkill(sourcePath: string, targetPath: string, sharedRoot?: string): void {
+  copyDir(sourcePath, targetPath);
+  writeInstalledSkill(sourcePath, targetPath, Boolean(sharedRoot));
+  installSharedDirectories(targetPath, sharedRoot, false);
+}
+
+function installLinkedSkill(sourcePath: string, targetPath: string, sharedRoot?: string): void {
+  ensureDir(targetPath);
+  writeInstalledSkill(sourcePath, targetPath, Boolean(sharedRoot));
+
+  for (const entry of fs.readdirSync(sourcePath, { withFileTypes: true })) {
+    if (entry.name === 'SKILL.md') {
+      continue;
+    }
+
+    createSymlink(
+      path.join(sourcePath, entry.name),
+      path.join(targetPath, entry.name),
+      entry.isDirectory()
+    );
+  }
+
+  installSharedDirectories(targetPath, sharedRoot, true);
 }
 
 export interface InstallResult {
@@ -83,7 +159,7 @@ export function installSkills(
 
   for (const skill of skills) {
     const targetPath = path.join(targetDir, skill.name);
-    const exists = fs.existsSync(targetPath);
+    const exists = pathEntryExists(targetPath);
 
     if (exists && !options.force) {
       result.skipped.push(skill.name);
@@ -100,32 +176,12 @@ export function installSkills(
         removeDir(targetPath);
       }
 
+      assertReservedNamespaceAvailable(skill.sourcePath);
+
       if (options.symlink) {
-        createSymlink(skill.sourcePath, targetPath);
+        installLinkedSkill(skill.sourcePath, targetPath, sharedRoot);
       } else {
-        copyDir(skill.sourcePath, targetPath);
-      }
-
-      if (sharedRoot) {
-        for (const dir of SHARED_DIRS) {
-          const sourceDir = path.join(sharedRoot, dir);
-          if (!fs.existsSync(sourceDir)) {
-            continue;
-          }
-
-          const sharedTargetPath = path.join(targetPath, dir);
-
-          if (options.symlink) {
-            fs.rmSync(sharedTargetPath, { recursive: true, force: true });
-            createSymlink(sourceDir, sharedTargetPath);
-          } else {
-            copyDir(sourceDir, sharedTargetPath);
-          }
-        }
-
-        if (!options.symlink) {
-          rewriteSharedLinks(targetPath);
-        }
+        installCopiedSkill(skill.sourcePath, targetPath, sharedRoot);
       }
 
       result.installed.push(skill.name);
