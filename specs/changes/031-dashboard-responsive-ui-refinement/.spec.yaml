@@ -1,0 +1,37 @@
+status: active
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: Dashboard responsive UI refinement
+type: refactor
+scope: dashboard-ui
+priority: P1
+depends_on:
+  - 030-dashboard-client-correctness
+affected_files:
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/styles/index.css
+  - servers/dashboard/ui/src/components/TopBar.tsx
+  - servers/dashboard/ui/src/components/Sidebar.tsx
+  - servers/dashboard/ui/src/components/FilterBar.tsx
+  - servers/dashboard/ui/src/components/SessionSelector.tsx
+  - servers/dashboard/ui/src/components/TimelineRow.tsx
+  - servers/dashboard/ui/src/components/FileDiff.tsx
+  - servers/dashboard/ui/src/components/views/Overview.tsx
+  - servers/dashboard/ui/src/components/views/SessionsView.tsx
+  - servers/dashboard/ui/src/components/views/TimelineView.tsx
+  - servers/dashboard/ui/src/components/views/FilesView.tsx
+  - servers/dashboard/ui/src/components/views/SkillsView.tsx
+  - servers/dashboard/ui/src/components/views/SettingsView.tsx
+  - servers/dashboard/ui/src/**/*.test.tsx
+subagents:
+  approved: true
+  components:
+    - name: shell-and-overlays
+      scope: Top bar, sidebar, filter sheet, session selector, focus management, and live regions
+      files: App.tsx, TopBar.tsx, Sidebar.tsx, FilterBar.tsx, SessionSelector.tsx
+      constraints: Preserve NAV_ITEMS, hash routing, and filter contracts
+    - name: view-refinement
+      scope: Overview, Sessions, Timeline, Files, Skills, Settings, and responsive visual hierarchy
+      files: components/views/*, TimelineRow.tsx, FileDiff.tsx, styles/index.css
+      constraints: Do not alter server protocol or route serialization

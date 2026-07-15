@@ -1,0 +1,34 @@
+status: active
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: Dashboard client correctness
+type: fix
+scope: dashboard-ui-state
+priority: P1
+depends_on:
+  - 029-dashboard-event-session-consistency
+affected_files:
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/hooks/useSessions.ts
+  - servers/dashboard/ui/src/hooks/useWebSocket.ts
+  - servers/dashboard/ui/src/contexts/SettingsContext.tsx
+  - servers/dashboard/ui/src/lib/filter.ts
+  - servers/dashboard/src/lib/invocations.ts
+  - servers/dashboard/ui/src/lib/settings.ts
+  - servers/dashboard/ui/src/components/FileDiff.tsx
+  - servers/dashboard/ui/src/components/views/Overview.tsx
+  - servers/dashboard/ui/src/components/views/FilesView.tsx
+  - servers/dashboard/ui/src/components/views/SettingsView.tsx
+  - servers/dashboard/ui/src/**/*.test.ts
+subagents:
+  approved: true
+  components:
+    - name: projection-and-filters
+      scope: Invocation limits, recency, session/file filters, and removal handling
+      files: src/lib/invocations.ts, ui/src/lib/*, ui/src/hooks/useSessions.ts, related tests
+      constraints: Do not modify overlays, visual tokens, or file-fetch code
+    - name: settings-and-file-fetch
+      scope: Theme/reduced-motion behavior, bounded pause state, and stale-request prevention
+      files: ui/src/contexts/SettingsContext.tsx, ui/src/App.tsx, ui/src/components/FileDiff.tsx, related tests
+      constraints: Do not change route serialization or filter semantics

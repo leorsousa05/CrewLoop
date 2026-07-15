@@ -1,0 +1,27 @@
+status: active
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: Dashboard event and session consistency
+type: fix
+scope: dashboard-events
+priority: P0
+depends_on:
+  - 028-dashboard-local-security-boundaries
+affected_files:
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/api/event.ts
+  - servers/dashboard/src/state.ts
+  - servers/dashboard/src/presenter.ts
+  - servers/dashboard/src/lib/invocations.ts
+  - servers/dashboard/src/adapters/agy.ts
+  - servers/dashboard/src/adapters/claude.ts
+  - servers/dashboard/src/adapters/codex.ts
+  - servers/dashboard/src/adapters/kimi.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - servers/dashboard/src/adapters/opencode.ts
+  - packages/cli/src/hooks.ts
+  - servers/dashboard/src/**/*.test.ts
+subagents:
+  approved: false
+  reason: Canonical event identity, session lifecycle, adapter output, and invocation pairing are one ordered consistency contract.
