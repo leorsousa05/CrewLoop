@@ -34,5 +34,5 @@
 ## Completion
 
 - [x] Submit implementation to Reviewer.
-- [ ] Mark `.spec.yaml` completed only after review passes.
-- [ ] Archive the change only during the shipping phase.
+- [x] Mark `.spec.yaml` completed only after review passes.
+- [x] Archive the change only during the shipping phase.
