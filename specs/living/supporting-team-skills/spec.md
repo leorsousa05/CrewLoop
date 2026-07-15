@@ -12,7 +12,7 @@ The core Loop Engineering Agents workflow covers discovery, specs, design, imple
 - **accessibility-auditor** — WCAG compliance, keyboard navigation, semantic markup, and inclusive UI review.
 - **project-brainstorm** — Interactive discovery for ambiguous project ideas.
 - **long-term-manager** — Durable multi-session project tracking.
-- **diamondblock** — Optional memory and semantic context retrieval.
+- **diamondblock** — Optional memory and semantic context retrieval. Installing the skill (Markdown instructions) is distinct from activating its MCP server; MCP registration is delegated to the official DiamondBlock CLI via `crewloop install --diamondblock`. Runtime use is capability-based: the CrewLoop Hub loads it directly at task entry only when the required MCP tools are exposed in the session, may return repeatedly with targeted queries, and saves only user-confirmed or spec/ADR-accepted distilled non-secret decisions (search-before-save, verified identifiers only). Wrap-up `log_session` after successful shipping is owned by Shipper outside AFK and by the Hub in AFK. All failures warn once and never block; missing or stale indexes stay a manual `dblock index run` action.
 - **docs-writer** — Project, module, feature, and capability documentation.
 - **frontend-architect** — Frontend component boundaries and state ownership.
 - **schema-designer** — Relational schemas, migrations, and API contracts.

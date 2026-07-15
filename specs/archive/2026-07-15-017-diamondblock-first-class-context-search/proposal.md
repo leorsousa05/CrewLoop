@@ -1,5 +1,10 @@
 # Proposal: DiamondBlock as the Default Discovery Layer
 
+## Status
+
+- **State:** completed
+- **Superseded in part by:** `specs/changes/033-diamondblock-runtime-integration/` (2026-07-15)
+
 ## Problem Statement
 CrewLoop currently treats `diamondblock` as an optional memory helper that can be used
 when convenient. In practice, the DiamondBlock project already provides more than session

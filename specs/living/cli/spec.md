@@ -32,6 +32,19 @@ Default `install` output is summarized (`installed N skills to <dir>`, `hooks: X
 
 `doctor` prints stable lines prefixed with `ok`, `warn`, or `error` (error-level findings go to stderr; `ok`/`warn` stay on stdout) and returns non-zero only for error-level findings. Hook checks report marker presence (`present` / `not present`), not semantic validity. A missing `crewloop-shim` PATH entry is warn-level.
 
+`doctor` also reports four layered optional DiamondBlock checks, never at error level and never affecting the exit code: `diamondblock skill` (present in the agent skill dir), `diamondblock binary` (`diamondblock`/`dblock` on PATH), `diamondblock installer` (bounded official `install --dry-run` preflight, exit-status only), and `diamondblock runtime` (guidance: activation is verified inside the agent by exposed MCP tools, never inferred from files). Doctor never parses or writes agent MCP config.
+
+## DiamondBlock MCP integration (opt-in)
+
+`crewloop install --diamondblock` is an explicit opt-in. Without the flag, install performs no DiamondBlock executable lookup or subprocess and behaves exactly as before.
+
+- All MCP registration is delegated to the official DiamondBlock CLI (`diamondblock`, falling back to the `dblock` alias). CrewLoop never writes agent MCP configuration; backups and user-config preservation are the official installer's responsibility.
+- With the flag, install locates the executable, then runs official `install --dry-run` preflight before any CrewLoop mutation. A missing executable or failed preflight exits `1` with an actionable message before skills/hooks are touched.
+- `--agent <agent>` is forwarded as `--target <agent>` only when explicit; otherwise official auto-detection applies.
+- `crewloop install --dry-run --diamondblock` is fully mutation-free: CrewLoop previews plus the official dry-run report only.
+- In normal mode the official install runs after CrewLoop skills/hooks succeed. Its failure exits `1` and states that CrewLoop files may already be installed (partial state, no blind rollback).
+- The subprocess adapter lives in `packages/cli/src/diamondblock.ts`: argument arrays only (`shell: false`), bounded output, injectable PATH lookup and executor, decisions from exit status only. Tests never spawn the real executable.
+
 ## Global binaries
 
 Installing `@archznn/crewloop-skills` globally exposes:

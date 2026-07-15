@@ -1,0 +1,48 @@
+status: completed
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: DiamondBlock runtime integration and lifecycle
+type: feat
+scope: cli-workflow
+priority: P1
+builds_on:
+  - 017-diamondblock-first-class-context-search
+  - 018-diamondblock-manual-index-fallback
+affected_files:
+  - packages/cli/src/args.ts
+  - packages/cli/src/help.ts
+  - packages/cli/src/diamondblock.ts
+  - packages/cli/src/commands/install.ts
+  - packages/cli/src/commands/doctor.ts
+  - packages/cli/src/tests/args.test.ts
+  - packages/cli/src/tests/help.test.ts
+  - packages/cli/src/tests/commands.test.ts
+  - packages/cli/src/tests/diamondblock.test.ts
+  - packages/cli/README.md
+  - packages/cli/AGENTS.md
+  - skills/crewloop-hub/SKILL.md
+  - skills/diamondblock/SKILL.md
+  - skills/shipper/SKILL.md
+  - references/conventions.md
+  - references/workflow.md
+  - references/skill-contracts.yaml
+  - README.md
+  - AGENTS.md
+  - docs/public/docs/getting-started/installation.md
+  - docs/public/docs/concepts/skills-and-roles.md
+  - docs/public/docs/concepts/workflow.md
+  - specs/living/cli/spec.md
+  - specs/living/supporting-team-skills/spec.md
+  - specs/decisions/006-diamondblock-official-installer-boundary.md
+subagents:
+  approved: true
+  components:
+    - name: cli-opt-in-integration
+      scope: Parser, help, official installer adapter, install orchestration, doctor checks, and CLI tests
+      files: packages/cli/src/**, packages/cli/README.md, packages/cli/AGENTS.md, specs/living/cli/spec.md
+      constraints: Do not modify skills or workflow contracts; never write agent MCP config directly
+    - name: memory-lifecycle-contract
+      scope: Hub startup/search/save behavior, Shipper wrap-up, DiamondBlock identifiers/fallback, shared references, and docs
+      files: skills/**, references/**, README.md, AGENTS.md, docs/public/docs/**, specs/living/supporting-team-skills/spec.md
+      constraints: Do not modify CLI implementation or change mandatory delivery phase order
