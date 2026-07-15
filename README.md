@@ -11,7 +11,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 
 ## Highlights
 
-- **Process-driven workflow:** CrewLoop Hub, Architect, Designer, Engineer, Reviewer, Shipper, and nine supporting roles each own one phase and never invade another's territory.
+- **Process-driven workflow:** CrewLoop Hub, Architect, Designer, Engineer, Reviewer, Shipper, and thirteen supporting roles each own one phase and never invade another's territory.
 - **Mandatory specs:** Every change, from a one-line fix to a full feature, gets a lightweight spec in `specs/changes/` before implementation starts.
 - **Design before code:** When there is UI, the Designer defines the aesthetic direction before the Engineer writes markup or styles.
 - **Docs by docs-writer:** READMEs, module docs, and changelogs are owned by the docs-writer skill so the engineer can focus on code and tests.
@@ -103,6 +103,7 @@ CrewLoop supports native shimming/hooking for the following AI agents:
 - **Claude** (`claude`)
 - **Codex** (`codex`)
 - **AGY** (`agy`)
+- **OpenCode** (`opencode`)
 
 During `crewloop install`, the installer modifies the configuration or custom scripts of the selected agent. This shims their execution, allowing tool execution events (such as read/write file, run command, etc.) to be forwarded to the local dashboard WebSocket.
 
@@ -135,6 +136,9 @@ CrewLoop ships 19 specialist skills. The core crew owns the main delivery loop; 
 | [`researcher`](skills/researcher/SKILL.md) | Research | Technology evaluation and proof-of-concepts |
 | [`security-guard`](skills/security-guard/SKILL.md) | Security Review | Security review, secret scanning, and auth |
 | [`accessibility-auditor`](skills/accessibility-auditor/SKILL.md) | Accessibility Review | WCAG, screen reader, and keyboard navigation review |
+| [`frontend-architect`](skills/frontend-architect/SKILL.md) | Frontend Architecture | Component boundaries, props, slots, and state ownership |
+| [`schema-designer`](skills/schema-designer/SKILL.md) | Schema Design | Relational schemas, migrations, and API contracts |
+| [`devops-specialist`](skills/devops-specialist/SKILL.md) | DevOps | CI/CD, deployment, containers, and infrastructure validation |
 
 ### Skills in Action
 
@@ -178,21 +182,21 @@ flowchart TD
 > [!IMPORTANT]
 > **Core Routing Rule:** Skills route directly to the next skill per the transition contract in `references/conventions.md`. The CrewLoop Hub mediates only at task entry and in AFK mode.
 
-1. **CrewLoop Hub is the entry point** — discovery for new tasks, then Architect first. Outside AFK mode it does not mediate mid-flow.
-2. **CrewLoop Hub always routes to Architect first** — to create or update specifications.
+1. **CrewLoop Hub is the entry point** — it may invoke approved discovery/tracking helpers, then routes to Architect as the first mandatory delivery phase.
+2. **Architect is mandatory before implementation** — Hub never routes directly to Designer or Engineer.
 3. **Architect is the design gatekeeper** — once the spec is created, it recommends Designer (for UI) or Engineer (for code).
 4. **Designer acts before Engineer** — when there is UI, the Designer creates the visual specification before the Engineer implements.
 5. **Engineer never does git, review, or docs** — it implements code and tests, then its menu recommends the Reviewer.
 6. **Reviewer is the quality gate** — no code reaches the repository without review. PASS recommends Shipper; FAIL recommends Engineer.
 7. **Shipper is the only skill that touches git** — commit, branch, push, and PR. After shipping it offers a new task (CrewLoop Hub) or done.
-8. **Sub-skills assist core skills** — `project-brainstorm` helps `crewloop-hub`; `schema-designer` helps `architect`; `frontend-architect` helps `designer`; and `devops-specialist` helps `shipper`. Supporting skills end by recommending a return to the skill that invoked them.
+8. **Sub-skills assist core skills** — supporting skills return to their invoker, except completed Project Brainstorm briefs and confirmed Maintainer bugs, which route to Architect.
 9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
 10. **Bug-fixing Pipeline** — Bug triaging is handled by the Maintainer, who recommends the Architect to create a lightweight specification (`.spec.yaml` + `tasks.md`), then the standard chain applies: Engineer → Reviewer → Shipper (commit/ship and archive the spec).
-11. **AFK mode is the exception** — with AFK active, every skill returns control to the CrewLoop Hub automatically and the Hub loads the next skill, with no menus.
+11. **AFK mode is the exception** — every non-Hub skill returns control to CrewLoop Hub, which loads the next skill without menus.
 
 > [!NOTE]
 > **Standard Developer Cycle Example:**
-> `CrewLoop Hub` (Discovery) -> `Architect` (Spec creation) -> `Engineer` (Build & Tests) -> `Reviewer` (Quality gate check) -> `Shipper` (Git commit & PR) -> done. Each transition is confirmed via the ending menu of the current skill.
+> `CrewLoop Hub` (Discovery) -> `Architect` (Spec creation) -> `Engineer` (Build & Tests) -> `Reviewer` (Quality gate check) -> `Shipper` (Git commit & PR) -> done. Interactive transitions are confirmed through menus; Architect and Designer hand off automatically.
 
 
 ## Repository Layout

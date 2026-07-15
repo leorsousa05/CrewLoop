@@ -10,14 +10,14 @@ sidebar_position: 3
 
 `[ Tool Guide ]`
 
-Integration testing in a multi-agent environment verifies that specialized AI skills coordinate seamlessly under the centralized Hub-and-Spoke workflow. Instead of testing individual prompts or tools in isolation, this workflow integration test simulates a real development task—progressing from requirement discovery to final verification—to ensure strict boundary enforcement, precise contract handoffs, and reliable step-by-step execution across all active agent roles. Developers can run this integration test manually by calling each skill in sequence (e.g. `/crewloop-hub`, `/architect`, `/designer`, etc.) or automatically using AFK mode (by setting `afk: true` in `MEMORY.md`) to let the CrewLoop Hub manage the pipeline transitions. This guide outlines the chronological transition paths, input/output requirements, and success criteria to execute and validate the complete pipeline.
+Integration testing in a multi-agent environment verifies strict role boundaries and precise handoffs across the direct-routing workflow. Interactive phases load the selected next skill directly; AFK mode returns every transition through CrewLoop Hub. This guide validates both paths from discovery through shipping.
 
-## Hub-and-Spoke Flowchart
+## Direct-Routing Flowchart
 
-The CrewLoop system runs on a centralized hub-and-spoke model where the CrewLoop Hub regulates all transitions. Every skill yields control back to the CrewLoop Hub before the next phase is invoked.
+CrewLoop Hub owns task entry. Outside AFK, core skills route directly to the next phase and supporting skills return to their invoker.
 
 ```mermaid
-graph TD
+flowchart TD
     %% Node Definitions
     O(["🎯 CrewLoop Hub"]):::crewloop-hub
     A["🏗️ Architect"]:::architect
@@ -27,13 +27,14 @@ graph TD
     T["🧪 Tester"]:::tester
     S["🚀 Shipper"]:::shipper
 
-    %% Hub and Spoke Connections
-    O <-->|1. Create Spec| A
-    O <-->|2. Design UI| D
-    O <-->|3. Implement| E
-    O <-->|4. Code QA| R
-    O <-->|5. Verify UI| T
-    O <-->|6. Git Ship| S
+    O -->|1. Create Spec| A
+    A -->|2. Design UI| D
+    A -->|No UI| E
+    D -->|3. Implement| E
+    E -->|4. Code QA| R
+    R -->|PASS| S
+    R -->|FAIL| E
+    T -.-> E
 
     %% Class Definitions (CSS Theme Variables & Contrast Safe Colors)
     classDef default fill:#1e293b,stroke:#475569,stroke-width:1px,color:#f8fafc;
@@ -75,7 +76,7 @@ graph TD
 | **🎯 CrewLoop Hub** | Initial prompt | `specs/changes/NNN/.spec.yaml` | Verify context brief contains target files |
 
 :::info
-**Routing Transition**: After completing this phase, control MUST return to the **🎯 CrewLoop Hub** before loading the next skill.
+**Routing Transition**: After discovery, present the entry menu and load **🏗️ Architect** after the user selects it. In AFK mode, the Hub loads Architect automatically.
 :::
 
 ---

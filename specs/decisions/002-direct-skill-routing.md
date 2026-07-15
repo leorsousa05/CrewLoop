@@ -21,9 +21,14 @@ Adopt **direct skill routing**:
 2. The CrewLoop Hub keeps only two roles: entry point for new tasks (discovery →
    Architect) and automatic router in AFK mode.
 3. Supporting skills recommend returning to the skill that invoked them (default invoker
-   table in the spec's `design.md`).
-4. The "Handling Tool Responses" and "Mandatory Command Recommendation" rules are
-   retained unchanged.
+   table in the spec's `design.md`). Maintainer and Project Brainstorm are explicit exceptions:
+   confirmed triage and completed briefs route to Architect.
+4. The "Handling Tool Responses" rule is retained: a turn caused by a menu selection loads
+   the selected skill directly without repeating the menu or asking the user to type a command.
+5. In AFK mode every non-Hub skill returns to CrewLoop Hub; the Hub alone evaluates phase
+   state and loads the next skill.
+6. `references/skill-contracts.yaml` is the machine-readable authoring contract for skill
+   prefixes, invokers, menus, and AFK targets. Critical rules remain inline in runtime skills.
 
 ## Alternatives Considered
 - **Keep hub-and-spoke** — rejected: double menus, slow iteration, no benefit when the
@@ -37,7 +42,6 @@ Adopt **direct skill routing**:
 - **Positive:** one menu per transition; skills own their endings; flow is readable as a
   linear chain with explicit branches; AFK automation untouched.
 - **Negative:** the navigation contract is duplicated across ~19 skill files (mitigated by
-  keeping the canonical version in `references/conventions.md` and having Reviewer diff
-  against it).
+  validating inline runtime capsules against `references/skill-contracts.yaml`).
 - **Neutral:** spec/ADR/living-docs formats unchanged; no migration beyond
   `crewloop install` refreshing installed skills.

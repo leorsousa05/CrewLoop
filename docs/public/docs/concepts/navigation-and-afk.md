@@ -6,7 +6,7 @@ sidebar_position: 4
 
 ## The navigation menu
 
-At the end of each skill response, a letter-based navigation menu is presented:
+Interactive skills present a letter-based navigation menu at the end of their response:
 
 ```
 **What would you like to do?**
@@ -19,7 +19,7 @@ At the end of each skill response, a letter-based navigation menu is presented:
 - **[O] Return to CrewLoop Hub** — Adjust scope
 ```
 
-Each skill shows only the letters relevant to its handoff. Skills always wait for explicit user confirmation before routing. The only exception is AFK mode.
+Each interactive skill shows only the letters relevant to its handoff and waits for explicit user confirmation. Architect and Designer are non-interactive: they hand off directly after completing their phase. AFK mode removes menus from all skills.
 
 ## AFK mode
 
@@ -39,11 +39,11 @@ Or add `afk: true` to `MEMORY.md` in the project root.
 - Skills skip the navigation menu.
 - Each response starts with the skill role prefix on its own line:
   ```
-  [ENGINEER BUILDING]
-  [REVIEWER INSPECTING]
-  [SHIPPER COMMITTING]
+  > 🔧 **Engineer**
+  > 🔍 **Reviewer**
+  > 🚀 **Shipper**
   ```
-- Skills load the next skill automatically without waiting for user input.
+- Every non-Hub skill returns control to CrewLoop Hub, which loads the next skill without waiting for user input.
 - Standard routing rules still apply.
 
 ### Deactivation

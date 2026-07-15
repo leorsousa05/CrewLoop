@@ -52,12 +52,14 @@ Keep the body under 500 lines when possible. Use progressive disclosure:
 4. **RESPONSE RULES** — How to behave and respond
 5. **ANTI-PATTERNS** — Common mistakes to avoid
 
+Every skill also includes a compact `## TRANSITION CONTRACT` near the role definition. Its prefix, invoker, routes, and AFK destination must match `references/skill-contracts.yaml`. Critical runtime transitions stay inline; the YAML file is an authoring and CI contract, not a runtime dependency.
+
 ### Tone
 
 - Use imperative form for instructions
 - Explain why things matter instead of heavy-handed MUSTs
 - Be specific in examples
-- Preserve letter-based navigation at the end
+- Preserve letter-based navigation at the end for interactive skills, scoped outside AFK
 
 ---
 
@@ -75,3 +77,6 @@ This checks:
 - Required fields (`name`, `description`) are present
 - `name` matches the directory name
 - Description is not too short
+- All 19 skills match `references/skill-contracts.yaml`
+- Role prefixes, routes, invokers, and AFK destinations are valid
+- Markdown fences are balanced and relative links resolve

@@ -13,13 +13,13 @@ A **skill** is a reusable instruction set for an AI agent. In CrewLoop, each ski
 - The expected inputs and outputs
 - How to hand off to the next skill
 
-Skills live in `skills/<skill-name>/SKILL.md`. They are loaded by compatible agents (Kimi Code, Claude, Codex, AGY) and triggered by conversation context.
+Skills live in `skills/<skill-name>/SKILL.md`. They are loaded by compatible agents (Kimi Code, Claude, Codex, AGY, OpenCode) and triggered by conversation context.
 
-## The 18 skills
+## The 19 skills
 
 ### Core Skills
 
-Mandatory in every task flow. No task bypasses any of them.
+These skills own the delivery loop. Designer participates only when a change affects a visual interface.
 
 | Skill | Phase | Role |
 |-------|-------|------|
@@ -32,7 +32,7 @@ Mandatory in every task flow. No task bypasses any of them.
 
 ### Supporting Skills
 
-Invoked by CrewLoop Hub or Reviewer when the task needs a specialist.
+Invoked by the owning core skill when a task needs specialist analysis. Default invokers are defined in `references/skill-contracts.yaml`.
 
 | Skill | Invoked when |
 |-------|-------------|
@@ -45,8 +45,12 @@ Invoked by CrewLoop Hub or Reviewer when the task needs a specialist.
 | **Researcher** | Technology evaluation, library comparison, proof-of-concept |
 | **Security-Guard** | Security review, secret scanning, auth, PII, authorization |
 | **Accessibility-Auditor** | WCAG compliance, keyboard nav, screen readers, color contrast |
+| **DiamondBlock** | Optional session memory, semantic context retrieval, and codebase search |
+| **Frontend-Architect** | React component boundaries, props, slots, and state ownership |
+| **Schema-Designer** | Relational schemas, constraints, migrations, and API contracts |
+| **DevOps-Specialist** | CI/CD, deployment, containers, and infrastructure validation |
 
-Supporting skills report findings back to the skill that invoked them. They do not write code or run git operations.
+Supporting skills report findings back to the skill that invoked them. Maintainer and Project Brainstorm route confirmed triage/completed briefs to Architect. They do not write implementation code or run git operations.
 
 ## Role separation rules
 
@@ -55,7 +59,7 @@ Supporting skills report findings back to the skill that invoked them. They do n
 | Only Engineer writes implementation code | Prevents untested, unreviewed code from other skills |
 | Only Shipper touches git | Ensures every commit is deliberate, reviewed, and Conventional Commits-compliant |
 | Only Reviewer approves changes | Prevents self-review and rubber-stamping |
-| CrewLoop Hub always routes to Architect first | Ensures specs exist before any code is written |
+| Architect is the first mandatory delivery phase | Allows approved discovery helpers while ensuring specs exist before delivery work |
 | Designer acts before Engineer on UI | Ensures visual direction is set before implementation |
 
 ## The crew is not a committee

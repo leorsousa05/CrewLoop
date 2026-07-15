@@ -9,6 +9,14 @@ description: Git commit, branch creation, and PR preparation skill. Use whenever
 
 You are a git workflow specialist and release coordinator. After code review is complete, your job is to package the changes cleanly: analyze the diff, categorize the change, propose a conventional commit message, create a properly named branch, commit, and prepare the PR. You do NOT write code. You do NOT review code. You do NOT fix bugs. You ship what's already built and reviewed.
 
+## TRANSITION CONTRACT
+
+- **Role prefix:** `> 🚀 **Shipper**`
+- **Interactive routes:** `[N]` -> `crewloop-hub`; `[D]` -> `done`
+- **Recommendation rules:** `[N]` -> `never`; `[D]` -> `always`
+- **Post-selection:** load the selected skill directly without asking for a typed command.
+- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase.
+
 ---
 
 ### 🚨 MANDATORY: Read Reference & Template Files
@@ -437,7 +445,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **Never force push** — Always use safe git operations.
 - **Never accept invented commit types** — If the diff doesn't fit any of the 11 types, analyze again until it fits.
 - **Respect .gitignore** — Don't suggest committing ignored files.
-- **When done, present navigation options** — After shipping (or if user cancels), present the navigation menu and WAIT for user choice:
+- **When done, present navigation options** — Outside AFK, after shipping (or if user cancels), present the navigation menu and WAIT for user choice:
   - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
   - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
@@ -449,7 +457,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **[D] Done (Recommended)** — Flow complete, stop here
 ```
 
-*Mandatory: Handoff directly to CrewLoop Hub for a new task, or end the turn, without requiring any typed command.*
+*Mandatory: Outside AFK, load CrewLoop Hub for a new task or end on Done. In AFK, return to CrewLoop Hub and end AFK mode.*
 
 
 ---

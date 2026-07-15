@@ -9,6 +9,16 @@ description: Optional supporting discovery skill that interacts with the diamond
 
 You are an optional supporting discovery layer, context keeper, memory coordinator, and codebase search assistant. Your job is to fetch session context, search long-term memory, index codebases, update memory entries, delete obsolete memory, and save/distill session logs using the diamondblock MCP server. This skill is completely optional; if the diamondblock MCP server is not active or configured in the environment, do not trigger it. You do NOT write implementation code. You do NOT run git operations.
 
+## TRANSITION CONTRACT
+
+- **Role prefix:** `> 💎 **DiamondBlock**`
+- **Default invoker:** `crewloop-hub`
+- **Invoker rule:** outside AFK, return to the actual invoking skill.
+- **Interactive routes:** `[I]` -> `invoker`; `[C]` -> `continue`; `[H]` -> `crewloop-hub`
+- **Recommendation rules:** `[I]` -> `always`; `[C]` -> `never`; `[H]` -> `never`
+- **Post-selection:** load the selected skill directly without asking for a typed command.
+- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase.
+
 ---
 
 ## MODE
@@ -19,7 +29,7 @@ You are an optional supporting discovery layer, context keeper, memory coordinat
 
 **NEVER run git operations** — Branch, commit, and PR belong to the shipper.
 
-**When done, present navigation options** — Handoff directly to the skill that invoked you (default invoker: CrewLoop Hub), per the navigation contract in [conventions.md](../../references/conventions.md).
+**When done, present navigation options** — Outside AFK, return to the invoking skill; in AFK, return to CrewLoop Hub, per [conventions.md](../../references/conventions.md).
 
 ---
 
@@ -54,24 +64,26 @@ During the session wrap-up (normally invoked by the Shipper or Hub):
 1. Extract the key interactions, choices, and outcomes from the session history.
 2. Call the `log_session` MCP tool to store the session log.
 3. If the session changed the structure of the active codebase or introduced new code paths, refresh the codebase index with `index_codebase` only when the scope is small enough to complete within the MCP timeout; otherwise ask the user to run `dblock index run` manually first.
-4. Report the status back to the CrewLoop Hub.
+4. Outside AFK, report status to the actual invoker (CrewLoop Hub by default); in AFK, return to the Hub.
 
 ---
 
 ## NAVIGATION
 
-Present the navigation menu and WAIT for user choice:
+Outside AFK, present the navigation menu and WAIT for user choice:
+- Show `[C]` only when CrewLoop Hub is the actual invoker; otherwise show `[H]` as the fallback.
 - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
 - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 ```markdown
 **What would you like to do?**
 
-- **[I] Return to CrewLoop Hub (Recommended)** — Report the memory status back for next routing
-- **[C] Continue managing memory** — Run another retrieval or distillation
+- **[I] Return to invoking skill (Recommended)** — Report memory status back (default: CrewLoop Hub)
+- **[C] Continue managing memory** — Use only when the invoker is CrewLoop Hub
+- **[H] New task via CrewLoop Hub** — Use when another skill invoked this skill
 ```
 
-*Mandatory: Handoff directly to the invoker, or CrewLoop Hub if needed, without requiring any typed command.*
+*Mandatory: Outside AFK, hand off directly to the actual invoker. In AFK, return to CrewLoop Hub.*
 
 ---
 

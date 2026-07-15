@@ -1,0 +1,183 @@
+version: 1
+skills:
+  crewloop-hub:
+    kind: core
+    prefix: "> 🎯 **CrewLoop Hub**"
+    interactive: true
+    menu:
+      A: {target: architect, recommended: conditional, condition: well-scoped-task}
+      B: {target: project-brainstorm, recommended: conditional, condition: ambiguous-project}
+      T: {target: long-term-manager, recommended: conditional, condition: multi-session-project}
+    afk_target: architect
+  architect:
+    kind: core
+    prefix: "> 🏗️ **Architect**"
+    interactive: false
+    direct_target: conditional-designer-or-engineer
+    afk_target: crewloop-hub
+  designer:
+    kind: core
+    prefix: "> 🎨 **Designer**"
+    interactive: false
+    direct_target: engineer
+    afk_target: crewloop-hub
+  engineer:
+    kind: core
+    prefix: "> 🔧 **Engineer**"
+    interactive: true
+    menu:
+      R: {target: reviewer, recommended: conditional, condition: verified-build}
+      E: {target: continue, recommended: conditional, condition: incomplete-build}
+      A: {target: architect, recommended: conditional, condition: spec-gap}
+    afk_target: crewloop-hub
+  reviewer:
+    kind: core
+    prefix: "> 🔍 **Reviewer**"
+    interactive: true
+    menu:
+      S: {target: shipper, recommended: conditional, condition: pass}
+      E: {target: engineer, recommended: conditional, condition: fail}
+    afk_target: crewloop-hub
+  shipper:
+    kind: core
+    prefix: "> 🚀 **Shipper**"
+    interactive: true
+    menu:
+      N: {target: crewloop-hub, recommended: never}
+      D: {target: done, recommended: always}
+    afk_target: crewloop-hub
+  maintainer:
+    kind: supporting
+    prefix: "> 🧰 **Maintainer**"
+    default_invoker: crewloop-hub
+    return_strategy: architect-after-triage
+    interactive: true
+    menu:
+      A: {target: architect, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  project-brainstorm:
+    kind: supporting
+    prefix: "> 🧠 **Project Brainstorm**"
+    default_invoker: crewloop-hub
+    return_strategy: architect-after-brief
+    interactive: true
+    menu:
+      A: {target: architect, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  long-term-manager:
+    kind: supporting
+    prefix: "> 📅 **Long-Term Manager**"
+    default_invoker: crewloop-hub
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      C: {target: continue, recommended: never}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  diamondblock:
+    kind: supporting
+    prefix: "> 💎 **DiamondBlock**"
+    default_invoker: crewloop-hub
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      C: {target: continue, recommended: never}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  docs-writer:
+    kind: supporting
+    prefix: "> 📝 **Docs Writer**"
+    default_invoker: crewloop-hub
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      C: {target: continue, recommended: never}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  researcher:
+    kind: supporting
+    prefix: "> 🔬 **Researcher**"
+    default_invoker: crewloop-hub
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      C: {target: continue, recommended: never}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  product-manager:
+    kind: supporting
+    prefix: "> 📊 **Product Manager**"
+    default_invoker: crewloop-hub
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      C: {target: continue, recommended: never}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  security-guard:
+    kind: supporting
+    prefix: "> 🛡️ **Security-Guard**"
+    default_invoker: reviewer
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  accessibility-auditor:
+    kind: supporting
+    prefix: "> ♿ **Accessibility-Auditor**"
+    default_invoker: reviewer
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  tester:
+    kind: supporting
+    prefix: "> 🧪 **Tester**"
+    default_invoker: engineer
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  frontend-architect:
+    kind: supporting
+    prefix: "> 📐 **Frontend-Architect**"
+    default_invoker: designer
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  schema-designer:
+    kind: supporting
+    prefix: "> 🗄️ **Schema-Designer**"
+    default_invoker: architect
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub
+  devops-specialist:
+    kind: supporting
+    prefix: "> 🛠️ **DevOps-Specialist**"
+    default_invoker: shipper
+    return_strategy: invoker
+    interactive: true
+    menu:
+      I: {target: invoker, recommended: always}
+      H: {target: crewloop-hub, recommended: never}
+    afk_target: crewloop-hub

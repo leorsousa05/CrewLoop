@@ -44,7 +44,7 @@ mode** — never in the middle of an interactive flow.
 
 ### The Transition Contract
 
-Each skill ends with a menu of the valid next steps from its position in the flow. Exactly
+Each interactive skill ends with a menu of the valid next steps from its position in the flow. Exactly
 one option is marked `(Recommended)`, chosen by the phase outcome.
 
 | Skill | Options (key → next skill) | Recommended when |
@@ -96,7 +96,7 @@ Rules:
 5. The recommended next skill at the end of each skill's navigation section uses that skill's recommended target (e.g. `Reviewer`), never a hardcoded `/crewloop-hub` unless the Hub is the recommended target.
 
 #### CrewLoop Hub Entry Menu (new tasks only)
-The Hub presents a menu only after discovery for a new task, or when mediating in AFK mode:
+The Hub presents this menu only after interactive discovery for a new task. AFK mode never presents menus:
 
 ```markdown
 **What would you like to do?**
@@ -156,6 +156,7 @@ The CrewLoop Hub mediates only at task entry and in AFK mode.
 CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done
                                                             ↑________ FAIL ________|
 Supporting skills → back to the invoking skill
+Maintainer / Project Brainstorm → Architect after confirmed triage / completed brief
 New task → CrewLoop Hub
 ```
 
@@ -185,11 +186,24 @@ Every skill response must start with its prefix on its own line:
 | Engineer | `> 🔧 **Engineer**` |
 | Reviewer | `> 🔍 **Reviewer**` |
 | Shipper | `> 🚀 **Shipper**` |
+| Maintainer | `> 🧰 **Maintainer**` |
+| Project Brainstorm | `> 🧠 **Project Brainstorm**` |
+| Long-Term Manager | `> 📅 **Long-Term Manager**` |
+| DiamondBlock | `> 💎 **DiamondBlock**` |
+| Docs Writer | `> 📝 **Docs Writer**` |
+| Researcher | `> 🔬 **Researcher**` |
+| Product Manager | `> 📊 **Product Manager**` |
+| Security Guard | `> 🛡️ **Security-Guard**` |
+| Accessibility Auditor | `> ♿ **Accessibility-Auditor**` |
+| Tester | `> 🧪 **Tester**` |
+| Frontend Architect | `> 📐 **Frontend-Architect**` |
+| Schema Designer | `> 🗄️ **Schema-Designer**` |
+| DevOps Specialist | `> 🛠️ **DevOps-Specialist**` |
 
 ### Automatic routing
 
 When AFK mode is active:
-1. The execution skill performs its task and returns control to the CrewLoop Hub automatically (using the Skill tool to trigger CrewLoop Hub).
+1. Every non-Hub skill performs its task and returns control to the CrewLoop Hub automatically (using the Skill tool to trigger CrewLoop Hub).
 2. The CrewLoop Hub automatically evaluates state and loads the next appropriate skill per the transition contract.
 
 ---
@@ -373,5 +387,5 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 ## Bundle Lock-In & Self-Consistency Rules
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
-2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 18 skills defined in the CrewLoop bundle. 
+2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 19 skills defined in the CrewLoop bundle.
 3. **Direct Routing:** Execution skills hand off directly to the next skill per the transition contract — the CrewLoop Hub mediates only as the new-task entry point and in AFK mode. Every skill must end its turn per the contract (menu + direct handoff). If you receive a handoff that violates the transition contract (e.g. a phase skipped without the user choosing it), note the deviation and continue the correct next skill.

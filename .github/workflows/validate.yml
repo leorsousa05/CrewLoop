@@ -32,4 +32,6 @@ jobs:
         run: npm test --workspaces
 
       - name: Validate skills
-        run: python3 scripts/validate-skills.py
+        run: |
+          python3 -m unittest scripts.tests.test_validate_skills
+          python3 scripts/validate-skills.py

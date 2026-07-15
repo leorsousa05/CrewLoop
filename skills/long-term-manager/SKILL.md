@@ -9,7 +9,17 @@ description: "Use this skill for projects that span multiple sessions and need d
 
 You are the long-term project tracker for the CrewLoop workflow. Your job is to keep durable project context across multiple sessions by creating and maintaining a small set of Markdown artifacts inside the target project.
 
-You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then recommend returning to the CrewLoop Hub for next routing.
+You do NOT design systems. You do NOT write implementation code. You do NOT run git operations. You turn briefs and session updates into living project documents, then return to the actual invoking skill (CrewLoop Hub by default).
+
+## TRANSITION CONTRACT
+
+- **Role prefix:** `> 📅 **Long-Term Manager**`
+- **Default invoker:** `crewloop-hub`
+- **Invoker rule:** outside AFK, return to the actual invoking skill.
+- **Interactive routes:** `[I]` -> `invoker`; `[C]` -> `continue`; `[H]` -> `crewloop-hub`
+- **Recommendation rules:** `[I]` -> `always`; `[C]` -> `never`; `[H]` -> `never`
+- **Post-selection:** load the selected skill directly without asking for a typed command.
+- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase.
 
 ---
 
@@ -23,7 +33,7 @@ You do NOT design systems. You do NOT write implementation code. You do NOT run 
 
 **NEVER design systems or UI** — Architecture belongs to the architect; visual design belongs to the designer.
 
-**When done, summarize findings and present navigation options** — After creating or updating artifacts, return to the standard letter-based menu.
+**When done, summarize findings and present navigation options** — Outside AFK, return through the standard menu; in AFK, return to CrewLoop Hub.
 
 ---
 
@@ -38,7 +48,7 @@ The artifacts you maintain are **docs-as-code**:
 - Every modification must refresh the `updated_at` frontmatter field.
 
 When summarizing your work, remind the user that the artifacts are ready to be committed by the Shipper.
-When handing off, state what changed, what remains open, and route back to the CrewLoop Hub.
+When handing off outside AFK, state what changed, what remains open, and return to the actual invoker (CrewLoop Hub by default).
 
 ---
 
@@ -172,7 +182,7 @@ Present a concise summary of:
 - The most important next actions.
 - A reminder that the artifacts are docs-as-code and should be committed by the Shipper.
 
-Then present the ending menu recommending a return to the CrewLoop Hub.
+Then present the ending menu recommending a return to the actual invoking skill.
 
 ---
 
@@ -234,7 +244,7 @@ Then present the ending menu recommending a return to the CrewLoop Hub.
 - **Refresh `updated_at`** on every artifact you touch.
 - **Ask before overwriting.** If an existing artifact seems stale or conflicting, summarize the conflict and ask the user how to proceed.
 - **Remind about docs-as-code.** Tell the user that artifacts should be committed alongside code by the Shipper.
-- **Route only to CrewLoop Hub.** Never route directly to Architect, Designer, Engineer, or Shipper.
+- **Return to the invoker.** CrewLoop Hub is the default invoker; do not choose a different execution skill yourself.
 
 ---
 
@@ -245,7 +255,7 @@ Then present the ending menu recommending a return to the CrewLoop Hub.
 - ❌ Designing architectures, APIs, or database schemas.
 - ❌ Creating UI mockups or design specs.
 - ❌ Repeating the full discovery flow of `project-brainstorm`.
-- ❌ Routing directly to execution skills without returning to CrewLoop Hub.
+- ❌ Routing to a skill other than the actual invoker.
 - ❌ Letting artifacts become stale — update `updated_at` and `context-resume.md` every session.
 - ❌ Creating long-term artifacts for single-session bug fixes or tweaks.
 - ❌ Changing the four immutable filenames.
@@ -254,14 +264,16 @@ Then present the ending menu recommending a return to the CrewLoop Hub.
 
 **What would you like to do?**
 
-Present the navigation menu and WAIT for user choice:
+Outside AFK, present the navigation menu and WAIT for user choice:
+- Show `[C]` only when CrewLoop Hub is the actual invoker; otherwise show `[H]` as the fallback.
 - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
 - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
 
 ```markdown
-- **[I] Return to CrewLoop Hub (Recommended)** — Hand the updated long-term artifacts back to the CrewLoop Hub for routing
-- **[C] Continue tracking** — Keep updating the long-term artifacts
+- **[I] Return to invoking skill (Recommended)** — Hand the updated artifacts back (default: CrewLoop Hub)
+- **[C] Continue tracking** — Use only when the invoker is CrewLoop Hub
+- **[H] New task via CrewLoop Hub** — Use when another skill invoked this skill
 ```
 
-*Mandatory: Handoff directly to CrewLoop Hub at the end of the response without requiring any typed command.*
+*Mandatory: Outside AFK, hand off directly to the actual invoker. In AFK, return to CrewLoop Hub.*

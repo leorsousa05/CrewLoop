@@ -15,6 +15,7 @@ Complete workflow for the Loop Engineering Agents team.
 | Reviewer | `skills/reviewer/SKILL.md` | Code review and quality gate |
 | Shipper | `skills/shipper/SKILL.md` | Git operations and PR |
 | Maintainer | `skills/maintainer/SKILL.md` | Bug triage and technical debt |
+| Project Brainstorm | `skills/project-brainstorm/SKILL.md` | Interactive discovery for ambiguous project ideas |
 | Docs Writer | `skills/docs-writer/SKILL.md` | Documentation-only changes |
 | Tester | `skills/tester/SKILL.md` | QA strategy and coverage analysis |
 | Product Manager | `skills/product-manager/SKILL.md` | Prioritization and success metrics |
@@ -66,13 +67,14 @@ flowchart TD
 
 ## Routing Rules
 
-1. **CrewLoop Hub is the entry point** — it runs discovery for new tasks and routes to
-   Architect first. Outside AFK mode, it does not mediate mid-flow transitions.
+1. **CrewLoop Hub is the entry point** — it may use approved discovery/tracking helpers,
+   then routes to Architect as the first mandatory delivery phase. Outside AFK mode, it
+   does not mediate mid-flow transitions.
 2. **DiamondBlock is the default read-only discovery layer** — when configured and
    installed, the Hub uses DiamondBlock before any broad manual inspection to retrieve
    session memory, prior decisions, semantic codebase search results, and other read-only
    context.
-3. **Skills route directly** — each skill ends by presenting the valid next-step options
+3. **Interactive skills route directly** — each interactive skill presents valid next-step options
    from its position in the flow (transition contract in `conventions.md`), with one
    outcome-driven option marked `(Recommended)`. The user picks; the skill continues
    directly into the chosen next skill.
@@ -94,8 +96,9 @@ flowchart TD
    Architect with a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
    standard chain applies: Architect → Engineer → Reviewer → Shipper.
 11. **Specialist Helpers return to their invoker** — `schema-designer` → Architect,
-    `frontend-architect` → Designer, `devops-specialist` → Shipper, `tester` → Engineer.
-12. **AFK mode is the exception** — with AFK active, every skill returns control to the
+    `frontend-architect` → Designer, `devops-specialist` → Shipper, and `tester` / `docs-writer` → Engineer when invoked during delivery.
+    Maintainer and Project Brainstorm instead route confirmed triage/completed briefs to Architect.
+12. **AFK mode is the exception** — with AFK active, every non-Hub skill returns control to the
     CrewLoop Hub automatically and the Hub loads the next skill per the transition
     contract, with no menus.
 
@@ -103,7 +106,7 @@ flowchart TD
 
 ## AFK Flow
 
-1. Skill finishes → loads CrewLoop Hub automatically (Skill tool)
+1. Non-Hub skill finishes → loads CrewLoop Hub automatically (Skill tool)
 2. Hub evaluates state → loads next skill per the transition contract
 3. No menus; role prefixes on every response
 4. Ends when Shipper completes and returns to the Hub
