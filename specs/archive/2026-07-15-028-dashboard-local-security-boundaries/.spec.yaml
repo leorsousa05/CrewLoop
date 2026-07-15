@@ -1,0 +1,22 @@
+status: completed
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: Dashboard local security boundaries
+type: fix
+scope: dashboard-server
+priority: P0
+depends_on: []
+affected_files:
+  - servers/dashboard/src/config.ts
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/api/event.ts
+  - servers/dashboard/src/lib/local-request-policy.ts
+  - servers/dashboard/src/lib/workspace-access.ts
+  - servers/dashboard/src/server.test.ts
+  - servers/dashboard/src/api/event.test.ts
+  - specs/decisions/005-dashboard-local-trust-boundary.md
+subagents:
+  approved: false
+  reason: Request policy, workspace resolution, file APIs, and integration tests share one trust-boundary contract and must change sequentially.

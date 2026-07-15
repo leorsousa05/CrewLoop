@@ -1,0 +1,33 @@
+status: active
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: Dashboard quality and documentation consolidation
+type: test
+scope: dashboard-quality
+priority: P1
+depends_on:
+  - 028-dashboard-local-security-boundaries
+  - 029-dashboard-event-session-consistency
+  - 030-dashboard-client-correctness
+  - 031-dashboard-responsive-ui-refinement
+affected_files:
+  - servers/dashboard/src/**/*.test.ts
+  - servers/dashboard/ui/src/**/*.test.ts
+  - servers/dashboard/README.md
+  - specs/living/dashboard/spec.md
+  - specs/decisions/001-dashboard-hybrid-architecture.md
+  - specs/changes/021-dashboard-console-redesign/**
+  - specs/changes/022-dashboard-saas-minimalist-redesign/**
+  - docs/project/*.md
+subagents:
+  approved: true
+  components:
+    - name: verification-matrix
+      scope: Cross-phase automated and manual regression coverage
+      files: servers/dashboard/src/**/*.test.ts, servers/dashboard/ui/src/**/*.test.ts
+      constraints: Do not change production behavior except isolated testability seams approved by Architect
+    - name: source-of-truth
+      scope: README, living spec, ADR corrections, tracking updates, and stale-spec disposition
+      files: servers/dashboard/README.md, specs/living/dashboard/spec.md, specs/decisions/001-dashboard-hybrid-architecture.md, docs/project/*.md
+      constraints: Document only verified final behavior

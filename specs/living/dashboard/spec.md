@@ -92,6 +92,16 @@ Because AGY does not emit `session_start`, the shim applies the `--default-skill
 
 The shim runs the raw payload through `sanitize()` before forwarding. Dangerous keys and verbose content are stripped so that agent data does not leak to the dashboard UI. The sanitizer accepts object or string `tool_response` values; plain-string responses are converted to a truncated `contentSnippet` so the UI can display them without exposing raw tool output.
 
+### Local trust boundary (ADR 005)
+
+The dashboard is a loopback-only product, enforced in code rather than implied by bind address:
+
+- **WebSocket Origin policy** — browser WebSocket upgrades must present an Origin matching the configured local origin (loopback host + configured port); foreign origins are rejected with 403 before any telemetry is sent. Non-browser hook clients without an Origin header are accepted.
+- **Workspace filesystem policy** — `/api/workspace-files`, `/api/file-content`, and `/api/file-diff` require a `sessionId` with a known workspace root (from `workspacePath` events or the runtime root mapping). There are no repository/CWD fallbacks and no session-ID substring authorization.
+- **Canonical path containment** — requested paths must be relative, resolve inside the canonical workspace root, and symlinks whose real targets escape the root are rejected (403).
+- **Bounded resources** — event bodies, workspace scans (entries and depth), and file reads have configured limits (`eventBodyBytes`, `workspaceEntries`, `workspaceDepth`, `fileBytes`); violations return typed 413 errors without partial state updates.
+- **Safe errors** — API errors carry stable codes (`PATH_FORBIDDEN`, `WORKSPACE_UNAVAILABLE`, `FILE_TOO_LARGE`, `BINARY_FILE_UNSUPPORTED`, `PAYLOAD_TOO_LARGE`) and never expose absolute paths or raw stderr.
+
 ### Kimi payload normalization
 
 Kimi sends tool inputs and responses in slightly different shapes from other sources. The sanitizer normalizes them before the UI sees them:

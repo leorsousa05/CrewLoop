@@ -91,6 +91,10 @@ export const DEFAULT_MAX_EVENTS = 200;
 export const DEFAULT_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 export const DEFAULT_SESSION_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
 export const DEFAULT_PRUNE_INTERVAL_MS = 60 * 1000;
+export const DEFAULT_EVENT_BODY_BYTES = 256 * 1024;
+export const DEFAULT_FILE_BYTES = 1024 * 1024;
+export const DEFAULT_WORKSPACE_ENTRIES = 20000;
+export const DEFAULT_WORKSPACE_DEPTH = 30;
 
 export function loadConfig(): ServerConfig {
   const port = parseInt(process.env.CREWLOOP_DASHBOARD_PORT || String(DEFAULT_PORT), 10);
@@ -108,6 +112,10 @@ export function loadConfig(): ServerConfig {
     sessionMaxAgeMs: DEFAULT_SESSION_MAX_AGE_MS,
     sessionIdleTimeoutMs: Number.isFinite(idleTimeout) && idleTimeout > 0 ? idleTimeout : DEFAULT_SESSION_IDLE_TIMEOUT_MS,
     pruneIntervalMs: DEFAULT_PRUNE_INTERVAL_MS,
+    eventBodyBytes: DEFAULT_EVENT_BODY_BYTES,
+    fileBytes: DEFAULT_FILE_BYTES,
+    workspaceEntries: DEFAULT_WORKSPACE_ENTRIES,
+    workspaceDepth: DEFAULT_WORKSPACE_DEPTH,
   };
 }
 
