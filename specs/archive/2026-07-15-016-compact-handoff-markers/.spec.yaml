@@ -1,30 +1,29 @@
-status: active
+status: completed
 created: 2026-07-13
-updated: 2026-07-13
+updated: 2026-07-15
 author: @codex
-title: Direct handoff without typed commands
+title: Unified skill transition and AFK contracts
 type: docs
 scope: repository-wide
+priority: P1
 affected_files:
+  - .github/workflows/validate.yml
+  - references/skill-contracts.yaml
   - references/conventions.md
   - references/workflow.md
+  - references/skill-anatomy.md
+  - assets/templates/skill-template.md
   - AGENTS.md
-  - skills/crewloop-hub/SKILL.md
-  - skills/architect/SKILL.md
-  - skills/designer/SKILL.md
-  - skills/engineer/SKILL.md
-  - skills/reviewer/SKILL.md
-  - skills/shipper/SKILL.md
-  - skills/maintainer/SKILL.md
-  - skills/project-brainstorm/SKILL.md
-  - skills/product-manager/SKILL.md
-  - skills/long-term-manager/SKILL.md
-  - skills/researcher/SKILL.md
-  - skills/docs-writer/SKILL.md
-  - skills/security-guard/SKILL.md
-  - skills/accessibility-auditor/SKILL.md
-  - skills/tester/SKILL.md
-  - skills/diamondblock/SKILL.md
-  - skills/frontend-architect/SKILL.md
-  - skills/schema-designer/SKILL.md
-  - skills/devops-specialist/SKILL.md
+  - README.md
+  - docs/public/docs/concepts/navigation-and-afk.md
+  - docs/public/docs/concepts/skills-and-roles.md
+  - docs/public/docs/concepts/workflow.md
+  - docs/public/docs/tools/workflow-test.md
+  - skills/*/SKILL.md
+  - scripts/validate-skills.py
+  - scripts/tests/test_validate_skills.py
+  - specs/decisions/002-direct-skill-routing.md
+  - specs/living/supporting-team-skills/spec.md
+subagents:
+  approved: false
+  reason: The manifest, validator, and skill text form one consistency contract and should be updated sequentially.
