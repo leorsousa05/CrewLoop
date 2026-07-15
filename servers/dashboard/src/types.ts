@@ -121,5 +121,9 @@ export interface ServerConfig {
   sessionMaxAgeMs: number;
   sessionIdleTimeoutMs: number;
   pruneIntervalMs: number;
+  eventBodyBytes: number;
+  fileBytes: number;
+  workspaceEntries: number;
+  workspaceDepth: number;
 }
 

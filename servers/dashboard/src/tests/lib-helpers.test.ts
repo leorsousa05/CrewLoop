@@ -1,7 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import { formatDuration, formatTime, truncate, escapeHtml, prettyJson } from '../lib/format';
-import { listWorkspaceFiles } from '../server';
+import { listWorkspaceFiles } from '../lib/workspace-access';
 import { resolvePath } from '../lib/paths';
 import { projectInvocations, buildFileActivity, operationType } from '../lib/invocations';
 import { buildGraph3D } from '../lib/graph';
@@ -174,11 +175,15 @@ describe('buildGraph3D', () => {
 });
 
 describe('listWorkspaceFiles', () => {
-  it('excludes git and node_modules and returns relative paths', () => {
+  it('excludes git and node_modules and returns relative paths', async () => {
     const root = process.cwd();
-    const files = listWorkspaceFiles(root, root);
+    const files = await listWorkspaceFiles(root, {
+      fileBytes: 1024 * 1024,
+      workspaceEntries: 10000,
+      workspaceDepth: 20,
+    });
     assert.ok(files.length > 0);
-    assert.ok(!files.some((f) => f.startsWith(root)));
+    assert.ok(!files.some((f) => path.isAbsolute(f)));
     assert.ok(!files.some((f) => f.includes('node_modules')));
     assert.ok(!files.some((f) => f.includes('.git/')));
   });
