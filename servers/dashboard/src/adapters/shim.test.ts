@@ -325,6 +325,61 @@ describe('buildEvent', () => {
   });
 });
 
+describe('normalizeOpenCode', () => {
+  it('maps tool_start payload correctly', () => {
+    const event = buildEvent('opencode' as AgentSource, {
+      tool: 'Read',
+      event_type: 'tool_start',
+      cwd: '/project',
+    });
+    assert.equal(event?.source, 'opencode');
+    assert.equal(event?.event_type, 'tool_start');
+    assert.equal(event?.tool, 'Read');
+    assert.equal(event?.status, 'running');
+  });
+
+  it('maps tool_end payload with success', () => {
+    const event = buildEvent('opencode' as AgentSource, {
+      tool: 'Write',
+      event_type: 'tool_end',
+      cwd: '/project',
+      success: true,
+      duration_ms: 42,
+    });
+    assert.equal(event?.event_type, 'tool_end');
+    assert.equal(event?.status, 'success');
+    assert.equal(event?.duration_ms, 42);
+  });
+
+  it('maps tool_end payload with failure', () => {
+    const event = buildEvent('opencode' as AgentSource, {
+      tool: 'Bash',
+      event_type: 'tool_end',
+      cwd: '/project',
+      success: false,
+    });
+    assert.equal(event?.event_type, 'tool_end');
+    assert.equal(event?.status, 'error');
+  });
+
+  it('returns undefined for malformed payload', () => {
+    const event = buildEvent('opencode' as AgentSource, {
+      tool: 'Read',
+      // missing event_type
+    });
+    assert.equal(event, undefined);
+  });
+
+  it('applies default_skill fallback to opencode tool events', () => {
+    const event = buildEvent(
+      'opencode' as AgentSource,
+      { tool: 'Read', event_type: 'tool_start', cwd: '/p' },
+      'crewloop-hub'
+    );
+    assert.equal(event?.default_skill, 'crewloop-hub');
+  });
+});
+
 describe('classifyOperation', () => {
   it('classifies edit tools from all agents', () => {
     const editTools = [

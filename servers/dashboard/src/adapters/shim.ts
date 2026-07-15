@@ -11,6 +11,10 @@ export { classifyOperation, extractFileDetail };
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:7890';
 
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export function getDefaultSkill(argv: string[]): string | undefined {
   const idx = argv.indexOf('--default-skill');
   if (idx !== -1 && argv[idx + 1]) {
@@ -41,6 +45,46 @@ export function detectSource(argv: string[]): AgentSource | undefined {
   return undefined;
 }
 
+export interface OpenCodePluginPayload {
+  tool: string;
+  event_type: 'tool_start' | 'tool_end';
+  cwd?: string;
+  success?: boolean;
+  duration_ms?: number;
+}
+
+export function normalizeOpenCode(payload: OpenCodePluginPayload): DashboardEvent | undefined {
+  if (typeof payload !== 'object' || payload === null) {
+    return undefined;
+  }
+
+  const p = payload as unknown as Record<string, unknown>;
+  const tool = typeof p.tool === 'string' ? p.tool : undefined;
+  const eventType = p.event_type === 'tool_start' || p.event_type === 'tool_end' ? p.event_type : undefined;
+
+  if (!tool || !eventType) {
+    return undefined;
+  }
+
+  let status: DashboardEvent['status'];
+  if (eventType === 'tool_start') {
+    status = 'running';
+  } else if (eventType === 'tool_end') {
+    status = p.success === false ? 'error' : 'success';
+  }
+
+  return {
+    id: generateId(),
+    timestamp: Date.now(),
+    source: 'opencode' as AgentSource,
+    session_id: typeof p.cwd === 'string' ? p.cwd : process.cwd(),
+    event_type: eventType,
+    tool,
+    status,
+    duration_ms: typeof p.duration_ms === 'number' ? p.duration_ms : undefined,
+  };
+}
+
 export function normalizePayload(source: AgentSource, raw: unknown): DashboardEvent | undefined {
   if (typeof raw !== 'object' || raw === null) {
     return undefined;
@@ -57,6 +101,8 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
       return normalizeCodex(payload as unknown as CodexHookPayload);
     case 'agy':
       return normalizeAgy(payload as unknown as AgyHookPayload);
+    case 'opencode':
+      return normalizeOpenCode(payload as unknown as OpenCodePluginPayload);
     default:
       return undefined;
   }
@@ -106,8 +152,8 @@ export function buildEvent(
     ...base,
     operationType,
     detail: sanitized.detail ?? base.detail ?? fileDetail,
-    status: sanitized.status,
-    duration_ms: sanitized.duration_ms,
+    status: sanitized.status ?? base.status,
+    duration_ms: sanitized.duration_ms ?? base.duration_ms,
     input: sanitizeToolPayload(base.input),
     output: sanitizeToolPayload(base.output),
     workspacePath: base.workspacePath || (typeof raw.cwd === 'string' ? raw.cwd : undefined) || (typeof raw.workspacePath === 'string' ? raw.workspacePath : undefined) || process.cwd(),
@@ -156,7 +202,7 @@ export function postEvent(event: DashboardEvent, onDone?: () => void): void {
 export function runShim(): void {
   const source = detectSource(process.argv);
   if (!source) {
-    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|claude|codex|agy>\n');
+    process.stderr.write('crewloop-shim: unknown source. Use: crewloop-shim <kimi|claude|codex|agy|opencode>\n');
     process.exit(1);
   }
 
