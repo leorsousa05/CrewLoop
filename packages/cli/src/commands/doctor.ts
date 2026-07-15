@@ -4,6 +4,11 @@ import os from 'node:os';
 import type { CliOptions } from '../args';
 import { listSupportedAgents } from '../agents';
 import { resolveSkills } from '../resolver';
+import {
+  createDiamondBlockCommandRunner,
+  DIAMONDBLOCK_INSTALL_HINT,
+  type DiamondBlockExecutor,
+} from '../diamondblock';
 
 export type DoctorLevel = 'ok' | 'warn' | 'error';
 
@@ -26,6 +31,7 @@ export interface DoctorContext {
   readFile?: (path: string) => string;
   resolveModule?: (id: string, fromDir: string) => boolean;
   findOnPath?: (binary: string) => string | undefined;
+  executeCommand?: DiamondBlockExecutor;
 }
 
 function defaultExists(target: string): boolean {
@@ -68,6 +74,7 @@ interface ResolvedDoctorContext {
   readFile: (path: string) => string;
   resolveModule: (id: string, fromDir: string) => boolean;
   findOnPath: (binary: string) => string | undefined;
+  executeCommand?: DiamondBlockExecutor;
 }
 
 function resolveContext(context: DoctorContext): ResolvedDoctorContext {
@@ -93,6 +100,7 @@ function resolveContext(context: DoctorContext): ResolvedDoctorContext {
     readFile: context.readFile ?? defaultReadFile,
     resolveModule: context.resolveModule ?? defaultResolveModule,
     findOnPath: context.findOnPath ?? defaultFindOnPath,
+    executeCommand: context.executeCommand,
   };
 }
 
@@ -204,6 +212,61 @@ export function runDoctor(context: DoctorContext): DoctorReport {
       checks.push({ level: 'warn', label, detail: `${agent.id} unreadable` });
     }
   }
+
+  const diamondblockSkillAgents = listSupportedAgents()
+    .filter((agent) =>
+      ctx.exists(
+        path.join(agentConfigPath(agent.skillsDir, ctx.homeDir), 'diamondblock', 'SKILL.md')
+      )
+    )
+    .map((agent) => agent.id);
+  checks.push(
+    diamondblockSkillAgents.length > 0
+      ? {
+          level: 'ok',
+          label: 'diamondblock skill',
+          detail: `installed for: ${diamondblockSkillAgents.join(', ')}`,
+        }
+      : {
+          level: 'warn',
+          label: 'diamondblock skill',
+          detail: 'not installed for any supported agent (run crewloop install)',
+        }
+  );
+
+  const diamondblockRunner = createDiamondBlockCommandRunner({
+    findOnPath: ctx.findOnPath,
+    execute: ctx.executeCommand,
+  });
+  const diamondblockExecutable = diamondblockRunner.findExecutable();
+  checks.push(
+    diamondblockExecutable
+      ? { level: 'ok', label: 'diamondblock binary', detail: diamondblockExecutable }
+      : {
+          level: 'warn',
+          label: 'diamondblock binary',
+          detail: `not found on PATH (optional; ${DIAMONDBLOCK_INSTALL_HINT})`,
+        }
+  );
+
+  if (diamondblockExecutable) {
+    const preflight = diamondblockRunner.preflight({ dryRun: true });
+    checks.push(
+      preflight.status === 'ready'
+        ? { level: 'ok', label: 'diamondblock installer', detail: 'official installer ready' }
+        : {
+            level: 'warn',
+            label: 'diamondblock installer',
+            detail: `official installer preflight ${preflight.status} (exit code ${preflight.exitCode})`,
+          }
+    );
+  }
+
+  checks.push({
+    level: 'warn',
+    label: 'diamondblock runtime',
+    detail: 'verify in agent: expected MCP tools must be exposed',
+  });
 
   const exitCode = checks.some((check) => check.level === 'error') ? 1 : 0;
   return { checks, exitCode };

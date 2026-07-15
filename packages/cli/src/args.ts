@@ -29,6 +29,7 @@ export interface CliOptions {
   symlink?: boolean;
   force?: boolean;
   dryRun?: boolean;
+  diamondblock?: boolean;
   hooks?: boolean;
   port?: number;
   host?: string;
@@ -74,7 +75,7 @@ const NO_FLAGS: CommandFlags = { values: new Set(), booleans: new Set() };
 const COMMAND_FLAGS: Record<CommandName, CommandFlags> = {
   install: {
     values: new Set(['--target', '--skill', '--agent']),
-    booleans: new Set(['--symlink', '--force', '--dry-run', '--hooks', '--no-hooks', '--verbose']),
+    booleans: new Set(['--symlink', '--force', '--dry-run', '--diamondblock', '--hooks', '--no-hooks', '--verbose']),
   },
   list: NO_FLAGS,
   agents: NO_FLAGS,
@@ -198,6 +199,9 @@ export function parseArgs(argv: string[]): CliOptions {
           break;
         case '--dry-run':
           result.dryRun = true;
+          break;
+        case '--diamondblock':
+          result.diamondblock = true;
           break;
         case '--hooks':
           result.hooks = true;

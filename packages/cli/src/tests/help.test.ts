@@ -45,9 +45,24 @@ describe('help', () => {
 
   it('install help documents all install options', () => {
     const help = printHelp('install');
-    for (const flag of ['--target', '--skill', '--agent', '--symlink', '--force', '--dry-run', '--hooks', '--no-hooks', '--verbose']) {
+    for (const flag of ['--target', '--skill', '--agent', '--symlink', '--force', '--dry-run', '--diamondblock', '--hooks', '--no-hooks', '--verbose']) {
       assert.ok(help.includes(flag), `install help should include ${flag}`);
     }
+  });
+
+  it('install help documents --diamondblock examples and the skill-vs-MCP distinction', () => {
+    const help = printHelp('install');
+    assert.ok(help.includes('--diamondblock       Also configure DiamondBlock MCP via its official installer (opt-in)'));
+    assert.ok(help.includes('crewloop install --diamondblock'));
+    assert.ok(help.includes('crewloop install --dry-run --diamondblock'));
+    assert.ok(help.includes('Installing skills does not configure MCP servers'));
+  });
+
+  it('top-level help clarifies that installing skills does not configure MCP servers', () => {
+    const help = printHelp();
+    assert.ok(help.includes('Installing skills does not configure MCP servers'));
+    assert.ok(help.includes('crewloop install\n  --diamondblock'));
+    assert.ok(help.includes('--diamondblock'));
   });
 
   it('dashboard help documents --port and --host', () => {

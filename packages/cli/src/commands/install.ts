@@ -4,6 +4,13 @@ import { resolveAgentDir } from '../agents';
 import { installSkills } from '../installer';
 import { installHooks, type HookWriterResult } from '../hooks';
 import { displayPath, pluralize } from '../output';
+import {
+  createDiamondBlockCommandRunner,
+  formatDiamondBlockInstallResult,
+  DIAMONDBLOCK_INSTALL_HINT,
+  type DiamondBlockCommandResult,
+  type DiamondBlockCommandRunner,
+} from '../diamondblock';
 
 function supportedHookResults(results: HookWriterResult[]): HookWriterResult[] {
   return results.filter((result) => result.status !== 'unsupported');
@@ -35,7 +42,8 @@ type InstallHooksFn = typeof installHooks;
 export async function runInstall(
   options: CliOptions,
   context: CommandContext,
-  installHooksFn: InstallHooksFn = installHooks
+  installHooksFn: InstallHooksFn = installHooks,
+  diamondblockRunner?: DiamondBlockCommandRunner
 ): Promise<number> {
   const { stdout, stderr } = context;
   const skills = resolveSkills(context.packageRoot, options.skills);
@@ -46,6 +54,26 @@ export async function runInstall(
   }
 
   const targetDir = options.target || resolveAgentDir(options.agent);
+
+  let runner: DiamondBlockCommandRunner | undefined;
+  let preflight: DiamondBlockCommandResult | undefined;
+
+  if (options.diamondblock) {
+    runner = diamondblockRunner ?? createDiamondBlockCommandRunner();
+    if (!runner.findExecutable()) {
+      stderr(`error: --diamondblock requested but no diamondblock executable found on PATH; ${DIAMONDBLOCK_INSTALL_HINT}`);
+      return 1;
+    }
+    preflight = runner.preflight({ agent: options.agent, dryRun: true });
+    if (preflight.status !== 'ready') {
+      const detail = preflight.stderr.trim();
+      stderr(
+        `error: diamondblock preflight ${preflight.status} (exit code ${preflight.exitCode})` +
+          `${detail ? `: ${detail}` : ''}; resolve the issue or rerun without --diamondblock`
+      );
+      return 1;
+    }
+  }
 
   if (options.dryRun) {
     const preview = installSkills(
@@ -92,6 +120,9 @@ export async function runInstall(
         return 1;
       }
     }
+    if (preflight) {
+      for (const line of formatDiamondBlockInstallResult(preflight).split('\n')) stdout(line);
+    }
     return 0;
   }
 
@@ -127,32 +158,44 @@ export async function runInstall(
 
   if (options.hooks === false) {
     stdout('hooks: skipped (--no-hooks)');
-    return 0;
-  }
-
-  const hookResults = supportedHookResults(installHooksFn({ dryRun: false, backup: true }));
-  const configured = hookResults.filter((r) => r.status === 'configured');
-  const hookErrors = hookResults.filter((r) => r.status === 'error');
-
-  if (configured.length === 0 && hookErrors.length === 0) {
-    stdout('hooks: skipped (no supported agents detected)');
   } else {
-    stdout(formatHookCounts(hookResults));
-    if (options.verbose) {
-      for (const line of verboseHookLines(hookResults)) stdout(line);
+    const hookResults = supportedHookResults(installHooksFn({ dryRun: false, backup: true }));
+    const configured = hookResults.filter((r) => r.status === 'configured');
+    const hookErrors = hookResults.filter((r) => r.status === 'error');
+
+    if (configured.length === 0 && hookErrors.length === 0) {
+      stdout('hooks: skipped (no supported agents detected)');
+    } else {
+      stdout(formatHookCounts(hookResults));
+      if (options.verbose) {
+        for (const line of verboseHookLines(hookResults)) stdout(line);
+      }
+    }
+
+    for (const hookError of hookErrors) {
+      stderr(`error: ${hookError.agent}: ${hookError.error?.message ?? 'unknown error'}`);
+    }
+
+    if (hookErrors.length > 0) {
+      return 1;
+    }
+
+    if (configured.length > 0) {
+      stdout('next: crewloop dashboard');
     }
   }
 
-  for (const hookError of hookErrors) {
-    stderr(`error: ${hookError.agent}: ${hookError.error?.message ?? 'unknown error'}`);
-  }
-
-  if (hookErrors.length > 0) {
-    return 1;
-  }
-
-  if (configured.length > 0) {
-    stdout('next: crewloop dashboard');
+  if (options.diamondblock) {
+    const dbRunner = runner ?? createDiamondBlockCommandRunner();
+    const installResult = dbRunner.install({ agent: options.agent, dryRun: false });
+    for (const line of formatDiamondBlockInstallResult(installResult).split('\n')) stdout(line);
+    if (installResult.status !== 'configured') {
+      stderr(
+        `error: diamondblock official install failed (exit code ${installResult.exitCode}); ` +
+          'CrewLoop skills/hooks may already be installed (partial state) and were not rolled back'
+      );
+      return 1;
+    }
   }
 
   return 0;

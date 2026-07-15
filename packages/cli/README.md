@@ -51,6 +51,12 @@ Install for a specific agent:
 crewloop install --agent claude
 ```
 
+Configure the optional DiamondBlock MCP integration (opt-in):
+
+```bash
+crewloop install --diamondblock
+```
+
 List available skills:
 
 ```bash
@@ -100,6 +106,7 @@ Re-run the command after changing a source `SKILL.md`; linked references and ass
 - `--target <dir>` — custom target directory
 - `--skill <name>` — install only a specific skill (repeatable)
 - `--agent <agent>` — target agent convention (`kimi`, `claude`, `codex`, `agy`, `opencode`, `cursor`, `windsurf`)
+- `--diamondblock` — opt-in: delegate DiamondBlock MCP registration to its official CLI
 - `--port <number>` — dashboard port (default: 7890)
 - `--host <address>` — dashboard host (default: 127.0.0.1)
 - `--symlink` — link skill payloads inside a safe installed wrapper
@@ -110,6 +117,27 @@ Re-run the command after changing a source `SKILL.md`; linked references and ass
 - `--verbose` — show per-skill and per-hook install details
 - `-v, --version` — show version
 - `-h, --help` — show help
+
+## DiamondBlock MCP integration (opt-in)
+
+Installing the `diamondblock` skill (Markdown instructions) is not the same as configuring or activating its MCP server. Normal `crewloop install` never touches MCP configuration and never invokes DiamondBlock. MCP registration is an explicit opt-in:
+
+```bash
+crewloop install --diamondblock
+```
+
+Prerequisite: the official DiamondBlock CLI must be installed separately (for example `npm i -g diamondblock`). It is not bundled with CrewLoop and remains optional.
+
+With the flag, the CLI:
+
+1. Locates the `diamondblock` executable (falling back to its `dblock` alias). A missing binary aborts with exit code `1` and an install hint before anything is mutated.
+2. Runs the official `install --dry-run` preflight. An unsupported target aborts with exit code `1` before anything is mutated.
+3. Installs CrewLoop skills and hooks as usual.
+4. Runs the official `diamondblock install`, which performs the actual MCP registration. If this final external step fails, the command exits `1` and reports that CrewLoop files may already be installed.
+
+CrewLoop never writes agent MCP config itself — backups and user-config preservation are the official installer's responsibility. An explicit `--agent <agent>` is forwarded as `--target <agent>`; without it, the official installer's auto-detection applies. `crewloop install --dry-run --diamondblock` is fully mutation-free (CrewLoop previews plus the official dry-run only).
+
+`crewloop doctor` reports four layered DiamondBlock checks as optional `ok`/`warn` lines, never `error`: skill presence in the agent skill directory, binary on PATH, installer readiness via a bounded official dry-run preflight, and runtime guidance stating that actual activation is verified inside the agent by exposed MCP tools. Binary or config presence alone does not prove activation. Doctor never parses or writes MCP config, and its exit code is unaffected.
 
 ## Output and errors
 

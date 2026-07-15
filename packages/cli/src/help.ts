@@ -12,7 +12,9 @@ const HELP_TOPICS: HelpTopic[] = [
   {
     name: 'install',
     usage: 'crewloop install [options]',
-    summary: 'Install CrewLoop skills and configure agent hooks',
+    summary:
+      'Install CrewLoop skills and configure agent hooks.\n' +
+      'Installing skills does not configure MCP servers; --diamondblock delegates that to the official DiamondBlock installer.',
     options: [
       '  --target <dir>       Install to a custom directory',
       '  --skill <name>       Install only a specific skill (repeatable)',
@@ -20,6 +22,7 @@ const HELP_TOPICS: HelpTopic[] = [
       '  --symlink            Link skill payloads inside a safe installed wrapper',
       '  --force              Overwrite existing skills',
       '  --dry-run            Print actions without installing',
+      '  --diamondblock       Also configure DiamondBlock MCP via its official installer (opt-in)',
       '  --hooks              Configure agent hooks (default)',
       '  --no-hooks           Skip agent hook configuration',
       '  --verbose            Show per-skill and per-hook details',
@@ -29,6 +32,8 @@ const HELP_TOPICS: HelpTopic[] = [
       '  crewloop install --skill architect --skill engineer',
       '  crewloop install --agent claude --no-hooks',
       '  crewloop install --dry-run --verbose',
+      '  crewloop install --diamondblock',
+      '  crewloop install --dry-run --diamondblock',
     ],
   },
   {
@@ -124,6 +129,10 @@ Hooks:
   each agent's config file. The hooks send events to the CrewLoop dashboard so it
   can track the active skill and session state. Use --no-hooks to skip this step.
 
+DiamondBlock:
+  Installing skills does not configure MCP servers; use "crewloop install
+  --diamondblock" to delegate MCP setup to the official DiamondBlock installer.
+
 Options:
   --target <dir>       Install to a custom directory
   --skill <name>       Install only a specific skill (repeatable)
@@ -133,6 +142,7 @@ Options:
   --symlink            Link skill payloads inside a safe installed wrapper
   --force              Overwrite existing skills
   --dry-run            Print actions without installing
+  --diamondblock       Also configure DiamondBlock MCP via its official installer (opt-in)
   --hooks              Configure agent hooks (default)
   --no-hooks           Skip agent hook configuration
   --verbose            Show per-skill and per-hook details
