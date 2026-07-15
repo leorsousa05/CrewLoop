@@ -20,7 +20,7 @@ npm install -g @archznn/crewloop-cli
 
 ## Step 2 — Install the skills
 
-Install all 18 skills into your agent's default skill directory:
+Install all 19 skills into your agent's default skill directory:
 
 ```bash
 crewloop install
@@ -38,7 +38,7 @@ crewloop install --skill architect --skill engineer
 crewloop install --agent claude
 ```
 
-Supported agents: `kimi`, `claude`, `codex`, `agy`.
+Supported agents: `kimi`, `claude`, `codex`, `agy`, `opencode`.
 
 ### Install to a custom directory
 
@@ -52,12 +52,30 @@ crewloop install --target /path/to/your/skills/dir
 crewloop install --dry-run
 ```
 
-## Step 3 — Validate (optional)
+Dry-run output is prefixed with `dry-run:` and never writes files.
+
+## Step 3 — Verify your setup (optional)
+
+Inspect supported agents and their hook config paths:
+
+```bash
+crewloop agents
+```
+
+Run read-only diagnostics for the package, dashboard, shim, and hook setup:
+
+```bash
+crewloop doctor
+```
+
+`doctor` prints lines prefixed with `ok`, `warn`, or `error` and exits non-zero only when an error-level check fails. Add `--verbose` to `crewloop install` if you want per-skill and per-hook details; the default output is a minimal summary.
+
+## Step 4 — Validate (optional)
 
 Confirm all skills are well-formed:
 
 ```bash
-python scripts/validate-skills.py
+python3 scripts/validate-skills.py
 ```
 
 You should see `PASS` for every skill.

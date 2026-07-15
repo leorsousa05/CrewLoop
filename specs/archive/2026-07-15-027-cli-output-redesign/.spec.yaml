@@ -1,0 +1,30 @@
+status: completed
+created: 2026-07-15
+updated: 2026-07-15
+author: @opencode
+title: CLI output and command redesign
+type: feat
+scope: cli-ux
+priority: P1
+affected_files:
+  - packages/cli/src/cli.ts
+  - packages/cli/src/args.ts
+  - packages/cli/src/help.ts
+  - packages/cli/src/output.ts
+  - packages/cli/src/commands/install.ts
+  - packages/cli/src/commands/list.ts
+  - packages/cli/src/commands/agents.ts
+  - packages/cli/src/commands/doctor.ts
+  - packages/cli/src/commands/dashboard.ts
+  - packages/cli/src/tests/cli.test.ts
+  - packages/cli/src/tests/args.test.ts
+  - packages/cli/src/tests/help.test.ts
+  - packages/cli/src/tests/output.test.ts
+  - packages/cli/src/tests/commands.test.ts
+  - packages/cli/README.md
+  - packages/cli/AGENTS.md
+  - docs/public/docs/getting-started/installation.md
+  - specs/living/cli/spec.md
+subagents:
+  approved: false
+  reason: Parser, command dispatch, output contracts, and tests share one command-surface contract and should be implemented sequentially to avoid dispatcher conflicts.
