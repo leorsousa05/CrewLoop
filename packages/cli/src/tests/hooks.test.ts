@@ -464,6 +464,119 @@ describe('installHooksForAgent', () => {
   });
 });
 
+describe('OpenCode plugin writer', () => {
+  it('generates plugin file with CrewLoop marker and event handlers', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-opencode-')),
+      'plugins',
+      'crewloop.js'
+    );
+    const agent = createAgentConfig({
+      id: 'opencode',
+      skillsDir: path.join(path.dirname(configPath), '..', 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'plugin',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      },
+    });
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assertResult(result, 'configured');
+
+    const content = fs.readFileSync(configPath, 'utf8');
+    assert.ok(content.includes('// CREWLOOP-PLUGIN v1'));
+    assert.ok(content.includes("spawn('crewloop-shim', ['opencode']"));
+    assert.ok(content.includes("'tool.execute.before'"));
+    assert.ok(content.includes("'tool.execute.after'"));
+    assert.ok(content.includes("event_type: 'tool_start'"));
+    assert.ok(content.includes("event_type: 'tool_end'"));
+  });
+
+  it('is idempotent on reinstall', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-opencode-')),
+      'plugins',
+      'crewloop.js'
+    );
+    const agent = createAgentConfig({
+      id: 'opencode',
+      skillsDir: path.join(path.dirname(configPath), '..', 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'plugin',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      },
+    });
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const first = installHooksForAgent(agent, { backup: true });
+    assertResult(first, 'configured');
+    assert.strictEqual(first.backupPath, undefined);
+
+    const second = installHooksForAgent(agent, { backup: true });
+    assertResult(second, 'configured');
+    assert.strictEqual(second.backupPath, undefined);
+
+    const content = fs.readFileSync(configPath, 'utf8');
+    assert.ok(content.includes('// CREWLOOP-PLUGIN v1'));
+  });
+
+  it('backs up existing non-CrewLoop plugin file before overwrite', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-opencode-')),
+      'plugins',
+      'crewloop.js'
+    );
+    const agent = createAgentConfig({
+      id: 'opencode',
+      skillsDir: path.join(path.dirname(configPath), '..', 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'plugin',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      },
+    });
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(configPath, '// user plugin\nexport const MyPlugin = () => {};\n', 'utf8');
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assertResult(result, 'configured');
+    assert.ok(result.backupPath);
+    assert.ok(fs.existsSync(result.backupPath));
+    assert.strictEqual(fs.readFileSync(result.backupPath, 'utf8'), '// user plugin\nexport const MyPlugin = () => {};\n');
+
+    const content = fs.readFileSync(configPath, 'utf8');
+    assert.ok(content.includes('// CREWLOOP-PLUGIN v1'));
+  });
+
+  it('returns skipped when opencode is not installed', () => {
+    const configPath = path.join(os.tmpdir(), 'nonexistent-opencode', 'plugins', 'crewloop.js');
+    const agent = createAgentConfig({
+      id: 'opencode',
+      skillsDir: path.join(os.tmpdir(), 'nonexistent-opencode', 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'plugin',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      },
+    });
+
+    const result = installHooksForAgent(agent);
+    assert.strictEqual(result.status, 'skipped');
+  });
+});
+
 describe('installHooks', () => {
   it('returns results for all supported agents', () => {
     const fakeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-home-'));
@@ -476,6 +589,7 @@ describe('installHooks', () => {
       path.join(fakeHome, '.codex', 'skills'),
       path.join(fakeHome, '.agy', 'skills'),
       path.join(fakeHome, '.gemini', 'config'),
+      path.join(fakeHome, '.config', 'opencode', 'skills'),
     ]) {
       fs.mkdirSync(dirname, { recursive: true });
     }
@@ -491,6 +605,7 @@ describe('installHooks', () => {
       assert.strictEqual(statuses.get('claude'), 'configured');
       assert.strictEqual(statuses.get('codex'), 'configured');
       assert.strictEqual(statuses.get('agy'), 'configured');
+      assert.strictEqual(statuses.get('opencode'), 'configured');
       assert.strictEqual(statuses.get('cursor'), 'unsupported');
       assert.strictEqual(statuses.get('windsurf'), 'unsupported');
     } finally {

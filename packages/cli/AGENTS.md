@@ -8,10 +8,15 @@
 
 `@archznn/crewloop-cli` is the TypeScript CLI that installs CrewLoop skills into an agent's skill directory and configures agent-specific hooks so that tool-use events are forwarded to the CrewLoop dashboard.
 
-Two commands are exposed:
+Seven commands are exposed:
 
 - `crewloop install` — copies skills to the agent's skill directory and writes hook configuration to the agent's config file.
 - `crewloop list` — lists all available skills.
+- `crewloop agents` — lists supported agents, hook support, and config paths (read-only).
+- `crewloop doctor` — diagnoses package, dashboard, shim, and hook setup (read-only).
+- `crewloop dashboard` — starts the dashboard server.
+- `crewloop version` — prints the package version.
+- `crewloop help [command]` — prints top-level or command-specific help.
 
 ---
 
@@ -19,12 +24,20 @@ Two commands are exposed:
 
 | File | Single responsibility |
 |------|----------------------|
-| `src/cli.ts` | Entry point — command parsing and flag handling |
+| `src/cli.ts` | Entry point — thin dispatcher, package-root resolution, exit-code normalization |
+| `src/args.ts` | Strict argument parser — `CliOptions`, `CliUsageError`, `CliUnknownCommandError` |
+| `src/help.ts` | Top-level and per-command help topics |
+| `src/output.ts` | Output formatting — errors, pluralization, `~` path display |
+| `src/commands/install.ts` | Install orchestration and summarized/verbose output |
+| `src/commands/list.ts` | Skill list output |
+| `src/commands/agents.ts` | Supported-agent table |
+| `src/commands/doctor.ts` | Read-only diagnostics with injectable `DoctorContext` |
+| `src/commands/dashboard.ts` | Dashboard startup |
 | `src/agents.ts` | Supported agent definitions: config path, hook format, agent ID |
 | `src/installer.ts` | Skill copy/install logic — copies SKILL.md files to the target directory |
 | `src/hooks.ts` | Hook configuration — reads and writes agent config files using the Strategy pattern |
 | `src/resolver.ts` | Path resolution utilities — resolves home dir, skill dirs, agent config paths |
-| `src/tests/` | Test suite for hooks, installer, and agent definitions |
+| `src/tests/` | Test suite for parser, help, output, commands, hooks, installer, and agent definitions |
 
 ---
 
@@ -38,6 +51,7 @@ Hook configuration lives in `src/hooks.ts`. The design uses the **Strategy** pat
   - `CodexHookWriter` — writes to `~/.codex/hooks.json` under `"hooks"`.
   - `ClaudeHookWriter` — writes to `~/.claude/config.json` under `"hooks"`.
   - `AgyHookWriter` — writes to `~/.gemini/config/hooks.json` under `"crewloop"`.
+- `OpenCodePluginWriter` — writes a JavaScript plugin file to `~/.config/opencode/plugins/crewloop.js`.
 
 Agent metadata (config path, format, commands) is defined in `src/agents.ts`.
 
@@ -134,6 +148,51 @@ Uses grouped objects. The top level is a map of hook-group names. CrewLoop uses 
 }
 ```
 
+### OpenCode (`~/.config/opencode/plugins/crewloop.js`)
+
+OpenCode does not use a static hook configuration file. Instead, it loads JavaScript plugins from `~/.config/opencode/plugins/`. CrewLoop writes a plugin file that registers `tool.execute.before` and `tool.execute.after` handlers. Each handler spawns `crewloop-shim opencode` and pipes a JSON payload to the shim's stdin.
+
+```js
+// CREWLOOP-PLUGIN v1 — do not edit; regenerate with `crewloop install`
+const { spawn } = require('node:child_process');
+
+function sendEvent(payload) {
+  try {
+    const child = spawn('crewloop-shim', ['opencode'], {
+      stdio: ['pipe', 'ignore', 'ignore'],
+    });
+    child.stdin.write(JSON.stringify(payload));
+    child.stdin.end();
+  } catch {
+    // Never block opencode.
+  }
+}
+
+export const CrewLoopPlugin = async () => {
+  return {
+    'tool.execute.before': async (input, output) => {
+      sendEvent({
+        tool: input.tool,
+        event_type: 'tool_start',
+        cwd: input.cwd,
+      });
+    },
+    'tool.execute.after': async (input, output) => {
+      sendEvent({
+        tool: input.tool,
+        event_type: 'tool_end',
+        cwd: input.cwd,
+        success: output?.success !== false,
+        duration_ms: output?.duration,
+      });
+    },
+  };
+};
+```
+
+- **Marker comment**: `// CREWLOOP-PLUGIN v1` identifies the file as CrewLoop-owned. If an existing file lacks this marker, the CLI backs it up before overwriting.
+- **Non-blocking**: The plugin spawns the shim with `stdio: ['pipe', 'ignore', 'ignore']` so opencode is never blocked by the dashboard.
+
 ---
 
 ## CrewLoop hook identification
@@ -146,6 +205,7 @@ Apply this rule consistently:
 
 - Kimi: inspect `command` inside each `[[hooks]]` block.
 - JSON agents: inspect `command` inside each nested hook object.
+- OpenCode: inspect the plugin file for the `// CREWLOOP-PLUGIN v1` marker comment.
 
 Never remove a hook whose command does not contain `crewloop-shim`.
 

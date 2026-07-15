@@ -433,6 +433,96 @@ function cleanupLegacyAgyConfig(): void {
   }
 }
 
+const CREWLOOP_PLUGIN_MARKER = '// CREWLOOP-PLUGIN v1';
+
+function generateOpenCodePlugin(): string {
+  return `// CREWLOOP-PLUGIN v1 — do not edit; regenerate with \`crewloop install\`
+const { spawn } = require('node:child_process');
+
+function sendEvent(payload) {
+  try {
+    const child = spawn('crewloop-shim', ['opencode'], {
+      stdio: ['pipe', 'ignore', 'ignore'],
+    });
+    child.stdin.write(JSON.stringify(payload));
+    child.stdin.end();
+  } catch {
+    // Never block opencode.
+  }
+}
+
+export const CrewLoopPlugin = async () => {
+  return {
+    'tool.execute.before': async (input, output) => {
+      sendEvent({
+        tool: input.tool,
+        event_type: 'tool_start',
+        cwd: input.cwd,
+      });
+    },
+    'tool.execute.after': async (input, output) => {
+      sendEvent({
+        tool: input.tool,
+        event_type: 'tool_end',
+        cwd: input.cwd,
+        success: output?.success !== false,
+        duration_ms: output?.duration,
+      });
+    },
+  };
+};
+`;
+}
+
+class OpenCodePluginWriter implements AgentHookConfigWriter {
+  readonly agentId = 'opencode';
+
+  constructor(private agent: AgentConfig) {}
+
+  isApplicable(): boolean {
+    return agentIsInstalled(this.agent);
+  }
+
+  readConfig(): AgentHookConfigFile | undefined {
+    const configPath = this.agent.hooks.configPath;
+    if (!fs.existsSync(configPath)) {
+      return undefined;
+    }
+    return {
+      path: configPath,
+      format: 'plugin',
+      raw: fs.readFileSync(configPath, 'utf8'),
+    };
+  }
+
+  writeConfig(config: AgentHookConfigFile): void {
+    fs.mkdirSync(path.dirname(config.path), { recursive: true });
+    fs.writeFileSync(config.path, String(config.raw), 'utf8');
+  }
+
+  buildDefaultConfig(hooks: HookEntry[]): AgentHookConfigFile {
+    return {
+      path: this.agent.hooks.configPath,
+      format: 'plugin',
+      raw: generateOpenCodePlugin(),
+    };
+  }
+
+  syncHooks(config: AgentHookConfigFile, hooks: HookEntry[]): AgentHookConfigFile {
+    const content = String(config.raw);
+    const generated = generateOpenCodePlugin();
+
+    // If the file already contains the CrewLoop marker and is identical, keep it.
+    if (content.includes(CREWLOOP_PLUGIN_MARKER) && content === generated) {
+      return config;
+    }
+
+    // If the file exists but has no CrewLoop marker, preserve it by backing up
+    // and replacing with the CrewLoop plugin.
+    return { ...config, raw: generated };
+  }
+}
+
 function createWriter(agent: AgentConfig): AgentHookConfigWriter | undefined {
   if (!agent.hooks.supported) {
     return undefined;
@@ -446,6 +536,8 @@ function createWriter(agent: AgentConfig): AgentHookConfigWriter | undefined {
       return new ClaudeHookWriter(agent);
     case 'agy':
       return new AgyHookWriter(agent);
+    case 'opencode':
+      return new OpenCodePluginWriter(agent);
     default:
       return undefined;
   }

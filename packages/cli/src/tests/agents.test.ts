@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import path from 'node:path';
 import { resolveAgentDir, listSupportedAgents } from '../agents';
 
 describe('agents', () => {
@@ -21,5 +22,16 @@ describe('agents', () => {
     const agents = listSupportedAgents();
     assert.ok(agents.length > 0);
     assert.ok(agents.some((a: { id: string }) => a.id === 'kimi'));
+    assert.ok(agents.some((a: { id: string }) => a.id === 'opencode'));
+  });
+
+  it('includes opencode with plugin format and correct paths', () => {
+    const agents = listSupportedAgents();
+    const opencode = agents.find((a: { id: string }) => a.id === 'opencode');
+    assert.ok(opencode);
+    assert.strictEqual(opencode.hooks.supported, true);
+    assert.strictEqual(opencode.hooks.format, 'plugin');
+    assert.ok(opencode.skillsDir.includes(path.join('.config', 'opencode', 'skills')));
+    assert.ok(opencode.hooks.configPath.includes(path.join('.config', 'opencode', 'plugins', 'crewloop.js')));
   });
 });

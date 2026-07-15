@@ -1,7 +1,7 @@
 import path from 'node:path';
 import os from 'node:os';
 
-export type HookFormat = 'toml' | 'json' | 'none';
+export type HookFormat = 'toml' | 'json' | 'plugin' | 'none';
 
 export type AgentLifecycleEvent = 'SessionStart' | 'SessionEnd' | 'Stop';
 
@@ -68,6 +68,17 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
       lifecycleEvents: ['SessionStart', 'SessionEnd'],
+    },
+  },
+  {
+    id: 'opencode',
+    skillsDir: path.join(os.homedir(), '.config', 'opencode', 'skills'),
+    hooks: {
+      supported: true,
+      configPath: path.join(os.homedir(), '.config', 'opencode', 'plugins', 'crewloop.js'),
+      format: 'plugin',
+      beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
     },
   },
   {

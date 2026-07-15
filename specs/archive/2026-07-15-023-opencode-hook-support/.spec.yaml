@@ -1,0 +1,16 @@
+id: 023
+name: opencode-hook-support
+status: completed
+created: 2026-07-14
+author: architect
+completed: 2026-07-14
+affected_files:
+  - packages/cli/src/agents.ts
+  - packages/cli/src/hooks.ts
+  - packages/cli/src/cli.ts
+  - packages/cli/src/tests/hooks.test.ts
+  - packages/cli/src/tests/agents.test.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - servers/dashboard/src/adapters/shim.test.ts
+  - packages/cli/AGENTS.md
+  - README.md
