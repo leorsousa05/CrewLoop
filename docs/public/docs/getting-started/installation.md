@@ -11,6 +11,7 @@ CrewLoop is distributed via npm. The CLI installs all skills into your agent's s
 - **Node.js 20+**
 - **A compatible AI agent:** Kimi Code, Claude, Codex, or AGY
 - **Python 3** (optional — only for running the skill validator)
+- **Official DiamondBlock CLI** (optional — only for the DiamondBlock MCP integration; install separately, e.g. `npm i -g diamondblock`)
 
 ## Step 1 — Install the CLI
 
@@ -54,6 +55,23 @@ crewloop install --dry-run
 
 Dry-run output is prefixed with `dry-run:` and never writes files.
 
+### Install the optional DiamondBlock MCP integration (opt-in)
+
+Normal `crewloop install` never touches MCP configuration. Installing the `diamondblock` skill (Markdown instructions) is not the same as configuring or activating its MCP server — registration is delegated to the official DiamondBlock CLI, which must be installed separately (see Prerequisites).
+
+```bash
+crewloop install --diamondblock
+```
+
+With an explicit agent, and the fully mutation-free preview variant:
+
+```bash
+crewloop install --diamondblock --agent claude
+crewloop install --dry-run --diamondblock
+```
+
+`--agent` is forwarded to the official installer as `--target`; without it, official auto-detection applies. CrewLoop runs the official dry-run preflight before mutating anything and aborts with exit code 1 if the `diamondblock`/`dblock` binary is missing or the target is unsupported.
+
 ## Step 3 — Verify your setup (optional)
 
 Inspect supported agents and their hook config paths:
@@ -69,6 +87,8 @@ crewloop doctor
 ```
 
 `doctor` prints lines prefixed with `ok`, `warn`, or `error` and exits non-zero only when an error-level check fails. Add `--verbose` to `crewloop install` if you want per-skill and per-hook details; the default output is a minimal summary.
+
+`doctor` also reports four optional DiamondBlock checks as `ok`/`warn` (never `error`): skill presence in the agent skill directory, the `diamondblock`/`dblock` binary on PATH, installer readiness via a bounded official dry-run preflight, and runtime guidance — actual activation is verified inside the agent by exposed MCP tools, so binary or config presence alone does not prove activation. If the DiamondBlock index is missing or stale, run `dblock index run` manually; CrewLoop never indexes automatically.
 
 ## Step 4 — Validate (optional)
 

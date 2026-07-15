@@ -186,7 +186,7 @@ crewloop/
 |-------|-------------|
 | **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
 | **long-term-manager** | Projects that span multiple sessions and need durable tracking artifacts across sessions |
-| **diamondblock** | Default discovery helper for multi-session memory, context retrieval, searching knowledge, indexing codebases, and logging session histories |
+| **diamondblock** | Default discovery helper for multi-session memory, context retrieval, searching knowledge, indexing codebases, and logging session histories (active only when its MCP tools are exposed in the session) |
 | **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
 | **frontend-architect** | Complex frontend layouts, component architecture, and React/Next.js state boundaries |
 | **docs-writer** | Pure documentation tasks without code changes |
@@ -200,7 +200,7 @@ crewloop/
 
 Supporting skills report findings back to the skill that invoked them. Exceptions: Maintainer routes confirmed bugs to Architect, and Project Brainstorm routes completed briefs to Architect. Supporting skills do not write implementation code or run git operations.
 
-When `diamondblock` is configured and installed, the CrewLoop Hub should use it first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection.
+When the DiamondBlock MCP tools are exposed in the session (the server is configured and active — skill files or a binary on PATH alone do not count), the CrewLoop Hub should use DiamondBlock first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection. Installing the DiamondBlock skill (Markdown instructions) is not the same as activating its MCP server: MCP registration is opt-in via `crewloop install --diamondblock`, which delegates to the separately installed official DiamondBlock CLI, and `crewloop doctor` reports layered optional DiamondBlock checks (skill, binary, installer readiness, runtime guidance) as warnings without affecting its exit code.
 
 ---
 

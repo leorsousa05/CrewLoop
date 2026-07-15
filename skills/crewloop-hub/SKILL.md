@@ -37,7 +37,7 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ### What to delegate
 
-- **DiamondBlock-first discovery** — when the `diamondblock` MCP server is configured and active, use it before any manual file reads to fetch session context, prior decisions, long-term memory, and semantic codebase search results.
+- **DiamondBlock-first discovery** — when your tool registry exposes the DiamondBlock MCP capabilities (skill installed ≠ MCP active), load the `diamondblock` skill directly before any manual file reads to fetch session context, prior decisions, long-term memory, and semantic codebase search results.
 - **Initial codebase exploration** — if DiamondBlock cannot answer the question, find relevant files, modules, conventions, and entry points with manual inspection.
 - **Reference and memory reading** — read `conventions.md`, `workflow.md`, `AGENTS.md`, `README.md`, and local skill references, then return a concise summary.
 - **Pattern and spec analysis** — analyze existing specs, ADRs, or prior changes to identify patterns the new task should follow.
@@ -62,7 +62,7 @@ To preserve the main conversation context, offload read-only, context-heavy work
 - Launch independent subagents in the same turn when possible.
 - When subagents return, briefly acknowledge their findings in your own words before using them.
 - Prefer specialist helpers early when the request clearly matches their domain. Examples: `project-brainstorm` for ambiguous requests, `long-term-manager` for multi-session work, `maintainer` for triage, `researcher` for tool/library evaluation, `tester` for edge-case analysis, `security-guard` for security-sensitive work, and `accessibility-auditor` for UI accessibility.
-- When `diamondblock` is active, prefer it for any read-only discovery: context retrieval, semantic code search, prior decisions, and broad file mapping before manual reads.
+- When the DiamondBlock MCP capabilities are exposed in your tool registry, prefer the `diamondblock` skill for any read-only discovery: context retrieval, semantic code search, prior decisions, and broad file mapping before manual reads. You may return to it repeatedly with targeted semantic queries during discovery.
 
 ### What NOT to delegate
 
@@ -140,7 +140,12 @@ If the task is a single-session change (e.g., a one-line bug fix or a small twea
 
 Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.
 
-- Spawn a `diamondblock`-focused subagent first when the server is configured to retrieve session context and semantic codebase search results.
+- **DiamondBlock capability check (do this first):** inspect your own available tool registry for the DiamondBlock MCP capabilities (`get_context`, `search_memory`, `save_memory`, `update_memory`, `log_session`, `index_codebase`). If the required context/search capabilities are exposed, load the `diamondblock` skill directly BEFORE broad manual file reads and request startup context. If they are not exposed, emit at most one concise fallback note that DiamondBlock is not active (skill installed ≠ MCP active) and continue ordinary exploration — ordinary `explore` subagents remain the fallback, not the primary route.
+- **Repeated DiamondBlock use:** you may return to `diamondblock` repeatedly with targeted semantic queries (prior decisions, semantic memory, codebase search) during discovery.
+- **Decision persistence:** save a memory ONLY after user confirmation or after a decision is accepted into a spec/ADR. Search for an existing equivalent memory before saving, and save only short, distilled, non-secret records with project scope and provenance. Never save raw chat, transient hypotheses, command output, tokens, or source payloads.
+- **Verified identifiers:** session/project identifiers must come from platform-provided values or values returned/accepted by the MCP schema. If they cannot be verified, warn and skip the memory operation — never fabricate IDs.
+- **Non-blocking failures:** any MCP failure produces one warning and the normal flow continues.
+- **Manual indexing:** when the index is missing or stale, keep the manual `dblock index run` instruction; never auto-index.
 - Spawn an `explore` subagent after that to map any remaining project structure and find files relevant to the user's request.
 - Spawn another subagent to read and summarize `conventions.md`, `workflow.md`, `AGENTS.md`, and any local skill references.
 - If the task mentions existing specs or prior changes, spawn a subagent to check `specs/` and `archive/`.

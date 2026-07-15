@@ -45,12 +45,14 @@ Invoked by the owning core skill when a task needs specialist analysis. Default 
 | **Researcher** | Technology evaluation, library comparison, proof-of-concept |
 | **Security-Guard** | Security review, secret scanning, auth, PII, authorization |
 | **Accessibility-Auditor** | WCAG compliance, keyboard nav, screen readers, color contrast |
-| **DiamondBlock** | Optional session memory, semantic context retrieval, and codebase search |
+| **DiamondBlock** | Optional session memory, semantic context retrieval, and codebase search (requires the DiamondBlock MCP server — see note below) |
 | **Frontend-Architect** | React component boundaries, props, slots, and state ownership |
 | **Schema-Designer** | Relational schemas, constraints, migrations, and API contracts |
 | **DevOps-Specialist** | CI/CD, deployment, containers, and infrastructure validation |
 
 Supporting skills report findings back to the skill that invoked them. Maintainer and Project Brainstorm route confirmed triage/completed briefs to Architect. They do not write implementation code or run git operations.
+
+**DiamondBlock: skill vs. MCP server.** Installing the DiamondBlock skill only installs Markdown instructions — it does not configure or activate the DiamondBlock MCP server. The Hub loads the skill directly only when the session actually exposes the required MCP tools; a binary on PATH or config files alone do not activate it. MCP registration is opt-in via `crewloop install --diamondblock`, delegated to the separately installed official DiamondBlock CLI.
 
 ## Role separation rules
 

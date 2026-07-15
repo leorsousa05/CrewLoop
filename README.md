@@ -70,6 +70,10 @@ The `crewloop` CLI provides commands to manage skills and integrate them with yo
 | `--agent <name>` | Configure hooks for a specific agent (e.g., `kimi`, `claude`, `codex`, `agy`). |
 | `--target <path>` | Specify a custom destination path for the skills. |
 | `--skill <name>` | Install only a specific skill (can be specified multiple times). |
+| `--diamondblock` | Opt-in: delegate DiamondBlock MCP registration to the separately installed official DiamondBlock CLI. |
+
+> [!NOTE]
+> **DiamondBlock is opt-in.** `crewloop install` never touches MCP configuration. To activate the optional DiamondBlock integration, install the official DiamondBlock CLI separately (for example `npm i -g diamondblock`) and run `crewloop install --diamondblock`, which delegates MCP registration to the official installer. Installing the DiamondBlock skill (Markdown instructions) is not the same as configuring or activating its MCP server. `crewloop doctor` reports DiamondBlock readiness as optional warnings, never errors.
 
 ## Real-time Activity Dashboard
 

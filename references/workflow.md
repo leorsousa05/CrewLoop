@@ -70,10 +70,14 @@ flowchart TD
 1. **CrewLoop Hub is the entry point** — it may use approved discovery/tracking helpers,
    then routes to Architect as the first mandatory delivery phase. Outside AFK mode, it
    does not mediate mid-flow transitions.
-2. **DiamondBlock is the default read-only discovery layer** — when configured and
-   installed, the Hub uses DiamondBlock before any broad manual inspection to retrieve
-   session memory, prior decisions, semantic codebase search results, and other read-only
-   context.
+2. **DiamondBlock is the OPTIONAL read-only discovery layer** — when its MCP capabilities
+   are exposed in the agent's tool registry (skill installed ≠ MCP active), the Hub loads
+   DiamondBlock directly before any broad manual inspection to retrieve session memory,
+   prior decisions, and semantic codebase search results. The Hub may return repeatedly
+   with targeted semantic queries during discovery, and persists memories only for
+   user-confirmed or spec/ADR-accepted decisions (search-before-save, distilled and
+   non-secret). When capabilities are absent, ordinary exploration continues unchanged,
+   and every MCP failure warns once without blocking the flow.
 3. **Interactive skills route directly** — each interactive skill presents valid next-step options
    from its position in the flow (transition contract in `conventions.md`), with one
    outcome-driven option marked `(Recommended)`. The user picks; the skill continues
@@ -90,8 +94,11 @@ flowchart TD
    (recommended); FAIL → Engineer (recommended), then continues directly into the selected route.
 8. **Security-Guard and Accessibility-Auditor are review specialists** — invoked by the
    Reviewer; they end by recommending a return to the Reviewer.
-9. **Shipper is the only one who touches git** — after shipping, its menu offers a new
-   task (CrewLoop Hub entry) or done, then continues directly into the selected route.
+9. **Shipper is the only one who touches git** — after a successful push/PR, outside AFK,
+   it optionally invokes DiamondBlock to log a distilled session summary when the MCP
+   capabilities are exposed (in AFK, Shipper returns to the Hub and the Hub owns wrap-up
+   logging); then its menu offers a new task (CrewLoop Hub entry) or done, and it
+   continues directly into the selected route.
 10. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then hands off directly to
    Architect with a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
    standard chain applies: Architect → Engineer → Reviewer → Shipper.

@@ -413,6 +413,15 @@ Extract owner/repo from remote URL:
 - SSH: `git@github.com:owner/repo.git` → owner/repo
 - HTTPS: `https://github.com/owner/repo.git` → owner/repo
 
+#### 8.4 Post-Push Session Wrap-Up (optional, outside AFK)
+
+After a successful push/PR and BEFORE presenting the ending navigation menu:
+
+- **AFK mode:** skip this step entirely — return control to the CrewLoop Hub as usual. The Hub owns wrap-up session logging in AFK.
+- **Outside AFK:** inspect your tool registry for the DiamondBlock MCP capabilities. If `log_session` is exposed, load the `diamondblock` skill and request a distilled session summary log (final commit/PR outcome + key decisions). DiamondBlock logs the session and returns control to you; then present your normal ending menu unchanged.
+- **Capabilities absent:** skip silently, or emit at most one concise note (skill installed ≠ MCP active).
+- **MCP failure:** emit one warning and continue — the successful shipping result is never altered or blocked.
+
 ---
 
 ### Step 9: Tags & Releases (when explicitly requested)

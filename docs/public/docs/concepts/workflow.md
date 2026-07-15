@@ -60,6 +60,17 @@ flowchart TD
 
 In AFK mode, every row above returns to CrewLoop Hub instead of routing directly.
 
+## Optional DiamondBlock lifecycle
+
+When the session exposes the DiamondBlock MCP tools, the workflow gains four optional, non-blocking touchpoints. If the tools are absent or a call fails, the flow warns once and continues unchanged.
+
+1. **Startup context** — at task entry, the Hub loads the DiamondBlock skill directly and retrieves session context and prior decisions before broad file-by-file discovery.
+2. **Repeated targeted search** — the Hub may return to DiamondBlock repeatedly during the same task for semantic memory and codebase search.
+3. **Confirmed-decision persistence** — only user-confirmed or spec/ADR-accepted decisions are saved, as distilled non-secret records (search-before-save).
+4. **Wrap-up logging** — after a successful push, the Shipper logs the distilled session outcome (normal mode); in AFK mode the Hub performs the wrap-up log after the Shipper returns control.
+
+A missing or stale index remains a manual `dblock index run` action; CrewLoop never indexes automatically.
+
 ## Which skill should I use?
 
 | Task type | Typical path |

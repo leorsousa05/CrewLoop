@@ -162,6 +162,22 @@ New task → CrewLoop Hub
 
 ---
 
+## Optional Runtime Lifecycle (DiamondBlock)
+
+DiamondBlock is an OPTIONAL, non-blocking runtime layer. Installing the skill does not
+activate it — runtime behavior depends exclusively on the MCP capabilities exposed in the
+agent's tool registry, never on binary, package, or config-file presence.
+
+- **Capability-based detection:** skills inspect their own tool registry for the DiamondBlock MCP tools (`get_context`, `search_memory`, `save_memory`, `update_memory`, `log_session`, `index_codebase`). Skill installed ≠ MCP active.
+- **Startup context:** when capabilities are exposed, the CrewLoop Hub loads `diamondblock` directly before broad manual discovery to retrieve session context; ordinary explore subagents remain the fallback.
+- **Repeated targeted search:** the Hub may return to DiamondBlock repeatedly with targeted semantic queries (prior decisions, semantic memory, codebase search) during discovery.
+- **Confirmed-decision persistence:** memories are saved only after user confirmation or acceptance into a spec/ADR, after a search-before-save check, and only as short, distilled, non-secret records with project scope and provenance. Never save raw chat, transient hypotheses, command output, tokens, or source payloads.
+- **Wrap-up logging ownership:** outside AFK, Shipper invokes DiamondBlock for post-push `log_session` and then resumes its normal ending menu; in AFK, Shipper returns to the Hub and the Hub owns wrap-up logging.
+- **One-warning failures:** any MCP failure produces a single warning and the normal flow continues — never blocked, never altering a successful result.
+- **Manual indexing:** a missing or stale index keeps the manual `dblock index run` fallback; no skill auto-indexes.
+
+---
+
 ## AFK Mode
 
 When the user explicitly activates AFK mode, skills route automatically through the
