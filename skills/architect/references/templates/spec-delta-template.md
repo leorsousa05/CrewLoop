@@ -6,15 +6,14 @@
 ## Changes
 
 ### ADDED
-- [New component/function/feature]
-- [New component/function/feature]
+- [New component/function/feature] (in `path/to/file.ts`)
 
 ### MODIFIED
-- [Existing thing] → [How it changes]
-- [Existing thing] → [How it changes]
+- [Existing thing] (`path/to/file.ts` — function/section) → [How it changes]
+- [Existing thing] (`path/to/file.ts` — function/section) → [How it changes]
 
 ### REMOVED
-- [Thing being deleted]
+- [Thing being deleted] (from `path/to/file.ts`)
 
 ## Migration Notes
 [How to migrate existing code/data]

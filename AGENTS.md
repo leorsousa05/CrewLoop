@@ -236,7 +236,7 @@ Rules — no exceptions:
 
 AFK mode allows the workflow to run automatically without waiting for user navigation confirmations between skills.
 
-**Activation:** The user says `AFK`, `modo AFK`, `vou ficar AFK`, or `MEMORY.md` in the project root contains `afk: true`.
+**Activation:** The user says `AFK`, `AFK mode`, `going AFK`, or `MEMORY.md` in the project root contains `afk: true`.
 
 **Behavior when active:**
 - Skills skip the interactive navigation prompts.
@@ -252,25 +252,9 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 
 Every change — no exceptions — gets a spec before any code or documentation is written.
 
-```
-specs/
-├── changes/                         # Active in-progress specs
-│   └── NNN-name/                    # One folder per change
-│       ├── .spec.yaml               # Status, dates, author, affected files
-│       ├── proposal.md              # WHY — motivation, scope, constraints
-│       ├── specs/                   # WHAT — delta vs. current system
-│       ├── design.md                # HOW — models, APIs, data flows, contracts
-│       └── tasks.md                 # Ordered implementation checklist
-├── archive/                         # Completed specs (prefixed YYYY-MM-DD-NNN-name on archival)
-├── living/                          # Merged source of truth per subsystem
-└── decisions/                       # Architectural Decision Records (ADRs)
-```
+See `specs/README.md` for the folder map (who writes/reads `changes/`, `living/`, `archive/`, `decisions/`, `templates/` and when) and `references/conventions.md` §Spec Folder Structure for the canonical tree and rules.
 
-| Change size | Required spec files |
-|------------|---------------------|
-| Bug fix / tweak (< 10 lines) | `.spec.yaml` + `tasks.md` |
-| Feature / component | Full: `.spec.yaml` + `proposal.md` + `specs/` + `design.md` + `tasks.md` |
-| Multi-component / architectural | Full spec + ADR in `decisions/` |
+In short: bug fixes and tweaks get a lightweight spec (`.spec.yaml` + `tasks.md`); features and components get the full spec (`proposal.md` + `specs/` + `design.md` + `tasks.md`); multi-component or architectural changes add an ADR in `decisions/`.
 
 **Critical:** Every spec file must live inside `specs/changes/NNN-name/`. Never place spec files directly in `specs/`.
 

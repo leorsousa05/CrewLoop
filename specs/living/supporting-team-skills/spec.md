@@ -2,7 +2,7 @@
 
 ## Overview
 
-The core Loop Engineering Agents workflow covers discovery, specs, design, implementation, review, documentation, and shipping. Additional skills extend the team for real-world scenarios without overlapping core responsibilities:
+The core CrewLoop workflow covers discovery, specs, design, implementation, review, documentation, and shipping. Additional skills extend the team for real-world scenarios without overlapping core responsibilities:
 
 - **tester** — QA strategy, coverage analysis, and bug reproduction.
 - **product-manager** — Prioritization, success metrics, and value framing.

@@ -159,7 +159,7 @@ describe('SkillInferenceEngine fallback priority', () => {
     const engine = new SkillInferenceEngine(skills);
     const event = makeEvent({
       tool: 'read_file',
-      input: { file_path: 'C:\\Users\\arch\\.agents\\skills\\engineer\\SKILL.md' },
+      input: { file_path: 'C:\\Users\\user\\.agents\\skills\\engineer\\SKILL.md' },
     });
     const result = engine.infer(event, makeSession());
     assert.equal(result.skill, 'engineer');

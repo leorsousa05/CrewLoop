@@ -98,7 +98,7 @@ If the project uses versioning (e.g. monorepo or standard package layouts with `
 
 1. **Verify if package files have been modified:**
    - Run `git diff --name-only` to list all modified files.
-   - Match the file paths to package/workspace directories (e.g. files starting with `packages/cli/` are in the CLI package, and files at the root level or under root directories like `skills/`, `references/`, `assets/` belong to the root package `@archznn/crewloop-skills`).
+   - Match the file paths to package/workspace directories (CrewLoop repo example — adapt the mapping to the project's own layout: files starting with `packages/cli/` are in the CLI package, and files at the root level or under root directories like `skills/`, `references/`, `assets/` belong to the root package `@archznn/crewloop-skills`).
    - **If any file within a package/workspace folder or root package folder is modified, and the commit type is `feat` or `fix` (or contains a breaking change `!`), a version bump is MANDATORY for that package.**
 
 2. **Map the commit type to SemVer bump:**
@@ -114,10 +114,10 @@ If the project uses versioning (e.g. monorepo or standard package layouts with `
 
 3. **Check if Version was already bumped:**
    - Inspect the diff of package manifest files (e.g. `package.json`). If the `version` field was already changed in the diff, the bump requirement is satisfied.
-   - **If the version has not been bumped yet, you MUST prompt the user for the version bump before committing:**
+   - **If the version has not been bumped yet, you MUST confirm the bump with the user and execute it yourself before committing** (the version-bump exception in RESPONSE RULES allows this). Bump ONLY the packages whose files changed — never bump untouched workspaces:
      ```bash
-     # Example npm workspaces command (adjust according to tech stack):
-     npm version <patch | minor | major> --workspaces --no-git-tag-version
+     # Example for npm workspaces (adjust to the tech stack):
+     npm version <patch | minor | major> --workspace <package-name> --no-git-tag-version
      ```
    - Do NOT proceed or propose committing without first performing the version bump if required.
 
@@ -146,6 +146,8 @@ Examples:
 ---
 
 ### Step 6: Draft Commit Message
+
+Base format rules live in [conventions.md](../../references/conventions.md) §Conventional Commits; this section is the operational checklist.
 
 Follow **Conventional Commits** specification:
 
@@ -298,7 +300,7 @@ chore(deps): update eslint to v9
 | `src/hooks/useAuth.ts` | Added | +120 | New authentication hook |
 | `tests/useAuth.test.ts` | Added | +30 | Added auth hook unit tests |
 
-### 📁 Pre-existing / Unrelated Changes (Stashed for isolation)
+### 📁 Pre-existing / Unrelated Changes (left uncommitted)
 | File | Status | Lines | Description |
 |------|--------|-------|-------------|
 | `config.json` | Modified | +5 -2 | Local database settings changed prior to task |
@@ -342,35 +344,25 @@ Closes #42
 - **[B] Commit & Push (Teamwork)** — Create branch, commit, and push (Teamwork Mode)
 - **[P] Commit, Push & Auto-PR (Teamwork)** — Create branch, commit, push, and open PR automatically (uses `gh pr create` if available)
 - **[E] Edit** — Change commit message, branch name, or scope
-- **[R] Review** — Go back to review the changes
-- **[N] Cancel** — Do nothing, keep changes unstaged
+- **[R] Re-inspect diff** — Show the diff summary again (not a route — code review belongs to the Reviewer)
+- **[X] Cancel** — Do nothing, keep changes unstaged
 ```
 
 ---
 
 ### Step 8: Execute (only if user confirms)
 
-#### 8.1 Isolation & Stashing Workflow
-1. **Stash All Changes:** To ensure clean branch creation and isolate modifications:
-   ```bash
-   git stash push -m "shipper-pre-branch-stash"
-   ```
-2. **Create Branch (Teamwork Mode only):**
+#### 8.1 Branch & Selective Staging
+1. **Create Branch (Teamwork Mode only):**
    ```bash
    git checkout -b <branch-name>
    ```
-3. **Restore Changes & Stage Feature Files Only:**
-   ```bash
-   git stash pop
-   ```
-   *CRITICAL Feature Isolation:* Do not run `git add -A` if there are unrelated modifications. Instead, only stage files related to the target task/spec:
+   Uncommitted changes carry over to the new branch automatically — no stashing needed. In Solo Mode, stay on the default branch.
+2. **Stage target files only:** Do not run `git add -A` if there are unrelated modifications. Stage only files related to the target task/spec:
    ```bash
    git add skills/docs-writer/SKILL.md specs/archive/...
    ```
-   *Re-stash Unrelated Files:* If there are remaining unstaged files that belong to another task, stash them again before committing:
-   ```bash
-   git stash push -m "shipper-remaining-unrelated-stash"
-   ```
+3. **Leave unrelated changes untouched:** pre-existing or unrelated modifications stay uncommitted in the working tree — never stash them away silently. After pushing, tell the user exactly which files were left uncommitted so no work is stranded.
 
 #### 8.2 Committing & Pushing
 - **Solo Mode:**
@@ -415,12 +407,7 @@ Extract owner/repo from remote URL:
 
 #### 8.4 Post-Push Session Wrap-Up (optional, outside AFK)
 
-After a successful push/PR and BEFORE presenting the ending navigation menu:
-
-- **AFK mode:** skip this step entirely — return control to the CrewLoop Hub as usual. The Hub owns wrap-up session logging in AFK.
-- **Outside AFK:** inspect your tool registry for the DiamondBlock MCP capabilities. If `log_session` is exposed, load the `diamondblock` skill and request a distilled session summary log (final commit/PR outcome + key decisions). DiamondBlock logs the session and returns control to you; then present your normal ending menu unchanged.
-- **Capabilities absent:** skip silently, or emit at most one concise note (skill installed ≠ MCP active).
-- **MCP failure:** emit one warning and continue — the successful shipping result is never altered or blocked.
+After a successful push/PR and BEFORE presenting the ending navigation menu, follow the wrap-up logging ownership rules in [conventions.md](../../references/conventions.md) §Optional Runtime Lifecycle: outside AFK, if the DiamondBlock `log_session` capability is exposed, load the `diamondblock` skill for a distilled session log (final commit/PR outcome + key decisions), then present your normal ending menu unchanged. In AFK, skip this step — the Hub owns wrap-up logging. Capabilities absent → skip silently or emit at most one concise note. MCP failure → one warning, never block or alter a successful ship.
 
 ---
 
@@ -445,8 +432,9 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **NEVER review code** or fix bugs — redirect to reviewer or engineer.
 - **Always show the diff summary** before committing — user must see what will be committed.
 - **Always run the VALIDATION CHECKLIST** before presenting the commit message — reject messages that fail any check.
-- **Always check for specs** — Before shipping, verify specs exist in `specs/changes/NNN-name/`. If no specs found, warn: "No specs found. Architect should create specs before shipping."
-- **Always archive specs on commit** — Move completed specs from `specs/changes/` to `specs/archive/YYYY-MM-DD-NNN-name/` before pushing.
+- **Only ship after a reviewer PASS** — If the change did not come from a PASS verdict (or review was bypassed), state that explicitly and require user confirmation before shipping.
+- **Always check for specs** — Before shipping, verify specs exist in `specs/changes/NNN-name/`. If no specs found, stop and warn: "No specs found. Architect should create specs before shipping." Do not ship without specs unless the user explicitly confirms.
+- **Always archive specs on commit** — Before pushing, verify the spec's `.spec.yaml` status is `completed` (if not, stop and route back to Reviewer). Then move the spec from `specs/changes/` to `specs/archive/YYYY-MM-DD-NNN-name/` and merge its deltas into `specs/living/` (create `specs/living/<domain>/` for new domains).
 - **Always verify version bump** — If any files in a versioned package/workspace have been modified, you MUST ensure a version bump was executed and staged. Never ship a `feat` or `fix` without a version bump on versioned packages.
 - **Never create tags or releases without explicit user confirmation** — CI-driven tagging (`release-tag.yml`) is the default; manual tags/releases require approval.
 - **Never invent release notes** — Derive release notes only from commits since the last tag.

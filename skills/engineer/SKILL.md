@@ -31,7 +31,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 **NEVER redesign architecture** — If you spot a design flaw, note it as Deferred and ask: "Re-analyze? (Invoke architect)". Do NOT change interfaces, move files between domains, or rename public APIs without architect approval.
 
-**NEVER skip specs** — If specs exist, read them first. If specs are missing or incomplete, ask the CrewLoop Hub to route to architect first. Specs are the single source of truth — your implementation must follow them exactly. Do NOT invent new contracts mid-implementation.
+**NEVER skip specs** — If specs exist, read them first. If specs are missing or incomplete, stop and route to the Architect via your ending menu (`[A]` — spec gap); never route through the CrewLoop Hub mid-flow. Specs are the single source of truth — your implementation must follow them exactly. Do NOT invent new contracts mid-implementation.
 
 **You ARE allowed to use code tools** — Write, Edit, Bash are all permitted for implementation, tests, and verification. This is the ONLY skill that may write implementation code.
 
@@ -58,11 +58,11 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## WORKFLOW
 
-1. **Read spec** — Read `specs/changes/NNN-<name>/tasks.md` if it exists
-2. **Check brief for subagents** — If the CrewLoop Hub brief includes `Subagents: approved` with listed components, use subagents for parallel development. See SUBAGENTS section below.
+1. **Read spec** — Read `specs/changes/NNN-<name>/tasks.md` (plus `design.md`, and `design-ui.md` when the change involves UI)
+2. **Check spec for subagents** — If the active spec's `.spec.yaml` has `subagents.approved: true` with listed components (the Hub brief may repeat it, but the spec is canonical), use subagents for parallel development. See SUBAGENTS section below.
 3. **Implement** — Follow existing contracts and specs
 4. **Test** — Add tests per TDD criteria
-5. **Verify** — Run build/test command. Fail → fix once. Still fail → [STOPPED]
+5. **Verify** — Run build/test command. Fail → diagnose the cause and fix once (no blind retries). Still fail → [STOPPED]
 6. **Update spec** — Mark completed tasks in `tasks.md`
 7. **Deliver** — BUILD output with checklist
 
@@ -70,10 +70,10 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 
 ## SUBAGENTS (when approved in brief)
 
-If the CrewLoop Hub brief explicitly approves subagents with listed independent components:
+If the active spec's `.spec.yaml` explicitly approves subagents (`subagents.approved: true`) with listed independent components:
 
 **Before implementing:**
-1. Read the full spec and the list of parallel components from the brief
+1. Read the full spec and the list of parallel components from its `.spec.yaml`
 2. For each independent component, spawn a subagent with a focused prompt containing:
    - The component name and scope
    - The relevant section of the spec
@@ -85,7 +85,7 @@ If the CrewLoop Hub brief explicitly approves subagents with listed independent 
 6. Run full test suite to verify integration
 
 **When NOT to use subagents:**
-- If the brief does NOT mention subagents approval
+- If the spec does NOT approve subagents
 - If components have heavy interdependencies (shared state, circular imports)
 - If the task is small enough to do inline while the user watches
 - If you are already a subagent (don't spawn sub-subagents)
@@ -132,9 +132,11 @@ When launching long-running verification or test/build processes via Bash, do NO
 
 ---
 
-## DEVELOPMENT & RESPONSE STYLES
+## RESPONSE STYLE & TECHNICAL HONESTY
 
-Please refer to the shared style guides, TDD skip criteria, and code style rules in [conventions.md](../../references/conventions.md).
+Please refer to the shared style guides, TDD skip criteria, and code style rules in [conventions.md](../../references/conventions.md). In addition, for implementation:
+- Verify every requirement from the original prompt is present.
+- List explicitly: "Implemented: X, Y, Z. Deferred: W (reason)."
 
 ---
 
@@ -147,10 +149,9 @@ Please refer to the shared style guides, TDD skip criteria, and code style rules
 
 When BUILD succeeds and all tests pass:
 
-1. **Update spec status:** Change `.spec.yaml` status from `active` to `completed`
-2. **Update living docs:** Merge changes into `specs/living/`. If new domain, create `specs/living/<domain>/`
-3. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked
-4. **Outside AFK, present navigation options and WAIT for user choice:**
+1. **Update spec status:** Change `.spec.yaml` status from `active` to `completed` (and fill the `completed` date). If this BUILD follows a reviewer FAIL, first revert the status to `active` (and clear the `completed` date) before re-implementing.
+2. **Final verification checklist:** Confirm all tasks in `tasks.md` are checked. Living docs (`specs/living/`) are NOT merged here — the Shipper merges them when archiving the spec, after a reviewer PASS.
+3. **Outside AFK, present navigation options and WAIT for user choice:**
    - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
    - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
@@ -173,7 +174,7 @@ When BUILD succeeds and all tests pass:
 Verification fails after 1 fix:
 1. Report: error + file + line
 2. Mark [STOPPED]
-3. Ask: "Fix and retry?" or "Re-analyze? (Invoke architect)"
+3. Ask via `ask_question` (markdown fallback): "Fix and retry?" or "Re-analyze? (Invoke architect)"
 
 ---
 
@@ -186,11 +187,3 @@ Refer to [conventions.md](../../references/conventions.md) for general anti-patt
 - ❌ Redesigning architecture mid-implementation or changing contracts without architect approval
 - ❌ Claiming tests pass without running them
 - ❌ Writing or updating READMEs, module docs, feature docs, API docs, or changelogs (redirect to docs-writer)
-
----
-
-## TECHNICAL HONESTY & REQUIREMENT TRACEABILITY
-
-Please refer to the shared style guides in [conventions.md](../../references/conventions.md). In addition, for implementation:
-- Verify every requirement from the original prompt is present.
-- List explicitly: "Implemented: X, Y, Z. Deferred: W (reason)."

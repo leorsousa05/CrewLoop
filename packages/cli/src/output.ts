@@ -27,12 +27,13 @@ export function pluralize(count: number, singular: string, plural?: string): str
 }
 
 export function displayPath(pathname: string): string {
-  const home = os.homedir();
-  if (pathname === home) {
+  const home = os.homedir().replace(/\\/g, '/');
+  const normalized = pathname.replace(/\\/g, '/');
+  if (normalized === home) {
     return '~';
   }
-  if (pathname.startsWith(`${home}/`)) {
-    return `~/${pathname.slice(home.length + 1)}`;
+  if (normalized.startsWith(`${home}/`)) {
+    return `~/${normalized.slice(home.length + 1)}`;
   }
   return pathname;
 }
