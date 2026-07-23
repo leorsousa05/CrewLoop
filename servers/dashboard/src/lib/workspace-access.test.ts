@@ -63,10 +63,19 @@ describe('workspace access policy', () => {
     }
   });
 
-  it('rejects symlinks whose targets escape the root', async () => {
+  it('rejects symlinks whose targets escape the root', async (t) => {
     const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-out-'));
     fs.writeFileSync(path.join(outside, 'secret.txt'), 'secret');
-    fs.symlinkSync(path.join(outside, 'secret.txt'), path.join(root, 'link.txt'));
+    try {
+      fs.symlinkSync(path.join(outside, 'secret.txt'), path.join(root, 'link.txt'));
+    } catch (err: any) {
+      if (err.code === 'EPERM') {
+        t.skip();
+        fs.rmSync(outside, { recursive: true, force: true });
+        return;
+      }
+      throw err;
+    }
     try {
       await assert.rejects(resolveContainedPath(root, 'link.txt'), (err: any) => {
         assert.equal(err.code, 'PATH_FORBIDDEN');
@@ -77,8 +86,16 @@ describe('workspace access policy', () => {
     }
   });
 
-  it('allows symlinks that stay inside the root', async () => {
-    fs.symlinkSync(path.join(root, 'b.txt'), path.join(root, 'inner-link.txt'));
+  it('allows symlinks that stay inside the root', async (t) => {
+    try {
+      fs.symlinkSync(path.join(root, 'b.txt'), path.join(root, 'inner-link.txt'));
+    } catch (err: any) {
+      if (err.code === 'EPERM') {
+        t.skip();
+        return;
+      }
+      throw err;
+    }
     const resolved = await resolveContainedPath(root, 'inner-link.txt');
     assert.equal(resolved, await fs.promises.realpath(path.join(root, 'b.txt')));
   });
@@ -90,10 +107,19 @@ describe('workspace access policy', () => {
     assert.deepEqual(files.sort(), ['b.txt', 'src/a.txt'].sort());
   });
 
-  it('does not follow directory symlinks that escape the root', async () => {
+  it('does not follow directory symlinks that escape the root', async (t) => {
     const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-out-dir-'));
     fs.writeFileSync(path.join(outside, 'leak.txt'), 'leak');
-    fs.symlinkSync(outside, path.join(root, 'out-link'));
+    try {
+      fs.symlinkSync(outside, path.join(root, 'out-link'));
+    } catch (err: any) {
+      if (err.code === 'EPERM') {
+        t.skip();
+        fs.rmSync(outside, { recursive: true, force: true });
+        return;
+      }
+      throw err;
+    }
     try {
       const files = await listWorkspaceFiles(root, LIMITS);
       assert.equal(files.includes('out-link/leak.txt'), false);

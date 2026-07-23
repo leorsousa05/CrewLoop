@@ -279,10 +279,19 @@ describe('DashboardServer', () => {
       }
     });
 
-    it('rejects symlinks escaping the workspace', async () => {
+    it('rejects symlinks escaping the workspace', async (t) => {
       const outside = path.join(os.tmpdir(), 'crewloop-leak.txt');
       fs.writeFileSync(outside, 'leak');
-      fs.symlinkSync(outside, path.join(workspace, 'link.txt'));
+      try {
+        fs.symlinkSync(outside, path.join(workspace, 'link.txt'));
+      } catch (err: any) {
+        if (err.code === 'EPERM') {
+          t.skip();
+          fs.rmSync(outside, { force: true });
+          return;
+        }
+        throw err;
+      }
       try {
         const res = await fetch(
           `http://127.0.0.1:${port}/api/file-content?sessionId=${sessionId}&path=link.txt`

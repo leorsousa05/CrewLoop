@@ -217,7 +217,7 @@ describe('shared references and assets', () => {
     const installedSkillPath = path.join(targetDir, 'example');
 
     fs.rmSync(installedSkillPath, { recursive: true, force: true });
-    fs.symlinkSync(skillSource, installedSkillPath, 'dir');
+    fs.symlinkSync(skillSource, installedSkillPath, os.platform() === 'win32' ? 'junction' : 'dir');
 
     const result = installSkills(
       [{ name: 'example', description: '', sourcePath: skillSource }],
@@ -241,7 +241,7 @@ describe('shared references and assets', () => {
     const missingSource = path.join(os.tmpdir(), `crewloop-missing-${Date.now()}`);
 
     fs.rmSync(installedSkillPath, { recursive: true, force: true });
-    fs.symlinkSync(missingSource, installedSkillPath, 'dir');
+    fs.symlinkSync(missingSource, installedSkillPath, os.platform() === 'win32' ? 'junction' : 'dir');
     assert.ok(fs.lstatSync(installedSkillPath).isSymbolicLink());
     assert.ok(!fs.existsSync(installedSkillPath));
 

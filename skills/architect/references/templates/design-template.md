@@ -3,6 +3,10 @@
 ## Overview
 [High-level summary of the approach]
 
+## Assumptions & Defaults
+[Every ambiguity resolved with a default convention (per the Architect's non-interactive rule) MUST be recorded here.
+Format: `- [Topic]: chose [X] because [reason]. Revisit if [condition].`]
+
 ## Proposed Directory & File Structure
 ```
 [Insert a complete ASCII tree of the proposed directories and files to be added, modified, or removed.
@@ -17,6 +21,14 @@ my-project/
     └── NewComponent.test.tsx (New)
 ]
 ```
+
+## File-by-File Changes
+[The anchor artifact for the implementer. Every file touched appears here AND in at least one tasks.md entry.]
+| File | Action | What changes | Design ref |
+|------|--------|--------------|------------|
+| `src/example.ts` | Modify | Add `foo()` export; rework `bar()` to use Strategy | §API Contracts |
+| `src/example.test.ts` | Create | Unit tests for `foo()` and `bar()` strategies | §Data Model |
+| `src/legacy.ts` | Delete | Superseded by `src/example.ts` | §Overview |
 
 ## Code Architecture & Design Patterns
 - **Architecture Model:** [Describe the architecture of the solution, clean code boundaries, separation of concerns, e.g. Clean Architecture, Modular, DDD context]

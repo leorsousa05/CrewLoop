@@ -101,6 +101,11 @@ Summarize findings in a structured report:
 ```markdown
 ## 🔍 Review Report
 
+| Detail | Description |
+| :--- | :--- |
+| **Verdict** | [PASS / PASS WITH WARNINGS / FAIL] |
+| **Risk Assessment** | [Low / Medium / High] |
+
 ### Summary
 | Check | Verdict | Notes |
 |-------|---------|-------|
@@ -134,10 +139,10 @@ Outside AFK, present the navigation menu and WAIT for user choice. Mark the reco
 **What would you like to do?**
 
 - **[S] Send to Shipper (Recommended on PASS)** — Commit, branch, push, and open PR
-- **[E] Back to Engineer (Recommended on FAIL)** — Fix the findings and re-verify
+- **[E] Back to Engineer (Recommended on FAIL)** — Fix the findings and re-verify (the `.spec.yaml` status reverts to `active`)
 ```
 
-*Mandatory: Outside AFK, hand off directly to Shipper on PASS or Engineer on FAIL. In AFK, return to CrewLoop Hub.*
+*Mandatory: Outside AFK, after the user selects an option, hand off directly to the chosen skill. In AFK, return to CrewLoop Hub.*
 
 ## RESPONSE RULES
 
@@ -146,7 +151,7 @@ Please adhere to the shared style guides in [conventions.md](../../references/co
 - **Never write code** — Report issues, don't fix them. Redirect to engineer.
 - **Never run git operations** — No commit, push, branch, merge. Redirect to shipper.
 - **Be specific in findings** — "Function `calculateTax` in `src/tax.js` lacks error handling for negative inputs" is better than "Some functions need error handling."
-- **Verify the navigation contract** — Ending options and recommendation conditions must match the inline capsule and manifest. Render exactly one `(Recommended)` marker for the current outcome, and preserve AFK precedence.
+- **Verify the navigation contract** — Ending options and recommendation conditions must match the inline capsule and `references/skill-contracts.yaml`. Render exactly one `(Recommended)` marker for the current outcome, and preserve AFK precedence.
 - **Cite line numbers** when possible — makes fixes faster for the engineer.
 - **Distinguish critical vs. warning** — Critical = ship blocker. Warning = should fix but not a blocker.
 - **Always reference the spec** when one exists — specs are the source of truth.

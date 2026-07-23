@@ -313,7 +313,7 @@ describe('buildEvent', () => {
         stepIdx: 0,
         toolCall: {
           name: 'view_file',
-          args: { AbsolutePath: '/home/arch/.agents/skills/engineer/SKILL.md' },
+          args: { AbsolutePath: '/home/user/.agents/skills/engineer/SKILL.md' },
         },
       },
       'crewloop-hub'

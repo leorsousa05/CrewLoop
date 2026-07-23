@@ -1,6 +1,6 @@
 # Workflow Reference
 
-Complete workflow for the Loop Engineering Agents team.
+Complete workflow for the CrewLoop team.
 
 ---
 
@@ -102,8 +102,9 @@ flowchart TD
 10. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then hands off directly to
    Architect with a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
    standard chain applies: Architect → Engineer → Reviewer → Shipper.
-11. **Specialist Helpers return to their invoker** — `schema-designer` → Architect,
-    `frontend-architect` → Designer, `devops-specialist` → Shipper, and `tester` / `docs-writer` → Engineer when invoked during delivery.
+11. **Specialist Helpers return to their invoker** — default invokers: `schema-designer` → Architect,
+    `frontend-architect` → Designer, `devops-specialist` → Shipper, `tester` → Engineer,
+    `docs-writer` → CrewLoop Hub (the actual invoker wins when different).
     Maintainer and Project Brainstorm instead route confirmed triage/completed briefs to Architect.
 12. **AFK mode is the exception** — with AFK active, every non-Hub skill returns control to the
     CrewLoop Hub automatically and the Hub loads the next skill per the transition

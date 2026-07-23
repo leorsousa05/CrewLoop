@@ -29,8 +29,8 @@ AFK mode lets the workflow run automatically without requiring navigation input 
 
 Say one of:
 - `AFK`
-- `modo AFK`
-- `vou ficar AFK`
+- `AFK mode`
+- `going AFK`
 
 Or add `afk: true` to `MEMORY.md` in the project root.
 

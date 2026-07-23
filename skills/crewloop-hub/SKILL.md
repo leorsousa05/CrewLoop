@@ -66,27 +66,10 @@ To preserve the main conversation context, offload read-only, context-heavy work
 
 ### What NOT to delegate
 
-- Writing or editing files (`Write`, `Edit`, `Bash` that mutates state) EXCEPT when delegating to the Architect or Designer skills to generate specification or design spec files autonomously based on discovery inputs.
+- Writing or editing files (`Write`, `Edit`, `Bash` that mutates state). Exception: in AFK mode only, you may delegate spec or design-spec generation to the Architect or Designer running as an autonomous subagent. Outside AFK, specs are written by loading the Architect/Designer in the main thread (see Step 4) — never via subagent.
 - Running builds, tests, installs, or deployments.
-- Making routing choices without user confirmation (except auto-triggering the Architect or Designer spec generation steps).
+- Making routing choices without user confirmation (except auto-triggering the Architect or Designer spec phases per Step 4).
 - Asking the user questions (do that in the main thread).
-
-## AFK MODE & ROLE PREFIX
-
-**Role prefix:** > 🎯 **CrewLoop Hub**
-
-Print this prefix on its own line before the first line of every response.
-
-**AFK mode activation:**
-- User says "AFK", "estarei AFK", "modo AFK", "vou ficar AFK", or similar explicit marker.
-- `MEMORY.md` contains `afk: true`.
-
-**AFK mode behavior:**
-- Skip the navigation menu at the end.
-- State the next skill being activated.
-- Load the next skill via the Skill tool (do not wait for user choice).
-
-**Next skill:** Architect at task entry; on mid-flow AFK returns, derive the next phase from workflow state.
 
 ---
 
@@ -140,19 +123,18 @@ If the task is a single-session change (e.g., a one-line bug fix or a small twea
 
 Before asking the user, use subagents to explore the codebase and read reference files in parallel. This keeps the main thread lean and gives you better questions.
 
-- **DiamondBlock capability check (do this first):** inspect your own available tool registry for the DiamondBlock MCP capabilities (`get_context`, `search_memory`, `save_memory`, `update_memory`, `log_session`, `index_codebase`). If the required context/search capabilities are exposed, load the `diamondblock` skill directly BEFORE broad manual file reads and request startup context. If they are not exposed, emit at most one concise fallback note that DiamondBlock is not active (skill installed ≠ MCP active) and continue ordinary exploration — ordinary `explore` subagents remain the fallback, not the primary route.
-- **Repeated DiamondBlock use:** you may return to `diamondblock` repeatedly with targeted semantic queries (prior decisions, semantic memory, codebase search) during discovery.
-- **Decision persistence:** save a memory ONLY after user confirmation or after a decision is accepted into a spec/ADR. Search for an existing equivalent memory before saving, and save only short, distilled, non-secret records with project scope and provenance. Never save raw chat, transient hypotheses, command output, tokens, or source payloads.
-- **Verified identifiers:** session/project identifiers must come from platform-provided values or values returned/accepted by the MCP schema. If they cannot be verified, warn and skip the memory operation — never fabricate IDs.
-- **Non-blocking failures:** any MCP failure produces one warning and the normal flow continues.
-- **Manual indexing:** when the index is missing or stale, keep the manual `dblock index run` instruction; never auto-index.
+**Size the discovery to the task:** for a trivial task (1-line fix, typo, config tweak), skip the subagent scans below and ask only the 1-2 questions that matter. For everything else, run the scans.
+
+- **DiamondBlock capability check (do this first):** inspect your tool registry for the DiamondBlock MCP capabilities. If exposed, load the `diamondblock` skill BEFORE broad manual reads, request startup context, and return to it repeatedly with targeted queries during discovery. If not exposed, emit at most one concise fallback note and continue with ordinary `explore` subagents — they are the default route, not the fallback. Detection, memory persistence, and failure rules: see [conventions.md](../../references/conventions.md) §Optional Runtime Lifecycle.
 - Spawn an `explore` subagent after that to map any remaining project structure and find files relevant to the user's request.
-- Spawn another subagent to read and summarize `conventions.md`, `workflow.md`, `AGENTS.md`, and any local skill references.
-- If the task mentions existing specs or prior changes, spawn a subagent to check `specs/` and `archive/`.
+- **Project knowledge scan (run it even when specs are not mentioned):** spawn a subagent to read and summarize, when present: `AGENTS.md` and `README.md` (project rules and overview), `specs/README.md` (how the spec folders work), `specs/living/` (merged current state per domain — the fastest way to understand what the system already does), `specs/decisions/` (ADRs — decisions that must not be silently reverted), and `specs/changes/` (in-flight work the new task may collide with). Also inventory the `skills/` directory if the repository contains one, so routing reuses existing skills instead of reinventing them.
+- Spawn another subagent to read and summarize `conventions.md`, `workflow.md`, and any local skill references.
 - Use the subagent findings to skip already-answered questions and ask sharper ones.
 - If the request clearly needs deeper specialist analysis, add supporting skill subagents in parallel instead of waiting for a later phase.
 
-Then ask ALL relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt or by the subagents. Prioritize using the `ask_question` tool to present these questions as structured choices or checklists in a modal, falling back to raw chat text only if the tool is not supported. Ask 2-4 questions per prompt — don't overwhelm. Wait for answers before proceeding.
+Then ask the relevant questions from the categories below. Skip only what is already clearly answered in the user's prompt or by the subagents. Prioritize using the `ask_question` tool to present these questions as structured choices or checklists in a modal, falling back to raw chat text only if the tool is not supported. Ask 2-4 questions per prompt — don't overwhelm. Wait for answers before proceeding.
+
+**Which categories apply:** 2.1–2.3 apply to every non-trivial task. Add 2.4 for features and refactors; 2.5 only when the change touches UI; 2.6 only when it touches data or state; 2.7–2.9 only when performance, security, or infrastructure is explicitly in scope; 2.10–2.11 for larger features. Bug fixes and tweaks: 2.1–2.2 only.
 
 #### 2.1 Context & Scope
 - What project/framework is this? (React, Vue, Godot, Python, etc.)
@@ -279,7 +261,7 @@ Once all questions are answered, produce a clean, focused task brief. Apply thes
 
 The Hub routes in two situations only — never in the middle of an interactive flow:
 
-**A. After discovery (new task):** present the entry menu via `ask_question` (markdown fallback). You may trigger the Architect and Designer spec-writing phases directly without waiting for user confirmation.
+**A. After discovery (new task):** present the entry menu via `ask_question` (markdown fallback). You may trigger the Architect and Designer spec-writing phases directly, in the main thread, without waiting for user confirmation. (Autonomous subagent spec-writing is an AFK-only path — see SUBAGENT DELEGATION.)
 
 **Entry menu format (to be used in `ask_question` or chat fallback):**
 ```markdown
@@ -299,18 +281,18 @@ Context updated. Current state: [describe state, e.g., brief created for a new t
 
 **Critical routing rules:**
 - **Direct routing is the default.** Outside AFK mode, execution skills hand off to the next skill themselves via their ending menus. Do not insert the Hub between phases.
-- **NEVER route automatically** EXCEPT for the Architect and Designer spec-writing phases after discovery, and for every transition when AFK mode is active. For all other cases, present the entry menu and WAIT for the user to choose.
+- **Route automatically only in two cases:** the Architect/Designer spec-writing phases right after discovery, and every transition in AFK mode. For all other cases, present the entry menu and WAIT for the user to choose.
 - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
 - **Architect is ALWAYS the first stop.** Every task — bug fix, feature, design, refactor — goes to architect first to create/maintain specs. No exceptions.
 - **Flow progression:** CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done. Reviewer FAIL loops back to Engineer.
-- **Skill handoffs stay in the main thread** (unless running Architect or Designer via an autonomous subagent). The next execution skill should activate in the SAME conversation thread so the user can see and interact with every step.
+- **Skill handoffs stay in the main thread** — the only exception is AFK-mode spec writing via an autonomous Architect/Designer subagent. The next execution skill should activate in the SAME conversation thread so the user can see and interact with every step.
 
 ---
 
 ## RESPONSE RULES
 
 Please refer to the shared response style guidelines in [conventions.md](../../references/conventions.md). In addition, for discovery:
-- **Never skip discovery** on non-trivial tasks. Even if the user says "just build it", ask at least 2-3 clarifying questions.
+- **Scale discovery to the task.** Non-trivial tasks: never skip discovery — even if the user says "just build it", ask at least 2-3 clarifying questions. Trivial tasks (1-line fix, typo, config tweak): 0-1 questions are enough — do not interrogate.
 - **Never write code** — redirect: "I'll hand this to engineer once we clarify X."
 - **Never design architecture** — redirect: "The architect skill will handle the system design."
 - **Never do UI/UX design** — redirect: "The designer skill will handle the visual direction and design spec."

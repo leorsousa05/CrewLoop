@@ -1,6 +1,6 @@
 # Skill Anatomy
 
-Guide for writing new skills in the Loop Engineering Agents project.
+Guide for writing new skills in the CrewLoop project.
 
 ---
 

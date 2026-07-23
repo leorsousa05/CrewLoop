@@ -1,6 +1,6 @@
 ---
 name: docs-writer
-description: Write or rewrite project documentation tailored to type and audience. Use for READMEs, module/feature/capability docs, or any project docs. Invoked by Engineer during delivery after Architect creates the required spec; return to the actual invoker when complete.
+description: Write or rewrite project documentation tailored to type and audience. Use for READMEs, module/feature/capability docs, or any project docs. Return to the actual invoker when complete.
 ---
 
 # Docs-Writer — Documentation Authoring
@@ -208,24 +208,26 @@ Load `references/quality-checklist.md`. Score every applicable item. Fix every f
 - **Never ship a framework's default scaffold README** — replace it wholesale.
 - **Always run the quality checklist** before declaring done.
 - **Always ask the user** what problem the project solves and who the audience is if the code cannot reveal it.
-  - **When done, summarize findings and present navigation options** — Outside AFK, after completing work, present the navigation menu and WAIT for user choice:
-  - Show `[C]` only when CrewLoop Hub is the actual invoker; otherwise show `[H]` as the fallback.
-  - **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
-  - Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
+- **When done, summarize findings and present navigation options** — Outside AFK, after completing work, present the navigation menu and WAIT for user choice:
+- Show `[C]` only when CrewLoop Hub is the actual invoker; otherwise show `[H]` as the fallback.
+- **Handle Tool Responses:** If the current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
+- Otherwise, call the `ask_question` tool to present options, or refer to the navigation guidelines in [conventions.md](../../references/conventions.md) for fallback:
 
-  ```markdown
-  **What would you like to do?**
+```markdown
+**What would you like to do?**
 
-  - **[I] Return to invoking skill (Recommended)** — Hand documentation back (default: CrewLoop Hub)
-  - **[C] Continue writing** — Use only when the invoker is CrewLoop Hub
-  - **[H] New task via CrewLoop Hub** — Use when another skill invoked this skill
-  ```
+- **[I] Return to invoking skill (Recommended)** — Hand documentation back (default: CrewLoop Hub)
+- **[C] Continue writing** — show ONLY when the invoker is CrewLoop Hub
+- **[H] New task via CrewLoop Hub** — show ONLY when another skill invoked this skill
+
+Show exactly one of `[C]` or `[H]`, never both, depending on the invoker.
+```
 
 ## HANDOFF
 
 State what documentation you wrote, what audience it targets, and recommend returning to the actual invoking skill (CrewLoop Hub by default).
 
-*Mandatory: Outside AFK, hand off directly to the actual invoker. In AFK, return to CrewLoop Hub.*
+*Mandatory: Outside AFK, after the user selects an option, hand off directly to the chosen skill. In AFK, return to CrewLoop Hub.*
 
 ---
 

@@ -220,7 +220,7 @@ describe('normalizeAgy', () => {
       toolCall: {
         name: 'view_file',
         args: {
-          AbsolutePath: '/home/arch/.agents/skills/crewloop-hub/SKILL.md',
+          AbsolutePath: '/home/user/.agents/skills/crewloop-hub/SKILL.md',
           IsSkillFile: true,
           toolSummary: 'CrewLoop Hub skill',
         },
@@ -239,7 +239,7 @@ describe('normalizeAgy', () => {
       stepIdx: 0,
       toolCall: {
         name: 'view_file',
-        args: { AbsolutePath: '/home/arch/README.md' },
+        args: { AbsolutePath: '/home/user/README.md' },
       },
     });
 
@@ -255,7 +255,7 @@ describe('normalizeAgy', () => {
       stepIdx: 0,
       toolCall: {
         name: 'view_file',
-        args: { AbsolutePath: 'C:\\Users\\arch\\.agents\\skills\\engineer\\SKILL.md' },
+        args: { AbsolutePath: 'C:\\Users\\user\\.agents\\skills\\engineer\\SKILL.md' },
       },
     });
 

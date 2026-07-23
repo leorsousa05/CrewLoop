@@ -1,9 +1,6 @@
 # Proposal: [Change Name]
 
-## Status
-- **State:** draft | active | completed | cancelled
-- **Created:** YYYY-MM-DD
-- **Author:** @username
+> Metadata (status, dates, author, affected files) lives in `.spec.yaml` — do not duplicate it here.
 
 ## Problem Statement
 [What problem are we solving? Why does this matter?]
@@ -26,5 +23,6 @@
 | [Risk description] | High/Med/Low | [How we avoid or handle it] |
 
 ## Success Criteria
-- [ ] [Measurable outcome 1]
-- [ ] [Measurable outcome 2]
+[Each criterion MUST map to at least one task in `tasks.md` — reference the task ID.]
+- [ ] [Measurable outcome 1] → verified by T1
+- [ ] [Measurable outcome 2] → verified by T2

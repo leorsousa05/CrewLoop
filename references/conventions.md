@@ -1,6 +1,6 @@
 # Team Conventions
 
-Shared conventions used by all Loop Engineering Agents skills.
+Shared conventions used by all CrewLoop skills.
 
 ---
 
@@ -114,10 +114,12 @@ The Hub presents this menu only after interactive discovery for a new task. AFK 
 specs/
 ├── changes/                        ← Active deltas
 │   └── 001-change-name/
-│       ├── .spec.yaml              ← status, dates, author
+│       ├── .spec.yaml              ← metadata: name, status, dates, author, affected files
+│       │                             (schema: templates/spec-yaml-template.yaml)
 │       ├── proposal.md             ← WHY (skipped for lightweight specs)
 │       ├── specs/                  ← WHAT (skipped for lightweight specs)
 │       ├── design.md               ← HOW (skipped for lightweight specs)
+│       ├── design-ui.md            ← UI design spec (only when the change involves UI; written by Designer)
 │       └── tasks.md                ← ordered checklist
 │
 ├── archive/                        ← Completed changes (YYYY-MM-DD-NNN-name)
@@ -129,20 +131,23 @@ specs/
 ├── decisions/                      ← ADRs
 │   └── 001-architecture-choice.md
 │
-└── templates/                      ← Reusable templates
-    ├── proposal-template.md
+└── templates/                      ← Reusable templates (working copy; canonical versions
+    ├── proposal-template.md         live in skills/architect/references/templates/)
     ├── spec-delta-template.md
     ├── design-template.md
-    └── tasks-template.md
+    ├── tasks-template.md
+    ├── spec-yaml-template.yaml
+    └── adr-template.md
 ```
 
 Rules:
 
 - Every spec lives inside `specs/changes/NNN-name/`. Never directly in `specs/`.
-- `living/` reflects the current state of the system.
+- `living/` reflects the current state of the system, organized as one `<domain>/` folder per bounded context. The Shipper merges spec deltas into it when archiving a completed change (never before a reviewer PASS). The CrewLoop Hub and the Architect read it during discovery, before designing anything that touches an existing domain.
 - `archive/` preserves completed changes for audit.
-- `decisions/` records irreversible architectural choices.
-- **Lightweight Specs (for bugs):** Bug fixes under any category require a lightweight specification. A lightweight spec requires only `.spec.yaml` and `tasks.md` in `specs/changes/NNN-bug-name/`. `proposal.md`, `design.md`, and the `specs/` folder are omitted.
+- `decisions/` records irreversible or cross-cutting architectural choices as ADRs, written from `templates/adr-template.md` and numbered by incrementing the highest `NNN` in the folder.
+- `specs/README.md` summarizes how each folder is used; the rules here remain canonical.
+- **Lightweight Specs (for bugs and tweaks):** Bug fixes and small tweaks require a lightweight specification, regardless of size. A lightweight spec requires only `.spec.yaml` and `tasks.md` in `specs/changes/NNN-name/`. `proposal.md`, `design.md`, and the `specs/` folder are omitted.
 
 ---
 
@@ -186,7 +191,7 @@ where the Hub mediates mid-flow.**
 
 ### Activation phrases
 
-Case-insensitive matches: `AFK`, `estarei AFK`, `modo AFK`, `vou ficar AFK`.
+Case-insensitive matches: `AFK`, `AFK mode`, `going AFK`.
 
 AFK mode remains active until the workflow returns to CrewLoop Hub after shipping, or until the user explicitly disables it.
 
@@ -268,6 +273,18 @@ These rules apply to all code proposed or implemented by any agent:
 
 ---
 
+## General Anti-Patterns
+
+Every skill avoids these. Skill-specific lists live in each SKILL.md (they extend, never replace, this one):
+
+- ❌ AI artifacts: placeholder comments, `TODO` without an issue reference, `console.log` left in code, empty `catch` blocks, "Written by AI" comments
+- ❌ Claiming verification without running it ("tests pass" without executing the suite)
+- ❌ Inventing contracts, interfaces, or config values not approved in a spec
+- ❌ Routing outside your own transition contract (menus, invoker returns, AFK rules)
+- ❌ Committing secrets, `.env` files, or build directories (`node_modules/`, `dist/`, `build/`)
+
+---
+
 ## Agent Interactive Tools & Capabilities
 
 When running on platforms that support interactive agent tools, agents must prioritize calling these tools to capture inputs and control flow, falling back to raw chat text only if the tool is not supported or errors:
@@ -288,11 +305,11 @@ When running on platforms that support interactive agent tools, agents must prio
 
 ---
 
-## Strict CLI Output Format Schemas
+## CLI Output Summary Blocks
 
-To ensure uniform terminal outputs, every skill MUST format its final response following these exact visual blocks:
+Every skill ends its final response with a summary block. The blocks below define the **required minimum fields** per skill — they are a contract of content, not of layout. Each skill may present these fields inside the richer, skill-specific format defined in its own SKILL.md; when the two differ, the skill's format wins for presentation, but every field below must appear somewhere in the output.
 
-### 1. CrewLoop Hub CLI Output
+### 1. CrewLoop Hub — minimum fields
 ```markdown
 ## 🎯 Context Brief
 
@@ -314,7 +331,7 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 - [What happens next]
 ```
 
-### 2. Architect CLI Output
+### 2. Architect — minimum fields
 ```markdown
 ## 🏗️ Spec & Design
 
@@ -323,17 +340,17 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 | **Specs Path** | [path to spec folder] |
 | **Integrations** | [External APIs / database / etc.] |
 
-### 🧱 [Padrões Aplicados]
+### 🧱 [Applied Patterns]
 - [Pattern 1] — [Justification]
 
-### 🚀 [Estratégia de Implementação]
+### 🚀 [Implementation Strategy]
 - [Step 1]
 - [Step 2]
 
 ### 🔌 Contracts & Stubs: [types, schemas, interfaces]
 ```
 
-### 3. Designer CLI Output
+### 3. Designer — minimum fields
 ```markdown
 ## 🎨 UI/UX Visual Specification
 
@@ -349,7 +366,7 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 [ASCII wireframe or Component compositions]
 ```
 
-### 4. Engineer CLI Output
+### 4. Engineer — minimum fields
 ```markdown
 ## 🔧 Verification Report
 
@@ -366,7 +383,7 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 [Bash execution logs brief]
 ```
 
-### 5. Reviewer CLI Output
+### 5. Reviewer — minimum fields
 ```markdown
 ## 🔍 Review Report
 
@@ -382,7 +399,7 @@ To ensure uniform terminal outputs, every skill MUST format its final response f
 ### ⚠️ Findings details: [critical bugs, security threats, style bugs]
 ```
 
-### 6. Shipper CLI Output
+### 6. Shipper — minimum fields
 ```markdown
 ## 📦 Ready to Ship
 

@@ -6,14 +6,14 @@ Motion should explain change, not decorate the page.
 
 - Animate only `transform` and `opacity`.
 - Prefer short entrances and even shorter exits.
-- Stagger reveals when many elements appear together.
+- On tools and dashboards, render instantly or with a single fade — staggered reveals belong to marketing surfaces only.
 - Keep reduced-motion fallbacks simple and complete.
 
 ## Motion families
 
 ### Entrance
-- Use page-load reveals for the first impression.
-- Stagger cards and sections so they feel orchestrated, not noisy.
+- Page-load reveals and staggers are for the first impression on marketing/brand surfaces — never on tools.
+- Keep state changes legible and fast.
 
 ### Feedback
 - Use quick press and hover feedback to confirm interaction.
