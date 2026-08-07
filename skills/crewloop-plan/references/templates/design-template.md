@@ -4,67 +4,46 @@
 [High-level summary of the approach]
 
 ## Assumptions & Defaults
-[Every ambiguity resolved with a default convention (per the CrewLoop Plan's non-interactive rule) MUST be recorded here.
+[Every ambiguity resolved with a default convention MUST be recorded here.
 Format: `- [Topic]: chose [X] because [reason]. Revisit if [condition].`]
 
 ## Proposed Directory & File Structure
 ```
-[Insert a complete ASCII tree of the proposed directories and files to be added, modified, or removed.
-Example:
-my-project/
-├── src/
-│   ├── components/
-│   │   └── NewComponent.tsx  (New)
-│   └── hooks/
-│   │   └── useHook.ts        (Modified)
-└── tests/
-    └── NewComponent.test.tsx (New)
-]
+[Insert a complete ASCII tree of the proposed directories and files to be added, modified, or removed.]
 ```
 
 ## File-by-File Changes
-[The anchor artifact for the implementer. Every file touched appears here AND in at least one tasks.md entry.]
 | File | Action | What changes | Design ref |
 |------|--------|--------------|------------|
 | `src/example.ts` | Modify | Add `foo()` export; rework `bar()` to use Strategy | §API Contracts |
-| `src/example.test.ts` | Create | Unit tests for `foo()` and `bar()` strategies | §Data Model |
-| `src/legacy.ts` | Delete | Superseded by `src/example.ts` | §Overview |
 
 ## Code Architecture & Design Patterns
-- **Architecture Model:** [Describe the architecture of the solution, clean code boundaries, separation of concerns, e.g. Clean Architecture, Modular, DDD context]
-- **Design Patterns Used:** [Name and justify the design patterns applied, e.g. Factory, Strategy, Observer, Repository pattern]
+- **Architecture Model:** [Clean Architecture, Modular, DDD context]
+- **Design Patterns Used:** [Factory, Strategy, Observer, Repository, etc.]
 
-## Data Model
+## Data Model & Interfaces
 ```typescript
-// Core entities, value objects, types
-interface Example {
-  id: string;
-  name: string;
-}
-```
-
-## API Contracts
-```typescript
-// Interfaces, function signatures, schemas
+// Explicit types, interfaces, schemas, and signatures
 interface ServiceContract {
-  method(input: Input): Promise<Output>;
+  execute(input: InputSchema): Promise<OutputSchema>;
 }
 ```
+
+## Edge Case & Error Handling Matrix
+| Scenario / Input | Expected Behavior | Return Value / Error Thrown |
+|------------------|-------------------|-----------------------------|
+| Empty string / null input | Reject early with validation error | Throws `ValidationError` |
+| Network timeout | Fallback to cached response | Returns `CacheFallback` |
 
 ## Flow Diagrams
-### [Flow Name]
 1. Step 1
 2. Step 2
-3. Step 3
 
-## State Management
+## State Management & Caching
 [Where state lives, how it flows]
 
-## Error Handling
-[Expected errors, fallback strategies]
-
 ## Performance Considerations
-[Budgets, caching, optimization strategies]
+[Budgets, lazy loading, query optimizations]
 
 ## Security Considerations
-[Auth, validation, sanitization]
+[Auth, input sanitization, PII protection]

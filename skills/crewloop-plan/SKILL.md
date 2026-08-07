@@ -28,16 +28,16 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 **ANALYZE only.** Discovery, brief synthesis, architecture contracts, and spec creation (`.spec.yaml`, `proposal.md`, `design.md`, `tasks.md`).
 
 - **NEVER write implementation code** — type signatures and interfaces only.
-- **NEVER skip discovery** — run at least a lightweight exploration and ask essential questions.
+- **NEVER skip discovery** — run read-only codebase exploration probes before asking questions.
 - **Auto-route when done** — load `crewloop:design` (if UI), `crewloop:docs` (if docs only), or `crewloop:code`.
 
 ---
 
 ## WORKFLOW
 
-1. **Read context & scan spec index:** Find highest `NNN` in `specs/changes/` and `specs/archive/`.
-2. **Explore codebase:** Map structure, entry points, and existing bounded contexts.
-3. **Classify task & ask questions:** Ask concise questions grouped into 2–4 per prompt (`ask_question` tool preferred).
+1. **Read Context & Scan Spec Index:** Find highest `NNN` in `specs/changes/` and `specs/archive/`.
+2. **Proactive Exploration:** Spawn parallel read-only subagents to inspect existing patterns, entry points, `specs/living/`, and ADRs.
+3. **Classify Task & Ask Questions:** Group questions into structured options using `ask_question` tool.
 4. **Synthesize Task Brief:**
    ```markdown
    ## Task Brief
@@ -47,10 +47,13 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
    ### 📌 Requirements
    ### 🗂️ Affected Files
    ```
-5. **Write Spec Files:**
-   - Create `specs/changes/NNN-name/`.
-   - Write `.spec.yaml`, `proposal.md`, `design.md`, `tasks.md`. (Lightweight specs: `.spec.yaml` + `tasks.md` for bug fixes).
-6. **Hand off automatically:** Load `crewloop:design` (UI), `crewloop:docs` (docs), or `crewloop:code`.
+5. **Write Spec Files (`specs/changes/NNN-name/`):**
+   - `.spec.yaml`: Metadata, status, subagent parallelization flags.
+   - `proposal.md`: WHY, goals, explicit non-goals, risk assessment.
+   - `design.md`: Architecture, file changes, explicit contracts/interfaces, and input/output edge case matrix.
+   - `tasks.md`: Atomic checklist items with `Files`, `Depends on`, `Verification` command, and `Done when` criteria.
+6. **Pre-Handoff Spec Validation:** Confirm all spec files are non-empty, contracts are typed, and tasks are verifiable.
+7. **Hand off Automatically:** Load `crewloop:design` (UI), `crewloop:docs` (docs), or `crewloop:code`.
 
 ---
 
