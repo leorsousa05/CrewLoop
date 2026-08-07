@@ -41,8 +41,8 @@ Example:
 ```
 Release v0.10.0
 
-- Add long-term-manager skill for multi-session tracking
-- Update README and AGENTS.md with 18-skill bundle
+- Adopt `crewloop:*` namespace for all skills
+- Reduce team to 8 core skills and update docs
 ```
 
 ## Release notes template

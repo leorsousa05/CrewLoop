@@ -6,7 +6,7 @@ sidebar_position: 1
 
 CrewLoop is a team of AI skills that work together as a complete, role-separated software development workflow — from requirements discovery to git push — ensuring no step is skipped and every change is traceable.
 
-Instead of asking a single AI to "build this feature", CrewLoop distributes responsibilities across 18 specialized skills. Each skill owns one phase and never invades another's territory.
+Instead of asking a single AI to "build this feature", CrewLoop distributes responsibilities across 8 specialized skills. Each skill owns one phase and never invades another's territory.
 
 ## The crew at a glance
 
@@ -14,44 +14,38 @@ Instead of asking a single AI to "build this feature", CrewLoop distributes resp
 
 | Skill | Phase | What it does |
 |-------|-------|--------------|
-| **CrewLoop Hub** | Discovery | Gathers context, asks the right questions, routes the task |
-| **Architect** | Specs | Creates mandatory specs and architectural contracts |
-| **Designer** | Design | Defines aesthetic direction for every UI change |
-| **Engineer** | Build | Writes implementation code and tests — the only one who does |
-| **Reviewer** | Review | Audits quality, security, and spec compliance |
-| **Shipper** | Ship | The only skill allowed to touch git |
+| **`crewloop:hub`** | Discovery | Gathers context, asks the right questions, routes the task |
+| **`crewloop:plan`** | Specs | Creates mandatory specs and architectural contracts |
+| **`crewloop:design`** | Design | Defines aesthetic direction for every UI change |
+| **`crewloop:code`** | Build | Writes implementation code and tests — the only one who does |
+| **`crewloop:review`** | Review | Audits quality, security, and spec compliance |
+| **`crewloop:ship`** | Ship | The only skill allowed to touch git |
 
 ### Supporting Skills — invoked as needed
 
 | Skill | Invoked when |
 |-------|-------------|
-| **Docs-Writer** | Pure documentation tasks |
-| **Long-Term Manager** | Projects that span multiple sessions and need durable tracking artifacts |
-| **Tester** | Test strategy, QA, coverage analysis |
-| **Product-Manager** | Prioritization, roadmap, user stories |
-| **Maintainer** | Bug triage, technical debt, dependency updates |
-| **Researcher** | Technology evaluation, library comparison |
-| **Security-Guard** | Security review, secret scanning, auth |
-| **Accessibility-Auditor** | WCAG compliance, keyboard nav, screen readers |
+| **`crewloop:brainstorm`** | New or ambiguous project ideas need interactive discovery before specs |
+| **`crewloop:docs`** | Pure documentation tasks without code changes |
 
 ## The flow
 
 ```mermaid
 flowchart TD
-    O["🎯 CrewLoop Hub\nDiscovery & Routing"]
-    A["🏗️ Architect\nSpecs & Architecture"]
-    D["🎨 Designer\nUI/UX Direction"]
-    E["🔧 Engineer\nImplementation"]
-    R["🔍 Reviewer\nQuality Gate"]
-    S["🚀 Shipper\nGit & PR"]
+    H["🎯 crewloop:hub\nDiscovery & Routing"]
+    P["🗺️ crewloop:plan\nSpecs & Architecture"]
+    D["🎨 crewloop:design\nUI/UX Direction"]
+    C["🛠️ crewloop:code\nImplementation"]
+    R["🔍 crewloop:review\nQuality Gate"]
+    S["🚀 crewloop:ship\nGit & PR"]
 
-    O --> A
-    A --> D
-    A --> E
-    D --> E
-    E --> R
+    H --> P
+    P --> D
+    P --> C
+    D --> C
+    C --> R
     R --> S
-    S --> O
+    S --> H
 ```
 
 ## What CrewLoop is not

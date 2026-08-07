@@ -4,7 +4,7 @@
 [High-level summary of the approach]
 
 ## Assumptions & Defaults
-[Every ambiguity resolved with a default convention (per the Architect's non-interactive rule) MUST be recorded here.
+[Every ambiguity resolved with a default convention (per the CrewLoop Plan's non-interactive rule) MUST be recorded here.
 Format: `- [Topic]: chose [X] because [reason]. Revisit if [condition].`]
 
 ## Proposed Directory & File Structure

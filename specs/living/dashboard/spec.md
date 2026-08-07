@@ -157,7 +157,7 @@ The dashboard does **not** guess a skill from generic tool usage. `SkillInferenc
 
 1. **Explicit skill change** — `event_type: skill_change` with a known `skill`.
 2. **Skill tool invocation** — `tool: Skill` with a known skill name in `detail`.
-3. **Git heuristic** — `tool: Bash` with a git command (`commit`, `push`, `branch`, `merge`, `tag`, `checkout`) maps to `shipper`.
+3. **Git heuristic** — `tool: Bash` with a git command (`commit`, `push`, `branch`, `merge`, `tag`, `checkout`) maps to `crewloop:ship`.
 4. **Preserve existing explicit skill** — once a session has an explicit skill, it is kept until another explicit signal arrives.
 5. **No match** — `activeSkill` is left undefined and the UI shows a "no active skill" state.
 

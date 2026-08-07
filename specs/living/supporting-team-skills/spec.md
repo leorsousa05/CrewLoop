@@ -2,48 +2,25 @@
 
 ## Overview
 
-The core CrewLoop workflow covers discovery, specs, design, implementation, review, documentation, and shipping. Additional skills extend the team for real-world scenarios without overlapping core responsibilities:
+The CrewLoop workflow is a 6-skill team:
 
-- **tester** — QA strategy, coverage analysis, and bug reproduction.
-- **product-manager** — Prioritization, success metrics, and value framing.
-- **maintainer** — Bug triage, technical debt, and upkeep planning.
-- **researcher** — Technology evaluation, comparisons, and proofs of concept.
-- **security-guard** — Deep-dive security review, secrets scanning, dependency audit, and infrastructure exposure analysis.
-- **accessibility-auditor** — WCAG compliance, keyboard navigation, semantic markup, and inclusive UI review.
-- **project-brainstorm** — Interactive discovery for ambiguous project ideas.
-- **long-term-manager** — Durable multi-session project tracking.
-- **diamondblock** — Optional memory and semantic context retrieval. Installing the skill (Markdown instructions) is distinct from activating its MCP server; MCP registration is delegated to the official DiamondBlock CLI via `crewloop install --diamondblock`. Runtime use is capability-based: the CrewLoop Hub loads it directly at task entry only when the required MCP tools are exposed in the session, may return repeatedly with targeted queries, and saves only user-confirmed or spec/ADR-accepted distilled non-secret decisions (search-before-save, verified identifiers only). Wrap-up `log_session` after successful shipping is owned by Shipper outside AFK and by the Hub in AFK. All failures warn once and never block; missing or stale indexes stay a manual `dblock index run` action.
-- **docs-writer** — Project, module, feature, and capability documentation.
-- **frontend-architect** — Frontend component boundaries and state ownership.
-- **schema-designer** — Relational schemas, migrations, and API contracts.
-- **devops-specialist** — CI/CD, deployment, and infrastructure configuration.
+- **Core crew** — `crewloop:plan`, `crewloop:design`, `crewloop:code`, `crewloop:review`, `crewloop:ship`.
+- **Supporting crew** — `crewloop:docs`.
+
+Supporting skills extend documentation without overlapping core responsibilities:
+
+- **crewloop:docs** — Project, module, feature, and capability documentation. Returns to the actual invoking skill (default `crewloop:plan`).
 
 ## Routing
 
-Core skills invoke their owned supporting specialists when needed. Under direct routing, supporting skills return to the actual invoker, except Maintainer and Project Brainstorm, which route confirmed triage/completed briefs to Architect:
+Skills route automatically per the transition contract. The user can interrupt the flow with `stop`, `pause`, `volta`, `voltar`, or `re-analyze`; otherwise each skill hands off directly to the next skill from its position in the workflow.
 
-- `product-manager` / `researcher` → `crewloop-hub` (discovery support)
-- `maintainer` → `architect` (lightweight bug spec)
-- `tester` → `engineer` (QA feedback loop)
-- `security-guard` / `accessibility-auditor` → `reviewer`
-- `schema-designer` → `architect`; `frontend-architect` → `designer`; `devops-specialist` → `shipper`
+- `crewloop:docs` → invoker (default `crewloop:plan`)
 
-The CrewLoop Hub mediates mid-flow only in AFK mode. Every non-Hub skill returns to CrewLoop Hub in AFK; only the Hub selects the next phase.
+In AFK mode, every skill returns to `crewloop:plan`, which evaluates workflow state and loads the next phase.
 
-`references/skill-contracts.yaml` is the machine-readable authoring contract for all 19 skills. Each runtime `SKILL.md` keeps a compact inline transition capsule so role identity, invoker behavior, menus, and AFK routing survive independent installation and context compaction.
+`references/skill-contracts.yaml` is the machine-readable authoring contract for all 6 skills. Each runtime `SKILL.md` keeps a compact inline transition capsule so role identity, invoker behavior, direct routes, and AFK routing survive independent installation and context compaction.
 
 ## Files
 
-- `skills/tester/SKILL.md`
-- `skills/product-manager/SKILL.md`
-- `skills/maintainer/SKILL.md`
-- `skills/researcher/SKILL.md`
-- `skills/security-guard/SKILL.md`
-- `skills/accessibility-auditor/SKILL.md`
-- `skills/project-brainstorm/SKILL.md`
-- `skills/long-term-manager/SKILL.md`
-- `skills/diamondblock/SKILL.md`
-- `skills/docs-writer/SKILL.md`
-- `skills/frontend-architect/SKILL.md`
-- `skills/schema-designer/SKILL.md`
-- `skills/devops-specialist/SKILL.md`
+- `skills/crewloop-docs/SKILL.md`

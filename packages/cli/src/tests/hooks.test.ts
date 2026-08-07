@@ -24,8 +24,8 @@ function createAgentConfig(
       supported: true,
       configPath: path.join(baseDir, 'config.toml'),
       format: format ?? 'toml',
-      beforeToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-hub`,
-      afterToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-hub`,
+      beforeToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-plan`,
+      afterToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-plan`,
       ...hookOverrides,
     },
   };
@@ -51,7 +51,7 @@ describe('installHooksForAgent', () => {
     assert.ok(content.includes('event = "PreToolUse"'));
     assert.ok(content.includes('event = "PostToolUse"'));
     assert.ok(content.includes('matcher = ".*"'));
-    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill crewloop-hub"'));
+    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill crewloop-plan"'));
   });
 
   it('configures Kimi TOML hooks idempotently', () => {
@@ -100,7 +100,7 @@ describe('installHooksForAgent', () => {
     fs.mkdirSync(agent.skillsDir, { recursive: true });
     fs.writeFileSync(
       agent.hooks.configPath,
-      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill crewloop-hub"\nafter_tool_use = "crewloop-shim kimi --default-skill crewloop-hub"\n',
+      '[hooks]\nbefore_tool_use = "crewloop-shim kimi --default-skill crewloop-plan"\nafter_tool_use = "crewloop-shim kimi --default-skill crewloop-plan"\n',
       'utf8'
     );
 
@@ -121,7 +121,7 @@ describe('installHooksForAgent', () => {
     fs.mkdirSync(agent.skillsDir, { recursive: true });
     fs.writeFileSync(
       agent.hooks.configPath,
-      '[[hooks]]\nevent = "PreToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-hub"\n\n[other]\nkey = "value"\n\n[[hooks]]\nevent = "PostToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-hub"\n',
+      '[[hooks]]\nevent = "PreToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-plan"\n\n[other]\nkey = "value"\n\n[[hooks]]\nevent = "PostToolUse"\nmatcher = ".*"\ncommand = "crewloop-shim kimi --default-skill crewloop-plan"\n',
       'utf8'
     );
 
@@ -149,8 +149,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
       },
     });
 
@@ -163,7 +163,7 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].type, 'command');
     assert.strictEqual(
       config.hooks.PreToolUse[0].hooks[0].command,
-      'crewloop-shim codex --default-skill crewloop-hub'
+      'crewloop-shim codex --default-skill crewloop-plan'
     );
     assert.ok(Array.isArray(config.hooks.PostToolUse));
   });
@@ -180,8 +180,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
       },
     });
 
@@ -207,8 +207,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
       },
     });
 
@@ -218,7 +218,7 @@ describe('installHooksForAgent', () => {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     assert.ok(Array.isArray(config.hooks.PreToolUse));
     assert.strictEqual(config.hooks.PreToolUse[0].matcher, '*');
-    assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].command, 'crewloop-shim claude --default-skill crewloop-hub');
+    assert.strictEqual(config.hooks.PreToolUse[0].hooks[0].command, 'crewloop-shim claude --default-skill crewloop-plan');
     assert.ok(Array.isArray(config.hooks.PostToolUse));
   });
 
@@ -234,8 +234,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
         lifecycleEvents: ['SessionStart', 'SessionEnd'],
       },
     });
@@ -248,7 +248,7 @@ describe('installHooksForAgent', () => {
       assert.ok(Array.isArray(config.hooks[event]), `expected ${event} hooks`);
       assert.strictEqual(
         config.hooks[event][0].hooks[0].command,
-        'crewloop-shim claude --default-skill crewloop-hub'
+        'crewloop-shim claude --default-skill crewloop-plan'
       );
     }
   });
@@ -265,8 +265,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
       },
     });
 
@@ -277,7 +277,7 @@ describe('installHooksForAgent', () => {
     assert.ok(config.crewloop);
     assert.ok(Array.isArray(config.crewloop.PreToolUse));
     assert.strictEqual(config.crewloop.PreToolUse[0].matcher, '*');
-    assert.strictEqual(config.crewloop.PreToolUse[0].hooks[0].command, 'crewloop-shim agy --default-skill crewloop-hub');
+    assert.strictEqual(config.crewloop.PreToolUse[0].hooks[0].command, 'crewloop-shim agy --default-skill crewloop-plan');
     assert.ok(Array.isArray(config.crewloop.PostToolUse));
   });
 
@@ -293,8 +293,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
         lifecycleEvents: ['SessionStart', 'SessionEnd'],
       },
     });
@@ -307,7 +307,7 @@ describe('installHooksForAgent', () => {
       assert.ok(Array.isArray(config.crewloop[event]), `expected AGY ${event} hooks`);
       assert.strictEqual(
         config.crewloop[event][0].hooks[0].command,
-        'crewloop-shim agy --default-skill crewloop-hub'
+        'crewloop-shim agy --default-skill crewloop-plan'
       );
     }
   });
@@ -324,8 +324,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
       },
     });
 
@@ -366,8 +366,8 @@ describe('installHooksForAgent', () => {
         supported: true,
         configPath,
         format: 'json',
-        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
       },
     });
 
@@ -376,8 +376,8 @@ describe('installHooksForAgent', () => {
       configPath,
       JSON.stringify({
         hooks: {
-          before_tool_use: 'crewloop-shim agy --default-skill crewloop-hub',
-          after_tool_use: 'crewloop-shim agy --default-skill crewloop-hub',
+          before_tool_use: 'crewloop-shim agy --default-skill crewloop-plan',
+          after_tool_use: 'crewloop-shim agy --default-skill crewloop-plan',
         },
       }),
       'utf8'
@@ -478,8 +478,8 @@ describe('OpenCode plugin writer', () => {
         supported: true,
         configPath,
         format: 'plugin',
-        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
       },
     });
     fs.mkdirSync(agent.skillsDir, { recursive: true });
@@ -509,8 +509,8 @@ describe('OpenCode plugin writer', () => {
         supported: true,
         configPath,
         format: 'plugin',
-        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
       },
     });
     fs.mkdirSync(agent.skillsDir, { recursive: true });
@@ -540,8 +540,8 @@ describe('OpenCode plugin writer', () => {
         supported: true,
         configPath,
         format: 'plugin',
-        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
       },
     });
     fs.mkdirSync(agent.skillsDir, { recursive: true });
@@ -567,8 +567,8 @@ describe('OpenCode plugin writer', () => {
         supported: true,
         configPath,
         format: 'plugin',
-        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
-        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+        beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
       },
     });
 

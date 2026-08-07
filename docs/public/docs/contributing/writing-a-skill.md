@@ -10,7 +10,7 @@ A CrewLoop skill is a single `SKILL.md` file that defines a specialist role for 
 
 ```markdown
 ---
-name: your-skill-name
+name: crewloop:<slug>
 description: "One-sentence trigger description and primary responsibility."
 ---
 
@@ -29,21 +29,21 @@ description: "One-sentence trigger description and primary responsibility."
 [Behavioral constraints and output format.]
 ```
 
-The YAML frontmatter (`name` and `description`) is what agents use for automatic detection. Never remove or rename these fields.
+The YAML frontmatter (`name` and `description`) is what agents use for automatic detection. Never remove or rename these fields. The `name` must match the `crewloop:<slug>` namespace.
 
 ## Step-by-step
 
 ### 1. Copy the template
 
 ```bash
-cp assets/templates/skill-template.md skills/<skill-name>/SKILL.md
+cp assets/templates/skill-template.md skills/crewloop-<slug>/SKILL.md
 ```
 
 ### 2. Fill in the frontmatter
 
 ```yaml
 ---
-name: your-skill-name
+name: crewloop:<slug>
 description: "Trigger on [keywords]. Does [primary responsibility]. Never [primary prohibition]."
 ---
 ```
@@ -58,7 +58,7 @@ Key rules:
 - Every skill must have a "What [Skill] Never Does" section.
 - Every skill must end with a letter-based navigation menu.
 - Shared conventions belong in `references/`, not inside the skill.
-- Skill-specific references belong in `skills/<skill-name>/references/`.
+- Skill-specific references belong in `skills/crewloop-<slug>/references/`.
 - Reference folders can be split into narrow topical files when the skill benefits from a larger playbook, for example:
   - `references/anti-patterns.md`
   - `references/reference-library.md`
@@ -82,7 +82,7 @@ Fix any `FAIL` items before proceeding.
 New skills must go through the standard flow:
 
 ```
-CrewLoop Hub ⇄ Architect ⇄ CrewLoop Hub ⇄ Engineer ⇄ CrewLoop Hub ⇄ Reviewer ⇄ CrewLoop Hub ⇄ Shipper
+CrewLoop Hub ⇄ crewloop:plan ⇄ crewloop:design ⇄ crewloop:code ⇄ crewloop:review ⇄ crewloop:ship
 ```
 
 ## Anti-patterns
@@ -90,6 +90,7 @@ CrewLoop Hub ⇄ Architect ⇄ CrewLoop Hub ⇄ Engineer ⇄ CrewLoop Hub ⇄ Re
 - A skill that owns two phases (e.g., designs AND implements).
 - Missing "never does" section — boundaries must be explicit.
 - Frontmatter without `name` and `description`.
+- Frontmatter with a name that does not follow `crewloop:<slug>`.
 - Shared conventions written inside the skill instead of `references/`.
 - Reference guidance that stays generic when the skill needs a deeper playbook.
 - A skill that skips the navigation menu at the end.

@@ -25,7 +25,8 @@ function resolvePackageRoot(): string {
     return path.dirname(skillsPackageJson);
   } catch {
     const bundledRoot = path.resolve(__dirname, '..', '..', '..');
-    if (fs.existsSync(path.join(bundledRoot, 'skills', 'crewloop-hub', 'SKILL.md'))) {
+    // The default entry skill is now `crewloop:plan`, stored in `skills/crewloop-plan`.
+    if (fs.existsSync(path.join(bundledRoot, 'skills', 'crewloop-plan', 'SKILL.md'))) {
       return bundledRoot;
     }
 

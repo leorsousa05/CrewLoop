@@ -24,12 +24,12 @@ describe('detectSource', () => {
 
 describe('getDefaultSkill', () => {
   it('reads default skill from argv', () => {
-    assert.equal(getDefaultSkill(['node', 'shim', 'kimi', '--default-skill', 'crewloop-hub']), 'crewloop-hub');
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi', '--default-skill', 'crewloop:plan']), 'crewloop:plan');
   });
 
   it('falls back to env var', () => {
-    process.env.CREWLOOP_DEFAULT_SKILL = 'architect';
-    assert.equal(getDefaultSkill(['node', 'shim', 'kimi']), 'architect');
+    process.env.CREWLOOP_DEFAULT_SKILL = 'crewloop:plan';
+    assert.equal(getDefaultSkill(['node', 'shim', 'kimi']), 'crewloop:plan');
     delete process.env.CREWLOOP_DEFAULT_SKILL;
   });
 
@@ -94,17 +94,17 @@ describe('buildEvent', () => {
     const event = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'SessionStart', session_id: 'sess-1', cwd: '/project' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
     assert.equal(event?.event_type, 'session_start');
-    assert.equal(event?.skill, 'crewloop-hub');
+    assert.equal(event?.skill, 'crewloop:plan');
   });
 
   it('does not attach default skill to tool events', () => {
     const startEvent = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'PreToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
     assert.equal(startEvent?.event_type, 'tool_start');
     assert.equal(startEvent?.skill, undefined);
@@ -112,7 +112,7 @@ describe('buildEvent', () => {
     const endEvent = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'PostToolUse', session_id: 'sess-1', cwd: '/project', tool_name: 'Read' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
     assert.equal(endEvent?.event_type, 'tool_end');
     assert.equal(endEvent?.skill, undefined);
@@ -122,23 +122,23 @@ describe('buildEvent', () => {
     const kimi = buildEvent(
       'kimi' as AgentSource,
       { hook_event_name: 'PreToolUse', session_id: 's1', cwd: '/p', tool_name: 'Read' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
-    assert.equal(kimi?.default_skill, 'crewloop-hub');
+    assert.equal(kimi?.default_skill, 'crewloop:plan');
 
     const claude = buildEvent(
       'claude' as AgentSource,
       { hook_event_name: 'PreToolUse', session_id: 's2', tool_name: 'Edit' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
-    assert.equal(claude?.default_skill, 'crewloop-hub');
+    assert.equal(claude?.default_skill, 'crewloop:plan');
 
     const codex = buildEvent(
       'codex' as AgentSource,
       { hook_event_name: 'PreToolUse', sessionId: 's3', toolName: 'Bash' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
-    assert.equal(codex?.default_skill, 'crewloop-hub');
+    assert.equal(codex?.default_skill, 'crewloop:plan');
   });
 
   it('does not attach default_skill when the event carries an explicit skill', () => {
@@ -149,11 +149,11 @@ describe('buildEvent', () => {
         session_id: 's1',
         cwd: '/p',
         tool_name: 'Read',
-        skill: 'architect',
+        skill: 'crewloop:plan',
       },
-      'crewloop-hub'
+      'crewloop:plan'
     );
-    assert.equal(event?.skill, 'architect');
+    assert.equal(event?.skill, 'crewloop:plan');
     assert.equal(event?.default_skill, undefined);
   });
 
@@ -170,18 +170,18 @@ describe('buildEvent', () => {
       hook_event_name: 'SessionStart',
       session_id: 'sess-1',
       cwd: '/project',
-      skill: 'architect',
+      skill: 'crewloop:plan',
     });
-    assert.equal(event?.skill, 'architect');
+    assert.equal(event?.skill, 'crewloop:plan');
   });
 
   it('forwards explicit payload skill for codex', () => {
     const event = buildEvent('codex' as AgentSource, {
       sessionId: 'sess-2',
       hook_event_name: 'SessionStart',
-      skill: 'engineer',
+      skill: 'crewloop:code',
     });
-    assert.equal(event?.skill, 'engineer');
+    assert.equal(event?.skill, 'crewloop:code');
   });
 
   it('preserves AGY detail extracted by the adapter', () => {
@@ -212,11 +212,11 @@ describe('buildEvent', () => {
           args: { CommandLine: 'git status', Cwd: '/project' },
         },
       },
-      'crewloop-hub'
+      'crewloop:plan'
     );
     assert.equal(event?.event_type, 'tool_start');
     assert.equal(event?.skill, undefined);
-    assert.equal(event?.default_skill, 'crewloop-hub');
+    assert.equal(event?.default_skill, 'crewloop:plan');
   });
 
   it('builds Claude PreToolUse event with operationType and detail', () => {
@@ -313,14 +313,14 @@ describe('buildEvent', () => {
         stepIdx: 0,
         toolCall: {
           name: 'view_file',
-          args: { AbsolutePath: '/home/user/.agents/skills/engineer/SKILL.md' },
+          args: { AbsolutePath: '/home/user/.agents/skills/crewloop-code/SKILL.md' },
         },
       },
-      'crewloop-hub'
+      'crewloop:plan'
     );
     assert.equal(event?.event_type, 'tool_start');
     assert.equal(event?.tool, 'Read');
-    assert.equal(event?.skill, 'engineer');
+    assert.equal(event?.skill, 'crewloop:code');
     assert.equal(event?.default_skill, undefined);
   });
 });
@@ -374,9 +374,9 @@ describe('normalizeOpenCode', () => {
     const event = buildEvent(
       'opencode' as AgentSource,
       { tool: 'Read', event_type: 'tool_start', cwd: '/p' },
-      'crewloop-hub'
+      'crewloop:plan'
     );
-    assert.equal(event?.default_skill, 'crewloop-hub');
+    assert.equal(event?.default_skill, 'crewloop:plan');
   });
 });
 

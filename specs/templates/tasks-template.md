@@ -40,6 +40,6 @@
 
 ### T9 — Ship (Reviewer PASS required)
 - **Files:** `.spec.yaml`, `specs/living/`, `specs/archive/`
-- **Depends on:** T8, reviewer PASS
+- **Depends on:** T8, `crewloop:review` PASS
 - **Do:** Shipper moves the change folder to `specs/archive/YYYY-MM-DD-NNN-name/` and merges the deltas into `specs/living/`.
 - **Done when:** The spec folder exists in `specs/archive/` and the living specs reflect the change.

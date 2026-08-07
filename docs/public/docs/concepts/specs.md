@@ -8,7 +8,7 @@ A **spec** is the source of truth for a change. Every task, including 1-line bug
 
 ## Why specs exist
 
-Without a spec, the Engineer does not know what to build, the Reviewer cannot verify compliance, and the team cannot trace why a decision was made six months later. Specs make the workflow auditable and the implementation unambiguous.
+Without a spec, `crewloop:code` does not know what to build, `crewloop:review` cannot verify compliance, and the team cannot trace why a decision was made six months later. Specs make the workflow auditable and the implementation unambiguous.
 
 ## Spec folder structure
 
@@ -39,28 +39,33 @@ specs/
 ## What each file contains
 
 ### `.spec.yaml`
+
 Metadata: status (`in-progress`, `done`), created date, author, affected files, skills involved.
 
 ### `proposal.md`
+
 The **why**: motivation for the change, scope (what is in and out), and constraints the implementation must respect.
 
 ### `specs/spec.md`
+
 The **what**: a delta view of the current system vs. the desired system. Acceptance criteria and edge cases.
 
 ### `design.md`
-The **how**: TypeScript interfaces, API contracts, data flows, component breakdowns. Formal enough that an engineer can implement without asking questions.
+
+The **how**: TypeScript interfaces, API contracts, data flows, component breakdowns. Formal enough that `crewloop:code` can implement without asking questions.
 
 ### `tasks.md`
-An ordered checklist of implementation steps. The Engineer checks off tasks as they complete them.
+
+An ordered checklist of implementation steps. `crewloop:code` checks off tasks as they complete them.
 
 ## Spec lifecycle
 
 ```mermaid
 flowchart LR
-    A[Architect creates] --> B[specs/changes/NNN-name/]
-    B --> C[Engineer implements]
-    C --> D[Reviewer approves]
-    D --> E[Shipper archives]
-    E --> F[specs/archive/YYYY-MM-DD-NNN-name/]
+    P[crewloop:plan creates] --> B[specs/changes/NNN-name/]
+    B --> C[crewloop:code implements]
+    C --> R[crewloop:review approves]
+    R --> S[crewloop:ship archives]
+    S --> F[specs/archive/YYYY-MM-DD-NNN-name/]
     F --> G[living/ updated]
 ```

@@ -31,13 +31,13 @@ function makeInv(tool: string, overrides?: Partial<ToolInvocation>): ToolInvocat
 describe('filter', () => {
   it('builds options from selected session', () => {
     const session = makeSession('s1', 'kimi', {
-      activeSkill: { name: 'engineer', confidence: 'explicit' },
+      activeSkill: { name: 'crewloop:code', confidence: 'explicit' },
       events: [{ id: 'e1', timestamp: 0, event_type: 'tool_end', tool: 'Read' }],
     });
     const sessions = new Map<string, ClientSession>([['s1', session]]);
     expect(buildOptions(sessions, 's1')).toEqual({
       sources: ['kimi'],
-      skills: ['engineer'],
+      skills: ['crewloop:code'],
       statuses: [],
       tools: ['Read'],
       opTypes: ['read'],

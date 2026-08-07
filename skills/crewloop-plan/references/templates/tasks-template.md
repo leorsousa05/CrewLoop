@@ -38,8 +38,8 @@
 - **Do:** Run the full test/build suite: `[command]`. Then set `.spec.yaml` status to `completed` with the `completed` date.
 - **Done when:** Suite exits 0 with no failing or skipped tests, and `.spec.yaml` shows `status: completed`.
 
-### T9 — Ship (Reviewer PASS required)
+### T9 — Ship (CrewLoop Review PASS required)
 - **Files:** `.spec.yaml`, `specs/living/`, `specs/archive/`
-- **Depends on:** T8, reviewer PASS
-- **Do:** Shipper moves the change folder to `specs/archive/YYYY-MM-DD-NNN-name/` and merges the deltas into `specs/living/`.
+- **Depends on:** T8, CrewLoop Review PASS
+- **Do:** CrewLoop Ship moves the change folder to `specs/archive/YYYY-MM-DD-NNN-name/` and merges the deltas into `specs/living/`.
 - **Done when:** The spec folder exists in `specs/archive/` and the living specs reflect the change.

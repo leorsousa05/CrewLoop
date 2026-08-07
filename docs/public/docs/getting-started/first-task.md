@@ -10,7 +10,7 @@ This tutorial walks through a complete CrewLoop task from start to finish. You w
 
 ---
 
-## Step 1 — CrewLoop Hub: Discovery
+## Step 1 — `crewloop:hub`: Discovery
 
 You describe the task:
 
@@ -27,14 +27,14 @@ The **CrewLoop Hub** begins by exploring the codebase, then asks clarifying ques
 After your answers, the CrewLoop Hub produces a **Task Brief** and presents:
 
 ```
-[A] Send to Architect — Create specs (always first)
+[A] Send to crewloop:plan — Create specs (always first)
 ```
 
 ---
 
-## Step 2 — Architect: Specs
+## Step 2 — `crewloop:plan`: Specs
 
-The **Architect** creates a spec folder:
+**`crewloop:plan`** creates a spec folder:
 
 ```
 specs/changes/042-product-search/
@@ -51,29 +51,29 @@ The spec defines:
 - Test plan: unit test for debounce, integration test for API call
 
 ```
-[D] Send to Designer — UI direction
-[E] Send to Engineer — Implementation
+[D] Send to crewloop:design — UI direction
+[C] Send to crewloop:code — Implementation
 ```
 
 ---
 
-## Step 3 — Designer: Visual Direction
+## Step 3 — `crewloop:design`: Visual Direction
 
-The **Designer** commits to a direction:
+**`crewloop:design`** commits to a direction:
 
 > **Direction:** Clean editorial. Input field with subtle border, no box shadow. Placeholder fades on focus. Results appear with a 150ms ease-in slide. Respects `prefers-reduced-motion`.
 
 The design spec covers color states, typography, animation easing, and accessibility (`role="search"`, `aria-label`, Escape-to-dismiss).
 
 ```
-[E] Send to Engineer — Implement the spec
+[C] Send to crewloop:code — Implement the spec
 ```
 
 ---
 
-## Step 4 — Engineer: Implementation
+## Step 4 — `crewloop:code`: Implementation
 
-The **Engineer** implements:
+**`crewloop:code`** implements:
 
 - `src/components/SearchBar.tsx` — the search input component
 - `src/hooks/useSearch.ts` — debounced search hook
@@ -81,14 +81,14 @@ The **Engineer** implements:
 - `src/components/SearchBar.test.tsx` — unit + integration tests
 
 ```
-[R] Send to Reviewer — Quality gate
+[R] Send to crewloop:review — Quality gate
 ```
 
 ---
 
-## Step 5 — Reviewer: Quality Gate
+## Step 5 — `crewloop:review`: Quality Gate
 
-The **Reviewer** inspects the diff:
+**`crewloop:review`** inspects the diff:
 
 ```
 ## Review Report
@@ -99,17 +99,17 @@ The **Reviewer** inspects the diff:
 - SearchBar.tsx line 23: console.log left in debounce handler
 ```
 
-The Engineer removes the `console.log`. Reviewer approves:
+`crewloop:code` removes the `console.log`. `crewloop:review` approves:
 
 ```
-[S] Send to Shipper — Commit and push
+[S] Send to crewloop:ship — Commit and push
 ```
 
 ---
 
-## Step 6 — Shipper: Git & PR
+## Step 6 — `crewloop:ship`: Git & PR
 
-The **Shipper** archives the spec and commits:
+**`crewloop:ship`** archives the spec and commits:
 
 **Branch:** `feat/product-search-bar`
 
@@ -126,7 +126,7 @@ feat(search): add debounced product search bar
 Spec archived to `specs/archive/2026-06-27-042-product-search/`.
 
 ```
-[O] Return to CrewLoop Hub — Next task
+[O] Return to crewloop:hub — Next task
 ```
 
 ---

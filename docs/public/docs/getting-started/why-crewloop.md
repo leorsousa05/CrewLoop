@@ -24,14 +24,13 @@ Each symptom has the same root cause: **no process**.
 
 | Problem | CrewLoop solution |
 |---------|-------------------|
-| Wrong requirements | CrewLoop Hub asks clarifying questions and produces a structured brief |
-| Missing specs | Architect creates mandatory specs for every change, including 1-line fixes |
-| Generic UI | Designer commits to a distinct aesthetic direction before code is written |
-| Untested code | Engineer writes tests alongside implementation |
-| Security holes | Reviewer scans for secrets, unsafe patterns, and AI artifacts |
-| Messy git history | Shipper generates Conventional Commits messages and proper branches |
+| Wrong requirements | `crewloop:hub` asks clarifying questions and produces a structured brief |
+| Missing specs | `crewloop:plan` creates mandatory specs for every change, including 1-line fixes |
+| Generic UI | `crewloop:design` commits to a distinct aesthetic direction before code is written |
+| Untested code | `crewloop:code` writes tests alongside implementation |
+| Security holes | `crewloop:review` scans for secrets, unsafe patterns, and AI artifacts |
+| Messy git history | `crewloop:ship` generates Conventional Commits messages and proper branches |
 | Undocumented changes | Every change is traced through a spec that is archived on commit |
-| Forgotten context across sessions | Long-Term Manager maintains durable project artifacts between sessions |
 
 ## When CrewLoop shines
 
@@ -46,8 +45,6 @@ Each symptom has the same root cause: **no process**.
 - One-off scripts or experiments
 - Quick questions about how a function works
 - Prototyping where speed matters more than maintainability
-
-Even then, individual skills like **Researcher** or **Engineer** can handle small tasks without the full loop.
 
 ## The philosophy
 

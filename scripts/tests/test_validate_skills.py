@@ -16,14 +16,11 @@ SPEC.loader.exec_module(validate_skills)
 CONTRACT = {
     "kind": "supporting",
     "prefix": "> 🧪 **Example**",
-    "default_invoker": "engineer",
+    "default_invoker": "crewloop:plan",
     "return_strategy": "invoker",
-    "interactive": True,
-    "menu": {
-        "I": {"target": "invoker", "recommended": "always"},
-        "H": {"target": "crewloop-hub", "recommended": "never"},
-    },
-    "afk_target": "crewloop-hub",
+    "interactive": False,
+    "direct_target": "crewloop:plan",
+    "afk_target": "crewloop:plan",
 }
 
 
@@ -38,12 +35,10 @@ description: Example skill description long enough to pass validation.
 ## TRANSITION CONTRACT
 
 - **Role prefix:** `> 🧪 **Example**`
-- **Default invoker:** `engineer`
+- **Default invoker:** `crewloop:plan`
 - **Invoker rule:** outside AFK, return to the actual invoking skill.
-- **Interactive routes:** `[I]` -> `invoker`; `[H]` -> `crewloop-hub`
-- **Recommendation rules:** `[I]` -> `always`; `[H]` -> `never`
-- **Post-selection:** load the selected skill directly without asking for a typed command.
-- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase.
+- **Direct route:** `crewloop:plan`
+- **AFK route:** skip the menu and return to `crewloop:plan`; the Plan skill evaluates state and loads the next phase.
 {extra}
 '''
 
@@ -88,39 +83,39 @@ class ValidateSkillsTest(unittest.TestCase):
         self.assertIn("TRANSITION CONTRACT lines do not exactly match the manifest", errors)
 
     def test_rejects_wrong_afk_target(self) -> None:
-        expected = "- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase."
-        content = valid_content().replace(expected, "- **AFK route:** go directly to `engineer`.")
+        expected = "- **AFK route:** skip the menu and return to `crewloop:plan`; the Plan skill evaluates state and loads the next phase."
+        content = valid_content().replace(expected, "- **AFK route:** go directly to `crewloop:code`.")
         temp, skill_dir = self.create_skill(content)
         self.addCleanup(temp.cleanup)
         errors = validate_skills.validate_skill(skill_dir, CONTRACT)
         self.assertIn("TRANSITION CONTRACT lines do not exactly match the manifest", errors)
 
-    def test_rejects_invalid_menu_key(self) -> None:
+    def test_rejects_invalid_direct_target(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             contracts = Path(temp) / "contracts.yaml"
             invalid = {
-                "version": 1,
+                "version": 3,
                 "skills": {
                     "example": {
                         **CONTRACT,
                         "default_invoker": "example",
-                        "menu": {"invalid": {"target": "invoker", "recommended": "always"}},
+                        "direct_target": "crewloop:hub",
                     }
                 },
             }
             contracts.write_text(yaml.safe_dump(invalid, allow_unicode=True), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "invalid menu key"):
+            with self.assertRaisesRegex(ValueError, "unknown direct target"):
                 validate_skills.load_contracts(contracts)
 
-    def test_rejects_non_hub_afk_bypass(self) -> None:
+    def test_rejects_non_plan_afk_bypass(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             contracts = Path(temp) / "contracts.yaml"
             invalid = {
-                "version": 1,
-                "skills": {"example": {**CONTRACT, "default_invoker": "example", "afk_target": "engineer"}},
+                "version": 3,
+                "skills": {"example": {**CONTRACT, "default_invoker": "example", "afk_target": "crewloop:code"}},
             }
             contracts.write_text(yaml.safe_dump(invalid, allow_unicode=True), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "must return to crewloop-hub"):
+            with self.assertRaisesRegex(ValueError, "must return to crewloop:plan"):
                 validate_skills.load_contracts(contracts)
 
     def test_repository_requires_exact_contract_inventory(self) -> None:
@@ -133,28 +128,31 @@ class ValidateSkillsTest(unittest.TestCase):
             (skill_dir / "SKILL.md").write_text(valid_content(), encoding="utf-8")
             contracts = root / "contracts.yaml"
             repository_contract = {**CONTRACT, "default_invoker": "example"}
-            hub_contract = {
+            plan_contract = {
                 "kind": "core",
-                "prefix": "> Hub",
-                "interactive": True,
-                "menu": {"A": {"target": "example", "recommended": "always"}},
-                "afk_target": "example",
+                "prefix": "> Plan",
+                "interactive": False,
+                "direct_target": "example",
+                "afk_target": "crewloop:plan",
             }
             contracts.write_text(
                 yaml.safe_dump(
-                    {"version": 1, "skills": {"example": repository_contract, "crewloop-hub": hub_contract}},
+                    {"version": 3, "skills": {"example": repository_contract, "crewloop:plan": plan_contract}},
                     allow_unicode=True,
                 ),
                 encoding="utf-8",
             )
             errors = validate_skills.validate_repository(skills_dir, contracts)
-            self.assertIn("Expected 19 skill contracts, found 2", errors)
+            self.assertIn("Expected 6 skill contracts, found 2", errors)
 
     def test_repository_manifest_contains_all_current_skills(self) -> None:
         repository_root = Path(__file__).resolve().parents[2]
         contracts = validate_skills.load_contracts(repository_root / "references" / "skill-contracts.yaml")
-        self.assertEqual(len(contracts), 19)
-        self.assertEqual(set(contracts), {path.name for path in (repository_root / "skills").iterdir() if path.is_dir()})
+        self.assertEqual(len(contracts), 6)
+        self.assertEqual(
+            {validate_skills.expected_dir_name(n) for n in contracts},
+            {path.name for path in (repository_root / "skills").iterdir() if path.is_dir()},
+        )
         self.assertEqual(
             validate_skills.validate_repository(
                 repository_root / "skills",
@@ -162,39 +160,6 @@ class ValidateSkillsTest(unittest.TestCase):
             ),
             [],
         )
-
-    def test_rejects_unknown_menu_target(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            contracts = Path(temp) / "contracts.yaml"
-            invalid_contract = {
-                **CONTRACT,
-                "default_invoker": "example",
-                "menu": {"I": {"target": "missing-skill", "recommended": "always"}},
-            }
-            contracts.write_text(
-                yaml.safe_dump({"version": 1, "skills": {"example": invalid_contract}}, allow_unicode=True),
-                encoding="utf-8",
-            )
-            with self.assertRaisesRegex(ValueError, "unknown menu target"):
-                validate_skills.load_contracts(contracts)
-
-    def test_rejects_multiple_always_recommended_routes(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            contracts = Path(temp) / "contracts.yaml"
-            invalid_contract = {
-                **CONTRACT,
-                "default_invoker": "example",
-                "menu": {
-                    "I": {"target": "invoker", "recommended": "always"},
-                    "C": {"target": "continue", "recommended": "always"},
-                },
-            }
-            contracts.write_text(
-                yaml.safe_dump({"version": 1, "skills": {"example": invalid_contract}}, allow_unicode=True),
-                encoding="utf-8",
-            )
-            with self.assertRaisesRegex(ValueError, "multiple always-recommended"):
-                validate_skills.load_contracts(contracts)
 
     def test_rejects_later_mandatory_route_that_bypasses_afk(self) -> None:
         content = valid_content(
@@ -226,8 +191,8 @@ class ValidateSkillsTest(unittest.TestCase):
 
     def test_rejects_unexpected_transition_contract_content(self) -> None:
         content = valid_content().replace(
-            "- **Post-selection:**",
-            "Contradictory transition prose.\n- **Post-selection:**",
+            "- **Direct route:**",
+            "Contradictory transition prose.\n- **Direct route:**",
         )
         temp, skill_dir = self.create_skill(content)
         self.addCleanup(temp.cleanup)
@@ -236,30 +201,22 @@ class ValidateSkillsTest(unittest.TestCase):
             validate_skills.validate_skill(skill_dir, CONTRACT),
         )
 
-    def test_invoker_strategy_requires_invoker_route(self) -> None:
+    def test_accepts_conditional_direct_targets(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             contracts = Path(temp) / "contracts.yaml"
-            invalid = {
-                **CONTRACT,
-                "default_invoker": "example",
-                "menu": {"H": {"target": "example", "recommended": "always"}},
-            }
-            hub_contract = {
+            plan_contract = {
                 "kind": "core",
-                "prefix": "> Hub",
-                "interactive": True,
-                "menu": {"A": {"target": "example", "recommended": "always"}},
-                "afk_target": "example",
+                "prefix": "> Plan",
+                "interactive": False,
+                "direct_target": "conditional-crewloop:design-or-crewloop:code",
+                "afk_target": "crewloop:plan",
             }
             contracts.write_text(
-                yaml.safe_dump(
-                    {"version": 1, "skills": {"example": invalid, "crewloop-hub": hub_contract}},
-                    allow_unicode=True,
-                ),
+                yaml.safe_dump({"version": 3, "skills": {"crewloop:plan": plan_contract}}, allow_unicode=True),
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(ValueError, "must provide an invoker route"):
-                validate_skills.load_contracts(contracts)
+            loaded = validate_skills.load_contracts(contracts)
+            self.assertEqual(loaded["crewloop:plan"]["direct_target"], "conditional-crewloop:design-or-crewloop:code")
 
     def test_ignores_transition_heading_inside_fenced_code(self) -> None:
         content = valid_content("\n## NOTES\n\n```markdown\n## TRANSITION CONTRACT\n---\n```\n")

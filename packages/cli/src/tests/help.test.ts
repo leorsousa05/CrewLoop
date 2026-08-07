@@ -23,6 +23,7 @@ describe('help', () => {
     assert.ok(help.includes('opencode'));
     assert.ok(help.includes('--no-hooks'));
     assert.ok(help.includes('Examples:'));
+    assert.ok(!help.includes('DiamondBlock'));
   });
 
   it('top-level examples include new commands', () => {
@@ -32,6 +33,7 @@ describe('help', () => {
     assert.ok(help.includes('crewloop install --dry-run'));
     assert.ok(help.includes('crewloop dashboard --port 8080'));
     assert.ok(help.includes('crewloop --version'));
+    assert.ok(help.includes('crewloop install --skill crewloop-plan --skill crewloop-code'));
   });
 
   it('has a help topic for every public command', () => {
@@ -45,24 +47,15 @@ describe('help', () => {
 
   it('install help documents all install options', () => {
     const help = printHelp('install');
-    for (const flag of ['--target', '--skill', '--agent', '--symlink', '--force', '--dry-run', '--diamondblock', '--hooks', '--no-hooks', '--verbose']) {
+    for (const flag of ['--target', '--skill', '--agent', '--symlink', '--force', '--dry-run', '--hooks', '--no-hooks', '--verbose']) {
       assert.ok(help.includes(flag), `install help should include ${flag}`);
     }
   });
 
-  it('install help documents --diamondblock examples and the skill-vs-MCP distinction', () => {
+  it('install help documents skill-vs-agent examples', () => {
     const help = printHelp('install');
-    assert.ok(help.includes('--diamondblock       Also configure DiamondBlock MCP via its official installer (opt-in)'));
-    assert.ok(help.includes('crewloop install --diamondblock'));
-    assert.ok(help.includes('crewloop install --dry-run --diamondblock'));
-    assert.ok(help.includes('Installing skills does not configure MCP servers'));
-  });
-
-  it('top-level help clarifies that installing skills does not configure MCP servers', () => {
-    const help = printHelp();
-    assert.ok(help.includes('Installing skills does not configure MCP servers'));
-    assert.ok(help.includes('crewloop install\n  --diamondblock'));
-    assert.ok(help.includes('--diamondblock'));
+    assert.ok(help.includes('crewloop install --skill crewloop-plan --skill crewloop-code'));
+    assert.ok(help.includes('crewloop install --agent claude --no-hooks'));
   });
 
   it('dashboard help documents --port and --host', () => {

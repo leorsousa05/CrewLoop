@@ -16,13 +16,22 @@ ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
 CONTRACTS_PATH = ROOT / "references" / "skill-contracts.yaml"
 KEBAB_CASE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+NAMESPACED = re.compile(r"^crewloop:[a-z0-9]+(?:-[a-z0-9]+)*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 CANONICAL_SKILLS = {
-    "accessibility-auditor", "architect", "crewloop-hub", "designer", "devops-specialist",
-    "diamondblock", "docs-writer", "engineer", "frontend-architect", "long-term-manager",
-    "maintainer", "product-manager", "project-brainstorm", "researcher", "reviewer",
-    "schema-designer", "security-guard", "shipper", "tester",
+    "crewloop-plan", "crewloop-design", "crewloop-code",
+    "crewloop-review", "crewloop-ship", "crewloop-docs",
 }
+DIRECT_TARGET_CONDITIONALS = {
+    "conditional-crewloop:design-or-crewloop:code",
+    "conditional-crewloop:review-or-crewloop:plan",
+    "conditional-crewloop:ship-or-crewloop:code",
+}
+
+
+def expected_dir_name(name: str) -> str:
+    """Map the logical namespaced skill name to its filesystem directory name."""
+    return name.replace(":", "-")
 
 
 def parse_frontmatter(content: str) -> dict[str, Any] | None:
@@ -118,14 +127,14 @@ def load_contracts(path: Path) -> dict[str, dict[str, Any]]:
     except (OSError, yaml.YAMLError) as error:
         raise ValueError(f"Cannot load skill contracts: {error}") from error
 
-    if not isinstance(parsed, dict) or parsed.get("version") != 1:
-        raise ValueError("Skill contracts must be a version 1 mapping")
+    if not isinstance(parsed, dict) or parsed.get("version") != 3:
+        raise ValueError("Skill contracts must be a version 3 mapping")
     skills = parsed.get("skills")
     if not isinstance(skills, dict):
         raise ValueError("Skill contracts must define a skills mapping")
 
     allowed_recommendations = {"always", "conditional", "never"}
-    allowed_strategies = {"invoker", "architect-after-triage", "architect-after-brief"}
+    allowed_strategies = {"invoker", "plan-after-brief"}
     for name, contract in skills.items():
         if not isinstance(name, str) or not isinstance(contract, dict):
             raise ValueError("Each skill contract must be a named mapping")
@@ -165,8 +174,8 @@ def load_contracts(path: Path) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"Contract {name} has multiple always-recommended routes")
         elif not isinstance(direct_target, str):
             raise ValueError(f"Non-interactive contract {name} must define a direct target")
-        if name != "crewloop-hub" and contract["afk_target"] != "crewloop-hub":
-            raise ValueError(f"Contract {name} must return to crewloop-hub in AFK mode")
+        if contract["afk_target"] != "crewloop:plan":
+            raise ValueError(f"Contract {name} must return to crewloop:plan in AFK mode")
         if contract["kind"] == "supporting":
             if not isinstance(contract.get("default_invoker"), str):
                 raise ValueError(f"Supporting contract {name} must define a default invoker")
@@ -174,13 +183,13 @@ def load_contracts(path: Path) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"Supporting contract {name} has an invalid return strategy")
 
     contract_names = set(skills)
-    if contract_names == CANONICAL_SKILLS:
-        if skills["crewloop-hub"].get("afk_target") != "architect":
-            raise ValueError("CrewLoop Hub must route task-entry AFK work to architect")
-        if skills["architect"].get("interactive") or skills["architect"].get("direct_target") != "conditional-designer-or-engineer":
-            raise ValueError("Architect must be non-interactive with its conditional direct route")
-        if skills["designer"].get("interactive") or skills["designer"].get("direct_target") != "engineer":
-            raise ValueError("Designer must be non-interactive and route directly to engineer")
+    if {expected_dir_name(n) for n in contract_names} == CANONICAL_SKILLS:
+        if skills["crewloop:plan"].get("direct_target") != "conditional-crewloop:design-or-crewloop:code":
+            raise ValueError("CrewLoop Plan must route conditionally to crewloop:design or crewloop:code")
+        if skills["crewloop:design"].get("direct_target") != "crewloop:code":
+            raise ValueError("CrewLoop Design must route directly to crewloop:code")
+        if skills["crewloop:ship"].get("direct_target") != "done":
+            raise ValueError("CrewLoop Ship must end with direct_target done")
     for name, contract in skills.items():
         invoker = contract.get("default_invoker")
         if invoker is not None and invoker not in contract_names:
@@ -190,18 +199,15 @@ def load_contracts(path: Path) -> dict[str, dict[str, Any]]:
             if route["target"] not in allowed_targets:
                 raise ValueError(f"Contract {name} has an unknown menu target: {route['target']}")
         direct_target = contract.get("direct_target")
-        if direct_target is not None and direct_target not in allowed_targets | {"conditional-designer-or-engineer"}:
+        if direct_target is not None and direct_target not in allowed_targets | DIRECT_TARGET_CONDITIONALS:
             raise ValueError(f"Contract {name} has an unknown direct target: {direct_target}")
         if contract["afk_target"] not in contract_names:
             raise ValueError(f"Contract {name} has an unknown AFK target: {contract['afk_target']}")
-        if contract.get("return_strategy") == "invoker":
-            if "invoker" not in {route["target"] for route in (contract.get("menu") or {}).values()}:
-                raise ValueError(f"Contract {name} must provide an invoker route")
-        if contract.get("return_strategy") in {"architect-after-triage", "architect-after-brief"}:
-            if name not in {"maintainer", "project-brainstorm"}:
-                raise ValueError(f"Contract {name} cannot use an Architect-bound return strategy")
-            if "architect" not in {route["target"] for route in (contract.get("menu") or {}).values()}:
-                raise ValueError(f"Contract {name} must provide an architect route")
+        if contract.get("return_strategy") == "plan-after-brief":
+            if name != "crewloop:brainstorm":
+                raise ValueError(f"Contract {name} cannot use a plan-after-brief return strategy")
+            if "crewloop:plan" not in {route["target"] for route in (contract.get("menu") or {}).values()}:
+                raise ValueError(f"Contract {name} must provide a crewloop:plan route")
 
     return skills
 
@@ -214,13 +220,11 @@ def expected_contract_lines(contract: dict[str, Any]) -> list[str]:
         strategy = contract.get("return_strategy")
         if strategy == "invoker":
             lines.append("- **Invoker rule:** outside AFK, return to the actual invoking skill.")
-        elif strategy == "architect-after-triage":
-            lines.append("- **Return strategy:** after confirmed triage, route to `architect` outside AFK.")
-        elif strategy == "architect-after-brief":
-            lines.append("- **Return strategy:** after a completed brief, route to `architect` outside AFK.")
+        elif strategy == "plan-after-brief":
+            lines.append("- **Return strategy:** after a completed brief, route to `crewloop:plan` outside AFK.")
 
-    menu = contract.get("menu")
     direct_target = contract.get("direct_target")
+    menu = contract.get("menu")
     if isinstance(menu, dict):
         routes = "; ".join(f'`[{key}]` -> `{route["target"]}`' for key, route in menu.items())
         lines.append(f"- **Interactive routes:** {routes}")
@@ -236,14 +240,9 @@ def expected_contract_lines(contract: dict[str, Any]) -> list[str]:
     elif isinstance(direct_target, str):
         lines.append(f'- **Direct route:** `{direct_target}`')
 
-    if contract.get("afk_target") == "crewloop-hub":
-        lines.append(
-            "- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase."
-        )
-    else:
-        lines.append(
-            f'- **AFK route:** load `{contract["afk_target"]}` at task entry, or the next phase from workflow state.'
-        )
+    lines.append(
+        '- **AFK route:** skip the menu and return to `crewloop:plan`; the Plan skill evaluates state and loads the next phase.'
+    )
     return lines
 
 
@@ -266,11 +265,6 @@ def extract_transition_contract(content: str) -> list[str] | None:
 
 
 def validate_instruction_precedence(content: str, contract: dict[str, Any]) -> list[str]:
-    if contract.get("afk_target") != "crewloop-hub":
-        if "**Next skill:** Architect." in content:
-            return ["Hub AFK next-skill instruction must be phase-aware"]
-        return []
-
     errors: list[str] = []
     for line in content.splitlines():
         lowered = line.lower()
@@ -323,10 +317,10 @@ def validate_skill(skill_dir: Path, contract: dict[str, Any] | None = None) -> l
     if name is not None and not isinstance(name, str):
         errors.append("Frontmatter name must be a string")
     elif isinstance(name, str):
-        if name != skill_name:
-            errors.append(f"Frontmatter name '{name}' does not match directory '{skill_name}'")
-        if not KEBAB_CASE.fullmatch(name):
-            errors.append("Frontmatter name must be lowercase kebab-case")
+        if expected_dir_name(name) != skill_name:
+            errors.append(f"Frontmatter name '{name}' maps to directory '{expected_dir_name(name)}', not '{skill_name}'")
+        if not (NAMESPACED.fullmatch(name) or KEBAB_CASE.fullmatch(name)):
+            errors.append("Frontmatter name must be lowercase kebab-case or a crewloop:* namespace name")
 
     description = frontmatter.get("description")
     if description is not None and not isinstance(description, str):
@@ -351,17 +345,18 @@ def validate_repository(skills_dir: Path, contracts_path: Path) -> list[str]:
         return [f"Skills directory not found: {skills_dir}"]
 
     skill_names = {path.name for path in skills_dir.iterdir() if path.is_dir()}
-    contract_names = set(contracts)
-    errors = [f"Expected 19 skill contracts, found {len(contract_names)}"] if len(contract_names) != 19 else []
+    contract_dirs = {expected_dir_name(name) for name in contracts}
+    errors = [f"Expected 6 skill contracts, found {len(contracts)}"] if len(contracts) != 6 else []
 
-    for name in sorted(skill_names - contract_names):
+    for name in sorted(skill_names - contract_dirs):
         errors.append(f"Skill has no contract: {name}")
-    for name in sorted(contract_names - skill_names):
+    for name in sorted(contract_dirs - skill_names):
         errors.append(f"Contract has no skill directory: {name}")
     if skill_names != CANONICAL_SKILLS:
-        errors.append("Skill directories do not match the canonical 19-skill inventory")
-    for name in sorted(skill_names & contract_names):
-        errors.extend(f"{name}: {error}" for error in validate_skill(skills_dir / name, contracts[name]))
+        errors.append("Skill directories do not match the canonical 6-skill inventory")
+    for name in sorted(skill_names & contract_dirs):
+        logical_name = next(n for n in contracts if expected_dir_name(n) == name)
+        errors.extend(f"{name}: {error}" for error in validate_skill(skills_dir / name, contracts[logical_name]))
     return errors
 
 
@@ -378,13 +373,13 @@ def main() -> int:
 
     skill_dirs = sorted((path for path in SKILLS_DIR.iterdir() if path.is_dir()), key=lambda path: path.name)
     inventory_errors = []
-    if len(contracts) != 19:
-        inventory_errors.append(f"Expected 19 skill contracts, found {len(contracts)}")
-    if set(contracts) != CANONICAL_SKILLS:
-        inventory_errors.append("Skill contracts do not match the canonical 19-skill inventory")
+    if len(contracts) != 6:
+        inventory_errors.append(f"Expected 6 skill contracts, found {len(contracts)}")
+    if {expected_dir_name(n) for n in contracts} != CANONICAL_SKILLS:
+        inventory_errors.append("Skill contracts do not match the canonical 6-skill inventory")
     if {path.name for path in skill_dirs} != CANONICAL_SKILLS:
-        inventory_errors.append("Skill directories do not match the canonical 19-skill inventory")
-    if {path.name for path in skill_dirs} != set(contracts):
+        inventory_errors.append("Skill directories do not match the canonical 6-skill inventory")
+    if {path.name for path in skill_dirs} != {expected_dir_name(n) for n in contracts}:
         inventory_errors.append("Skill directories do not match the contract inventory")
 
     all_ok = not inventory_errors
@@ -393,8 +388,10 @@ def main() -> int:
         for error in inventory_errors:
             print(f"   - {error}")
 
+    dir_to_logical = {expected_dir_name(n): n for n in contracts}
     for skill_dir in skill_dirs:
-        errors = validate_skill(skill_dir, contracts.get(skill_dir.name))
+        logical_name = dir_to_logical.get(skill_dir.name)
+        errors = validate_skill(skill_dir, contracts.get(logical_name) if logical_name else None)
         if errors:
             all_ok = False
             print(f"FAIL {skill_dir.name}")

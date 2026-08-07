@@ -22,6 +22,8 @@ export interface AgentConfig {
 }
 
 const SUPPORTED_AGENTS: AgentConfig[] = [
+  // The installed skill directory is `crewloop-plan` and the logical skill identity is `crewloop:plan`.
+  // The dashboard shim maps the directory name to the namespaced display name.
   {
     id: 'kimi',
     skillsDir: path.join(os.homedir(), '.agents', 'skills'),
@@ -29,8 +31,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.kimi-code', 'config.toml'),
       format: 'toml',
-      beforeToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
-      afterToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-hub',
+      beforeToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-plan',
+      afterToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd', 'Stop'],
     },
   },
@@ -41,8 +43,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.claude', 'settings.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
-      afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-hub',
+      beforeToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
+      afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
   },
@@ -53,8 +55,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.codex', 'hooks.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
-      afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-hub',
+      beforeToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
+      afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'Stop'],
     },
   },
@@ -65,8 +67,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.gemini', 'config', 'hooks.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
-      afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-hub',
+      beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+      afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
   },
@@ -77,8 +79,8 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       supported: true,
       configPath: path.join(os.homedir(), '.config', 'opencode', 'plugins', 'crewloop.js'),
       format: 'plugin',
-      beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
-      afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-hub',
+      beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
+      afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
     },
   },
   {

@@ -14,8 +14,8 @@ describe('installer', () => {
     sourceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-source-'));
     targetDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-target-'));
 
-    fs.mkdirSync(path.join(sourceDir, 'architect'), { recursive: true });
-    fs.writeFileSync(path.join(sourceDir, 'architect', 'SKILL.md'), '# Architect\n');
+    fs.mkdirSync(path.join(sourceDir, 'crewloop-plan'), { recursive: true });
+    fs.writeFileSync(path.join(sourceDir, 'crewloop-plan', 'SKILL.md'), '# CrewLoop Plan\n');
   });
 
   after(() => {
@@ -25,45 +25,45 @@ describe('installer', () => {
 
   it('copies skills to target directory', () => {
     const skills: SkillManifest[] = [
-      { name: 'architect', description: '', sourcePath: path.join(sourceDir, 'architect') },
+      { name: 'crewloop-plan', description: '', sourcePath: path.join(sourceDir, 'crewloop-plan') },
     ];
 
     const result = installSkills(skills, targetDir, {});
-    assert.deepStrictEqual(result.installed, ['architect']);
+    assert.deepStrictEqual(result.installed, ['crewloop-plan']);
     assert.strictEqual(result.skipped.length, 0);
     assert.strictEqual(result.errors.length, 0);
-    assert.ok(fs.existsSync(path.join(targetDir, 'architect', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(targetDir, 'crewloop-plan', 'SKILL.md')));
   });
 
   it('skips existing skills without force', () => {
     const skills: SkillManifest[] = [
-      { name: 'architect', description: '', sourcePath: path.join(sourceDir, 'architect') },
+      { name: 'crewloop-plan', description: '', sourcePath: path.join(sourceDir, 'crewloop-plan') },
     ];
 
     const result = installSkills(skills, targetDir, {});
     assert.strictEqual(result.installed.length, 0);
-    assert.deepStrictEqual(result.skipped, ['architect']);
+    assert.deepStrictEqual(result.skipped, ['crewloop-plan']);
   });
 
   it('overwrites existing skills with force', () => {
     const skills: SkillManifest[] = [
-      { name: 'architect', description: '', sourcePath: path.join(sourceDir, 'architect') },
+      { name: 'crewloop-plan', description: '', sourcePath: path.join(sourceDir, 'crewloop-plan') },
     ];
 
     const result = installSkills(skills, targetDir, { force: true });
-    assert.deepStrictEqual(result.installed, ['architect']);
+    assert.deepStrictEqual(result.installed, ['crewloop-plan']);
     assert.strictEqual(result.skipped.length, 0);
-    assert.ok(fs.existsSync(path.join(targetDir, 'architect', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(targetDir, 'crewloop-plan', 'SKILL.md')));
   });
 
   it('dry-run does not write files', () => {
     const dryTarget = path.join(targetDir, 'dry');
     const skills: SkillManifest[] = [
-      { name: 'architect', description: '', sourcePath: path.join(sourceDir, 'architect') },
+      { name: 'crewloop-plan', description: '', sourcePath: path.join(sourceDir, 'crewloop-plan') },
     ];
 
     const result = installSkills(skills, dryTarget, { dryRun: true });
-    assert.deepStrictEqual(result.installed, ['architect']);
+    assert.deepStrictEqual(result.installed, ['crewloop-plan']);
     assert.ok(!fs.existsSync(dryTarget));
   });
 });

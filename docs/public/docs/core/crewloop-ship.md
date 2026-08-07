@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Shipper
+# CrewLoop Ship
 
 > Git operations and PR preparation. The only skill allowed to touch git.
 
@@ -10,22 +10,22 @@ sidebar_position: 6
 
 ## Role
 
-The Shipper is the only skill authorized to perform git operations. After the Reviewer approves, the Shipper packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, prepares a PR, and can create annotated tags and draft releases when explicitly requested.
+`crewloop:ship` is the only skill authorized to perform git operations. After `crewloop:review` approves, it packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, prepares a PR, and can create annotated tags and draft releases when explicitly requested.
 
 ## Responsibilities
 
-1. Verify git state: check git status, git diff --stat, git log, and remote configuration.
+1. Verify git state: check `git status`, `git diff --stat`, `git log`, and remote configuration.
 2. Read the full diff to understand what changed and categorize the change type.
 3. Determine the correct Conventional Commits type and scope.
 4. Verify and execute package version bumps (`npm version <type>`) if versioning applies, aligning internal dependencies in workspaces.
-5. Archive the spec: move specs/changes/NNN-name/ to specs/archive/YYYY-MM-DD-NNN-name/.
-6. Draft the commit message: type(scope): description in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
-7. Create the branch: type/short-description in kebab-case.
+5. Archive the spec: move `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`.
+6. Draft the commit message: `type(scope): description` in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
+7. Create the branch: `type/short-description` in kebab-case.
 8. Stage all changes, commit, and push to the remote.
 9. Generate and display the PR creation link.
 10. When explicitly requested, create an annotated tag (`vX.Y.Z`) with a structured tag message and draft release notes grouped by Conventional Commits type.
 
-## What Shipper Never Does
+## What `crewloop:ship` Never Does
 
 - ❌ Write implementation code or fix functional bugs (Exception: Allowed to run version bump commands like `npm version` or modify manifest JSON files to update version strings).
 - ❌ Review code or fix bugs.
@@ -41,18 +41,18 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 
 | Artifact | Description |
 |----------|-------------|
-| **Branch** | type/short-description (kebab-case) |
+| **Branch** | `type/short-description` (kebab-case) |
 | **Commit** | Conventional Commits message with scope and optional body |
 | **Bumped Version** | Staged manifest changes updating project and dependency versions |
-| **Archived spec** | specs/archive/YYYY-MM-DD-NNN-name/ |
+| **Archived spec** | `specs/archive/YYYY-MM-DD-NNN-name/` |
 | **PR link** | Platform URL for opening the pull request |
 | **Tag** | Annotated semver tag (when explicitly requested) |
 | **Release notes** | Markdown notes grouped by Conventional Commits type |
 
 ## Concrete Example
 
-**Shipper ships JWT login:**
-1. Verifies Reviewer approval.
+**`crewloop:ship` ships a JWT login:**
+1. Verifies `crewloop:review` approval.
 2. Identifies commit type as `feat` (requires a minor version bump).
 3. Executes `npm version minor --workspaces --no-git-tag-version` after user confirmation.
 4. Updates local dependency reference of CLI on the root package.
@@ -72,11 +72,11 @@ The Shipper is the only skill authorized to perform git operations. After the Re
 
 ## Handoff
 
-**Invoked by:** Reviewer.  
-**Sends to:** CrewLoop Hub (returns control to start the next loop).
+**Invoked by:** `crewloop:review`.  
+**Sends to:** `crewloop:hub` (returns control to start the next loop).
 
 ```markdown
 **What would you like to do?**
 
-- **[O] Return to CrewLoop Hub** — Next task or adjustments
+- **[O] Return to `crewloop:hub`** — Next task or adjustments
 ```

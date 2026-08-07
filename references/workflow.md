@@ -8,57 +8,36 @@ Complete workflow for the CrewLoop team.
 
 | Role | File | Responsibility |
 |------|------|----------------|
-| CrewLoop Hub | `skills/crewloop-hub/SKILL.md` | Entry point: context discovery and first routing; AFK auto-router |
-| Architect | `skills/architect/SKILL.md` | Specs, contracts, architecture |
-| Designer | `skills/designer/SKILL.md` | Visual/UI direction |
-| Engineer | `skills/engineer/SKILL.md` | Implementation and tests |
-| Reviewer | `skills/reviewer/SKILL.md` | Code review and quality gate |
-| Shipper | `skills/shipper/SKILL.md` | Git operations and PR |
-| Maintainer | `skills/maintainer/SKILL.md` | Bug triage and technical debt |
-| Project Brainstorm | `skills/project-brainstorm/SKILL.md` | Interactive discovery for ambiguous project ideas |
-| Docs Writer | `skills/docs-writer/SKILL.md` | Documentation-only changes |
-| Tester | `skills/tester/SKILL.md` | QA strategy and coverage analysis |
-| Product Manager | `skills/product-manager/SKILL.md` | Prioritization and success metrics |
-| Researcher | `skills/researcher/SKILL.md` | Technology evaluation and comparison |
-| Security-Guard | `skills/security-guard/SKILL.md` | Deep-dive security review |
-| Accessibility-Auditor | `skills/accessibility-auditor/SKILL.md` | Accessibility and WCAG review |
-| Long-Term Manager | `skills/long-term-manager/SKILL.md` | Durable tracking for multi-session projects |
-| Frontend Architect | `skills/frontend-architect/SKILL.md` | Frontend component architecture and React state boundaries |
-| Schema Designer | `skills/schema-designer/SKILL.md` | Database schema and API contract design |
-| DevOps Specialist | `skills/devops-specialist/SKILL.md` | Release automation and infrastructure validation |
-| DiamondBlock | `skills/diamondblock/SKILL.md` | Default discovery helper for session memory, context retrieval, and semantic codebase search |
+| CrewLoop Plan | `skills/crewloop-plan/SKILL.md` | Entry point: discovery, brief synthesis, spec creation, and routing |
+| CrewLoop Design | `skills/crewloop-design/SKILL.md` | Visual/UI direction |
+| CrewLoop Code | `skills/crewloop-code/SKILL.md` | Implementation and tests |
+| CrewLoop Review | `skills/crewloop-review/SKILL.md` | Code review and quality gate |
+| CrewLoop Ship | `skills/crewloop-ship/SKILL.md` | Git operations and PR |
+| CrewLoop Docs | `skills/crewloop-docs/SKILL.md` | Documentation-only changes |
 
 ---
 
-## Flow Diagram (Direct Routing)
+## Flow Diagram (Auto-Routing)
 
-Skills hand off directly to the next skill via their ending menu; the user confirms each
-transition. The CrewLoop Hub mediates only at task entry and in AFK mode.
+Skills hand off automatically to the next skill per the transition contract. The user can
+interrupt the flow with explicit commands. `crewloop:plan` is the entry point for new tasks
+and the AFK fallback router.
 
 ```mermaid
 flowchart TD
-    O["🎯 CrewLoop Hub<br>Entry: Discovery & First Routing<br>+ AFK Auto-Router"] --> A["🏗️ Architect<br>Specs & Architecture"]
-    O -.-> DB["💎 DiamondBlock<br>Session memory + semantic codebase search"]
-    DB -.-> O
-    A --> D["🎨 Designer<br>UI/UX Direction"]
-    A --> E["🔧 Engineer<br>Implementation"]
-    D --> E
-    E --> R["🔍 Reviewer<br>Quality Gate"]
-    R -->|PASS| S["🚀 Shipper<br>Git & PR"]
-    R -->|FAIL| E
-    S -->|new task| O
+    P["🏗️ CrewLoop Plan<br>Discovery & Specs"] --> D["🎨 CrewLoop Design<br>UI/UX Direction"]
+    P --> C["🔧 CrewLoop Code<br>Implementation"]
+    D --> C
+    C --> R["🔍 CrewLoop Review<br>Quality Gate"]
+    R -->|PASS| S["🚀 CrewLoop Ship<br>Git & PR"]
+    R -->|FAIL| C
+    S --> done
 
-    SG["🛡️ Security-Guard<br>Security Review"] <-.-> R
-    AA["♿ Accessibility-Auditor<br>Accessibility Review"] <-.-> R
-    SD["🗃️ Schema Designer"] <-.-> A
-    FA["🧩 Frontend Architect"] <-.-> D
-    DO["⚙️ DevOps Specialist"] <-.-> S
-    T["🧪 Tester"] <-.-> E
+    DO["📝 CrewLoop Docs<br>Documentation"] --> P
 
-    style O fill:#01579b,color:#fff
-    style A fill:#e65100,color:#fff
+    style P fill:#e65100,color:#fff
     style D fill:#6a1b9a,color:#fff
-    style E fill:#1b5e20,color:#fff
+    style C fill:#1b5e20,color:#fff
     style R fill:#b71c1c,color:#fff
     style S fill:#00695c,color:#fff
 ```
@@ -67,54 +46,24 @@ flowchart TD
 
 ## Routing Rules
 
-1. **CrewLoop Hub is the entry point** — it may use approved discovery/tracking helpers,
-   then routes to Architect as the first mandatory delivery phase. Outside AFK mode, it
-   does not mediate mid-flow transitions.
-2. **DiamondBlock is the OPTIONAL read-only discovery layer** — when its MCP capabilities
-   are exposed in the agent's tool registry (skill installed ≠ MCP active), the Hub loads
-   DiamondBlock directly before any broad manual inspection to retrieve session memory,
-   prior decisions, and semantic codebase search results. The Hub may return repeatedly
-   with targeted semantic queries during discovery, and persists memories only for
-   user-confirmed or spec/ADR-accepted decisions (search-before-save, distilled and
-   non-secret). When capabilities are absent, ordinary exploration continues unchanged,
-   and every MCP failure warns once without blocking the flow.
-3. **Interactive skills route directly** — each interactive skill presents valid next-step options
-   from its position in the flow (transition contract in `conventions.md`), with one
-   outcome-driven option marked `(Recommended)`. The user picks; the skill continues
-   directly into the chosen next skill.
-4. **Architect is ALWAYS the first stop** — every task (bug fix, feature, design,
-   refactor) gets a spec before implementation. Architect is non-interactive and hands off
-   directly to Designer (UI) or Engineer.
-5. **Designer acts BEFORE Engineer** — when the change involves UI, Designer hands off
-   directly to Engineer.
-6. **Engineer never does git or review** — implements code/tests, then its menu offers
-   Reviewer (recommended), keep implementing, or back to Architect, then continues directly
-   into the selected route.
-7. **Reviewer is the quality gate** — verdict drives the menu: PASS → Shipper
-   (recommended); FAIL → Engineer (recommended), then continues directly into the selected route.
-8. **Security-Guard and Accessibility-Auditor are review specialists** — invoked by the
-   Reviewer; they end by recommending a return to the Reviewer.
-9. **Shipper is the only one who touches git** — after a successful push/PR, outside AFK,
-   it optionally invokes DiamondBlock to log a distilled session summary when the MCP
-   capabilities are exposed (in AFK, Shipper returns to the Hub and the Hub owns wrap-up
-   logging); then its menu offers a new task (CrewLoop Hub entry) or done, and it
-   continues directly into the selected route.
-10. **Bug-Fixing Pipeline** — Maintainer triages and reproduces, then hands off directly to
-   Architect with a lightweight specification (`.spec.yaml` + `tasks.md`); from there the
-   standard chain applies: Architect → Engineer → Reviewer → Shipper.
-11. **Specialist Helpers return to their invoker** — default invokers: `schema-designer` → Architect,
-    `frontend-architect` → Designer, `devops-specialist` → Shipper, `tester` → Engineer,
-    `docs-writer` → CrewLoop Hub (the actual invoker wins when different).
-    Maintainer and Project Brainstorm instead route confirmed triage/completed briefs to Architect.
-12. **AFK mode is the exception** — with AFK active, every non-Hub skill returns control to the
-    CrewLoop Hub automatically and the Hub loads the next skill per the transition
-    contract, with no menus.
+1. **`crewloop:plan` is the entry point** — every session starts here. It routes to `crewloop:design` if the change involves UI, otherwise to `crewloop:code`.
+2. **Skills route automatically** — each skill evaluates its outcome and hands off directly to the next skill per the transition contract. No end-of-skill menus.
+3. **User interrupts are explicit** — recognized commands are `stop`, `pause`, `volta`, `voltar`, and `re-analyze`. Any of these halts the flow and returns to `crewloop:plan`.
+4. **`crewloop:plan` is ALWAYS the first stop** — every task (bug fix, feature, design, refactor) gets a spec before implementation. `crewloop:plan` is interactive during discovery but auto-routes once the spec is ready.
+5. **`crewloop:design` acts BEFORE `crewloop:code`** — when the change involves UI, `crewloop:design` hands off directly to `crewloop:code`.
+6. **`crewloop:code` never does git or review** — implements code/tests, then auto-routes to `crewloop:review` on success or back to `crewloop:plan` after a failed build that could not be fixed.
+7. **`crewloop:review` is the quality gate** — verdict drives the route: PASS → `crewloop:ship`; FAIL → `crewloop:code`.
+8. **`crewloop:ship` is the only skill that touches git** — commit, branch, push, and PR. After shipping it routes to `done`.
+9. **`crewloop:docs` supports documentation tasks** — invoked on demand, returns to `crewloop:plan` when done.
+10. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit by `crewloop:ship`.
+11. **Bug fixes enter via `crewloop:plan`** — bug fixes are triaged like any other task through the Plan skill.
+12. **AFK mode is Plan-driven** — with AFK active, every skill returns to `crewloop:plan` automatically, and Plan loads the next skill per the transition contract, with no menus.
 
 ---
 
 ## AFK Flow
 
-1. Non-Hub skill finishes → loads CrewLoop Hub automatically (Skill tool)
-2. Hub evaluates state → loads next skill per the transition contract
-3. No menus; role prefixes on every response
-4. Ends when Shipper completes and returns to the Hub
+1. Skill finishes → returns to `crewloop:plan` automatically.
+2. `crewloop:plan` evaluates state → loads next skill per the transition contract.
+3. No menus; role prefixes on every response.
+4. Ends when `crewloop:ship` completes and returns to `crewloop:plan`.

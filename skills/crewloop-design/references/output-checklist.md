@@ -1,6 +1,6 @@
 # Output Checklist
 
-Use this as the final quality gate before handing off to Engineer.
+Use this as the final quality gate before handing off to CrewLoop Code (`crewloop:code`).
 
 ## Must pass
 

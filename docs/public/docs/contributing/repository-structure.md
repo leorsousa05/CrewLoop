@@ -15,7 +15,7 @@ crewloop/
 ├── assets/
 │   └── templates/
 │       └── skill-template.md        # Template for new SKILL.md files
-├── docs/                            # This Docusaurus site
+├── docs/                            # Vite + React + Tailwind docs site
 ├── packages/
 │   └── cli/                         # @archznn/crewloop-cli (TypeScript)
 │       ├── src/
@@ -38,10 +38,15 @@ crewloop/
 │       ├── src/
 │       ├── ui/
 │       └── README.md
-├── skills/                          # All 18 skill directories
+├── skills/                          # All 8 skill directories
 │   ├── crewloop-hub/SKILL.md
-│   ├── architect/SKILL.md
-│   └── ... (18 total)
+│   ├── crewloop-plan/SKILL.md
+│   ├── crewloop-design/SKILL.md
+│   ├── crewloop-code/SKILL.md
+│   ├── crewloop-review/SKILL.md
+│   ├── crewloop-ship/SKILL.md
+│   ├── crewloop-brainstorm/SKILL.md
+│   └── crewloop-docs/SKILL.md
 ├── specs/
 │   ├── changes/                     # Active in-progress specs
 │   ├── archive/                     # Completed specs
@@ -55,18 +60,18 @@ crewloop/
 
 | What | Where |
 |------|-------|
-| New skill | `skills/<skill-name>/SKILL.md` |
+| New skill | `skills/crewloop-<slug>/SKILL.md` with frontmatter `name: crewloop:<slug>` |
 | Shared conventions | `references/` |
-| Skill-specific references | `skills/<skill-name>/references/` |
+| Skill-specific references | `skills/crewloop-<slug>/references/` |
 | Active change spec | `specs/changes/NNN-name/` |
 | Architectural decision | `specs/decisions/NNN-name.md` |
 | CLI source changes | `packages/cli/src/` |
 | Dashboard source changes | `servers/dashboard/src/` |
-| Documentation pages | `docs/docs/` |
+| Documentation pages | `docs/public/docs/` |
 
 ## Where NOT to put things
 
 - Spec files directly in `specs/` — always nested in `specs/changes/NNN-name/`.
-- Shared conventions inside a SKILL.md — use `references/`.
+- Shared conventions inside a `SKILL.md` — use `references/`.
 - `.env` files or secrets anywhere in the repository.
 - `node_modules/`, `dist/`, or build output committed to git.

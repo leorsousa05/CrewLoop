@@ -27,12 +27,12 @@ describe('search', () => {
       eventType: 'tool_end',
       status: 'success',
       startTime: 0,
-      skill: 'engineer',
+      skill: 'crewloop:code',
       detail: 'opened readme',
       output: { contentSnippet: 'hello world' },
     };
     expect(matchesInvocation(inv, 'Read')).toBe(true);
-    expect(matchesInvocation(inv, 'engineer')).toBe(true);
+    expect(matchesInvocation(inv, 'crewloop:code')).toBe(true);
     expect(matchesInvocation(inv, 'hello')).toBe(true);
     expect(matchesInvocation(inv, 'missing')).toBe(false);
   });

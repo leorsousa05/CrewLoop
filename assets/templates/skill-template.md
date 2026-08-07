@@ -1,5 +1,5 @@
 ---
-name: skill-name
+name: crewloop:<slug>
 description: Describe what this skill does and when to use it. Be specific and include contexts where it should trigger even if the user does not explicitly name it. For example, mention related keywords, adjacent tasks, and competing skills where this one should win.
 ---
 
@@ -12,13 +12,12 @@ Describe the role in 2-3 sentences. What is this skill responsible for? What doe
 ## TRANSITION CONTRACT
 
 - **Role prefix:** `> [icon] **Skill Name**`
-- **Default invoker:** `crewloop-hub`
+- **Default invoker:** `crewloop:plan`
 - **Invoker rule:** outside AFK, return to the actual invoking skill.
-- **Interactive routes:** `[I]` -> `invoker`; `[H]` -> `crewloop-hub`
-- **Post-selection:** load the selected skill directly without asking for a typed command.
-- **AFK route:** skip the menu and return to `crewloop-hub`; only the Hub selects the next phase.
+- **Direct route:** `crewloop:plan`
+- **AFK route:** skip the menu and return to `crewloop:plan`; the Plan skill evaluates state and loads the next phase.
 
-Register the exact contract in `references/skill-contracts.yaml` and keep this capsule synchronized with it.
+Register the exact contract in `references/skill-contracts.yaml` and keep this capsule synchronized with it. Use `crewloop:<slug>` for the skill name and `crewloop-<slug>` for the directory name.
 
 ---
 
@@ -30,7 +29,7 @@ Register the exact contract in `references/skill-contracts.yaml` and keep this c
 
 **NEVER do Y** — Explain another critical restriction.
 
-**When done, present navigation options** — Outside AFK, show the letter-based navigation menu. In AFK, return to CrewLoop Hub.
+**When done, route automatically** — Outside AFK, hand off to the next skill per the transition contract. In AFK, return to `crewloop:plan`.
 
 ---
 

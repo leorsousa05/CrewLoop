@@ -36,7 +36,6 @@ Seven commands are exposed:
 | `src/agents.ts` | Supported agent definitions: config path, hook format, agent ID |
 | `src/installer.ts` | Skill copy/install logic — copies SKILL.md files to the target directory |
 | `src/hooks.ts` | Hook configuration — reads and writes agent config files using the Strategy pattern |
-| `src/diamondblock.ts` | Official DiamondBlock CLI adapter — locates the executable, runs dry-run preflight, delegates install |
 | `src/resolver.ts` | Path resolution utilities — resolves home dir, skill dirs, agent config paths |
 | `src/tests/` | Test suite for parser, help, output, commands, hooks, installer, and agent definitions |
 
@@ -70,12 +69,12 @@ Uses TOML array-of-tables. Each hook is a separate `[[hooks]]` block:
 [[hooks]]
 event = "PreToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill crewloop-hub"
+command = "crewloop-shim kimi --default-skill crewloop-plan"
 
 [[hooks]]
 event = "PostToolUse"
 matcher = ".*"
-command = "crewloop-shim kimi --default-skill crewloop-hub"
+command = "crewloop-shim kimi --default-skill crewloop-plan"
 ```
 
 - `event` — when the hook fires (`PreToolUse`, `PostToolUse`).
@@ -96,7 +95,7 @@ Uses a top-level `"hooks"` object. Each event maps to an array of matcher blocks
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill crewloop-hub"
+            "command": "crewloop-shim codex --default-skill crewloop-plan"
           }
         ]
       }
@@ -107,7 +106,7 @@ Uses a top-level `"hooks"` object. Each event maps to an array of matcher blocks
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim codex --default-skill crewloop-hub"
+            "command": "crewloop-shim codex --default-skill crewloop-plan"
           }
         ]
       }
@@ -129,7 +128,7 @@ Uses grouped objects. The top level is a map of hook-group names. CrewLoop uses 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill crewloop-hub"
+            "command": "crewloop-shim agy --default-skill crewloop-plan"
           }
         ]
       }
@@ -140,7 +139,7 @@ Uses grouped objects. The top level is a map of hook-group names. CrewLoop uses 
         "hooks": [
           {
             "type": "command",
-            "command": "crewloop-shim agy --default-skill crewloop-hub"
+            "command": "crewloop-shim agy --default-skill crewloop-plan"
           }
         ]
       }
@@ -226,10 +225,10 @@ If you change a matcher, you risk losing events.
 The command passed to every CrewLoop hook is:
 
 ```
-crewloop-shim <agent-id> --default-skill crewloop-hub
+crewloop-shim <agent-id> --default-skill crewloop-plan
 ```
 
-Example: `crewloop-shim kimi --default-skill crewloop-hub`.
+Example: `crewloop-shim kimi --default-skill crewloop-plan`.
 
 The shim receives event context via stdin, which is the standard mechanism for agent hooks. Do not change this command string unless the shim contract is also updated.
 
@@ -260,22 +259,6 @@ Older versions of the CLI wrote incorrect formats:
 - AGY: `crewloop` block under `~/.agy/config.json` instead of `~/.gemini/config/hooks.json`.
 
 The current writers detect these legacy entries by the `crewloop-shim` command and remove them before writing the correct format. For AGY, the installer also removes the stale `crewloop` block from `~/.agy/config.json`. This migration is idempotent.
-
----
-
-## DiamondBlock adapter
-
-`src/diamondblock.ts` is the adapter between CrewLoop install orchestration and the official DiamondBlock CLI. Its responsibilities:
-
-- Locate the official executable (`diamondblock` first, then its `dblock` alias).
-- Run the official `install --dry-run` preflight and, on success, the official `install`.
-- Build argument arrays only — executable and arguments stay separate; never construct shell command strings.
-- Trust the official installer's exit status for compatibility decisions, not stdout parsing.
-- Accept injected dependencies (PATH lookup and process execution) so tests run with fakes.
-
-MCP configuration is owned by the official DiamondBlock installer. CrewLoop never reads or writes agent MCP config — it only delegates through this adapter, and only when the user passes the explicit `crewloop install --diamondblock` opt-in.
-
----
 
 ## Testing hooks
 
@@ -308,7 +291,5 @@ Tests use temporary directories and do not touch real agent config files in the 
 - **Do not use `"*"` as the Kimi matcher** — it is an invalid JavaScript regex. Use `".*"`.
 - **Do not remove hooks that do not contain `crewloop-shim`** — those belong to the user.
 - **Do not write to real agent config files in tests** — use temporary directories.
-- **Do not parse or write agent MCP config in CrewLoop** — MCP configuration is owned by the official DiamondBlock installer; `src/diamondblock.ts` only delegates to it.
-- **Do not spawn the real `diamondblock` binary in tests** — inject fakes for PATH lookup and process execution.
 - **Do not run git operations** — use the Shipper skill.
 - **Do not skip creating a spec** before making changes — even a 1-line fix needs a `.spec.yaml` + `tasks.md`.

@@ -48,17 +48,17 @@ describe('StateStore', () => {
 
   it('sets active skill when event carries skill', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
-    store.applyEvent(makeEvent({ skill: 'architect', event_type: 'skill_change' }));
+    store.applyEvent(makeEvent({ skill: 'crewloop:plan', event_type: 'skill_change' }));
     const session = store.getSession('sess-1')!;
-    assert.equal(session.active_skill, 'architect');
+    assert.equal(session.active_skill, 'crewloop:plan');
     assert.equal(session.active_confidence, 'explicit');
   });
 
   it('sets explicit active skill from session_start event', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
-    store.applyEvent(makeEvent({ skill: 'crewloop-hub', event_type: 'session_start' }));
+    store.applyEvent(makeEvent({ skill: 'crewloop:plan', event_type: 'session_start' }));
     const session = store.getSession('sess-1')!;
-    assert.equal(session.active_skill, 'crewloop-hub');
+    assert.equal(session.active_skill, 'crewloop:plan');
     assert.equal(session.active_confidence, 'explicit');
   });
 

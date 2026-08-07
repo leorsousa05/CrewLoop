@@ -132,7 +132,7 @@ describe('buildGraph3D', () => {
     const session: ClientSession = {
       id: 's1',
       source: 'kimi',
-      activeSkill: { name: 'engineer', confidence: 'explicit' },
+      activeSkill: { name: 'crewloop:code', confidence: 'explicit' },
       lifecycle: 'running',
       events: [],
       startTime: 0,
@@ -144,7 +144,7 @@ describe('buildGraph3D', () => {
     ];
     const graph = buildGraph3D(session, invs);
     assert.equal(graph.nodes.length, 3);
-    assert.ok(graph.nodes.some((n) => n.id === 'skill:engineer'));
+    assert.ok(graph.nodes.some((n) => n.id === 'skill:crewloop:code'));
     assert.ok(graph.nodes.some((n) => n.id === 'tool:Read'));
     assert.ok(graph.nodes.some((n) => n.id === 'file:a.txt'));
     assert.equal(graph.links.length, 2);
@@ -154,7 +154,7 @@ describe('buildGraph3D', () => {
     const session: ClientSession = {
       id: 's2',
       source: 'kimi',
-      activeSkill: { name: 'engineer', confidence: 'explicit' },
+      activeSkill: { name: 'crewloop:code', confidence: 'explicit' },
       lifecycle: 'running',
       events: [],
       startTime: 0,
@@ -162,15 +162,15 @@ describe('buildGraph3D', () => {
       toolCounts: {},
     };
     const invs = [
-      { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: {}, skill: 'architect' },
-      { id: '2', tool: 'Write', eventType: 'tool_end', startTime: 1100, status: 'success', input: { path: 'b.txt' }, output: {}, skill: 'engineer' },
+      { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: {}, skill: 'crewloop:plan' },
+      { id: '2', tool: 'Write', eventType: 'tool_end', startTime: 1100, status: 'success', input: { path: 'b.txt' }, output: {}, skill: 'crewloop:code' },
     ];
     const graph = buildGraph3D(session, invs);
     assert.equal(graph.nodes.length, 6);
-    assert.ok(graph.nodes.some((n) => n.id === 'skill:architect'));
-    assert.ok(graph.nodes.some((n) => n.id === 'skill:engineer'));
-    assert.ok(graph.links.some((l) => l.source === 'skill:architect' && l.target === 'tool:Read'));
-    assert.ok(graph.links.some((l) => l.source === 'skill:engineer' && l.target === 'tool:Write'));
+    assert.ok(graph.nodes.some((n) => n.id === 'skill:crewloop:plan'));
+    assert.ok(graph.nodes.some((n) => n.id === 'skill:crewloop:code'));
+    assert.ok(graph.links.some((l) => l.source === 'skill:crewloop:plan' && l.target === 'tool:Read'));
+    assert.ok(graph.links.some((l) => l.source === 'skill:crewloop:code' && l.target === 'tool:Write'));
   });
 });
 

@@ -29,82 +29,37 @@ Format: `<type>/<short-description>`
 
 ---
 
-## Letter-Based Navigation & Direct Routing
+## Direct Routing & Auto-Handoff
 
-Skills route **directly** to the next skill in the flow. Each skill owns its ending: it
-presents the valid next steps from its position, and the user decides. The CrewLoop Hub
-mediates only as the **entry point for new tasks** and as the **automatic router in AFK
-mode** — never in the middle of an interactive flow.
+Skills route **automatically** to the next skill in the flow. Each skill owns its ending: it
+evaluates its outcome and hands off directly to the next appropriate skill. `crewloop:plan`
+is the **entry point for new tasks** and the **AFK fallback router**; no central Hub mediates
+mid-flow transitions.
 
-### Presentation Guidelines
-- **Prioritize Interactive Tool:** Call the `ask_question` tool to present navigation options as selectable choices in an interactive modal.
-- **Text Fallback:** If `ask_question` is not supported by your environment or fails, print the letter-based options as a standard markdown list at the end of your response.
-- **Handling Tool Responses:** If your current turn is triggered by a tool response from a previous `ask_question` navigation/routing call (e.g. user selected a menu option in the modal), do NOT present the navigation menu or call `ask_question` again. Instead, immediately continue into the chosen next skill without asking the user to type anything.
-- **Direct Handoff:** After a menu selection, the response must not include a slash command, command label, or instruction for the user to manually invoke the next skill.
+### Routing Rules
+- **Default is continuous routing.** Do not present end-of-skill navigation menus unless the user explicitly interrupts the flow.
+- **User interrupts are explicit only.** The recognized interrupt phrases are `stop`, `pause`, `volta`, `voltar`, and `re-analyze`. When you see one of these, halt the current flow and return to `crewloop:plan`.
+- **Direct handoff:** After a skill finishes, continue into the next skill without asking the user to type anything.
+- **No slash commands or manual labels:** Never tell the user to invoke the next skill themselves.
 
 ### The Transition Contract
 
-Each interactive skill ends with a menu of the valid next steps from its position in the flow. Exactly
-one option is marked `(Recommended)`, chosen by the phase outcome.
+Each skill has a deterministic outgoing route defined in `references/skill-contracts.yaml`.
 
-| Skill | Options (key → next skill) | Recommended when |
-|-------|------------------------|------------------|
-| crewloop-hub (entry) | `[A]` → Architect, `[B]` → Project-Brainstorm, `[T]` → Long-Term Manager | `[A]` for any well-scoped task |
-| architect (non-interactive) | → Designer or Engineer | Designer if the spec touches UI, else Engineer |
-| designer (non-interactive) | → Engineer | always |
-| engineer | `[R]` → Reviewer, `[E]` → keep implementing, `[A]` → Architect | `[R]` when all tasks are checked and verification passed |
-| reviewer | `[S]` → Shipper, `[E]` → Engineer | `[S]` on PASS, `[E]` on FAIL |
-| shipper | `[N]` → CrewLoop Hub (new task), `[D]` → done | `[D]` after a successful push |
-| maintainer | `[A]` → Architect, `[H]` → CrewLoop Hub | `[A]` for confirmed bugs (lightweight spec) |
-| project-brainstorm | `[A]` → Architect, `[H]` → CrewLoop Hub | `[A]` once the brief is complete |
-| supporting skills | `[I]` → invoker, `[H]` → CrewLoop Hub (or `[C]` → continue, when the invoker already is the Hub) | `[I]` always |
+| Skill | Outgoing route | Condition |
+|-------|----------------|-----------|
+| `crewloop:plan` (entry) | `crewloop:design` or `crewloop:code` | `crewloop:design` if the spec touches UI, else `crewloop:code` |
+| `crewloop:design` | `crewloop:code` | always |
+| `crewloop:code` | `crewloop:review` or `crewloop:plan` | `crewloop:review` when verification passes; `crewloop:plan` after a failed build that could not be fixed |
+| `crewloop:review` | `crewloop:ship` or `crewloop:code` | `crewloop:ship` on PASS, `crewloop:code` on FAIL |
+| `crewloop:ship` | `done` | after a successful push |
+| `crewloop:docs` | `crewloop:plan` | always returns to its invoker or `crewloop:plan` |
 
-**Default invokers for supporting skills** (controls which option is recommended; if the
-user invoked the skill from a different parent, both options are shown and the user picks):
+### Supporting Skills
 
-| Supporting skill | Default invoker | Next skill |
-|------------------|-----------------|---------|
-| security-guard | reviewer | Reviewer |
-| accessibility-auditor | reviewer | Reviewer |
-| schema-designer | architect | Architect |
-| frontend-architect | designer | Designer |
-| devops-specialist | shipper | Shipper |
-| tester | engineer | Engineer |
-| docs-writer | crewloop-hub | CrewLoop Hub |
-| researcher | crewloop-hub | CrewLoop Hub |
-| product-manager | crewloop-hub | CrewLoop Hub |
-| long-term-manager | crewloop-hub | CrewLoop Hub |
-| diamondblock | crewloop-hub | CrewLoop Hub |
-
-When DiamondBlock is configured and installed, the CrewLoop Hub should use it first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection.
-
-### Menu Block Format
-
-```markdown
-**What would you like to do?**
-
-- **[R] Send to Reviewer (Recommended)** — Code review and quality check
-- **[E] Keep implementing** — Return to the spec task list
-- **[A] Back to Architect** — A spec gap was found
-```
-
-Rules:
-1. Present via `ask_question`; markdown list is the fallback.
-2. Exactly one option carries `(Recommended)` — chosen by the outcome condition in the transition table.
-3. Non-interactive skills (Architect, Designer) skip the menu and hand off directly to the next skill.
-4. Every menu must offer a fallback so there are no dead ends (invoker, `[C] Continue` to keep iterating, or the Hub for a new task).
-5. The recommended next skill at the end of each skill's navigation section uses that skill's recommended target (e.g. `Reviewer`), never a hardcoded `/crewloop-hub` unless the Hub is the recommended target.
-
-#### CrewLoop Hub Entry Menu (new tasks only)
-The Hub presents this menu only after interactive discovery for a new task. AFK mode never presents menus:
-
-```markdown
-**What would you like to do?**
-
-- **[A] Send to Architect (Recommended)** — Create or update specs (always the first step)
-- **[B] Send to Project-Brainstorm** — Interactive discovery for a new or ambiguous idea
-- **[T] Send to Long-Term Manager** — Durable tracking for a multi-session project
-```
+| Supporting skill | Default invoker | Return target |
+|------------------|-----------------|---------------|
+| `crewloop:docs` | `crewloop:plan` | `crewloop:plan` |
 
 ---
 
@@ -132,7 +87,7 @@ specs/
 │   └── 001-architecture-choice.md
 │
 └── templates/                      ← Reusable templates (working copy; canonical versions
-    ├── proposal-template.md         live in skills/architect/references/templates/)
+    ├── proposal-template.md         live in skills/crewloop-plan/references/templates/)
     ├── spec-delta-template.md
     ├── design-template.md
     ├── tasks-template.md
@@ -143,7 +98,7 @@ specs/
 Rules:
 
 - Every spec lives inside `specs/changes/NNN-name/`. Never directly in `specs/`.
-- `living/` reflects the current state of the system, organized as one `<domain>/` folder per bounded context. The Shipper merges spec deltas into it when archiving a completed change (never before a reviewer PASS). The CrewLoop Hub and the Architect read it during discovery, before designing anything that touches an existing domain.
+- `living/` reflects the current state of the system, organized as one `<domain>/` folder per bounded context. The CrewLoop Ship merges spec deltas into it when archiving a completed change (never before a CrewLoop Review PASS). The CrewLoop Plan reads it during discovery before designing anything that touches an existing domain.
 - `archive/` preserves completed changes for audit.
 - `decisions/` records irreversible or cross-cutting architectural choices as ADRs, written from `templates/adr-template.md` and numbered by incrementing the highest `NNN` in the folder.
 - `specs/README.md` summarizes how each folder is used; the rules here remain canonical.
@@ -151,49 +106,31 @@ Rules:
 
 ---
 
-## Mandatory Workflow (Direct Routing)
+## Mandatory Workflow (Auto-Routing)
 
-The flow is a linear chain with dynamic branches. Skills hand off directly to the next
-skill per the transition contract; the user confirms each transition via the ending menu.
-The CrewLoop Hub mediates only at task entry and in AFK mode.
+The flow is a linear chain with dynamic branches. Skills hand off automatically to the next
+skill per the transition contract; the user can interrupt the flow with explicit commands.
+`crewloop:plan` is the entry point for new tasks and the AFK fallback router.
 
 ```
-CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done
-                                                            ↑________ FAIL ________|
-Supporting skills → back to the invoking skill
-Maintainer / Project Brainstorm → Architect after confirmed triage / completed brief
-New task → CrewLoop Hub
+User request → crewloop:plan → crewloop:design (if UI) → crewloop:code ⇄ crewloop:review → crewloop:ship → done
+                                  └──── no UI ────────┘
 ```
 
----
-
-## Optional Runtime Lifecycle (DiamondBlock)
-
-DiamondBlock is an OPTIONAL, non-blocking runtime layer. Installing the skill does not
-activate it — runtime behavior depends exclusively on the MCP capabilities exposed in the
-agent's tool registry, never on binary, package, or config-file presence.
-
-- **Capability-based detection:** skills inspect their own tool registry for the DiamondBlock MCP tools (`get_context`, `search_memory`, `save_memory`, `update_memory`, `log_session`, `index_codebase`). Skill installed ≠ MCP active.
-- **Startup context:** when capabilities are exposed, the CrewLoop Hub loads `diamondblock` directly before broad manual discovery to retrieve session context; ordinary explore subagents remain the fallback.
-- **Repeated targeted search:** the Hub may return to DiamondBlock repeatedly with targeted semantic queries (prior decisions, semantic memory, codebase search) during discovery.
-- **Confirmed-decision persistence:** memories are saved only after user confirmation or acceptance into a spec/ADR, after a search-before-save check, and only as short, distilled, non-secret records with project scope and provenance. Never save raw chat, transient hypotheses, command output, tokens, or source payloads.
-- **Wrap-up logging ownership:** outside AFK, Shipper invokes DiamondBlock for post-push `log_session` and then resumes its normal ending menu; in AFK, Shipper returns to the Hub and the Hub owns wrap-up logging.
-- **One-warning failures:** any MCP failure produces a single warning and the normal flow continues — never blocked, never altering a successful result.
-- **Manual indexing:** a missing or stale index keeps the manual `dblock index run` fallback; no skill auto-indexes.
+`crewloop:docs` is invoked on demand and returns to `crewloop:plan` when done.
 
 ---
 
 ## AFK Mode
 
 When the user explicitly activates AFK mode, skills route automatically through the
-workflow via the CrewLoop Hub without presenting navigation menus. **AFK is the only mode
-where the Hub mediates mid-flow.**
+workflow via `crewloop:plan` without presenting navigation menus.
 
 ### Activation phrases
 
 Case-insensitive matches: `AFK`, `AFK mode`, `going AFK`.
 
-AFK mode remains active until the workflow returns to CrewLoop Hub after shipping, or until the user explicitly disables it.
+AFK mode remains active until the workflow returns to `crewloop:plan` after shipping, or until the user explicitly disables it.
 
 ### Role prefixes
 
@@ -201,31 +138,19 @@ Every skill response must start with its prefix on its own line:
 
 | Skill | Prefix |
 |-------|--------|
-| CrewLoop Hub | `> 🎯 **CrewLoop Hub**` |
-| Architect | `> 🏗️ **Architect**` |
-| Designer | `> 🎨 **Designer**` |
-| Engineer | `> 🔧 **Engineer**` |
-| Reviewer | `> 🔍 **Reviewer**` |
-| Shipper | `> 🚀 **Shipper**` |
-| Maintainer | `> 🧰 **Maintainer**` |
-| Project Brainstorm | `> 🧠 **Project Brainstorm**` |
-| Long-Term Manager | `> 📅 **Long-Term Manager**` |
-| DiamondBlock | `> 💎 **DiamondBlock**` |
-| Docs Writer | `> 📝 **Docs Writer**` |
-| Researcher | `> 🔬 **Researcher**` |
-| Product Manager | `> 📊 **Product Manager**` |
-| Security Guard | `> 🛡️ **Security-Guard**` |
-| Accessibility Auditor | `> ♿ **Accessibility-Auditor**` |
-| Tester | `> 🧪 **Tester**` |
-| Frontend Architect | `> 📐 **Frontend-Architect**` |
-| Schema Designer | `> 🗄️ **Schema-Designer**` |
-| DevOps Specialist | `> 🛠️ **DevOps-Specialist**` |
+| CrewLoop Plan | `> 🏗️ **CrewLoop Plan**` |
+| CrewLoop Design | `> 🎨 **CrewLoop Design**` |
+| CrewLoop Code | `> 🔧 **CrewLoop Code**` |
+| CrewLoop Review | `> 🔍 **CrewLoop Review**` |
+| CrewLoop Ship | `> 🚀 **CrewLoop Ship**` |
+| CrewLoop Docs | `> 📝 **CrewLoop Docs**` |
 
 ### Automatic routing
 
 When AFK mode is active:
-1. Every non-Hub skill performs its task and returns control to the CrewLoop Hub automatically (using the Skill tool to trigger CrewLoop Hub).
-2. The CrewLoop Hub automatically evaluates state and loads the next appropriate skill per the transition contract.
+1. Every skill performs its task and returns control to `crewloop:plan` automatically.
+2. `crewloop:plan` evaluates the workflow state and loads the next appropriate skill per the transition contract.
+3. The standard phase order still applies: `crewloop:plan` → `crewloop:design` (if UI) → `crewloop:code` → `crewloop:review` → `crewloop:ship`.
 
 ---
 
@@ -309,9 +234,9 @@ When running on platforms that support interactive agent tools, agents must prio
 
 Every skill ends its final response with a summary block. The blocks below define the **required minimum fields** per skill — they are a contract of content, not of layout. Each skill may present these fields inside the richer, skill-specific format defined in its own SKILL.md; when the two differ, the skill's format wins for presentation, but every field below must appear somewhere in the output.
 
-### 1. CrewLoop Hub — minimum fields
+### 1. CrewLoop Plan — minimum fields
 ```markdown
-## 🎯 Context Brief
+## 🏗️ Discovery Brief
 
 | Detail | Description |
 | :--- | :--- |
@@ -331,7 +256,7 @@ Every skill ends its final response with a summary block. The blocks below defin
 - [What happens next]
 ```
 
-### 2. Architect — minimum fields
+### 2. CrewLoop Plan — Spec & Design
 ```markdown
 ## 🏗️ Spec & Design
 
@@ -350,7 +275,7 @@ Every skill ends its final response with a summary block. The blocks below defin
 ### 🔌 Contracts & Stubs: [types, schemas, interfaces]
 ```
 
-### 3. Designer — minimum fields
+### 3. CrewLoop Design — minimum fields
 ```markdown
 ## 🎨 UI/UX Visual Specification
 
@@ -366,7 +291,7 @@ Every skill ends its final response with a summary block. The blocks below defin
 [ASCII wireframe or Component compositions]
 ```
 
-### 4. Engineer — minimum fields
+### 4. CrewLoop Code — minimum fields
 ```markdown
 ## 🔧 Verification Report
 
@@ -383,7 +308,7 @@ Every skill ends its final response with a summary block. The blocks below defin
 [Bash execution logs brief]
 ```
 
-### 5. Reviewer — minimum fields
+### 5. CrewLoop Review — minimum fields
 ```markdown
 ## 🔍 Review Report
 
@@ -399,7 +324,7 @@ Every skill ends its final response with a summary block. The blocks below defin
 ### ⚠️ Findings details: [critical bugs, security threats, style bugs]
 ```
 
-### 6. Shipper — minimum fields
+### 6. CrewLoop Ship — minimum fields
 ```markdown
 ## 📦 Ready to Ship
 
@@ -420,5 +345,5 @@ Every skill ends its final response with a summary block. The blocks below defin
 ## Bundle Lock-In & Self-Consistency Rules
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
-2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 19 skills defined in the CrewLoop bundle.
-3. **Direct Routing:** Execution skills hand off directly to the next skill per the transition contract — the CrewLoop Hub mediates only as the new-task entry point and in AFK mode. Every skill must end its turn per the contract (menu + direct handoff). If you receive a handoff that violates the transition contract (e.g. a phase skipped without the user choosing it), note the deviation and continue the correct next skill.
+2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 6 skills defined in the CrewLoop bundle.
+3. **Auto-Routing:** Skills hand off automatically to the next skill per the transition contract. `crewloop:plan` is the entry point for new tasks and the AFK fallback router. Every skill must end its turn per the contract. If you receive a handoff that violates the transition contract (e.g. a phase skipped without a recognized interrupt), note the deviation and continue the correct next skill.

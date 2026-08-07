@@ -1,4 +1,5 @@
 import type { AgentSource, DashboardEvent, EventType } from '../types';
+import { canonicalSkillName } from '../lib/skills';
 
 export interface AgyHookPayload {
   hook_event_name?: string;
@@ -101,7 +102,7 @@ function inferSkillFromReadPath(
   if (typeof rawPath !== 'string') return undefined;
 
   const match = rawPath.match(SKILL_PATH_RE);
-  return match ? match[1] : undefined;
+  return match ? canonicalSkillName(match[1]) : undefined;
 }
 
 function generateId(sessionId: string, stepIdx: number | undefined): string {

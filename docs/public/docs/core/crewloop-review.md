@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Reviewer
+# CrewLoop Review
 
 > Quality gate. The last line of defense before code reaches the repository.
 
@@ -10,7 +10,7 @@ sidebar_position: 5
 
 ## Role
 
-The Reviewer audits every diff for spec compliance, code quality, security, performance, and AI artifacts. It is the single gate between Engineer and Shipper. It never writes code or fixes issues itself.
+`crewloop:review` audits every diff for spec compliance, code quality, security, performance, and AI artifacts. It is the single gate between `crewloop:code` and `crewloop:ship`. It never writes code or fixes issues itself.
 
 ## Responsibilities
 
@@ -23,9 +23,9 @@ The Reviewer audits every diff for spec compliance, code quality, security, perf
 7. Scan for AI artifacts: `console.log`, `TODO` without issue reference, placeholder comments, empty catch blocks, "Written by AI" comments.
 8. Produce a review report with a clear verdict and specific file/line references for every issue.
 
-## What Reviewer Never Does
+## What `crewloop:review` Never Does
 
-- ❌ Write code or fix issues (returns to Engineer).
+- ❌ Write code or fix issues (returns to `crewloop:code`).
 - ❌ Run git operations.
 - ❌ Approve without reading changed files.
 - ❌ Approve new logic without checking for tests.
@@ -41,21 +41,23 @@ The Reviewer audits every diff for spec compliance, code quality, security, perf
 
 ## Concrete Example
 
-**Reviewer reviews JWT login diff:**
+**`crewloop:review` reviews a JWT login diff:**
 1. Verifies that implementation files match the spec requirements.
 2. Identifies:
    - `console.log` in `auth.ts` line 42 — CRITICAL (must remove before ship).
    - JWT secret compared with `==` instead of `crypto.timingSafeEqual` — CRITICAL (timing attack vulnerability).
    - Missing `aria-describedby` on error message — WARNING.
-3. Returns `Changes Required` report to Engineer.
+3. Returns `Changes Required` report to `crewloop:code`.
 
 ## Handoff
 
-**Invoked by:** Engineer.  
-**Sends to:** Shipper (approved), Engineer (code fixes needed), Architect (design-level issue), Security-Guard (security concerns), Accessibility-Auditor (accessibility concerns).
+**Invoked by:** `crewloop:code`.  
+**Sends to:** `crewloop:ship` (approved), `crewloop:code` (code fixes needed), or `crewloop:plan` (design-level issue).
 
 ```markdown
 **What would you like to do?**
 
-- **[S] Send to Shipper** — Commit and ship the documentation (if approved)
+- **[S] Send to `crewloop:ship`** — Commit and ship the change (if approved)
+- **[C] Send to `crewloop:code`** — Fix implementation issues
+- **[O] Return to `crewloop:hub`** — Adjust scope or requirements
 ```

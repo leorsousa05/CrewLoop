@@ -6,14 +6,14 @@
 
 ## Project Overview
 
-**CrewLoop** is a team of AI skills that operate together as a complete, role-separated software development workflow. Each skill represents a specialist role — crewloop-hub, architect, designer, engineer, reviewer, shipper, and twelve supporting roles — and is distributed as an independent `SKILL.md` file that any compatible AI agent can load and follow.
+**CrewLoop** is a team of AI skills that operate together as a complete, role-separated software development workflow. Each skill represents a specialist role — CrewLoop Plan, CrewLoop Design, CrewLoop Code, CrewLoop Review, CrewLoop Ship, and CrewLoop Docs — and is distributed as an independent `SKILL.md` file that any compatible AI agent can load and follow.
 
 **Why it exists:** Most AI agents operate without a structured process — they jump straight to implementation, skip architecture, and skip review. CrewLoop enforces a mandatory flow where every change goes through context gathering, spec creation, design (if there is UI), implementation, code review, and git operations, each handled by a dedicated skill.
 
 **How it is consumed:** Install the CLI globally and run `crewloop install`. The CLI copies all skills to the agent's skill directory (e.g., `~/.agents/skills/`) and configures hook files for supported agents so that the real-time dashboard receives tool-use events. Supported agents: Kimi Code, Claude, Codex, AGY, OpenCode.
 
 **What this repository contains:**
-- **Skills** — 19 Markdown skill files, each describing a specialist role
+- **Skills** — 6 Markdown skill files, each describing a specialist role
 - **CLI** (`packages/cli/`) — TypeScript tool that installs skills and configures agent hooks
 - **Dashboard** (`servers/dashboard/`) — real-time WebSocket server + browser UI that shows which skill is active and a live event timeline
 - **Docs site** (`docs/`) — Vite + React + Tailwind SPA deployed to GitHub Pages
@@ -87,38 +87,25 @@ crewloop/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── README.md
-├── skills/                          # All 19 skill directories
-│   ├── crewloop-hub/SKILL.md
-│   ├── architect/
+├── skills/                          # All 6 skill directories
+│   ├── crewloop-plan/
 │   │   ├── SKILL.md
 │   │   └── references/              # Local references folder
-│   ├── designer/
+│   ├── crewloop-design/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   ├── engineer/
+│   ├── crewloop-code/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   ├── reviewer/
+│   ├── crewloop-review/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   ├── shipper/
+│   ├── crewloop-ship/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   ├── project-brainstorm/SKILL.md
-│   ├── long-term-manager/SKILL.md
-│   ├── accessibility-auditor/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   ├── diamondblock/SKILL.md
-│   ├── docs-writer/SKILL.md
-│   ├── maintainer/SKILL.md
-│   ├── product-manager/SKILL.md
-│   ├── researcher/SKILL.md
-│   ├── security-guard/SKILL.md
-│   ├── tester/SKILL.md
-│   ├── frontend-architect/SKILL.md
-│   ├── schema-designer/SKILL.md
-│   └── devops-specialist/SKILL.md
+│   └── crewloop-docs/
+│       ├── SKILL.md
+│       └── references/
 ├── specs/
 │   ├── changes/                     # Active in-progress specs
 │   ├── archive/                     # Completed specs (date-prefixed)
@@ -136,7 +123,7 @@ crewloop/
 |------|---------|
 | `AGENTS.md` | Agent onboarding guide — start here |
 | `README.md` | Public-facing project documentation |
-| `references/conventions.md` | Conventional Commits format, navigation menu rules, AFK mode |
+| `references/conventions.md` | Conventional Commits format, auto-routing rules, AFK mode |
 | `references/workflow.md` | Canonical skill routing flow and role responsibilities |
 | `references/skill-anatomy.md` | Guide for writing new SKILL.md files |
 | `assets/templates/skill-template.md` | Template to copy when creating a new skill |
@@ -167,67 +154,54 @@ crewloop/
 
 ---
 
-## The 19 Skills
+## The 6 Skills
 
-### Core Skills — own the mandatory delivery loop (Designer is conditional)
+### Core Skills — own the mandatory delivery loop (CrewLoop Design is conditional)
 
 | Skill | Role | Never does |
 |-------|------|-----------|
-| **crewloop-hub** | Context discovery, requirement gathering, routing | Writes code, designs systems, creates files |
-| **architect** | Spec creation, architecture design, contracts | Writes implementation code, runs git |
-| **designer** | UI/UX aesthetic direction, design specs | Writes implementation code, runs git |
-| **engineer** | Implementation, tests, BUILD | Git operations, code review, architecture |
-| **reviewer** | Code review, quality gate, security scan | Writes code, runs git operations |
-| **shipper** | Git commit, branch creation, push, PR | Reviews code, writes implementation |
+| **crewloop:plan** | Context discovery, requirement gathering, spec creation, architecture design, routing | Writes implementation code, runs git |
+| **crewloop:design** | UI/UX aesthetic direction, design specs | Writes implementation code, runs git |
+| **crewloop:code** | Implementation, tests, BUILD | Git operations, code review, architecture |
+| **crewloop:review** | Code review, quality gate, security scan | Writes code, runs git operations |
+| **crewloop:ship** | Git commit, branch creation, push, PR | Reviews code, writes implementation |
 
 ### Supporting Skills — invoked by the relevant core skill as needed
 
 | Skill | Invoked when |
 |-------|-------------|
-| **project-brainstorm** | New or ambiguous software project ideas that need interactive discovery before specs |
-| **long-term-manager** | Projects that span multiple sessions and need durable tracking artifacts across sessions |
-| **diamondblock** | Default discovery helper for multi-session memory, context retrieval, searching knowledge, indexing codebases, and logging session histories (active only when its MCP tools are exposed in the session) |
-| **accessibility-auditor** | UI changes with accessibility scope (WCAG, screen readers, keyboard nav) |
-| **frontend-architect** | Complex frontend layouts, component architecture, and React/Next.js state boundaries |
-| **docs-writer** | Pure documentation tasks without code changes |
-| **maintainer** | Bug triage, technical debt, dependency updates, production incidents |
-| **product-manager** | Prioritization, roadmap, user stories, success metrics |
-| **researcher** | Technology evaluation, library comparison, proof-of-concept |
-| **schema-designer** | Relational schema design, constraints, indexes, and API payload contracts |
-| **security-guard** | Security review, secret scanning, auth, authorization, PII |
-| **devops-specialist** | Infrastructure configs, deployment scripts, CI/CD pipelines, and release automation |
-| **tester** | Test strategy, QA, coverage analysis, test plans |
+| **crewloop:docs** | Pure documentation tasks without code changes |
 
-Supporting skills report findings back to the skill that invoked them. Exceptions: Maintainer routes confirmed bugs to Architect, and Project Brainstorm routes completed briefs to Architect. Supporting skills do not write implementation code or run git operations.
-
-When the DiamondBlock MCP tools are exposed in the session (the server is configured and active — skill files or a binary on PATH alone do not count), the CrewLoop Hub should use DiamondBlock first and repeatedly for session memory, prior decisions, semantic codebase search, and other read-only discovery before broad file-by-file inspection. Installing the DiamondBlock skill (Markdown instructions) is not the same as activating its MCP server: MCP registration is opt-in via `crewloop install --diamondblock`, which delegates to the separately installed official DiamondBlock CLI, and `crewloop doctor` reports layered optional DiamondBlock checks (skill, binary, installer readiness, runtime guidance) as warnings without affecting its exit code.
+Supporting skills report findings back to the skill that invoked them. `crewloop:docs` returns to `crewloop:plan`. Supporting skills do not write implementation code or run git operations.
 
 ---
 
-## Mandatory Development Flow (Direct Routing)
+## Mandatory Development Flow (Auto-Routing)
 
-Skills hand off directly to the next skill via their ending menu; the user confirms each
-transition. The CrewLoop Hub mediates only as the entry point for new tasks and as the
-automatic router in AFK mode:
+Skills hand off automatically to the next skill per the transition contract. The user can
+interrupt the flow with explicit commands. `crewloop:plan` is the entry point for new tasks
+and the AFK fallback router:
 
 ```
-CrewLoop Hub (entry) → Architect → Designer (if UI) → Engineer ⇄ Reviewer → Shipper → done
-Supporting skills → back to the invoking skill (Maintainer/Brainstorm → Architect when complete)
+User request → CrewLoop Plan → CrewLoop Design (if UI) → CrewLoop Code ⇄ CrewLoop Review → CrewLoop Ship → done
+                                        └──── no UI ────────┘
 ```
+
+`crewloop:docs` is invoked on demand and returns to `crewloop:plan` when done.
 
 Rules — no exceptions:
 
-1. **Architect is the first mandatory delivery phase.** Hub may use approved discovery/tracking helpers first, but never routes directly to Designer or Engineer.
-2. **Architect creates a spec** in `specs/changes/NNN-name/` for every change — including 1-line bug fixes.
-3. **Designer acts before Engineer** whenever the change involves a visual interface.
-4. **Engineer never does git operations** and never reviews its own code.
-5. **Reviewer never writes code** and never runs git operations.
-6. **Shipper is the only skill** that commits, creates branches, pushes, and opens PRs.
-7. **Navigation menus present the real next steps** of the flow (transition contract in `references/conventions.md`), with one outcome-driven option marked `(Recommended)`. Skills prioritize calling the `ask_question` tool for menus, falling back to markdown if unsupported. After a user picks an option, the skill continues directly into the chosen next skill.
-8. **Sub-skills assist core skills** — supporting skills return to their invoker, except completed Project Brainstorm briefs and confirmed Maintainer bugs, which route to Architect.
-9. **Direct handoffs between phases.** Every agent ends by recommending the next skill per the transition contract; the CrewLoop Hub only mediates at task entry and in AFK mode.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 19 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the CrewLoop Hub (entry)/Architect gatekeepers.
-11. **Bug-Fixing Pipeline:** Bug triaging and reproduction are handled by the Maintainer, who hands off directly to Architect for a lightweight specification (`.spec.yaml` + `tasks.md`). From there the standard chain applies: Architect → Engineer → Reviewer → Shipper (commit/ship and archive the spec).
+1. **`crewloop:plan` is the first mandatory delivery phase.** Every session starts here; it never routes directly to `crewloop:design` or `crewloop:code` without first creating a spec.
+2. **`crewloop:plan` creates a spec** in `specs/changes/NNN-name/` for every change — including 1-line bug fixes.
+3. **CrewLoop Design acts before CrewLoop Code** whenever the change involves a visual interface.
+4. **CrewLoop Code never does git operations** and never reviews its own code.
+5. **CrewLoop Review never writes code** and never runs git operations.
+6. **CrewLoop Ship is the only skill** that commits, creates branches, pushes, and opens PRs.
+7. **Skills auto-route based on the transition contract.** Present navigation options only when the user interrupts with `stop`, `pause`, `volta`, `voltar`, or `re-analyze`.
+8. **Sub-skills assist core skills** — supporting skills return to their invoker; `crewloop:docs` returns to `crewloop:plan` by default.
+9. **Direct handoffs between phases.** Every agent ends by routing to the next skill per the transition contract; `crewloop:plan` is the entry point and AFK fallback router.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 6 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the `crewloop:plan` gatekeeper.
+11. **Bug-Fixing Pipeline:** Bug fixes enter via `crewloop:plan` like any other task and follow the standard chain: `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` (commit/ship and archive the spec).
 
 
 ---
@@ -240,11 +214,12 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 
 **Behavior when active:**
 - Skills skip the interactive navigation prompts.
-- Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **Engineer**`, `> 🔍 **Reviewer**`).
-   - AFK is the only mode where the CrewLoop Hub mediates mid-flow: each skill automatically returns control to the CrewLoop Hub, which then automatically routes to and loads the next appropriate skill per the transition contract.
-   - The standard phase order still applies: Architect → Designer (if UI) → Engineer → Reviewer → Shipper, with the Hub routing between them.
+- Each response must start with the skill's role prefix on its own line (e.g., `> 🔧 **CrewLoop Code**`, `> 🔍 **CrewLoop Review**`).
+- Every skill returns control to `crewloop:plan` automatically at the end of its turn.
+- `crewloop:plan` evaluates state and loads the next appropriate skill per the transition contract.
+- The standard phase order still applies: `crewloop:plan` → `crewloop:design` (if UI) → `crewloop:code` → `crewloop:review` → `crewloop:ship`.
 
-**Deactivation:** AFK mode ends when Shipper completes and returns control to CrewLoop Hub.
+**Deactivation:** AFK mode ends when Shipper completes and returns control to `crewloop:plan`.
 
 ---
 
@@ -299,15 +274,15 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 
 ## How to Contribute
 
-1. Start with **CrewLoop Hub** — gather context, produce a structured brief, and route to Architect.
-2. **Architect** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then recommends Designer (UI) or Engineer.
-3. If the change involves a visual interface, **Designer** creates a design spec before Engineer starts, then recommends Engineer.
-4. **Engineer** implements the spec, runs verification, and its menu offers Reviewer (recommended).
-5. **Reviewer** inspects the diff for spec compliance, quality, tests, security, and AI artifacts; PASS recommends Shipper, FAIL recommends Engineer.
-6. **Shipper** commits on a branch following the Conventional Commits format, pushes, opens a PR, then offers a new task (CrewLoop Hub) or done.
+1. Start with **CrewLoop Plan** — gather context, produce a structured brief, and write a spec.
+2. **CrewLoop Plan** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then recommends CrewLoop Design (UI) or CrewLoop Code.
+3. If the change involves a visual interface, **CrewLoop Design** creates a design spec before CrewLoop Code starts, then recommends CrewLoop Code.
+4. **CrewLoop Code** implements the spec, runs verification, and routes to CrewLoop Review automatically.
+5. **CrewLoop Review** inspects the diff for spec compliance, quality, tests, security, and AI artifacts; PASS routes to CrewLoop Ship, FAIL routes to CrewLoop Code.
+6. **CrewLoop Ship** commits on a branch following the Conventional Commits format, pushes, opens a PR, then ends the flow on `done`.
 7. Run `python scripts/validate-skills.py` after adding or editing any `SKILL.md`.
 8. Update `README.md` and `AGENTS.md` if the repository structure or team rules change.
-9. Place new skills in `skills/<skill-name>/SKILL.md` using `assets/templates/skill-template.md`.
+9. Place new skills in `skills/crewloop-<slug>/SKILL.md` using `assets/templates/skill-template.md`. The frontmatter `name` is `crewloop:<slug>`; the directory is `crewloop-<slug>`.
 10. Never perform git operations manually — always use the Shipper skill.
 
 **Commit format:** `<type>(<scope>): <description>` — imperative mood, max 72 characters, no trailing period.  
@@ -319,7 +294,7 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 ## Notes for Agents
 
 - **Documentation-first.** Do not execute build commands, install dependencies, or create runtime configuration files unless an explicit spec in `specs/changes/` requires it.
-- **When editing a SKILL.md:** preserve the YAML frontmatter (`--- name: ... description: ... ---`), letter-based navigation rules, and the clear separation of responsibilities between skills.
+- **When editing a SKILL.md:** preserve the YAML frontmatter (`--- name: ... description: ... ---`), auto-routing rules, and the clear separation of responsibilities between skills.
 - **New skills:** copy `assets/templates/skill-template.md` → `skills/<skill-name>/SKILL.md`. Shared conventions belong in `references/`. Skill-specific references belong in `skills/<skill-name>/references/`.
 - **Specs:** never write spec files directly in `specs/` — always nested inside `specs/changes/NNN-name/`.
 - **Git:** never perform git operations directly — always use the Shipper skill.

@@ -131,7 +131,8 @@ export function resolvePackageRoot(): string {
   }
 
   const monorepoRoot = path.resolve(__dirname, '..', '..', '..');
-  if (fs.existsSync(path.join(monorepoRoot, 'skills', 'crewloop-hub', 'SKILL.md'))) {
+  // The default entry skill is `crewloop:plan`, stored in `skills/crewloop-plan`.
+  if (fs.existsSync(path.join(monorepoRoot, 'skills', 'crewloop-plan', 'SKILL.md'))) {
     return monorepoRoot;
   }
 

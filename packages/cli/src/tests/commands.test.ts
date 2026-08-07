@@ -9,36 +9,19 @@ import { runAgents } from '../commands/agents';
 import { runDoctor, runDoctorCommand } from '../commands/doctor';
 import { runInstall } from '../commands/install';
 import { resolveDashboardAddress } from '../commands/dashboard';
-import type {
-  DiamondBlockCommandResult,
-  DiamondBlockCommandRunner,
-  DiamondBlockInstallRequest,
-} from '../diamondblock';
-
-function diamondblockResult(partial: Partial<DiamondBlockCommandResult> = {}): DiamondBlockCommandResult {
-  return {
-    status: 'ready',
-    executable: '/usr/bin/diamondblock',
-    dryRun: true,
-    exitCode: 0,
-    stdout: '',
-    stderr: '',
-    ...partial,
-  };
-}
 
 function createPackageRoot(): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-cli-test-'));
   const skills = [
-    { name: 'architect', description: 'Software architecture and spec-writing skill' },
-    { name: 'engineer', description: 'Software implementation and coding skill' },
+    { name: 'crewloop-plan', description: 'Creates specs and plans' },
+    { name: 'crewloop-code', description: 'Implements and tests software' },
   ];
   for (const skill of skills) {
     const dir = path.join(root, 'skills', skill.name);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(
       path.join(dir, 'SKILL.md'),
-      `---\nname: ${skill.name}\ndescription: ${skill.description}\n---\n# ${skill.name}\n`
+      `---\nname: ${skill.name.replace('-', ':')}\ndescription: ${skill.description}\n---\n# ${skill.name}\n`
     );
   }
   return root;
@@ -91,9 +74,10 @@ describe('commands', () => {
     const code = runList({ command: 'list' }, context(root));
     assert.strictEqual(code, 0);
     assert.strictEqual(lines.length, 2);
-    assert.ok(lines[0].startsWith('architect'));
-    assert.ok(lines[0].includes('  Software architecture and spec-writing skill'));
-    assert.ok(lines[1].startsWith('engineer'));
+    assert.ok(lines[0].startsWith('crewloop-code'));
+    assert.ok(lines[0].includes('  Implements and tests software'));
+    assert.ok(lines[1].startsWith('crewloop-plan'));
+    assert.ok(lines[1].includes('  Creates specs and plans'));
     assert.ok(!lines.some((line) => line.includes('Available CrewLoop skills')));
   });
 
@@ -250,8 +234,8 @@ describe('commands', () => {
       context(root)
     );
     assert.strictEqual(code, 0);
-    assert.ok(lines.includes('+ architect'));
-    assert.ok(lines.includes('+ engineer'));
+    assert.ok(lines.includes('+ crewloop-plan'));
+    assert.ok(lines.includes('+ crewloop-code'));
   });
 
   it('install --dry-run uses dry-run prefix and does not write', async () => {
@@ -271,7 +255,7 @@ describe('commands', () => {
 
   it('install reports skipped existing skills with --force hint', async () => {
     const target = path.join(root, 'target');
-    fs.mkdirSync(path.join(target, 'architect'), { recursive: true });
+    fs.mkdirSync(path.join(target, 'crewloop-plan'), { recursive: true });
     const { lines, context } = collect();
     const code = await runInstall(
       { command: 'install', target, hooks: false },
@@ -356,318 +340,5 @@ describe('commands', () => {
     );
     assert.strictEqual(code, 1);
     assert.deepStrictEqual(errors, ['error: no matching skills found']);
-  });
-
-  it('install without --diamondblock makes zero diamondblock calls', async () => {
-    const target = path.join(root, 'target');
-    const { lines, errors, context } = collect();
-    let calls = 0;
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => {
-        calls++;
-        return '/usr/bin/diamondblock';
-      },
-      preflight: () => {
-        calls++;
-        return diamondblockResult();
-      },
-      install: () => {
-        calls++;
-        return diamondblockResult({ status: 'configured', dryRun: false });
-      },
-    };
-    const code = await runInstall(
-      { command: 'install', target, hooks: false },
-      context(root),
-      undefined,
-      runner
-    );
-    assert.strictEqual(code, 0);
-    assert.strictEqual(calls, 0);
-    assert.deepStrictEqual(lines, [
-      `installed 2 skills to ${target}`,
-      'hooks: skipped (--no-hooks)',
-    ]);
-    assert.deepStrictEqual(errors, []);
-  });
-
-  it('install --diamondblock aborts before mutation when preflight fails', async () => {
-    const target = path.join(root, 'target');
-    const { lines, errors, context } = collect();
-    let hookCalls = 0;
-    let installCalls = 0;
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => '/usr/bin/diamondblock',
-      preflight: () =>
-        diamondblockResult({ status: 'unsupported', exitCode: 3, stderr: 'unsupported target' }),
-      install: () => {
-        installCalls++;
-        return diamondblockResult({ status: 'failed', dryRun: false, exitCode: 1 });
-      },
-    };
-    const code = await runInstall(
-      { command: 'install', target, diamondblock: true },
-      context(root),
-      () => {
-        hookCalls++;
-        return [];
-      },
-      runner
-    );
-    assert.strictEqual(code, 1);
-    assert.strictEqual(hookCalls, 0);
-    assert.strictEqual(installCalls, 0);
-    assert.ok(!fs.existsSync(target));
-    assert.deepStrictEqual(lines, []);
-    assert.strictEqual(errors.length, 1);
-    assert.ok(errors[0].includes('diamondblock preflight unsupported'));
-    assert.ok(errors[0].includes('exit code 3'));
-    assert.ok(errors[0].includes('unsupported target'));
-  });
-
-  it('install --diamondblock fails before mutation when no executable is found', async () => {
-    const target = path.join(root, 'target');
-    const { lines, errors, context } = collect();
-    let hookCalls = 0;
-    let preflightCalls = 0;
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => undefined,
-      preflight: () => {
-        preflightCalls++;
-        return diamondblockResult({ status: 'unavailable', exitCode: 1 });
-      },
-      install: () => diamondblockResult({ status: 'configured', dryRun: false }),
-    };
-    const code = await runInstall(
-      { command: 'install', target, diamondblock: true },
-      context(root),
-      () => {
-        hookCalls++;
-        return [];
-      },
-      runner
-    );
-    assert.strictEqual(code, 1);
-    assert.strictEqual(preflightCalls, 0);
-    assert.strictEqual(hookCalls, 0);
-    assert.ok(!fs.existsSync(target));
-    assert.deepStrictEqual(lines, []);
-    assert.ok(errors[0].includes('npm i -g diamondblock'));
-  });
-
-  it('install --dry-run --diamondblock runs only the official preflight', async () => {
-    const target = path.join(root, 'target-dry');
-    const { lines, errors, context } = collect();
-    const preflightRequests: DiamondBlockInstallRequest[] = [];
-    let installCalls = 0;
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => '/usr/bin/diamondblock',
-      preflight: (request) => {
-        preflightRequests.push(request);
-        return diamondblockResult({ stdout: 'preflight ok' });
-      },
-      install: () => {
-        installCalls++;
-        return diamondblockResult({ status: 'configured', dryRun: false });
-      },
-    };
-    const code = await runInstall(
-      { command: 'install', target, dryRun: true, hooks: false, diamondblock: true },
-      context(root),
-      undefined,
-      runner
-    );
-    assert.strictEqual(code, 0);
-    assert.strictEqual(installCalls, 0);
-    assert.strictEqual(preflightRequests.length, 1);
-    assert.strictEqual(preflightRequests[0].agent, undefined);
-    assert.strictEqual(preflightRequests[0].dryRun, true);
-    assert.ok(!fs.existsSync(target));
-    assert.ok(lines.some((line) => line.startsWith('dry-run: would install')));
-    assert.ok(lines.some((line) => line === 'diamondblock: ready'));
-    assert.ok(lines.some((line) => line.includes('preflight ok')));
-    assert.deepStrictEqual(errors, []);
-  });
-
-  it('install --diamondblock runs the official installer after CrewLoop steps', async () => {
-    const target = path.join(root, 'target');
-    const { lines, errors, context } = collect();
-    const preflightRequests: DiamondBlockInstallRequest[] = [];
-    const installRequests: DiamondBlockInstallRequest[] = [];
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => '/usr/bin/diamondblock',
-      preflight: (request) => {
-        preflightRequests.push(request);
-        return diamondblockResult();
-      },
-      install: (request) => {
-        installRequests.push(request);
-        assert.ok(
-          fs.existsSync(path.join(target, 'architect', 'SKILL.md')),
-          'skills must be installed before the official install runs'
-        );
-        return diamondblockResult({ status: 'configured', dryRun: false });
-      },
-    };
-    const code = await runInstall(
-      { command: 'install', target, agent: 'claude', hooks: false, diamondblock: true },
-      context(root),
-      undefined,
-      runner
-    );
-    assert.strictEqual(code, 0);
-    assert.ok(fs.existsSync(path.join(target, 'engineer', 'SKILL.md')));
-    assert.strictEqual(preflightRequests.length, 1);
-    assert.strictEqual(preflightRequests[0].agent, 'claude');
-    assert.strictEqual(preflightRequests[0].dryRun, true);
-    assert.strictEqual(installRequests.length, 1);
-    assert.strictEqual(installRequests[0].agent, 'claude');
-    assert.strictEqual(installRequests[0].dryRun, false);
-    assert.ok(lines.some((line) => line === 'diamondblock: configured'));
-    assert.deepStrictEqual(errors, []);
-  });
-
-  it('install --diamondblock reports partial state when the official installer fails', async () => {
-    const target = path.join(root, 'target');
-    const { lines, errors, context } = collect();
-    const runner: DiamondBlockCommandRunner = {
-      findExecutable: () => '/usr/bin/diamondblock',
-      preflight: () => diamondblockResult(),
-      install: () =>
-        diamondblockResult({ status: 'failed', dryRun: false, exitCode: 2, stderr: 'write failed' }),
-    };
-    const code = await runInstall(
-      { command: 'install', target, hooks: false, diamondblock: true },
-      context(root),
-      undefined,
-      runner
-    );
-    assert.strictEqual(code, 1);
-    assert.ok(fs.existsSync(path.join(target, 'architect', 'SKILL.md')));
-    assert.ok(lines.some((line) => line === 'diamondblock: failed'));
-    assert.ok(errors.some((line) => line.includes('may already be installed')));
-  });
-
-  it('doctor reports diamondblock layers as optional checks', () => {
-    createDashboard(root);
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-home-'));
-    cleanupDirs.push(home);
-    const skillDir = path.join(home, '.agents', 'skills', 'diamondblock');
-    fs.mkdirSync(skillDir, { recursive: true });
-    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: diamondblock\n---\n');
-    const executions: Array<{ executable: string; args: readonly string[] }> = [];
-    const report = runDoctor({
-      packageRoot: root,
-      homeDir: home,
-      findOnPath: (binary) =>
-        binary === 'crewloop-shim'
-          ? '/usr/bin/crewloop-shim'
-          : binary === 'diamondblock'
-            ? '/usr/bin/diamondblock'
-            : undefined,
-      executeCommand: (executable, args) => {
-        executions.push({ executable, args });
-        return { exitCode: 0, stdout: '', stderr: '' };
-      },
-    });
-    assert.strictEqual(report.exitCode, 0);
-    const skill = report.checks.find((c) => c.label === 'diamondblock skill');
-    assert.strictEqual(skill?.level, 'ok');
-    const binary = report.checks.find((c) => c.label === 'diamondblock binary');
-    assert.deepStrictEqual(binary, {
-      level: 'ok',
-      label: 'diamondblock binary',
-      detail: '/usr/bin/diamondblock',
-    });
-    const installer = report.checks.find((c) => c.label === 'diamondblock installer');
-    assert.strictEqual(installer?.level, 'ok');
-    assert.deepStrictEqual(executions, [
-      { executable: '/usr/bin/diamondblock', args: ['install', '--dry-run'] },
-    ]);
-    const runtime = report.checks.find((c) => c.label === 'diamondblock runtime');
-    assert.deepStrictEqual(runtime, {
-      level: 'warn',
-      label: 'diamondblock runtime',
-      detail: 'verify in agent: expected MCP tools must be exposed',
-    });
-  });
-
-  it('doctor detects the diamondblock skill installed for a non-default agent', () => {
-    createDashboard(root);
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-home-'));
-    cleanupDirs.push(home);
-    const claudeSkillDir = path.join(home, '.claude', 'skills', 'diamondblock');
-    fs.mkdirSync(claudeSkillDir, { recursive: true });
-    fs.writeFileSync(path.join(claudeSkillDir, 'SKILL.md'), '---\nname: diamondblock\n---\n');
-    const report = runDoctor({
-      packageRoot: root,
-      homeDir: home,
-      findOnPath: (binary) => (binary === 'crewloop-shim' ? '/usr/bin/crewloop-shim' : undefined),
-    });
-    assert.strictEqual(report.exitCode, 0);
-    const skill = report.checks.find((c) => c.label === 'diamondblock skill');
-    assert.deepStrictEqual(skill, {
-      level: 'ok',
-      label: 'diamondblock skill',
-      detail: 'installed for: claude',
-    });
-  });
-
-  it('doctor warns without failing when diamondblock is absent', () => {
-    createDashboard(root);
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-home-'));
-    cleanupDirs.push(home);
-    let executions = 0;
-    const report = runDoctor({
-      packageRoot: root,
-      homeDir: home,
-      findOnPath: (binary) => (binary === 'crewloop-shim' ? '/usr/bin/crewloop-shim' : undefined),
-      executeCommand: () => {
-        executions++;
-        return { exitCode: 0, stdout: '', stderr: '' };
-      },
-    });
-    assert.strictEqual(report.exitCode, 0);
-    assert.strictEqual(executions, 0);
-    const skill = report.checks.find((c) => c.label === 'diamondblock skill');
-    assert.strictEqual(skill?.level, 'warn');
-    const binary = report.checks.find((c) => c.label === 'diamondblock binary');
-    assert.strictEqual(binary?.level, 'warn');
-    assert.ok(binary?.detail.includes('npm i -g diamondblock'));
-    assert.ok(!report.checks.some((c) => c.label === 'diamondblock installer'));
-    const runtime = report.checks.find((c) => c.label === 'diamondblock runtime');
-    assert.strictEqual(runtime?.level, 'warn');
-    assert.ok(
-      !report.checks.some((c) => c.label.startsWith('diamondblock') && c.level === 'error'),
-      'diamondblock checks must never produce error level'
-    );
-  });
-
-  it('doctor warns when the official installer preflight is unsupported', () => {
-    createDashboard(root);
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-home-'));
-    cleanupDirs.push(home);
-    const report = runDoctor({
-      packageRoot: root,
-      homeDir: home,
-      findOnPath: (binary) =>
-        binary === 'crewloop-shim'
-          ? '/usr/bin/crewloop-shim'
-          : binary === 'dblock'
-            ? '/usr/bin/dblock'
-            : undefined,
-      executeCommand: () => ({ exitCode: 5, stdout: '', stderr: 'unsupported target' }),
-    });
-    assert.strictEqual(report.exitCode, 0);
-    const binary = report.checks.find((c) => c.label === 'diamondblock binary');
-    assert.deepStrictEqual(binary, {
-      level: 'ok',
-      label: 'diamondblock binary',
-      detail: '/usr/bin/dblock',
-    });
-    const installer = report.checks.find((c) => c.label === 'diamondblock installer');
-    assert.strictEqual(installer?.level, 'warn');
-    assert.ok(installer?.detail.includes('unsupported'));
-    assert.ok(installer?.detail.includes('5'));
   });
 });

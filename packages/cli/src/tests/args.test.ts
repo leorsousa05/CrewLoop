@@ -119,12 +119,12 @@ describe('args parser', () => {
     const args = parseArgs([
       'node', 'crewloop', 'install',
       '--target', '/tmp/skills',
-      '--skill', 'architect', '--skill', 'engineer',
+      '--skill', 'crewloop-plan', '--skill', 'crewloop-code',
       '--agent', 'claude',
       '--symlink', '--force', '--dry-run', '--verbose',
     ]);
     assert.strictEqual(args.target, '/tmp/skills');
-    assert.deepStrictEqual(args.skills, ['architect', 'engineer']);
+    assert.deepStrictEqual(args.skills, ['crewloop-plan', 'crewloop-code']);
     assert.strictEqual(args.agent, 'claude');
     assert.strictEqual(args.symlink, true);
     assert.strictEqual(args.force, true);
@@ -135,24 +135,6 @@ describe('args parser', () => {
   it('parses --hooks and --no-hooks', () => {
     assert.strictEqual(parseArgs(['node', 'crewloop', 'install', '--hooks']).hooks, true);
     assert.strictEqual(parseArgs(['node', 'crewloop', 'install', '--no-hooks']).hooks, false);
-  });
-
-  it('parses --diamondblock only for install', () => {
-    const args = parseArgs(['node', 'crewloop', 'install', '--diamondblock']);
-    assert.strictEqual(args.diamondblock, true);
-    assert.throws(() => parseArgs(['node', 'crewloop', 'doctor', '--diamondblock']), CliUsageError);
-    assert.throws(() => parseArgs(['node', 'crewloop', 'list', '--diamondblock']), CliUsageError);
-    assert.throws(() => parseArgs(['node', 'crewloop', 'dashboard', '--diamondblock']), CliUsageError);
-  });
-
-  it('combines --diamondblock with --agent and --dry-run', () => {
-    const args = parseArgs([
-      'node', 'crewloop', 'install',
-      '--agent', 'claude', '--dry-run', '--diamondblock',
-    ]);
-    assert.strictEqual(args.diamondblock, true);
-    assert.strictEqual(args.agent, 'claude');
-    assert.strictEqual(args.dryRun, true);
   });
 
   it('validates remaining arguments after --help or --version', () => {

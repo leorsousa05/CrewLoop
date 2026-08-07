@@ -1,23 +1,17 @@
+import { canonicalSkillName } from './skills';
+
 export const SKILL_ICONS: Record<string, string> = {
-  'crewloop-hub': 'Target',
-  architect: 'Blueprint',
-  designer: 'Palette',
-  engineer: 'Wrench',
-  reviewer: 'MagnifyingGlass',
-  shipper: 'RocketLaunch',
-  'docs-writer': 'Article',
-  tester: 'Flask',
-  'product-manager': 'ChartBar',
-  maintainer: 'Toolbox',
-  researcher: 'Microscope',
-  'security-guard': 'Shield',
-  'accessibility-auditor': 'Person',
-  'project-mapper': 'TreeStructure',
+  'crewloop:plan': 'Blueprint',
+  'crewloop:design': 'Palette',
+  'crewloop:code': 'Wrench',
+  'crewloop:review': 'MagnifyingGlass',
+  'crewloop:ship': 'RocketLaunch',
+  'crewloop:docs': 'Article',
   default: 'Circle',
 };
 
 export function skillIcon(skillName: string | undefined): string {
-  const key = String(skillName || '').toLowerCase().replace(/\s+/g, '-');
+  const key = canonicalSkillName(String(skillName || '').toLowerCase().replace(/\s+/g, '-'));
   return SKILL_ICONS[key] || SKILL_ICONS.default;
 }
 

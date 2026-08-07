@@ -9,7 +9,7 @@ completed: null           # ISO date when status became completed (null while ac
 author: ""                # agent or person who created the spec
 affected_files: []        # files this change creates, modifies, or deletes
 
-# Optional — parallelization plan (see the architect skill's SUBAGENT PARALLELIZATION ANALYSIS):
+# Optional — parallelization plan (see the `crewloop:plan` skill's SUBAGENT PARALLELIZATION ANALYSIS):
 # subagents:
 #   approved: true
 #   components:

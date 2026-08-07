@@ -2,7 +2,7 @@
 """Package a single skill into a .skill archive.
 
 Usage: python scripts/package-skill.py <skill-name> [output-dir]
-Example: python scripts/package-skill.py shipper
+Example: python scripts/package-skill.py crewloop-ship
 """
 
 import shutil

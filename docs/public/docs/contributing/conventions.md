@@ -15,7 +15,7 @@ All commits follow [Conventional Commits](https://www.conventionalcommits.org/):
 - Imperative mood: "add" not "added"
 - Max 72 characters in the description
 - No trailing period
-- The Shipper skill generates these automatically
+- The `crewloop:ship` skill generates these automatically
 
 See [Conventional Commits](../concepts/conventional-commits) for the type table and branch naming rules.
 

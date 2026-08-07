@@ -1,6 +1,7 @@
 import type { DashboardEvent, Session, SkillInferenceResult, SkillMeta } from '../types';
 import { inferFromGitCommand } from './mapping';
 import { classifyOperation } from '../lib/operations';
+import { canonicalSkillName } from '../lib/skills';
 
 const SKILL_TOOL_NAMES = new Set(['skill', 'use_skill', 'useskill']);
 const SKILL_FILE_RE = /([^\\/]+)[\\/]SKILL\.md$/i;
@@ -108,7 +109,7 @@ export class SkillInferenceEngine {
       }
       const match = candidate.match(SKILL_FILE_RE);
       if (match) {
-        return this.normalizeSkillName(match[1]) ?? match[1];
+        return this.normalizeSkillName(canonicalSkillName(match[1])) ?? canonicalSkillName(match[1]);
       }
     }
     return undefined;

@@ -220,16 +220,16 @@ describe('normalizeAgy', () => {
       toolCall: {
         name: 'view_file',
         args: {
-          AbsolutePath: '/home/user/.agents/skills/crewloop-hub/SKILL.md',
+          AbsolutePath: '/home/user/.agents/skills/crewloop-plan/SKILL.md',
           IsSkillFile: true,
-          toolSummary: 'CrewLoop Hub skill',
+          toolSummary: 'CrewLoop Plan skill',
         },
       },
     });
 
     assert.ok(event);
     assert.strictEqual(event!.tool, 'Read');
-    assert.strictEqual(event!.skill, 'crewloop-hub');
+    assert.strictEqual(event!.skill, 'crewloop:plan');
   });
 
   it('does not infer skill for ordinary AGY file reads', () => {
@@ -255,11 +255,11 @@ describe('normalizeAgy', () => {
       stepIdx: 0,
       toolCall: {
         name: 'view_file',
-        args: { AbsolutePath: 'C:\\Users\\user\\.agents\\skills\\engineer\\SKILL.md' },
+        args: { AbsolutePath: 'C:\\Users\\user\\.agents\\skills\\crewloop-code\\SKILL.md' },
       },
     });
 
     assert.ok(event);
-    assert.strictEqual(event!.skill, 'engineer');
+    assert.strictEqual(event!.skill, 'crewloop:code');
   });
 });

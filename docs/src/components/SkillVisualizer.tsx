@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { 
+  Target,
+  MapTrifold, 
   PaintBrush, 
   Code, 
   Eye, 
   Rocket, 
-  Brain, 
-  MapTrifold, 
+  Lightbulb,
+  BookOpen,
   CaretDown,
   Warning
 } from '@phosphor-icons/react';
@@ -21,62 +23,80 @@ interface PipelineStep {
 }
 
 export const SkillVisualizer: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<string | null>('crewloop-hub');
+  const [activeStep, setActiveStep] = useState<string | null>('crewloop:hub');
 
   const steps: PipelineStep[] = [
     {
-      id: 'crewloop-hub',
+      id: 'crewloop:hub',
       stepNum: '01',
       name: 'CrewLoop Hub',
       role: 'Discovery & Routing Hub',
-      icon: <Brain className="w-5 h-5" />,
+      icon: <Target className="w-5 h-5" />,
       description: 'Handles context discovery, requirement gathering, and workflow routing. Acts as the central hub connecting all execution phases.',
       cannotDo: ['Writes code', 'Designs systems', 'Creates code files', 'Performs git operations']
     },
     {
-      id: 'architect',
+      id: 'crewloop:plan',
       stepNum: '02',
-      name: 'Architect',
+      name: 'CrewLoop Plan',
       role: 'Specs & Contracts',
       icon: <MapTrifold className="w-5 h-5" />,
-      description: 'Authors technical specifications and checklists under specs/changes/ before coding begins. Resolves API schemas and database migrations.',
+      description: 'Authors technical specifications and checklists under specs/changes/ before coding begins. Resolves system design, contracts, and test plans.',
       cannotDo: ['Writes implementation code', 'Runs git operations', 'Configures build scripts']
     },
     {
-      id: 'designer',
+      id: 'crewloop:design',
       stepNum: '03',
-      name: 'Designer',
+      name: 'CrewLoop Design',
       role: 'UI/UX Visual Specs',
       icon: <PaintBrush className="w-5 h-5" />,
-      description: 'Defines layout specs, design tokens (HSL colors), responsiveness, and motion specifications for user interface components.',
+      description: 'Defines layout specs, design tokens, responsiveness, and motion specifications for user interface components.',
       cannotDo: ['Writes functional code', 'Runs git operations', 'Executes database migrations']
     },
     {
-      id: 'engineer',
+      id: 'crewloop:code',
       stepNum: '04',
-      name: 'Engineer',
+      name: 'CrewLoop Code',
       role: 'Code & Local Verification',
       icon: <Code className="w-5 h-5" />,
       description: 'The only role authorized to write implementation code and unit tests. Compiles codebase locally and verifies verification checks pass.',
       cannotDo: ['Commits or pushes to git', 'Performs code reviews', 'Modifies specs without routing approval']
     },
     {
-      id: 'reviewer',
+      id: 'crewloop:review',
       stepNum: '05',
-      name: 'Reviewer',
+      name: 'CrewLoop Review',
       role: 'Quality Gate & Security',
       icon: <Eye className="w-5 h-5" />,
       description: 'Audits spec compliance, reviews implementation code, runs security checks, and scans files for secrets or exposed credentials.',
       cannotDo: ['Writes correction code', 'Runs git operations', 'Approves own code']
     },
     {
-      id: 'shipper',
+      id: 'crewloop:ship',
       stepNum: '06',
-      name: 'Shipper',
+      name: 'CrewLoop Ship',
       role: 'Git Commit & PR Preparer',
       icon: <Rocket className="w-5 h-5" />,
       description: 'The only role authorized to commit changes, create branches, push code, and open pull requests following Conventional Commits.',
       cannotDo: ['Reviews code', 'Writes implementation code', 'Alters specification files']
+    },
+    {
+      id: 'crewloop:brainstorm',
+      stepNum: 'S1',
+      name: 'CrewLoop Brainstorm',
+      role: 'Project Discovery',
+      icon: <Lightbulb className="w-5 h-5" />,
+      description: 'Runs interactive discovery sessions for new or ambiguous software projects, then synthesizes a structured brief for CrewLoop Plan.',
+      cannotDo: ['Designs system structure', 'Writes implementation code', 'Creates project files']
+    },
+    {
+      id: 'crewloop:docs',
+      stepNum: 'S2',
+      name: 'CrewLoop Docs',
+      role: 'Documentation Authoring',
+      icon: <BookOpen className="w-5 h-5" />,
+      description: 'Writes and updates project READMEs, subsystem manuals, and API guides, then returns control to the invoking skill.',
+      cannotDo: ['Writes implementation code', 'Designs systems', 'Runs git operations']
     }
   ];
 

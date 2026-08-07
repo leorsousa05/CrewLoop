@@ -1,21 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { SkillMeta } from '../types';
+import { canonicalSkillName } from '../lib/skills';
 
 const SKILL_ICONS: Record<string, string> = {
-  'crewloop-hub': 'target',
-  architect: 'blueprint',
-  designer: 'palette',
-  engineer: 'wrench',
-  reviewer: 'magnifying-glass',
-  shipper: 'rocket-launch',
-  'docs-writer': 'article',
-  tester: 'flask',
-  'product-manager': 'chart-bar',
-  maintainer: 'toolbox',
-  researcher: 'microscope',
-  'security-guard': 'shield',
-  'accessibility-auditor': 'person',
+  'crewloop:plan': 'blueprint',
+  'crewloop:design': 'palette',
+  'crewloop:code': 'wrench',
+  'crewloop:review': 'magnifying-glass',
+  'crewloop:ship': 'rocket-launch',
+  'crewloop:docs': 'article',
 };
 
 export class SkillRegistry {
@@ -32,11 +26,14 @@ export class SkillRegistry {
       this.skills = fs
         .readdirSync(skillsDir, { withFileTypes: true })
         .filter((entry) => entry.isDirectory())
-        .map((entry) => ({
-          name: entry.name,
-          description: '',
-          icon: SKILL_ICONS[entry.name] || 'circle',
-        }));
+        .map((entry) => {
+          const name = canonicalSkillName(entry.name);
+          return {
+            name,
+            description: '',
+            icon: SKILL_ICONS[name] || 'circle',
+          };
+        });
     }
 
     return this.skills;

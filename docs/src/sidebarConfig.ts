@@ -27,26 +27,19 @@ export const sidebarConfig: SidebarConfig = [
     label: 'Core Skills',
     items: [
       { id: 'core/crewloop-hub', title: 'CrewLoop Hub', path: '/docs/core/crewloop-hub.md' },
-      { id: 'core/architect', title: 'Architect', path: '/docs/core/architect.md' },
-      { id: 'core/designer', title: 'Designer', path: '/docs/core/designer.md' },
-      { id: 'core/engineer', title: 'Engineer', path: '/docs/core/engineer.md' },
-      { id: 'core/reviewer', title: 'Reviewer', path: '/docs/core/reviewer.md' },
-      { id: 'core/shipper', title: 'Shipper', path: '/docs/core/shipper.md' }
+      { id: 'core/crewloop-plan', title: 'CrewLoop Plan', path: '/docs/core/crewloop-plan.md' },
+      { id: 'core/crewloop-design', title: 'CrewLoop Design', path: '/docs/core/crewloop-design.md' },
+      { id: 'core/crewloop-code', title: 'CrewLoop Code', path: '/docs/core/crewloop-code.md' },
+      { id: 'core/crewloop-review', title: 'CrewLoop Review', path: '/docs/core/crewloop-review.md' },
+      { id: 'core/crewloop-ship', title: 'CrewLoop Ship', path: '/docs/core/crewloop-ship.md' }
     ]
   },
   {
     id: 'supporting-skills',
     label: 'Supporting Skills',
     items: [
-      { id: 'supporting/project-brainstorm', title: 'Project Brainstorm', path: '/docs/supporting/project-brainstorm.md' },
-      { id: 'supporting/long-term-manager', title: 'Long-term Manager', path: '/docs/supporting/long-term-manager.md' },
-      { id: 'supporting/docs-writer', title: 'Docs Writer', path: '/docs/supporting/docs-writer.md' },
-      { id: 'supporting/tester', title: 'Tester', path: '/docs/supporting/tester.md' },
-      { id: 'supporting/product-manager', title: 'Product Manager', path: '/docs/supporting/product-manager.md' },
-      { id: 'supporting/maintainer', title: 'Maintainer', path: '/docs/supporting/maintainer.md' },
-      { id: 'supporting/researcher', title: 'Researcher', path: '/docs/supporting/researcher.md' },
-      { id: 'supporting/security-guard', title: 'Security Guard', path: '/docs/supporting/security-guard.md' },
-      { id: 'supporting/accessibility-auditor', title: 'Accessibility Auditor', path: '/docs/supporting/accessibility-auditor.md' }
+      { id: 'supporting/crewloop-brainstorm', title: 'CrewLoop Brainstorm', path: '/docs/supporting/crewloop-brainstorm.md' },
+      { id: 'supporting/crewloop-docs', title: 'CrewLoop Docs', path: '/docs/supporting/crewloop-docs.md' }
     ]
   },
   {

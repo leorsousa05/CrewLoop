@@ -20,24 +20,24 @@ const DEFAULT_OPTIONS = { maxEventsPerSession: 100, sessionMaxAgeMs: 1000 * 60 *
 describe('StateStore default_skill fallback', () => {
   it('applies default_skill when no active skill exists', () => {
     const store = new StateStore(DEFAULT_OPTIONS);
-    const event = makeEvent({ default_skill: 'crewloop-hub' });
+    const event = makeEvent({ default_skill: 'crewloop:plan' });
     const session = store.applyEvent(event);
-    assert.strictEqual(session.active_skill, 'crewloop-hub');
+    assert.strictEqual(session.active_skill, 'crewloop:plan');
     assert.strictEqual(session.active_confidence, 'heuristic');
   });
 
   it('ignores default_skill when an active skill is already set', () => {
     const store = new StateStore(DEFAULT_OPTIONS);
-    store.applyEvent(makeEvent({ skill: 'architect' }));
-    const session = store.applyEvent(makeEvent({ default_skill: 'crewloop-hub' }));
-    assert.strictEqual(session.active_skill, 'architect');
+    store.applyEvent(makeEvent({ skill: 'crewloop:plan' }));
+    const session = store.applyEvent(makeEvent({ default_skill: 'crewloop:plan' }));
+    assert.strictEqual(session.active_skill, 'crewloop:plan');
   });
 
   it('overrides active skill with an explicit skill signal', () => {
     const store = new StateStore(DEFAULT_OPTIONS);
-    store.applyEvent(makeEvent({ default_skill: 'crewloop-hub' }));
-    const session = store.applyEvent(makeEvent({ skill: 'engineer' }));
-    assert.strictEqual(session.active_skill, 'engineer');
+    store.applyEvent(makeEvent({ default_skill: 'crewloop:plan' }));
+    const session = store.applyEvent(makeEvent({ skill: 'crewloop:code' }));
+    assert.strictEqual(session.active_skill, 'crewloop:code');
     assert.strictEqual(session.active_confidence, 'heuristic');
   });
 });

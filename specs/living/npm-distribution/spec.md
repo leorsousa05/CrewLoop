@@ -21,7 +21,7 @@ crewloop install
 Install only selected skills:
 
 ```bash
-crewloop install --skill architect --skill engineer
+crewloop install --skill crewloop-plan --skill crewloop-code
 ```
 
 Install to a custom directory:

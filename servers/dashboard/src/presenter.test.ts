@@ -11,7 +11,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     tool_counts: { Read: 2 },
     started_at: 1000,
     last_event_at: 2000,
-    active_skill: 'architect',
+    active_skill: 'crewloop:plan',
     active_confidence: 'explicit',
     status: 'running',
     lifecycle: 'running',
@@ -26,8 +26,8 @@ describe('presenter', () => {
 
     assert.equal(client.id, 'sess-1');
     assert.equal(client.source, 'kimi');
-    assert.equal(client.skill, 'architect');
-    assert.deepEqual(client.activeSkill, { name: 'architect', confidence: 'explicit' });
+    assert.equal(client.skill, 'crewloop:plan');
+    assert.deepEqual(client.activeSkill, { name: 'crewloop:plan', confidence: 'explicit' });
     assert.equal(client.status, 'running');
     assert.equal(client.lifecycle, 'running');
     assert.equal(client.startTime, 1000);

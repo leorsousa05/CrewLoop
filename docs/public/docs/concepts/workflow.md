@@ -6,90 +6,60 @@ sidebar_position: 2
 
 ## The canonical flow
 
-CrewLoop uses direct routing during interactive work. Each phase owns its ending and hands off to the next selected skill. CrewLoop Hub mediates only task entry and every transition in AFK mode.
+CrewLoop uses direct routing during interactive work. Each phase owns its ending and hands off to the next selected skill. `crewloop:hub` mediates only task entry and every transition in AFK mode.
 
 ```mermaid
 flowchart TD
-    H["🎯 CrewLoop Hub<br/>Discovery"] --> A["🏗️ Architect<br/>Specs"]
-    A -->|UI| D["🎨 Designer<br/>Visual direction"]
-    A -->|No UI| E["🔧 Engineer<br/>Implementation"]
-    D --> E
-    E --> R["🔍 Reviewer<br/>Quality gate"]
-    R -->|PASS| S["🚀 Shipper<br/>Git and PR"]
-    R -->|FAIL| E
+    H["🎯 crewloop:hub<br/>Discovery & Routing"] --> P["🗺️ crewloop:plan<br/>Specs"]
+    P -->|UI| D["🎨 crewloop:design<br/>Visual direction"]
+    P -->|No UI| C["🛠️ crewloop:code<br/>Implementation"]
+    D --> C
+    C --> R["🔍 crewloop:review<br/>Quality gate"]
+    R -->|PASS| S["🚀 crewloop:ship<br/>Git and PR"]
+    R -->|FAIL| C
     S -->|New task| H
 
-    SG["🛡️ Security Guard"] -.-> R
-    AA["♿ Accessibility Auditor"] -.-> R
-    T["🧪 Tester"] -.-> E
-    SD["🗄️ Schema Designer"] -.-> A
-    FA["📐 Frontend Architect"] -.-> D
-    DO["🛠️ DevOps Specialist"] -.-> S
+    B["💡 crewloop:brainstorm<br/>Discovery"] -.-> H
+    DOC["📝 crewloop:docs<br/>Documentation"] -.-> C
 ```
 
 ## Mandatory routing rules
 
-1. **Architect is the first mandatory delivery phase.** Hub may use approved discovery/tracking helpers first, but never routes directly to Designer or Engineer.
-2. **Architect creates a spec** in `specs/changes/NNN-name/` for every change, including one-line fixes.
-3. **Designer acts before Engineer** whenever a change affects a visual interface.
-4. **Engineer implements and tests**, but never performs Git operations or reviews its own work.
-5. **Reviewer is the quality gate**, but never writes implementation code or performs Git operations.
-6. **Shipper is the only Git operator** for branches, commits, pushes, tags, and pull requests.
+1. **`crewloop:plan` is the first mandatory delivery phase.** `crewloop:hub` may use `crewloop:brainstorm` for discovery, but never routes directly to `crewloop:design` or `crewloop:code`.
+2. **`crewloop:plan` creates a spec** in `specs/changes/NNN-name/` for every change, including one-line fixes.
+3. **`crewloop:design` acts before `crewloop:code`** whenever a change affects a visual interface.
+4. **`crewloop:code` implements and tests**, but never performs Git operations or reviews its own work.
+5. **`crewloop:review` is the quality gate**, but never writes implementation code or performs Git operations.
+6. **`crewloop:ship` is the only Git operator** for branches, commits, pushes, tags, and pull requests.
 7. **Interactive skills route directly.** Their ending menu loads the selected skill without requiring a typed command.
-8. **Supporting skills return to their actual invoker.** The default invoker applies when no explicit parent is available; Maintainer and Project Brainstorm instead route confirmed triage/completed briefs to Architect.
-9. **AFK is the exception.** Every non-Hub skill returns to CrewLoop Hub; the Hub selects the next phase from workflow state.
-10. **Bundle Lock-In:** routing and role execution stay within the 19 CrewLoop skills.
+8. **Supporting skills return to their actual invoker.** `crewloop:brainstorm` hands a completed brief to `crewloop:plan`; `crewloop:docs` returns to the skill that invoked it.
+9. **AFK is the exception.** Every non-Hub skill returns to `crewloop:hub`; the Hub selects the next phase from workflow state.
+10. **Bundle Lock-In:** routing and role execution stay within the 8 CrewLoop skills.
 
 ## How supporting skills plug in
 
 | Supporting skill | Default invoker | Interactive return |
 |------------------|-----------------|--------------------|
-| Project Brainstorm | CrewLoop Hub | Architect after the brief, or Hub for a new task |
-| Long-Term Manager | CrewLoop Hub | Actual invoker |
-| DiamondBlock | CrewLoop Hub | Actual invoker |
-| Product Manager | CrewLoop Hub | Actual invoker |
-| Researcher | CrewLoop Hub | Actual invoker |
-| Docs Writer | CrewLoop Hub | Actual invoker |
-| Maintainer | CrewLoop Hub | Architect for a confirmed bug |
-| Tester | Engineer | Actual invoker |
-| Security Guard | Reviewer | Actual invoker |
-| Accessibility Auditor | Reviewer | Actual invoker |
-| Frontend Architect | Designer | Actual invoker |
-| Schema Designer | Architect | Actual invoker |
-| DevOps Specialist | Shipper | Actual invoker |
+| `crewloop:brainstorm` | `crewloop:hub` | `crewloop:plan` with a completed brief |
+| `crewloop:docs` | `crewloop:hub` (or any core skill) | Actual invoker |
 
-In AFK mode, every row above returns to CrewLoop Hub instead of routing directly.
-
-## Optional DiamondBlock lifecycle
-
-When the session exposes the DiamondBlock MCP tools, the workflow gains four optional, non-blocking touchpoints. If the tools are absent or a call fails, the flow warns once and continues unchanged.
-
-1. **Startup context** — at task entry, the Hub loads the DiamondBlock skill directly and retrieves session context and prior decisions before broad file-by-file discovery.
-2. **Repeated targeted search** — the Hub may return to DiamondBlock repeatedly during the same task for semantic memory and codebase search.
-3. **Confirmed-decision persistence** — only user-confirmed or spec/ADR-accepted decisions are saved, as distilled non-secret records (search-before-save).
-4. **Wrap-up logging** — after a successful push, the Shipper logs the distilled session outcome (normal mode); in AFK mode the Hub performs the wrap-up log after the Shipper returns control.
-
-A missing or stale index remains a manual `dblock index run` action; CrewLoop never indexes automatically.
+In AFK mode, every row above returns to `crewloop:hub` instead of routing directly.
 
 ## Which skill should I use?
 
 | Task type | Typical path |
 |-----------|--------------|
-| New feature | Hub → Architect → Engineer → Reviewer → Shipper |
-| UI redesign | Hub → Architect → Designer → Engineer → Reviewer → Shipper |
-| Bug fix | Hub → Maintainer → Architect → Engineer → Reviewer → Shipper |
-| Technology choice | Hub → Researcher → Hub → Architect |
-| Multi-session project | Hub → Long-Term Manager → Hub → Architect |
-| Documentation only | Hub → Architect → Engineer → Docs Writer → Engineer → Reviewer → Shipper |
-| Security audit | Reviewer → Security Guard → Reviewer |
-| Test strategy | Engineer → Tester → Engineer |
+| New feature | `crewloop:hub` → `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` |
+| UI redesign | `crewloop:hub` → `crewloop:plan` → `crewloop:design` → `crewloop:code` → `crewloop:review` → `crewloop:ship` |
+| Bug fix | `crewloop:hub` → `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` |
+| Documentation only | `crewloop:hub` → `crewloop:docs` → `crewloop:hub` |
 
 ## AFK mode
 
 AFK mode removes navigation menus while preserving every mandatory gate:
 
 ```text
-Current skill completes → CrewLoop Hub evaluates state → next skill
+Current skill completes → crewloop:hub evaluates state → next skill
 ```
 
-The Hub still requires Architect before any delivery phase, and Reviewer FAIL still loops to the appropriate authoring/implementation skill.
+The Hub still requires `crewloop:plan` before any delivery phase, and `crewloop:review` FAIL still loops to the appropriate authoring/implementation skill.

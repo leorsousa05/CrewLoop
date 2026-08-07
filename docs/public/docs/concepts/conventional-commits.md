@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Conventional Commits
 
-All commits follow the [Conventional Commits](https://www.conventionalcommits.org/) standard. The **Shipper** skill generates commit messages — you never write them manually.
+All commits follow the [Conventional Commits](https://www.conventionalcommits.org/) standard. The **`crewloop:ship`** skill generates commit messages — you never write them manually.
 
 ## Format
 

@@ -19,11 +19,11 @@ describe('sanitize', () => {
     const result = sanitize(
       {
         tool_name: 'Skill',
-        tool_input: { skill: 'architect' },
+        tool_input: { skill: 'crewloop:plan' },
       },
       'pre'
     );
-    assert.equal(result.detail, 'architect');
+    assert.equal(result.detail, 'crewloop:plan');
   });
 
   it('strips dangerous command input', () => {

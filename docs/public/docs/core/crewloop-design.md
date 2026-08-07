@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Designer
+# CrewLoop Design
 
 > Aesthetic direction and design specification. Sets the visual standard before code is written.
 
@@ -10,11 +10,11 @@ sidebar_position: 3
 
 ## Role
 
-The Designer is a UI/UX specialist who defines the aesthetic direction for every frontend change. It produces design specs that Engineers can implement with precision and without guessing. It never writes HTML, CSS, or JavaScript.
+`crewloop:design` is a UI/UX specialist who defines the aesthetic direction for every frontend change. It produces design specs that `crewloop:code` can implement with precision and without guessing. It never writes HTML, CSS, or JavaScript.
 
 ## Responsibilities
 
-1. Read the spec from Architect before taking any design decisions.
+1. Read the spec from `crewloop:plan` before taking any design decisions.
 2. Read the reference library before making visual decisions.
 3. Commit to one clear aesthetic thesis. Avoid generic or AI-default looks.
 4. Define the complete design system: color palette with usage rules, typography (font, size, weight, line-height), spacing scale, layout grid, and responsive breakpoints.
@@ -22,7 +22,7 @@ The Designer is a UI/UX specialist who defines the aesthetic direction for every
 6. Ensure accessibility: WCAG 2.1 AA contrast ratios, touch targets >= 44px, visible focus states, keyboard navigation.
 7. Produce a design spec with ASCII wireframes, component breakdown, an asset list, and explicit references to the files that informed the direction.
 
-## What Designer Never Does
+## What `crewloop:design` Never Does
 
 - ❌ Write HTML, CSS, or JavaScript implementation code.
 - ❌ Skip the aesthetic direction step.
@@ -46,8 +46,8 @@ The Designer is a UI/UX specialist who defines the aesthetic direction for every
 
 ## Concrete Example
 
-**Designer receives spec for JWT login:**
-1. Commits to clean editorial direction.
+**`crewloop:design` receives a spec for a JWT login:**
+1. Commits to a clean editorial direction.
 2. Reads the reference library and selects a composition-first, editorial direction.
 3. Design variables defined: `#0A0A0A` background, `#F5F5F5` text, a distinctive display face, a readable body face, centered 400px card.
 4. Focus animation defined: border-color transition 100ms ease.
@@ -57,11 +57,11 @@ The Designer is a UI/UX specialist who defines the aesthetic direction for every
 
 ## Handoff
 
-**Invoked by:** Architect.  
-**Sends to:** Engineer.
+**Invoked by:** `crewloop:plan`.  
+**Sends to:** `crewloop:code`.
 
 ```markdown
 **What would you like to do?**
 
-- **[E] Send to Engineer** — Implement the spec
+- **[C] Send to `crewloop:code`** — Implement the spec
 ```

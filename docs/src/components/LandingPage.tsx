@@ -10,7 +10,14 @@ import {
   ShieldWarning,
   ShieldCheck,
   BookOpen,
-  Warning
+  Warning,
+  Compass,
+  MapTrifold,
+  PaintBrush,
+  Code,
+  MagnifyingGlass,
+  Rocket,
+  Brain
 } from '@phosphor-icons/react';
 
 interface LandingPageProps {
@@ -23,6 +30,7 @@ interface SkillDetails {
   role: string;
   desc: string;
   cannotDo: string[];
+  icon: React.ReactNode;
 }
 
 // Doc pages that actually exist — the modal's "Read Full Guide" button is
@@ -83,129 +91,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
       name: 'CrewLoop Hub',
       role: 'Context & Routing',
       desc: 'Analyzes initial context, gathers requirements, and routes workflow tasks between specialist agents.',
-      cannotDo: ['Writes code', 'Designs systems', 'Creates files', 'Git operations']
+      cannotDo: ['Writes code', 'Designs systems', 'Creates files', 'Git operations'],
+      icon: <Compass className="w-5 h-5" />
     },
     {
-      id: 'core/architect',
-      name: 'Architect',
+      id: 'core/crewloop-plan',
+      name: 'CrewLoop Plan',
       role: 'Specs & Contracts',
       desc: 'Creates system specs and task lists in specs/changes/ before coding begins.',
-      cannotDo: ['Writes implementation code', 'Runs git commands', 'Configures build scripts']
+      cannotDo: ['Writes implementation code', 'Runs git commands', 'Configures build scripts'],
+      icon: <MapTrifold className="w-5 h-5" />
     },
     {
-      id: 'core/designer',
-      name: 'Designer',
+      id: 'core/crewloop-design',
+      name: 'CrewLoop Design',
       role: 'Visual UI/UX Specs',
-      desc: 'Defines design tokens, responsive layouts, and visual visualizer models for UI components.',
-      cannotDo: ['Writes functional code', 'Git operations', 'Runs database migrations']
+      desc: 'Defines design tokens, responsive layouts, and visual specifications for UI components.',
+      cannotDo: ['Writes functional code', 'Git operations', 'Runs database migrations'],
+      icon: <PaintBrush className="w-5 h-5" />
     },
     {
-      id: 'core/engineer',
-      name: 'Engineer',
+      id: 'core/crewloop-code',
+      name: 'CrewLoop Code',
       role: 'Code Implementation',
       desc: 'Implements source code and unit tests. The only role permitted to modify codebase source files.',
-      cannotDo: ['Git operations', 'Code reviews', 'Modifies system architecture']
+      cannotDo: ['Git operations', 'Code reviews', 'Modifies system structure'],
+      icon: <Code className="w-5 h-5" />
     },
     {
-      id: 'core/reviewer',
-      name: 'Reviewer',
+      id: 'core/crewloop-review',
+      name: 'CrewLoop Review',
       role: 'Quality Assurance',
       desc: 'Audits spec compliance, runs local tests, and performs security checks for exposed credentials.',
-      cannotDo: ['Writes implementation code', 'Runs git commands', 'Approves own code']
+      cannotDo: ['Writes implementation code', 'Runs git commands', 'Approves own code'],
+      icon: <MagnifyingGlass className="w-5 h-5" />
     },
     {
-      id: 'core/shipper',
-      name: 'Shipper',
+      id: 'core/crewloop-ship',
+      name: 'CrewLoop Ship',
       role: 'Git & PR Preparer',
       desc: 'Manages repository branches, pushes committed changes, and prepares pull requests following Conventional Commits.',
-      cannotDo: ['Reviews code', 'Writes code', 'Alters spec files']
+      cannotDo: ['Reviews code', 'Writes code', 'Alters spec files'],
+      icon: <Rocket className="w-5 h-5" />
     }
   ];
 
   const supportingSkillsList: SkillDetails[] = [
     {
-      id: 'supporting/project-brainstorm',
-      name: 'Project Brainstorm',
-      role: 'Product Discovery',
+      id: 'supporting/crewloop-brainstorm',
+      name: 'CrewLoop Brainstorm',
+      role: 'Project Discovery',
       desc: 'Aids in defining requirements for ambiguous or complex tasks before specifications are written.',
-      cannotDo: ['Writes code', 'Git operations']
+      cannotDo: ['Writes code', 'Git operations'],
+      icon: <Brain className="w-5 h-5" />
     },
     {
-      id: 'supporting/long-term-manager',
-      name: 'Long-term Manager',
-      role: 'Progress Tracking',
-      desc: 'Monitors long-term tasks across sessions and keeps progress checklists up-to-date.',
-      cannotDo: ['Writes code', 'Git operations']
-    },
-    {
-      id: 'supporting/docs-writer',
-      name: 'Docs Writer',
+      id: 'supporting/crewloop-docs',
+      name: 'CrewLoop Docs',
       role: 'Documentation',
       desc: 'Writes and updates project READMEs, subsystem manuals, and API guides.',
-      cannotDo: ['Modifies logic code', 'Alters spec files', 'Configures build scripts']
-    },
-    {
-      id: 'supporting/tester',
-      name: 'Tester',
-      role: 'QA Verification',
-      desc: 'Designs verification plans, analyzes test coverage, and logs edge cases.',
-      cannotDo: ['Modifies source code', 'Runs git commands', 'Alters spec files']
-    },
-    {
-      id: 'supporting/product-manager',
-      name: 'Product Manager',
-      role: 'Prioritization',
-      desc: 'Aids in roadmap prioritization, user stories mapping, and setting delivery goals.',
-      cannotDo: ['Modifies source code', 'Runs git commands', 'Executes tests']
-    },
-    {
-      id: 'supporting/maintainer',
-      name: 'Maintainer',
-      role: 'Refactoring & Maintenance',
-      desc: 'Triages bug reports, cleans up code debt, updates outdated packages, and refactors code.',
-      cannotDo: ['Creates spec files', 'Approves own reviews', 'Runs git commits']
-    },
-    {
-      id: 'supporting/researcher',
-      name: 'Researcher',
-      role: 'Tech Investigation',
-      desc: 'Compares alternative frameworks and libraries, building quick proofs-of-concept.',
-      cannotDo: ['Writes production code', 'Runs git commits', 'Opens Pull Requests']
-    },
-    {
-      id: 'supporting/security-guard',
-      name: 'Security Guard',
-      role: 'Vulnerabilities',
-      desc: 'Verifies auth rules, audits exposed endpoints, and checks dependency supply chain risk.',
-      cannotDo: ['Writes code', 'Modifies git settings', 'Runs database migrations']
-    },
-    {
-      id: 'supporting/accessibility-auditor',
-      name: 'Accessibility Auditor',
-      role: 'WCAG Compliance',
-      desc: 'Audits layouts against WCAG guidelines, ensuring screen reader and keyboard nav support.',
-      cannotDo: ['Writes backend code', 'Runs database migrations', 'Runs git commits']
-    },
-    {
-      id: 'devops-specialist',
-      name: 'DevOps Specialist',
-      role: 'CI/CD Pipelines',
-      desc: 'Manages Docker configurations, edits GitHub Actions workflows, and maintains deploy settings.',
-      cannotDo: ['Writes application logic', 'Alters specs', 'Performs code reviews']
-    },
-    {
-      id: 'frontend-architect',
-      name: 'Frontend Architect',
-      role: 'Component Composition',
-      desc: 'Defines frontend component composition, slot structures, and hook patterns.',
-      cannotDo: ['Writes backend code', 'Runs git commits', 'Approves PR reviews']
-    },
-    {
-      id: 'schema-designer',
-      name: 'Schema Designer',
-      role: 'Database Schema',
-      desc: 'Designs relational schemas, table constraints, and coordinates Prisma migrations.',
-      cannotDo: ['Writes frontend logic', 'Configures builds', 'Runs git commits']
+      cannotDo: ['Modifies logic code', 'Alters spec files', 'Configures build scripts'],
+      icon: <BookOpen className="w-5 h-5" />
     }
   ];
 
@@ -310,7 +256,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
           <span className="label">Skills directory</span>
           <h2 className="text-display-xl font-display font-bold text-text-primary mt-2 mb-3">Skills Directory</h2>
           <p className="font-prose text-prose text-text-secondary max-w-xl">
-            The 18 specialized roles available to compose your development team. Click any card to inspect constraints.
+            The 8 specialized roles available to compose your development team. Click any card to inspect constraints.
           </p>
         </div>
 
@@ -332,7 +278,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                     <span className="text-micro font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border text-accent-strong border-accent-dim bg-accent-subtle">
                       Core Flow
                     </span>
-                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-text-muted group-hover:text-accent transition-colors" aria-hidden="true">{skill.icon}</span>
+                      <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+                    </div>
                   </div>
                   <h4 className="text-heading font-display font-semibold text-text-primary">
                     {skill.name}
@@ -363,9 +312,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
                   className="panel panel-hoverable !p-4 text-left cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-label font-display font-semibold text-text-primary">
-                      {skill.name}
-                    </h4>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-text-muted group-hover:text-accent transition-colors flex-shrink-0" aria-hidden="true">{skill.icon}</span>
+                      <h4 className="text-label font-display font-semibold text-text-primary truncate">
+                        {skill.name}
+                      </h4>
+                    </div>
                     <ArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                   </div>
                   <p className="text-micro font-mono text-text-muted mt-1">{skill.role}</p>
@@ -432,7 +384,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             </span>
             <h3 className="text-display-lg font-display font-bold text-text-primary">Specs Tracing</h3>
             <p className="font-prose text-prose text-text-secondary">
-              CrewLoop enforces a spec-first cycle. The Architect documents specs in `specs/changes/` and the dashboard tracks checklist status, highlighting implemented and verified tasks.
+              CrewLoop enforces a spec-first cycle. CrewLoop Plan documents specs in `specs/changes/` and the dashboard tracks checklist status, highlighting implemented and verified tasks.
             </p>
           </div>
           <div className="lg:col-span-7 order-1 lg:order-2">
@@ -504,11 +456,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
             <ul className="space-y-4 text-label text-text-secondary">
               <li className="flex items-start gap-3">
                 <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="bold" />
-                <span>Requires task definitions and architecture specs before coding begins.</span>
+                <span>Requires task definitions and technical specs before coding begins.</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="bold" />
-                <span>Strict role isolation: Engineer codes, Reviewer audits, Shipper commits.</span>
+                <span>Strict role isolation: CrewLoop Code implements, CrewLoop Review audits, and CrewLoop Ship commits.</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="bold" />

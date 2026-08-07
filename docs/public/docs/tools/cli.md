@@ -24,7 +24,7 @@ crewloop install
 
 | Flag | Description |
 |------|-------------|
-| `--skill <name>` | Install only a specific skill (repeatable) |
+| `--skill <name>` | Install only a specific skill directory (repeatable) |
 | `--agent <agent>` | Target a specific agent |
 | `--target <dir>` | Install to a custom skills directory |
 | `--symlink` | Create symlinks instead of copying files |
@@ -39,7 +39,7 @@ crewloop install
 crewloop install
 
 # Install specific skills only
-crewloop install --skill architect --skill engineer --skill reviewer
+crewloop install --skill crewloop-plan --skill crewloop-code --skill crewloop-review
 
 # Install for a specific agent
 crewloop install --agent claude
@@ -77,6 +77,7 @@ crewloop dashboard --host 0.0.0.0
 | `claude` | `~/.claude/config.json` | Grouped JSON |
 | `codex` | `~/.codex/hooks.json` | Grouped JSON |
 | `agy` | `~/.gemini/config/hooks.json` | Grouped JSON |
+| `opencode` | `~/.config/opencode/plugins/crewloop.js` | JavaScript plugin |
 
 ## Hook identification
 

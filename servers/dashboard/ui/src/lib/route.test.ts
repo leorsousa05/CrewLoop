@@ -34,9 +34,9 @@ describe('route', () => {
   });
 
   it('keeps free-text filters', () => {
-    const route = parseRoute('#/timeline?q=build&skills=engineer&tools=Read');
+    const route = parseRoute('#/timeline?q=build&skills=crewloop:code&tools=Read');
     expect(route.filters.q).toBe('build');
-    expect(route.filters.skills).toBe('engineer');
+    expect(route.filters.skills).toBe('crewloop:code');
     expect(route.filters.tools).toBe('Read');
   });
 

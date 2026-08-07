@@ -10,7 +10,7 @@ describe('export', () => {
       eventType: 'tool_end',
       status: 'success',
       startTime: 1000,
-      skill: 'engineer',
+      skill: 'crewloop:code',
       detail: 'opened file',
       input: { path: 'src/index.ts' },
       durationMs: 50,
