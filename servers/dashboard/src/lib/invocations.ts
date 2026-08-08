@@ -1,6 +1,6 @@
 import type { ClientEvent } from '../types';
 import { classifyOperation } from './operations';
-import { resolvePaths } from './paths';
+
 
 const MAX_EVENTS = 100;
 

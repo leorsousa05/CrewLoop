@@ -16,27 +16,6 @@ const PATH_KEYS = [
   'notebook_path',
 ];
 
-function pathFromObject(obj: Record<string, unknown>): string | undefined {
-  for (const key of PATH_KEYS) {
-    const value = obj[key];
-    if (typeof value === 'string' && value.length > 0) {
-      return value;
-    }
-  }
-  return undefined;
-}
-
-function firstOperationPath(operations: unknown): string | undefined {
-  if (!Array.isArray(operations)) return undefined;
-  for (const op of operations) {
-    if (isPlainObject(op)) {
-      const p = pathFromObject(op);
-      if (p) return p;
-    }
-  }
-  return undefined;
-}
-
 function collectObjectPaths(obj: Record<string, unknown>, paths: string[], seen: Set<string>): void {
   for (const key of PATH_KEYS) {
     const value = obj[key];

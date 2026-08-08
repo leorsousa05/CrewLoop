@@ -54,10 +54,10 @@ function readJsonBody(req: IncomingMessage, maxBytes: number): Promise<unknown> 
   });
 }
 
-function normalizePathsToRelative(obj: any, root: string): any {
+function normalizePathsToRelative(obj: unknown, root: string): unknown {
   if (typeof obj === 'string') {
     if (path.isAbsolute(obj) && obj.startsWith(root)) {
-      let rel = path.relative(root, obj);
+      const rel = path.relative(root, obj);
       return rel.replace(/\\/g, '/');
     }
     if (obj.includes(root)) {
@@ -72,9 +72,9 @@ function normalizePathsToRelative(obj: any, root: string): any {
     return obj.map((item) => normalizePathsToRelative(item, root));
   }
   if (typeof obj === 'object' && obj !== null) {
-    const res: any = {};
+    const res: Record<string, unknown> = {};
     for (const key of Object.keys(obj)) {
-      res[key] = normalizePathsToRelative(obj[key], root);
+      res[key] = normalizePathsToRelative((obj as Record<string, unknown>)[key], root);
     }
     return res;
   }
