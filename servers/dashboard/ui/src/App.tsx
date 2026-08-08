@@ -26,7 +26,7 @@ import { FilesView } from './components/views/FilesView';
 import { SkillsView } from './components/views/SkillsView';
 import { SettingsView } from './components/views/SettingsView';
 import { projectInvocations, buildFileActivity } from '../../src/lib/invocations';
-import { resolvePath } from '../../src/lib/paths';
+import { resolvePath, resolvePaths } from '../../src/lib/paths';
 import { buildOptions, filterInvocations, filterSessions } from './lib/filter';
 import { filtersToQuery, filtersFromQuery } from './lib/route';
 import { NAV_ITEMS } from './lib/navigation';
@@ -298,7 +298,7 @@ export default function App() {
     [invocations, selectedSession, filters, now]
   );
   const filteredFiles = useMemo(
-    () => buildFileActivity(filteredInvocations, resolvePath),
+    () => buildFileActivity(filteredInvocations, resolvePaths),
     [filteredInvocations]
   );
   const filterOptions = useMemo<FilterOptions>(

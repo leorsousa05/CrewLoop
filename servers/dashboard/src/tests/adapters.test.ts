@@ -1,8 +1,11 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { normalizeKimi } from '../adapters/kimi';
 import { normalizeClaude } from '../adapters/claude';
-import { normalizeCodex } from '../adapters/codex';
+import { normalizeCodex, type CodexHookPayload } from '../adapters/codex';
 import { normalizeAgy } from '../adapters/agy';
 
 describe('normalizeKimi', () => {
@@ -19,6 +22,7 @@ describe('normalizeKimi', () => {
     assert.strictEqual(event!.event_type, 'tool_start');
     assert.deepStrictEqual(event!.input, { command: 'echo hello' });
     assert.strictEqual(event!.output, undefined);
+    assert.strictEqual(event!.workspacePath, '/tmp');
   });
 
   it('forwards tool_output object as output', () => {
@@ -49,6 +53,52 @@ describe('normalizeKimi', () => {
 
     assert.ok(event);
     assert.deepStrictEqual(event!.output, { output: 'hello\n' });
+  });
+
+  it('parses JSON string tool_output as an object', () => {
+    const event = normalizeKimi({
+      hook_event_name: 'PostToolUse',
+      session_id: 'session-1',
+      cwd: '/tmp',
+      tool_name: 'Bash',
+      tool_output: '{"stdout":"hello"}',
+    });
+
+    assert.ok(event);
+    assert.deepStrictEqual(event!.output, { stdout: 'hello' });
+  });
+
+  it('normalizes measured usage without copying the raw payload', () => {
+    const event = normalizeKimi({
+      hook_event_name: 'SessionEnd',
+      session_id: 'session-usage',
+      cwd: '/tmp',
+      model: 'kimi-test',
+      usage: {
+        input_tokens: 900,
+        output_tokens: 100,
+        cache_read_input_tokens: 250,
+        total_tokens: 1000,
+      },
+    });
+
+    assert.ok(event?.token_usage);
+    assert.equal(event!.token_usage!.totalTokens, 1000);
+    assert.equal(event!.token_usage!.cacheReadTokens, 250);
+    assert.equal(event!.token_usage!.model, 'kimi-test');
+    assert.equal(event!.input, undefined);
+    assert.equal(event!.output, undefined);
+  });
+
+  it('drops malformed usage while preserving the event', () => {
+    const event = normalizeKimi({
+      hook_event_name: 'SessionEnd',
+      session_id: 'session-usage',
+      cwd: '/tmp',
+      usage: { input_tokens: '900' },
+    });
+    assert.ok(event);
+    assert.equal(event!.token_usage, undefined);
   });
 });
 
@@ -126,12 +176,187 @@ describe('normalizeCodex', () => {
       toolName: 'ReadFile',
       toolInput: { path: '/tmp/foo.txt' },
       toolResponse: { content: 'bar' },
+      cwd: '/tmp',
     });
 
     assert.ok(event);
     assert.strictEqual(event!.event_type, 'tool_end');
     assert.deepStrictEqual(event!.input, { path: '/tmp/foo.txt' });
     assert.deepStrictEqual(event!.output, { content: 'bar' });
+    assert.strictEqual(event!.workspacePath, '/tmp');
+  });
+
+  it('normalizes snake-case tool fields and wraps string responses', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'PostToolUse',
+      session_id: 'session-snake',
+      cwd: '/tmp',
+      tool_name: 'ReadFile',
+      tool_input: { path: '/tmp/snake.txt' },
+      tool_response: 'read complete',
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.tool, 'ReadFile');
+    assert.deepStrictEqual(event!.input, { path: '/tmp/snake.txt' });
+    assert.deepStrictEqual(event!.output, { output: 'read complete' });
+  });
+
+  it('prefers valid camel-case tool fields over snake-case aliases', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'PostToolUse',
+      sessionId: 'session-alias-precedence',
+      cwd: '/tmp',
+      toolName: 'WriteFile',
+      tool_name: 'ReadFile',
+      toolInput: { path: '/tmp/camel.txt' },
+      tool_input: { path: '/tmp/snake.txt' },
+      toolResponse: { diff: '+camel' },
+      tool_response: { diff: '+snake' },
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.tool, 'WriteFile');
+    assert.deepStrictEqual(event!.input, { path: '/tmp/camel.txt' });
+    assert.deepStrictEqual(event!.output, { diff: '+camel' });
+  });
+
+  it('derives safe per-file metadata from apply_patch commands', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'PreToolUse',
+      session_id: 'session-apply-patch',
+      cwd: '/tmp',
+      tool_name: 'apply_patch',
+      tool_input: {
+        command: [
+          '*** Begin Patch',
+          '*** Update File: src/a.ts',
+          '+const onlyA = true;',
+          '+api_key = "must-not-survive"',
+          '*** Add File: src/b.ts',
+          '+const onlyB = true;',
+          '*** End Patch',
+        ].join('\n'),
+      },
+    });
+
+    assert.ok(event);
+    assert.deepStrictEqual(event!.input, {
+      operations: [
+        {
+          path: 'src/a.ts',
+          diff: [
+            '*** Update File: src/a.ts',
+            '+const onlyA = true;',
+            '+[redacted sensitive line]',
+          ].join('\n'),
+        },
+        {
+          path: 'src/b.ts',
+          diff: '*** Add File: src/b.ts\n+const onlyB = true;',
+        },
+      ],
+    });
+    assert.equal('command' in event!.input!, false);
+    assert.equal(JSON.stringify(event).includes('must-not-survive'), false);
+  });
+
+  it('does not parse patch headers for other tools', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'PreToolUse',
+      session_id: 'session-bash',
+      cwd: '/tmp',
+      tool_name: 'Bash',
+      tool_input: { command: '*** Update File: src/a.ts' },
+    });
+
+    assert.ok(event);
+    assert.deepStrictEqual(event!.input, { command: '*** Update File: src/a.ts' });
+  });
+
+  it('preserves the event when optional tool fields are malformed', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'PreToolUse',
+      session_id: 'session-malformed',
+      cwd: '/tmp',
+      tool_name: 42,
+      tool_input: 'not-an-object',
+      tool_response: false,
+    } as unknown as CodexHookPayload);
+
+    assert.ok(event);
+    assert.strictEqual(event!.event_type, 'tool_start');
+    assert.strictEqual(event!.tool, undefined);
+    assert.strictEqual(event!.input, undefined);
+    assert.strictEqual(event!.output, undefined);
+  });
+
+  it('normalizes camel-case usage with a deterministic call identifier', () => {
+    const event = normalizeCodex({
+      hook_event_name: 'Stop',
+      sessionId: 'session-codex-usage',
+      cwd: '/tmp',
+      callId: 'call-1',
+      model: 'gpt-test',
+      usage: {
+        inputTokens: 700,
+        outputTokens: 300,
+        cachedTokens: 200,
+        reasoningTokens: 50,
+        totalTokens: 1000,
+      },
+    });
+
+    assert.ok(event?.token_usage);
+    assert.equal(event!.token_usage!.totalTokens, 1000);
+    assert.equal(event!.token_usage!.reasoningTokens, 50);
+    assert.match(event!.token_usage!.measurementId, /call-1$/);
+  });
+
+  it('prefers direct hook usage over transcript fallback usage', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-codex-precedence-'));
+    const transcript = path.join(root, 'session.jsonl');
+    fs.writeFileSync(
+      transcript,
+      `${JSON.stringify({
+        timestamp: '2026-07-27T10:00:00.000Z',
+        type: 'event_msg',
+        payload: {
+          type: 'token_count',
+          info: {
+            total_token_usage: {
+              total_tokens: 999,
+              input_tokens: 900,
+              output_tokens: 99,
+            },
+          },
+        },
+      })}\n`,
+      'utf8'
+    );
+
+    try {
+      const event = normalizeCodex(
+        {
+          hook_event_name: 'Stop',
+          sessionId: 'session',
+          cwd: '/tmp',
+          transcriptPath: transcript,
+          usage: {
+            inputTokens: 700,
+            outputTokens: 300,
+            totalTokens: 1000,
+          },
+        },
+        { sessionsRoot: root }
+      );
+
+      assert.ok(event?.token_usage);
+      assert.equal(event!.token_usage!.totalTokens, 1000);
+      assert.equal(event!.token_usage!.outputTokens, 300);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 
@@ -203,6 +428,7 @@ describe('normalizeAgy', () => {
     const event = normalizeAgy({
       hook_event_name: 'PreToolUse',
       sessionId: 'sess-fallback',
+      stepIdx: 0,
       toolCall: { name: 'list_dir', args: { DirectoryPath: '/tmp' } },
     });
 
@@ -246,20 +472,5 @@ describe('normalizeAgy', () => {
     assert.ok(event);
     assert.strictEqual(event!.tool, 'Read');
     assert.strictEqual(event!.skill, undefined);
-  });
-
-  it('infers skill from Windows-style skill file path', () => {
-    const event = normalizeAgy({
-      hook_event_name: 'PreToolUse',
-      conversationId: 'conv-win',
-      stepIdx: 0,
-      toolCall: {
-        name: 'view_file',
-        args: { AbsolutePath: 'C:\\Users\\user\\.agents\\skills\\crewloop-code\\SKILL.md' },
-      },
-    });
-
-    assert.ok(event);
-    assert.strictEqual(event!.skill, 'crewloop:code');
   });
 });

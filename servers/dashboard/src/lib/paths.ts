@@ -37,26 +37,57 @@ function firstOperationPath(operations: unknown): string | undefined {
   return undefined;
 }
 
-export function resolvePath(input?: unknown, output?: unknown): string | undefined {
-  if (isPlainObject(input)) {
-    const p = pathFromObject(input);
-    if (p) return p;
-    if (isPlainObject(input.args)) {
-      const ap = pathFromObject(input.args);
-      if (ap) return ap;
+function collectObjectPaths(obj: Record<string, unknown>, paths: string[], seen: Set<string>): void {
+  for (const key of PATH_KEYS) {
+    const value = obj[key];
+    if (typeof value === 'string' && value.length > 0 && !seen.has(value)) {
+      seen.add(value);
+      paths.push(value);
     }
-    const op = firstOperationPath(input.operations);
-    if (op) return op;
+  }
+}
+
+function collectNestedArgumentPaths(
+  input: Record<string, unknown>,
+  paths: string[],
+  seen: Set<string>
+): void {
+  if (isPlainObject(input.args)) {
+    collectObjectPaths(input.args as Record<string, unknown>, paths, seen);
+  }
+}
+
+function collectOperationPaths(
+  value: Record<string, unknown>,
+  paths: string[],
+  seen: Set<string>
+): void {
+  if (!Array.isArray(value.operations)) return;
+  for (const op of value.operations) {
+    if (isPlainObject(op)) {
+      collectObjectPaths(op as Record<string, unknown>, paths, seen);
+    }
+  }
+}
+
+export function resolvePaths(input?: unknown, output?: unknown): string[] {
+  const paths: string[] = [];
+  const seen = new Set<string>();
+
+  if (isPlainObject(input)) {
+    collectObjectPaths(input as Record<string, unknown>, paths, seen);
+    collectNestedArgumentPaths(input as Record<string, unknown>, paths, seen);
+    collectOperationPaths(input as Record<string, unknown>, paths, seen);
   }
   if (isPlainObject(output)) {
-    const p = pathFromObject(output);
-    if (p) return p;
-    if (isPlainObject(output.args)) {
-      const ap = pathFromObject(output.args);
-      if (ap) return ap;
-    }
-    const op = firstOperationPath(output.operations);
-    if (op) return op;
+    collectObjectPaths(output as Record<string, unknown>, paths, seen);
+    collectNestedArgumentPaths(output as Record<string, unknown>, paths, seen);
+    collectOperationPaths(output as Record<string, unknown>, paths, seen);
   }
-  return undefined;
+
+  return paths;
+}
+
+export function resolvePath(input?: unknown, output?: unknown): string | undefined {
+  return resolvePaths(input, output)[0];
 }

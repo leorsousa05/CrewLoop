@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { presentSession, presentState, createSnapshotMessage, createUpdateMessage } from './presenter';
 import type { Session, ClientUpdateMessage } from './types';
+import { createEmptySessionTokenUsage } from './telemetry/token-usage';
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -9,6 +10,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     source: 'kimi',
     events: [],
     tool_counts: { Read: 2 },
+    token_usage: createEmptySessionTokenUsage(),
     started_at: 1000,
     last_event_at: 2000,
     active_skill: 'crewloop:plan',
@@ -39,6 +41,33 @@ describe('presenter', () => {
     const client = presentSession(makeSession({ lifecycle: 'ended', ended_at: 5000 }));
     assert.equal(client.lifecycle, 'ended');
     assert.equal(client.endedAt, 5000);
+  });
+
+  it('presents token totals without internal cursor state', () => {
+    const token_usage = createEmptySessionTokenUsage();
+    token_usage.quality = 'measured';
+    token_usage.totalTokens = 500;
+    token_usage.inputTokens = 400;
+    token_usage.outputTokens = 100;
+    token_usage.measurementCount = 1;
+    token_usage.measurementIds = ['private-id'];
+    token_usage.cursors = {
+      'kimi:kimi-test': {
+        capturedAt: 1000,
+        counts: {
+          inputTokens: 400,
+          outputTokens: 100,
+          cacheReadTokens: 0,
+          cacheWriteTokens: 0,
+          reasoningTokens: 0,
+          totalTokens: 500,
+        },
+      },
+    };
+    const client = presentSession(makeSession({ token_usage }));
+    assert.equal(client.tokenUsage?.totalTokens, 500);
+    assert.equal('cursors' in (client.tokenUsage || {}), false);
+    assert.equal('measurementIds' in (client.tokenUsage || {}), false);
   });
 
   it('omits active skill when not set', () => {

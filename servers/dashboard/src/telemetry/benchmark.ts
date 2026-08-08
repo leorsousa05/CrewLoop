@@ -1,0 +1,302 @@
+import type { AgentSource, ClientTokenUsage } from '../types';
+
+export interface TokenBenchmarkRun {
+  schemaVersion: 1;
+  scenarioId: string;
+  variant: 'baseline' | 'candidate';
+  repetition: number;
+  model?: string;
+  source: AgentSource;
+  passed: boolean;
+  durationMs: number;
+  toolCalls: number;
+  tokenUsage: ClientTokenUsage;
+}
+
+export interface TokenBenchmarkDataset {
+  schemaVersion: 1;
+  label: string;
+  runs: TokenBenchmarkRun[];
+}
+
+export interface TokenBenchmarkConfig {
+  minimumTokenReductionPercent: number;
+  minimumMeasuredCoveragePercent: number;
+  maximumDurationRegressionPercent: number;
+  requireCandidateSuccessForPassingBaseline: boolean;
+}
+
+export interface TokenMetricComparison {
+  baselineMedian: number;
+  candidateMedian: number;
+  delta: number;
+  deltaPercent: number;
+}
+
+export interface TokenBenchmarkComparison {
+  passed: boolean;
+  totalTokens: TokenMetricComparison;
+  inputTokens: TokenMetricComparison;
+  outputTokens: TokenMetricComparison;
+  durationMs: TokenMetricComparison;
+  baselineSuccessRate: number;
+  candidateSuccessRate: number;
+  measuredCoveragePercent: number;
+  failures: string[];
+}
+
+export const DEFAULT_TOKEN_BENCHMARK_CONFIG: TokenBenchmarkConfig = {
+  minimumTokenReductionPercent: 15,
+  minimumMeasuredCoveragePercent: 95,
+  maximumDurationRegressionPercent: 10,
+  requireCandidateSuccessForPassingBaseline: true,
+};
+
+const AGENT_SOURCES: ReadonlySet<string> = new Set([
+  'kimi',
+  'claude',
+  'codex',
+  'opencode',
+  'log-watcher',
+  'agy',
+]);
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonNegativeNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return isNonNegativeNumber(value) && Number.isSafeInteger(value);
+}
+
+function validateTokenUsage(value: unknown, path: string): asserts value is ClientTokenUsage {
+  if (!isObject(value)) {
+    throw new Error(`${path} must be an object`);
+  }
+  for (const key of [
+    'inputTokens',
+    'outputTokens',
+    'cacheReadTokens',
+    'cacheWriteTokens',
+    'reasoningTokens',
+    'totalTokens',
+    'measurementCount',
+    'rejectedMeasurementCount',
+  ]) {
+    if (!isNonNegativeInteger(value[key])) {
+      throw new Error(`${path}.${key} must be a non-negative safe integer`);
+    }
+  }
+  if (!['measured', 'estimated', 'unavailable'].includes(String(value.quality))) {
+    throw new Error(`${path}.quality is invalid`);
+  }
+  if (value.model !== undefined && (typeof value.model !== 'string' || value.model.length > 200)) {
+    throw new Error(`${path}.model is invalid`);
+  }
+}
+
+function validateRun(value: unknown, path: string): asserts value is TokenBenchmarkRun {
+  if (!isObject(value)) {
+    throw new Error(`${path} must be an object`);
+  }
+  if (value.schemaVersion !== 1) {
+    throw new Error(`${path}.schemaVersion must be 1`);
+  }
+  if (typeof value.scenarioId !== 'string' || value.scenarioId.length === 0) {
+    throw new Error(`${path}.scenarioId must be a non-empty string`);
+  }
+  if (value.variant !== 'baseline' && value.variant !== 'candidate') {
+    throw new Error(`${path}.variant must be baseline or candidate`);
+  }
+  if (!isNonNegativeInteger(value.repetition)) {
+    throw new Error(`${path}.repetition must be a non-negative safe integer`);
+  }
+  if (typeof value.source !== 'string' || !AGENT_SOURCES.has(value.source)) {
+    throw new Error(`${path}.source is invalid`);
+  }
+  if (typeof value.passed !== 'boolean') {
+    throw new Error(`${path}.passed must be a boolean`);
+  }
+  if (!isNonNegativeNumber(value.durationMs)) {
+    throw new Error(`${path}.durationMs must be a non-negative number`);
+  }
+  if (!isNonNegativeInteger(value.toolCalls)) {
+    throw new Error(`${path}.toolCalls must be a non-negative safe integer`);
+  }
+  validateTokenUsage(value.tokenUsage, `${path}.tokenUsage`);
+}
+
+export function validateTokenBenchmarkDataset(value: unknown): TokenBenchmarkDataset {
+  if (!isObject(value)) {
+    throw new Error('dataset must be an object');
+  }
+  if (value.schemaVersion !== 1) {
+    throw new Error('dataset.schemaVersion must be 1');
+  }
+  if (typeof value.label !== 'string' || value.label.length === 0) {
+    throw new Error('dataset.label must be a non-empty string');
+  }
+  if (!Array.isArray(value.runs) || value.runs.length === 0) {
+    throw new Error('dataset.runs must be a non-empty array');
+  }
+  value.runs.forEach((run, index) => validateRun(run, `dataset.runs[${index}]`));
+  return value as unknown as TokenBenchmarkDataset;
+}
+
+export function median(values: number[]): number {
+  if (values.length === 0) {
+    throw new Error('median requires at least one value');
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[middle - 1] + sorted[middle]) / 2
+    : sorted[middle];
+}
+
+function compareMetric(baseline: number[], candidate: number[]): TokenMetricComparison {
+  const baselineMedian = median(baseline);
+  const candidateMedian = median(candidate);
+  const delta = candidateMedian - baselineMedian;
+  const deltaPercent = baselineMedian === 0
+    ? (candidateMedian === 0 ? 0 : Number.POSITIVE_INFINITY)
+    : (delta / baselineMedian) * 100;
+  return { baselineMedian, candidateMedian, delta, deltaPercent };
+}
+
+function successRate(runs: TokenBenchmarkRun[]): number {
+  return (runs.filter((run) => run.passed).length / runs.length) * 100;
+}
+
+function measuredCoverage(runs: TokenBenchmarkRun[]): number {
+  return (runs.filter((run) => run.tokenUsage.quality === 'measured').length / runs.length) * 100;
+}
+
+function scenarioIds(runs: TokenBenchmarkRun[]): string[] {
+  return Array.from(new Set(runs.map((run) => run.scenarioId))).sort();
+}
+
+function sameStrings(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+export function compareTokenBenchmarks(
+  rawBaseline: TokenBenchmarkDataset,
+  rawCandidate: TokenBenchmarkDataset,
+  overrides: Partial<TokenBenchmarkConfig> = {}
+): TokenBenchmarkComparison {
+  const baseline = validateTokenBenchmarkDataset(rawBaseline);
+  const candidate = validateTokenBenchmarkDataset(rawCandidate);
+  const config = { ...DEFAULT_TOKEN_BENCHMARK_CONFIG, ...overrides };
+  const failures: string[] = [];
+
+  if (!sameStrings(scenarioIds(baseline.runs), scenarioIds(candidate.runs))) {
+    throw new Error('baseline and candidate scenario sets must match');
+  }
+  if (baseline.runs.some((run) => run.variant !== 'baseline')) {
+    throw new Error('baseline dataset may contain only baseline runs');
+  }
+  if (candidate.runs.some((run) => run.variant !== 'candidate')) {
+    throw new Error('candidate dataset may contain only candidate runs');
+  }
+
+  const measuredBaseline = baseline.runs.filter((run) => run.tokenUsage.quality === 'measured');
+  const measuredCandidate = candidate.runs.filter((run) => run.tokenUsage.quality === 'measured');
+  if (measuredBaseline.length === 0 || measuredCandidate.length === 0) {
+    throw new Error('baseline and candidate require at least one measured run');
+  }
+
+  const totalTokens = compareMetric(
+    measuredBaseline.map((run) => run.tokenUsage.totalTokens),
+    measuredCandidate.map((run) => run.tokenUsage.totalTokens)
+  );
+  const inputTokens = compareMetric(
+    measuredBaseline.map((run) => run.tokenUsage.inputTokens),
+    measuredCandidate.map((run) => run.tokenUsage.inputTokens)
+  );
+  const outputTokens = compareMetric(
+    measuredBaseline.map((run) => run.tokenUsage.outputTokens),
+    measuredCandidate.map((run) => run.tokenUsage.outputTokens)
+  );
+  const durationMs = compareMetric(
+    baseline.runs.map((run) => run.durationMs),
+    candidate.runs.map((run) => run.durationMs)
+  );
+  const baselineSuccessRate = successRate(baseline.runs);
+  const candidateSuccessRate = successRate(candidate.runs);
+  const measuredCoveragePercent = Math.min(
+    measuredCoverage(baseline.runs),
+    measuredCoverage(candidate.runs)
+  );
+  const reductionPercent = -totalTokens.deltaPercent;
+
+  if (reductionPercent < config.minimumTokenReductionPercent) {
+    failures.push(
+      `token reduction ${reductionPercent.toFixed(2)}% is below ${config.minimumTokenReductionPercent}%`
+    );
+  }
+  if (measuredCoveragePercent < config.minimumMeasuredCoveragePercent) {
+    failures.push(
+      `measured coverage ${measuredCoveragePercent.toFixed(2)}% is below ${config.minimumMeasuredCoveragePercent}%`
+    );
+  }
+  if (durationMs.deltaPercent > config.maximumDurationRegressionPercent) {
+    failures.push(
+      `duration regression ${durationMs.deltaPercent.toFixed(2)}% exceeds ${config.maximumDurationRegressionPercent}%`
+    );
+  }
+  if (
+    config.requireCandidateSuccessForPassingBaseline
+    && baselineSuccessRate > 0
+    && candidateSuccessRate < 100
+  ) {
+    failures.push('candidate must pass every run when the baseline has passing runs');
+  }
+
+  return {
+    passed: failures.length === 0,
+    totalTokens,
+    inputTokens,
+    outputTokens,
+    durationMs,
+    baselineSuccessRate,
+    candidateSuccessRate,
+    measuredCoveragePercent,
+    failures,
+  };
+}
+
+function formatNumber(value: number): string {
+  return Number.isFinite(value) ? value.toFixed(2) : String(value);
+}
+
+export function formatBenchmarkMarkdown(comparison: TokenBenchmarkComparison): string {
+  const rows = [
+    ['Total tokens', comparison.totalTokens],
+    ['Input tokens', comparison.inputTokens],
+    ['Output tokens', comparison.outputTokens],
+    ['Duration (ms)', comparison.durationMs],
+  ];
+  const lines = [
+    `# Token Benchmark: ${comparison.passed ? 'PASS' : 'FAIL'}`,
+    '',
+    '| Metric | Baseline median | Candidate median | Delta % |',
+    '|---|---:|---:|---:|',
+    ...rows.map(([label, metric]) => {
+      const value = metric as TokenMetricComparison;
+      return `| ${label} | ${formatNumber(value.baselineMedian)} | ${formatNumber(value.candidateMedian)} | ${formatNumber(value.deltaPercent)}% |`;
+    }),
+    '',
+    `- Baseline success: ${formatNumber(comparison.baselineSuccessRate)}%`,
+    `- Candidate success: ${formatNumber(comparison.candidateSuccessRate)}%`,
+    `- Measured coverage: ${formatNumber(comparison.measuredCoveragePercent)}%`,
+  ];
+  if (comparison.failures.length > 0) {
+    lines.push('', '## Failures', ...comparison.failures.map((failure) => `- ${failure}`));
+  }
+  return `${lines.join('\n')}\n`;
+}

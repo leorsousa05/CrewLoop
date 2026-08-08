@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.10.2",
+  "version": "0.11.0",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -32,6 +32,7 @@
     "test": "npm run test:server && npm run test:ui",
     "test:server": "node --test dist/**/*.test.js",
     "test:ui": "vitest run --root ui --config vitest.config.ts",
+    "benchmark:tokens": "npm run build:server && node dist/telemetry/benchmark-cli.js",
     "prepublishOnly": "npm run build"
   },
   "engines": {

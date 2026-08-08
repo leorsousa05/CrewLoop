@@ -3,8 +3,13 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { formatDuration, formatTime, truncate, escapeHtml, prettyJson } from '../lib/format';
 import { listWorkspaceFiles } from '../lib/workspace-access';
-import { resolvePath } from '../lib/paths';
-import { projectInvocations, buildFileActivity, operationType } from '../lib/invocations';
+import { resolvePath, resolvePaths } from '../lib/paths';
+import {
+  projectInvocations,
+  buildFileActivity,
+  operationType,
+  resolveFileSnippet,
+} from '../lib/invocations';
 import { buildGraph3D } from '../lib/graph';
 import type { ClientEvent, ClientSession } from '../types';
 
@@ -52,12 +57,36 @@ describe('resolvePath', () => {
     assert.equal(resolvePath({ filePath: 'camel.txt' }), 'camel.txt');
   });
 
-  it('resolves AbsolutePath and TargetFile and lowercase variants', () => {
-    assert.equal(resolvePath({ AbsolutePath: 'abs.txt' }), 'abs.txt');
-    assert.equal(resolvePath({ TargetFile: 'tgt.txt' }), 'tgt.txt');
-    assert.equal(resolvePath({ args: { AbsolutePath: 'args-abs.txt' } }), 'args-abs.txt');
-    assert.equal(resolvePath({ args: { TargetFile: 'args-tgt.txt' } }), 'args-tgt.txt');
-    assert.equal(resolvePath({ targetfile: 'low-tgt.txt' }), 'low-tgt.txt');
+  it('resolves every unique path in stable canonical order', () => {
+    assert.deepEqual(
+      resolvePaths(
+        {
+          path: 'direct.ts',
+          args: { file_path: 'nested.ts' },
+          operations: [
+            { path: 'operation.ts' },
+            { file_path: 'direct.ts' },
+            { filePath: '' },
+          ],
+        },
+        {
+          filePath: 'output.ts',
+          operations: [{ path: 'nested.ts' }, { file_path: 'last.ts' }],
+        }
+      ),
+      ['direct.ts', 'nested.ts', 'operation.ts', 'output.ts', 'last.ts']
+    );
+    assert.equal(resolvePath({ operations: [{ path: 'first.ts' }, { path: 'second.ts' }] }), 'first.ts');
+  });
+
+  it('ignores malformed path containers', () => {
+    assert.deepEqual(
+      resolvePaths(
+        { path: '', args: 'invalid', operations: [null, 'bad', { path: 42 }] },
+        []
+      ),
+      []
+    );
   });
 });
 
@@ -102,7 +131,7 @@ describe('buildFileActivity', () => {
       { id: '1', tool: 'Write', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: { diff: '+x' } },
       { id: '2', tool: 'Read', eventType: 'tool_end', startTime: 1100, status: 'success', input: { path: 'a.txt' } },
     ];
-    const activity = buildFileActivity(invs, resolvePath);
+    const activity = buildFileActivity(invs, resolvePaths);
     assert.equal(activity.length, 1);
     assert.equal(activity[0].path, 'a.txt');
     assert.equal(activity[0].snippet, '+x');
@@ -112,9 +141,114 @@ describe('buildFileActivity', () => {
     const invs = [
       { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'b.txt' }, output: { content: 'kimi read output content' } },
     ];
-    const activity = buildFileActivity(invs, resolvePath);
+    const activity = buildFileActivity(invs, resolvePaths);
     assert.equal(activity.length, 1);
     assert.equal(activity[0].snippet, 'kimi read output content');
+  });
+
+  it('projects one invocation onto every unique file path', () => {
+    const invs = [
+      {
+        id: 'multi',
+        tool: 'apply_patch',
+        eventType: 'tool_end',
+        startTime: 1200,
+        status: 'success',
+        input: {
+          operations: [
+            { path: 'a.ts' },
+            { path: 'b.ts' },
+            { path: 'a.ts' },
+          ],
+        },
+      },
+    ];
+
+    const activity = buildFileActivity(invs, resolvePaths);
+    assert.deepEqual(activity.map((entry) => entry.path), ['a.ts', 'b.ts']);
+    assert.ok(activity.every((entry) => entry.ops[0].id === 'multi'));
+    assert.ok(activity.every((entry) => entry.ops[0].type === 'edit'));
+  });
+
+  it('projects only the matching operation diff onto each file', () => {
+    const invs = [
+      {
+        id: 'multi-diff',
+        tool: 'apply_patch',
+        eventType: 'tool_start',
+        startTime: 1300,
+        status: 'running',
+        input: {
+          operations: [
+            { path: 'a.ts', diff: '*** Update File: a.ts\n+only a' },
+            { path: 'b.ts', diff: '*** Update File: b.ts\n+only b' },
+          ],
+        },
+      },
+    ];
+
+    const activity = buildFileActivity(invs, resolvePaths);
+    assert.equal(activity[0].snippet, '*** Update File: a.ts\n+only a');
+    assert.equal(activity[1].snippet, '*** Update File: b.ts\n+only b');
+    assert.equal(activity[0].snippet?.includes('only b'), false);
+    assert.equal(activity[1].snippet?.includes('only a'), false);
+  });
+});
+
+describe('resolveFileSnippet', () => {
+  it('uses matching input then output operations before output fallbacks', () => {
+    const input = {
+      operations: [
+        { path: 'a.ts', diff: 'input a' },
+        { file_path: 'b.ts', diff: 'input b' },
+      ],
+    };
+    const output = {
+      operations: [
+        { filePath: 'a.ts', diff: 'output a' },
+        { path: 'c.ts', diff: 'output c' },
+      ],
+      diff: 'output fallback',
+      contentSnippet: 'snippet fallback',
+    };
+
+    assert.equal(resolveFileSnippet('a.ts', input, output), 'input a');
+    assert.equal(resolveFileSnippet('b.ts', input, output), 'input b');
+    assert.equal(resolveFileSnippet('c.ts', input, output), 'output c');
+    assert.equal(resolveFileSnippet('d.ts', input, output), 'output fallback');
+  });
+
+  it('uses contentSnippet last when no operation matches', () => {
+    assert.equal(
+      resolveFileSnippet(
+        'a.ts',
+        { operations: 'invalid' },
+        { operations: [null, { path: 'other.ts', diff: 42 }], contentSnippet: 'fallback' }
+      ),
+      'fallback'
+    );
+    assert.equal(resolveFileSnippet('a.ts', null, { contentSnippet: 42 }), undefined);
+  });
+
+  it('treats a matching path without diff as explicit suppression', () => {
+    const input = {
+      operations: [
+        { path: '.env' },
+        { path: 'src/aggregate-limited.ts' },
+        { path: 'src/malformed.ts', diff: 42 },
+      ],
+    };
+    const output = {
+      diff: '+DB_PASSWORD=raw-value',
+      contentSnippet: 'raw fallback',
+    };
+
+    assert.equal(resolveFileSnippet('.env', input, output), undefined);
+    assert.equal(
+      resolveFileSnippet('src/aggregate-limited.ts', input, output),
+      undefined
+    );
+    assert.equal(resolveFileSnippet('src/malformed.ts', input, output), undefined);
   });
 });
 

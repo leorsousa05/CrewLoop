@@ -4,7 +4,7 @@ import { normalizeKimi, type KimiHookPayload } from './kimi';
 import { normalizeClaude, type ClaudeHookPayload } from './claude';
 import { normalizeCodex, type CodexHookPayload } from './codex';
 import { normalizeAgy, type AgyHookPayload } from './agy';
-import { sanitize, sanitizeToolPayload } from '../filters/sanitize';
+import { sanitize, sanitizeToolInputPayload, sanitizeToolPayload } from '../filters/sanitize';
 import { classifyOperation, extractFileDetail } from '../lib/operations';
 
 export { classifyOperation, extractFileDetail };
@@ -154,7 +154,7 @@ export function buildEvent(
     detail: sanitized.detail ?? base.detail ?? fileDetail,
     status: sanitized.status ?? base.status,
     duration_ms: sanitized.duration_ms ?? base.duration_ms,
-    input: sanitizeToolPayload(base.input),
+    input: sanitizeToolInputPayload(base.input),
     output: sanitizeToolPayload(base.output),
     workspacePath: base.workspacePath || (typeof raw.cwd === 'string' ? raw.cwd : undefined) || (typeof raw.workspacePath === 'string' ? raw.workspacePath : undefined) || process.cwd(),
   };

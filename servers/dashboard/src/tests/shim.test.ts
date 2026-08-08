@@ -97,8 +97,9 @@ describe('shim binary', () => {
       assert.strictEqual(parsed.event_type, 'tool_end');
       assert.strictEqual(parsed.source, 'kimi');
       assert.strictEqual(parsed.session_id, 'test-session');
-      assert.deepStrictEqual(parsed.input, { command: 'echo hello' });
+      assert.strictEqual(parsed.input, undefined);
       assert.deepStrictEqual(parsed.output, { output: 'hello\n' });
+      assert.equal(receivedBody!.includes('echo hello'), false);
     } finally {
       server.close();
     }

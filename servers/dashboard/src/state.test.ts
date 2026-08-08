@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { StateStore } from './state';
 import type { DashboardEvent } from './types';
+import { createEmptySessionTokenUsage } from './telemetry/token-usage';
 
 function makeEvent(overrides: Partial<DashboardEvent> = {}): DashboardEvent {
   return {
@@ -44,6 +45,60 @@ describe('StateStore', () => {
     const session = store.getSession('sess-1')!;
     assert.equal(session.tool_counts['Read'], 2);
     assert.equal(session.tool_counts['Edit'], 1);
+  });
+
+  it('aggregates token usage independently of the bounded event list', () => {
+    const store = new StateStore({ maxEventsPerSession: 2, sessionMaxAgeMs: 60000 });
+    for (let index = 1; index <= 4; index++) {
+      store.applyEvent(makeEvent({
+        id: `ev-${index}`,
+        timestamp: 1000 + index,
+        token_usage: {
+          inputTokens: index * 100,
+          outputTokens: index * 20,
+          cacheReadTokens: index * 10,
+          cacheWriteTokens: 0,
+          reasoningTokens: 0,
+          totalTokens: index * 120,
+          measurementId: `m-${index}`,
+          capturedAt: 1000 + index,
+          source: 'kimi',
+          quality: 'measured',
+          semantics: 'cumulative',
+        },
+      }));
+    }
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.events.length, 2);
+    assert.equal(session.token_usage.totalTokens, 480);
+    assert.equal(session.token_usage.inputTokens, 400);
+    assert.equal(session.token_usage.measurementCount, 4);
+  });
+
+  it('does not count the same token measurement twice', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    const token_usage = {
+      inputTokens: 100,
+      outputTokens: 20,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      reasoningTokens: 0,
+      totalTokens: 120,
+      measurementId: 'same',
+      capturedAt: 1000,
+      source: 'kimi' as const,
+      quality: 'measured' as const,
+      semantics: 'delta' as const,
+    };
+    store.applyEvent(makeEvent({ id: 'one', token_usage }));
+    store.applyEvent(makeEvent({ id: 'two', token_usage }));
+    assert.equal(store.getSession('sess-1')!.token_usage.totalTokens, 120);
+  });
+
+  it('initializes sessions with unavailable token telemetry', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent());
+    assert.deepEqual(store.getSession('sess-1')!.token_usage, createEmptySessionTokenUsage());
   });
 
   it('sets active skill when event carries skill', () => {

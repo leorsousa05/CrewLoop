@@ -11,6 +11,51 @@ export type EventType =
 
 export type EventStatus = 'running' | 'success' | 'error';
 
+export type TokenMeasurementQuality = 'measured' | 'estimated' | 'unavailable';
+
+export type TokenCounterSemantics = 'delta' | 'cumulative';
+
+export interface TokenUsageCounts {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  reasoningTokens: number;
+  totalTokens: number;
+}
+
+export interface TokenUsageMeasurement extends TokenUsageCounts {
+  measurementId: string;
+  capturedAt: number;
+  source: AgentSource;
+  model?: string;
+  quality: Exclude<TokenMeasurementQuality, 'unavailable'>;
+  semantics: TokenCounterSemantics;
+}
+
+export interface TokenUsageCursor {
+  capturedAt: number;
+  counts: TokenUsageCounts;
+}
+
+export interface SessionTokenUsage extends TokenUsageCounts {
+  quality: TokenMeasurementQuality;
+  model?: string;
+  measurementCount: number;
+  rejectedMeasurementCount: number;
+  measuredEventCount: number;
+  estimatedEventCount: number;
+  cursors: Record<string, TokenUsageCursor>;
+  measurementIds: string[];
+}
+
+export interface ClientTokenUsage extends TokenUsageCounts {
+  quality: TokenMeasurementQuality;
+  model?: string;
+  measurementCount: number;
+  rejectedMeasurementCount: number;
+}
+
 export interface DashboardEvent {
   id: string;
   timestamp: number;
@@ -24,6 +69,7 @@ export interface DashboardEvent {
   detail?: string;
   status?: EventStatus;
   duration_ms?: number;
+  token_usage?: TokenUsageMeasurement;
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   workspacePath?: string;
@@ -38,6 +84,7 @@ export interface Session {
   lifecycle: 'starting' | 'running' | 'ended';
   events: DashboardEvent[];
   tool_counts: Record<string, number>;
+  token_usage: SessionTokenUsage;
   started_at: number;
   last_event_at: number;
   ended_at?: number;
@@ -62,6 +109,7 @@ export interface ClientEvent {
   detail?: string;
   status?: EventStatus;
   duration_ms?: number;
+  tokenUsage?: TokenUsageMeasurement;
   skill?: string;
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
@@ -79,6 +127,7 @@ export interface ClientSession {
   lastActivity: number;
   endedAt?: number;
   toolCounts: Record<string, number>;
+  tokenUsage?: ClientTokenUsage;
   workspaceRoot?: string;
 }
 

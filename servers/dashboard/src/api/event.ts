@@ -3,9 +3,10 @@ import path from 'node:path';
 import type { DashboardEvent, ClientWebSocketMessage } from '../types';
 import { StateStore } from '../state';
 import { SkillInferenceEngine } from '../skills/infer';
-import { sanitizeEventBoundary, sanitizeToolPayload } from '../filters/sanitize';
+import { sanitizeEventBoundary, sanitizeToolInputPayload, sanitizeToolPayload } from '../filters/sanitize';
 import { classifyOperation } from '../lib/operations';
 import { createUpdateMessage } from '../presenter';
+import { validateTokenUsageMeasurement } from '../telemetry/token-usage';
 
 export interface EventHandlerDependencies {
   state: StateStore;
@@ -121,8 +122,11 @@ export function createEventHandler(deps: EventHandlerDependencies) {
 
     // Defense in depth: events can be POSTed by arbitrary clients, so the
     // payloads are re-sanitized and classified here regardless of the shim.
-    event.input = sanitizeToolPayload(event.input);
+    event.input = sanitizeToolInputPayload(event.input);
     event.output = sanitizeToolPayload(event.output);
+    if (event.token_usage !== undefined) {
+      event.token_usage = validateTokenUsageMeasurement(event.token_usage);
+    }
     if (!event.operationType && event.tool) {
       event.operationType = classifyOperation(event.tool);
     }

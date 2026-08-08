@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "label": "fixture-baseline",
+  "runs": [
+    {
+      "schemaVersion": 1,
+      "scenarioId": "small-change",
+      "variant": "baseline",
+      "repetition": 1,
+      "model": "fixture-model",
+      "source": "codex",
+      "passed": true,
+      "durationMs": 1000,
+      "toolCalls": 4,
+      "tokenUsage": {
+        "inputTokens": 800,
+        "outputTokens": 200,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0,
+        "reasoningTokens": 0,
+        "totalTokens": 1000,
+        "quality": "measured",
+        "model": "fixture-model",
+        "measurementCount": 1,
+        "rejectedMeasurementCount": 0
+      }
+    }
+  ]
+}
