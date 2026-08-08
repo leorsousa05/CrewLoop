@@ -111,6 +111,10 @@ Kimi sends tool inputs and responses in slightly different shapes from other sou
 - **Edit tools** produce a unified `diff` from `old_string`/`new_string`, `oldString`/`newString`, or `old`/`new`.
 - **Tool responses** preserve safe content keys (`content`, `result`, `contentsnippet`) to render code views and diffs.
 
+### Token usage ingestion
+
+The dashboard displays token usage in the Overview telemetry strip and the Telemetry panel. Agent hooks are not required to supply usage counters; when they are missing, the UI shows the telemetry as unavailable. For sources that do not report usage through hooks (e.g. Kimi Code), a local-only `POST /ingest/usage` endpoint accepts a Moonshot-compatible `usage` object and merges it into the matching session's token telemetry. A small `crewloop-ingest-kimi` helper forwards payloads from stdin to the dashboard so users can wire it into their own API integration or logging pipeline. The endpoint validates the session id, source, and token counts, and de-duplicates repeated ingestion using the event timestamp.
+
 ## Client views
 
 The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + session selector + connection indicator + command palette trigger), and a main content area. It exposes six views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):

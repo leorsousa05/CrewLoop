@@ -8,6 +8,7 @@ import { SkillRegistry } from './skills/registry';
 import { SkillInferenceEngine } from './skills/infer';
 import { createEventHandler } from './api/event';
 import { createSkillsHandler } from './api/skills';
+import { createUsageHandler } from './api/usage';
 import { createSnapshotMessage, createUpdateMessage } from './presenter';
 import { createLocalRequestPolicy } from './lib/local-request-policy';
 import {
@@ -111,12 +112,19 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     maxBodyBytes: config.eventBodyBytes,
   });
   const skillsHandler = createSkillsHandler(registry);
+  const usageHandler = createUsageHandler({
+    state,
+    broadcast,
+    getActiveSessionId: () => activeSessionId,
+    maxBodyBytes: config.eventBodyBytes,
+  });
 
   const httpServer = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');
 
     const isSensitiveRoute =
       req.url === '/event' ||
+      req.url === '/ingest/usage' ||
       req.url === '/api/skills' ||
       req.url?.startsWith('/api/workspace-files') ||
       req.url?.startsWith('/api/file-content') ||
@@ -129,6 +137,15 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     if (req.method === 'POST' && req.url === '/event') {
       eventHandler(req, res).catch((err) => {
         console.error('Event handler error:', err);
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Internal server error' }));
+      });
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/ingest/usage') {
+      usageHandler(req, res).catch((err) => {
+        console.error('Usage handler error:', err);
         res.statusCode = 500;
         res.end(JSON.stringify({ error: 'Internal server error' }));
       });

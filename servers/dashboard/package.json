@@ -11,7 +11,8 @@
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
   "bin": {
     "crewloop-dashboard": "bin/crewloop-dashboard.js",
-    "crewloop-shim": "bin/crewloop-shim.js"
+    "crewloop-shim": "bin/crewloop-shim.js",
+    "crewloop-ingest-kimi": "bin/crewloop-ingest-kimi.js"
   },
   "files": [
     "bin/",

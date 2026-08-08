@@ -7,6 +7,7 @@ import { sanitizeEventBoundary, sanitizeToolInputPayload, sanitizeToolPayload } 
 import { classifyOperation } from '../lib/operations';
 import { createUpdateMessage } from '../presenter';
 import { validateTokenUsageMeasurement } from '../telemetry/token-usage';
+import { PayloadTooLargeError, readJsonBody } from './json-body';
 
 export interface EventHandlerDependencies {
   state: StateStore;
@@ -15,43 +16,6 @@ export interface EventHandlerDependencies {
   getActiveSessionId: () => string | undefined;
   setActiveSessionId: (id: string) => void;
   maxBodyBytes: number;
-}
-
-class PayloadTooLargeError extends Error {
-  constructor() {
-    super('Payload too large');
-    this.name = 'PayloadTooLargeError';
-  }
-}
-
-function readJsonBody(req: IncomingMessage, maxBytes: number): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    let bytes = 0;
-    let tooLarge = false;
-    req.setEncoding('utf8');
-    req.on('data', (chunk: string) => {
-      bytes += Buffer.byteLength(chunk);
-      if (bytes > maxBytes) {
-        tooLarge = true;
-        body = '';
-        return;
-      }
-      if (!tooLarge) body += chunk;
-    });
-    req.on('end', () => {
-      if (tooLarge) {
-        reject(new PayloadTooLargeError());
-        return;
-      }
-      try {
-        resolve(JSON.parse(body));
-      } catch {
-        reject(new Error('Invalid JSON'));
-      }
-    });
-    req.on('error', reject);
-  });
 }
 
 function normalizePathsToRelative(obj: unknown, root: string): unknown {

@@ -7,6 +7,7 @@ import { normalizeKimi } from '../adapters/kimi';
 import { normalizeClaude } from '../adapters/claude';
 import { normalizeCodex, type CodexHookPayload } from '../adapters/codex';
 import { normalizeAgy } from '../adapters/agy';
+import { validateTokenUsageMeasurement } from '../telemetry/token-usage';
 
 describe('normalizeKimi', () => {
   it('forwards tool_input as input', () => {
@@ -99,6 +100,66 @@ describe('normalizeKimi', () => {
     });
     assert.ok(event);
     assert.equal(event!.token_usage, undefined);
+  });
+
+  it('produces a token_usage measurement that survives boundary validation', () => {
+    const event = normalizeKimi({
+      hook_event_name: 'Stop',
+      session_id: 'session-usage',
+      cwd: '/tmp',
+      model: 'kimi-k3',
+      usage: {
+        input_tokens: 900,
+        output_tokens: 100,
+        cache_read_input_tokens: 250,
+        total_tokens: 1000,
+      },
+    });
+
+    assert.ok(event?.token_usage);
+    const validated = validateTokenUsageMeasurement(event!.token_usage);
+    assert.ok(validated, 'token_usage should pass boundary validation');
+    assert.equal(validated!.totalTokens, 1000);
+    assert.equal(validated!.model, 'kimi-k3');
+    assert.equal(validated!.source, 'kimi');
+  });
+
+  it('falls back to the Kimi wire log when the payload carries no usage', () => {
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-kimi-fallback-'));
+    try {
+      const sessionId = 'session-wire-fallback';
+      const wireDir = path.join(dataDir, 'sessions', 'workspace-1', sessionId, 'agents', 'agent-1');
+      fs.mkdirSync(wireDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(wireDir, 'wire.jsonl'),
+        `${JSON.stringify({
+          type: 'usage.record',
+          timestamp: '2026-08-08T10:00:00.000Z',
+          usage: { inputOther: 80, output: 40, inputCacheRead: 10, inputCacheCreation: 5, total: 125 },
+        })}\n`,
+        'utf8'
+      );
+
+      const event = normalizeKimi(
+        {
+          hook_event_name: 'PostToolUse',
+          session_id: sessionId,
+          cwd: '/tmp',
+          tool_name: 'Bash',
+        },
+        { kimiDataDir: dataDir }
+      );
+
+      assert.ok(event?.token_usage);
+      assert.equal(event!.token_usage!.totalTokens, 125);
+      assert.equal(event!.token_usage!.inputTokens, 80);
+      assert.equal(event!.token_usage!.outputTokens, 40);
+      assert.equal(event!.token_usage!.cacheReadTokens, 10);
+      assert.equal(event!.token_usage!.cacheWriteTokens, 5);
+      assert.equal(event!.token_usage!.semantics, 'cumulative');
+    } finally {
+      fs.rmSync(dataDir, { recursive: true, force: true });
+    }
   });
 });
 

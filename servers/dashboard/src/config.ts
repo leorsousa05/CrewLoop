@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';
 import type { ServerConfig } from './types';
 
 export const SAFE_TOOL_INPUT_KEYS = new Set([
@@ -96,6 +97,20 @@ export const DEFAULT_FILE_BYTES = 1024 * 1024;
 export const DEFAULT_WORKSPACE_ENTRIES = 20000;
 export const DEFAULT_WORKSPACE_DEPTH = 30;
 
+export function resolveKimiDataDir(): string | undefined {
+  const env = process.env.KIMI_DATA_DIR;
+  if (env) {
+    return env.split(',')[0].trim();
+  }
+  const home = os.homedir();
+  const primary = path.join(home, '.kimi-code');
+  if (fs.existsSync(primary)) {
+    return primary;
+  }
+  const legacy = path.join(home, '.kimi');
+  return fs.existsSync(legacy) ? legacy : undefined;
+}
+
 export function loadConfig(): ServerConfig {
   const port = parseInt(process.env.CREWLOOP_DASHBOARD_PORT || String(DEFAULT_PORT), 10);
   const host = process.env.CREWLOOP_DASHBOARD_HOST || DEFAULT_HOST;
@@ -108,6 +123,7 @@ export function loadConfig(): ServerConfig {
     port,
     host,
     packageRoot: resolvePackageRoot(),
+    kimiDataDir: resolveKimiDataDir(),
     maxEventsPerSession: DEFAULT_MAX_EVENTS,
     sessionMaxAgeMs: DEFAULT_SESSION_MAX_AGE_MS,
     sessionIdleTimeoutMs: Number.isFinite(idleTimeout) && idleTimeout > 0 ? idleTimeout : DEFAULT_SESSION_IDLE_TIMEOUT_MS,

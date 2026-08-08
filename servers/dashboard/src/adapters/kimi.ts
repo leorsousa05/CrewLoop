@@ -1,5 +1,6 @@
 import type { AgentSource, DashboardEvent, EventType } from '../types';
 import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
+import { readKimiSessionTokenUsage } from './kimi-session';
 
 export interface KimiHookPayload {
   hook_event_name: string;
@@ -31,7 +32,14 @@ const TOKEN_USAGE_ALIASES: TokenUsageAliases = {
   total: ['total_tokens', 'totalTokens'],
 };
 
-export function normalizeKimi(payload: KimiHookPayload): DashboardEvent | undefined {
+export interface KimiNormalizationOptions {
+  kimiDataDir?: string;
+}
+
+export function normalizeKimi(
+  payload: KimiHookPayload,
+  options: KimiNormalizationOptions = {}
+): DashboardEvent | undefined {
   const event_type = EVENT_MAP[payload.hook_event_name];
   if (!event_type) {
     return undefined;
@@ -39,14 +47,20 @@ export function normalizeKimi(payload: KimiHookPayload): DashboardEvent | undefi
 
   const id = generateId();
   const timestamp = Date.now();
-  const token_usage = normalizeTokenUsage({
+  const sessionId = payload.session_id || 'unknown';
+  const directTokenUsage = normalizeTokenUsage({
     source: 'kimi',
     rawUsage: payload.usage,
     model: payload.model,
-    eventId: `${payload.session_id || 'unknown'}:${payload.hook_event_name}:${id}`,
+    eventId: `${sessionId}:${payload.hook_event_name}:${id}`,
     capturedAt: timestamp,
     semantics: 'cumulative',
     aliases: TOKEN_USAGE_ALIASES,
+  });
+  const token_usage = directTokenUsage || readKimiSessionTokenUsage({
+    sessionId,
+    model: payload.model,
+    kimiDataDir: options.kimiDataDir,
   });
 
   return {

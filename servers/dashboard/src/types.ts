@@ -166,6 +166,7 @@ export interface ServerConfig {
   port: number;
   host: string;
   packageRoot: string;
+  kimiDataDir?: string;
   maxEventsPerSession: number;
   sessionMaxAgeMs: number;
   sessionIdleTimeoutMs: number;
