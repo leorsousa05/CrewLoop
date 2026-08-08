@@ -329,4 +329,163 @@ describe('DashboardServer', () => {
       assert.equal(res.status, 413);
     });
   });
+
+  it('removes dangerous nested input fields before state and broadcast', async () => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, {
+      headers: { Origin: `http://127.0.0.1:${port}` },
+    });
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('WebSocket timeout')), 2000);
+      ws.once('message', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+
+    type Message = { type: string; session?: { id: string; events: Array<{ id: string; input?: Record<string, unknown> }> } };
+    const updatePromise = new Promise<Message>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('WebSocket timeout')), 2000);
+      const listener = (data: WebSocket.RawData) => {
+        const message = JSON.parse(data.toString()) as Message;
+        if (message.type === 'update' && message.session?.id === 'sess-nested-input') {
+          clearTimeout(timer);
+          ws.off('message', listener);
+          resolve(message);
+        }
+      };
+      ws.on('message', listener);
+    });
+
+    const response = await fetch(`http://127.0.0.1:${port}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 'ev-nested-input',
+        timestamp: Date.now(),
+        source: 'codex',
+        session_id: 'sess-nested-input',
+        event_type: 'tool_start',
+        tool: 'apply_patch',
+        input: {
+          command: 'RAW_PATCH_BODY',
+          content: 'RAW_FILE_CONTENT',
+          operations: [
+            {
+              path: 'src/a.ts',
+              diff: [
+                '*** Update File: src/a.ts',
+                '+API_KEY=RAW_DIFF_SECRET',
+                '+safe derived diff',
+              ].join('\n'),
+              token: 'RAW_TOKEN',
+            },
+            {
+              path: '.env',
+              diff: '*** Update File: .env\n+DB_PASSWORD=RAW_ENV_SECRET',
+            },
+          ],
+        },
+      }),
+    });
+    assert.equal(response.status, 200);
+
+    const update = await updatePromise;
+    const event = update.session!.events.find((candidate) => candidate.id === 'ev-nested-input');
+    assert.deepEqual(event?.input, {
+      operations: [
+        {
+          path: 'src/a.ts',
+          diff: [
+            '*** Update File: src/a.ts',
+            '+[redacted sensitive line]',
+            '+safe derived diff',
+          ].join('\n'),
+        },
+        { path: '.env' },
+      ],
+    });
+    assert.equal(JSON.stringify(event).includes('RAW_PATCH_BODY'), false);
+    assert.equal(JSON.stringify(event).includes('RAW_FILE_CONTENT'), false);
+    assert.equal(JSON.stringify(event).includes('RAW_TOKEN'), false);
+    assert.equal(JSON.stringify(event).includes('RAW_DIFF_SECRET'), false);
+    assert.equal(JSON.stringify(event).includes('RAW_ENV_SECRET'), false);
+    ws.close();
+  });
+
+  it('broadcasts validated token usage and drops invalid usage only', async () => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, {
+      headers: { Origin: `http://127.0.0.1:${port}` },
+    });
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('WebSocket timeout')), 2000);
+      ws.once('message', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+
+    type Message = { type: string; session?: { id: string; tokenUsage?: { quality: string; totalTokens: number; model?: string } } };
+    const nextUpdate = (sessionId: string) => new Promise<Message>((resolve) => {
+      const listener = (data: WebSocket.RawData) => {
+        const message = JSON.parse(data.toString()) as Message;
+        if (message.type === 'update' && message.session?.id === sessionId) {
+          ws.off('message', listener);
+          resolve(message);
+        }
+      };
+      ws.on('message', listener);
+    });
+
+    const validUpdate = nextUpdate('sess-token-valid');
+    const validResponse = await fetch(`http://127.0.0.1:${port}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 'ev-token-valid',
+        timestamp: 1000,
+        source: 'codex',
+        session_id: 'sess-token-valid',
+        event_type: 'session_end',
+        token_usage: {
+          inputTokens: 80,
+          outputTokens: 20,
+          cacheReadTokens: 10,
+          cacheWriteTokens: 0,
+          reasoningTokens: 5,
+          totalTokens: 100,
+          measurementId: 'measurement-valid',
+          capturedAt: 1000,
+          source: 'codex',
+          model: 'gpt-test',
+          quality: 'measured',
+          semantics: 'cumulative',
+        },
+      }),
+    });
+    assert.equal(validResponse.status, 200);
+    const validMessage = await validUpdate;
+    assert.equal(validMessage.session!.tokenUsage!.totalTokens, 100);
+    assert.equal(validMessage.session!.tokenUsage!.model, 'gpt-test');
+
+    const invalidUpdate = nextUpdate('sess-token-invalid');
+    const invalidResponse = await fetch(`http://127.0.0.1:${port}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 'ev-token-invalid',
+        timestamp: 1000,
+        source: 'codex',
+        session_id: 'sess-token-invalid',
+        event_type: 'session_end',
+        token_usage: {
+          inputTokens: -1,
+        },
+      }),
+    });
+    assert.equal(invalidResponse.status, 200);
+    const invalidMessage = await invalidUpdate;
+    assert.equal(invalidMessage.session!.tokenUsage!.quality, 'unavailable');
+    assert.equal(invalidMessage.session!.tokenUsage!.totalTokens, 0);
+    ws.close();
+  });
 });

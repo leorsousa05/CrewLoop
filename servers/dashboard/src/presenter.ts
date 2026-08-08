@@ -1,4 +1,5 @@
 import type { Session, DashboardState, ClientSession, ClientEvent, ClientWebSocketMessage } from './types';
+import { presentTokenUsage } from './telemetry/token-usage';
 
 export function presentEvent(event: Session['events'][number]): ClientEvent {
   return {
@@ -10,6 +11,7 @@ export function presentEvent(event: Session['events'][number]): ClientEvent {
     detail: event.detail,
     status: event.status,
     duration_ms: event.duration_ms,
+    tokenUsage: event.token_usage,
     skill: event.skill,
     input: event.input,
     output: event.output,
@@ -35,6 +37,7 @@ export function presentSession(session: Session): ClientSession {
     lastActivity: session.last_event_at,
     endedAt: session.ended_at,
     toolCounts: session.tool_counts,
+    tokenUsage: presentTokenUsage(session.token_usage),
     workspaceRoot: session.workspaceRoot,
   };
 }

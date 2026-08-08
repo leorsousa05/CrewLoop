@@ -1,4 +1,5 @@
 import type { DashboardEvent, Session, DashboardState, AgentSource, EventStatus } from './types';
+import { createEmptySessionTokenUsage, mergeTokenUsage } from './telemetry/token-usage';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -64,6 +65,18 @@ export class StateStore {
     if (event.workspacePath) {
       session.workspaceRoot = event.workspacePath;
       saveSessionRootMapping(event.session_id, event.workspacePath);
+    }
+
+    if (event.token_usage) {
+      const merged = mergeTokenUsage(session.token_usage, event.token_usage);
+      if (merged.accepted) {
+        session.token_usage = merged.aggregate;
+      } else if (merged.reason === 'invalid') {
+        session.token_usage = {
+          ...session.token_usage,
+          rejectedMeasurementCount: session.token_usage.rejectedMeasurementCount + 1,
+        };
+      }
     }
 
     if (event.event_type === 'session_start' && event.skill) {
@@ -167,6 +180,7 @@ export class StateStore {
       source,
       events: [],
       tool_counts: {},
+      token_usage: createEmptySessionTokenUsage(),
       lifecycle: 'starting',
       started_at: now,
       last_event_at: now,

@@ -1,5 +1,6 @@
 import type { ClientEvent } from '../types';
 import { classifyOperation } from './operations';
+import { resolvePaths } from './paths';
 
 const MAX_EVENTS = 100;
 
@@ -35,6 +36,70 @@ export interface FileEntry {
   path: string;
   ops: FileOp[];
   snippet?: string;
+}
+
+export type ResolvePaths = (input?: unknown, output?: unknown) => string[];
+
+export function resolveFileSnippet(
+  path: string,
+  input?: unknown,
+  output?: unknown
+): string | undefined {
+  const inputOperation = resolveOperationDiff(path, input);
+  if (inputOperation.matched) {
+    return inputOperation.diff;
+  }
+  const outputOperation = resolveOperationDiff(path, output);
+  if (outputOperation.matched) {
+    return outputOperation.diff;
+  }
+  return (
+    resolveStringField(output, 'diff') ??
+    resolveStringField(output, 'contentSnippet') ??
+    resolveStringField(output, 'content') ??
+    resolveStringField(output, 'result') ??
+    resolveStringField(output, 'snippet') ??
+    resolveStringField(output, 'output')
+  );
+}
+
+interface OperationDiffResolution {
+  matched: boolean;
+  diff?: string;
+}
+
+function resolveOperationDiff(
+  path: string,
+  payload: unknown
+): OperationDiffResolution {
+  if (!isPlainObject(payload) || !Array.isArray(payload.operations)) {
+    return { matched: false };
+  }
+  for (const operation of payload.operations) {
+    if (!isPlainObject(operation)) {
+      continue;
+    }
+    const operationPath = [operation.path, operation.file_path, operation.filePath]
+      .find((value): value is string => typeof value === 'string');
+    if (operationPath === path) {
+      return {
+        matched: true,
+        diff: typeof operation.diff === 'string' ? operation.diff : undefined,
+      };
+    }
+  }
+  return { matched: false };
+}
+
+function resolveStringField(payload: unknown, field: string): string | undefined {
+  if (!isPlainObject(payload)) {
+    return undefined;
+  }
+  return typeof payload[field] === 'string' ? payload[field] : undefined;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function statusFromEvent(ev: ClientEvent): string {
@@ -141,55 +206,39 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
 
 export function buildFileActivity(
   invocations: ToolInvocation[],
-  resolvePathFn: (input?: unknown, output?: unknown) => string | undefined
+  resolvePathsFn: ResolvePaths
 ): FileEntry[] {
   const files = new Map<string, FileEntry>();
 
   for (const inv of invocations) {
-    const path = resolvePathFn(inv.input, inv.output);
-    if (!path) continue;
-
-    if (!files.has(path)) {
-      files.set(path, { path, ops: [] });
-    }
-    const entry = files.get(path)!;
-    const snippetCandidates = [
-      inv.output?.diff,
-      inv.output?.contentSnippet,
-      inv.output?.content,
-      inv.output?.result,
-      inv.output?.snippet,
-      inv.output?.output
-    ];
-    let resolvedSnippet: string | undefined;
-    for (const cand of snippetCandidates) {
-      if (typeof cand === 'string' && cand.length > 0) {
-        resolvedSnippet = cand;
-        break;
+    const paths = new Set(resolvePathsFn(inv.input, inv.output));
+    for (const path of paths) {
+      if (!path) continue;
+      if (!files.has(path)) {
+        files.set(path, { path, ops: [] });
       }
-    }
-
-    let lineHint: string | undefined;
-    if (inv.input) {
-      const startLine = inv.input.StartLine ?? inv.input.startLine ?? inv.input.Startline ?? inv.input.line ?? inv.input.Line;
-      const endLine = inv.input.EndLine ?? inv.input.endLine ?? inv.input.Endline;
-      if (startLine !== undefined) {
-        lineHint = endLine !== undefined ? `Lines ${startLine}-${endLine}` : `Line ${startLine}`;
+      const entry = files.get(path)!;
+      let lineHint: string | undefined;
+      if (inv.input) {
+        const startLine = inv.input.StartLine ?? inv.input.startLine ?? inv.input.Startline ?? inv.input.line ?? inv.input.Line;
+        const endLine = inv.input.EndLine ?? inv.input.endLine ?? inv.input.Endline;
+        if (startLine !== undefined) {
+          lineHint = endLine !== undefined ? `Lines ${startLine}-${endLine}` : `Line ${startLine}`;
+        }
       }
+      entry.ops.push({
+        id: inv.id,
+        type: operationType(inv.tool),
+        status: inv.status,
+        timestamp: inv.startTime,
+        tool: inv.tool,
+        snippet: resolveFileSnippet(path, inv.input, inv.output),
+        skill: inv.skill,
+        input: inv.input,
+        output: inv.output,
+        lineHint,
+      });
     }
-
-    entry.ops.push({
-      id: inv.id,
-      type: operationType(inv.tool),
-      status: inv.status,
-      timestamp: inv.startTime,
-      tool: inv.tool,
-      snippet: resolvedSnippet,
-      skill: inv.skill,
-      input: inv.input,
-      output: inv.output,
-      lineHint,
-    });
   }
 
   return Array.from(files.values()).map((entry) => {

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "label": "fixture-candidate",
+  "runs": [
+    {
+      "schemaVersion": 1,
+      "scenarioId": "small-change",
+      "variant": "candidate",
+      "repetition": 1,
+      "model": "fixture-model",
+      "source": "codex",
+      "passed": true,
+      "durationMs": 1050,
+      "toolCalls": 4,
+      "tokenUsage": {
+        "inputTokens": 600,
+        "outputTokens": 150,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0,
+        "reasoningTokens": 0,
+        "totalTokens": 750,
+        "quality": "measured",
+        "model": "fixture-model",
+        "measurementCount": 1,
+        "rejectedMeasurementCount": 0
+      }
+    }
+  ]
+}

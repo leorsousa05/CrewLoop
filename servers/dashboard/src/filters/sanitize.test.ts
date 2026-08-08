@@ -1,6 +1,11 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { sanitize, sanitizeEventBoundary, sanitizeToolPayload } from './sanitize';
+import {
+  sanitize,
+  sanitizeEventBoundary,
+  sanitizeToolInputPayload,
+  sanitizeToolPayload,
+} from './sanitize';
 
 describe('sanitize', () => {
   it('extracts safe path details', () => {
@@ -158,5 +163,130 @@ describe('sanitizeToolPayload', () => {
     cyclic.self = cyclic;
     const result = sanitizeToolPayload(cyclic);
     assert.equal(result?.a, 1);
+  });
+});
+
+describe('sanitizeToolInputPayload', () => {
+  it('removes dangerous input keys recursively while preserving paths', () => {
+    const result = sanitizeToolInputPayload({
+      path: 'src/app.ts',
+      command: 'apply patch',
+      content: 'file body',
+      nested: {
+        code: 'secret code',
+        prompt: 'secret prompt',
+        token: 'secret token',
+        args: { file_path: 'src/nested.ts' },
+      },
+      operations: [{ path: 'src/other.ts', password: 'secret' }],
+    });
+
+    assert.deepEqual(result, {
+      path: 'src/app.ts',
+      nested: { args: { file_path: 'src/nested.ts' } },
+      operations: [{ path: 'src/other.ts' }],
+    });
+  });
+
+  it('returns undefined when sanitization removes every field', () => {
+    assert.equal(
+      sanitizeToolInputPayload({
+        command: 'ls',
+        content: 'body',
+        nested: { token: 'secret' },
+      }),
+      undefined
+    );
+    assert.equal(sanitizeToolInputPayload('not-an-object'), undefined);
+  });
+
+  it('preserves only already-derived operation paths and redacted diffs', () => {
+    const result = sanitizeToolInputPayload({
+      command: 'raw patch must be removed',
+      operations: [
+        {
+          path: 'src/a.ts',
+          diff: '*** Update File: src/a.ts\n+[redacted sensitive line]',
+          token: 'raw token',
+        },
+      ],
+    });
+
+    assert.deepEqual(result, {
+      operations: [
+        {
+          path: 'src/a.ts',
+          diff: '*** Update File: src/a.ts\n+[redacted sensitive line]',
+        },
+      ],
+    });
+    assert.equal(JSON.stringify(result).includes('raw patch'), false);
+    assert.equal(JSON.stringify(result).includes('raw token'), false);
+  });
+
+  it('revalidates untrusted operation diffs before storage', () => {
+    const result = sanitizeToolInputPayload({
+      operations: [
+        {
+          path: 'src/config.ts',
+          diff: [
+            '*** Update File: src/config.ts',
+            '+API_KEY=raw-secret',
+            '+export const safe = true;',
+          ].join('\n'),
+        },
+        {
+          path: '.env',
+          diff: '*** Update File: .env\n+DB_PASSWORD=raw-password',
+        },
+      ],
+    });
+
+    assert.deepEqual(result, {
+      operations: [
+        {
+          path: 'src/config.ts',
+          diff: [
+            '*** Update File: src/config.ts',
+            '+[redacted sensitive line]',
+            '+export const safe = true;',
+          ].join('\n'),
+        },
+        { path: '.env' },
+      ],
+    });
+    assert.equal(JSON.stringify(result).includes('raw-secret'), false);
+    assert.equal(JSON.stringify(result).includes('raw-password'), false);
+  });
+
+  it('reapplies per-file and aggregate budgets to untrusted operation diffs', () => {
+    const operations = Array.from({ length: 10 }, (_, index) => ({
+      path: `src/file-${index}.ts`,
+      diff: [
+        `*** Update File: src/file-${index}.ts`,
+        ...Array.from({ length: 100 }, () => `+${String(index).repeat(80)}`),
+      ].join('\n'),
+    }));
+
+    const result = sanitizeToolInputPayload({ operations });
+    const safeOperations = result?.operations as Array<{
+      path: string;
+      diff?: string;
+    }>;
+    const totalLength = safeOperations.reduce(
+      (total, operation) => total + (operation.diff?.length || 0),
+      0
+    );
+
+    assert.ok(safeOperations.every((operation) => !operation.diff || operation.diff.length <= 8000));
+    assert.ok(totalLength <= 64 * 1024);
+    assert.equal(safeOperations.at(-1)?.diff, undefined);
+
+    const capped = sanitizeToolInputPayload({
+      operations: Array.from({ length: 101 }, (_, index) => ({
+        path: `src/capped-${index}.ts`,
+      })),
+    });
+    assert.equal((capped?.operations as unknown[]).length, 100);
   });
 });

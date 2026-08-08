@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { SkillInferenceEngine } from './infer';
 import type { DashboardEvent, Session } from '../types';
+import { createEmptySessionTokenUsage } from '../telemetry/token-usage';
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -9,6 +10,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     source: 'kimi',
     events: [],
     tool_counts: {},
+    token_usage: createEmptySessionTokenUsage(),
     lifecycle: 'running',
     started_at: Date.now(),
     last_event_at: Date.now(),
