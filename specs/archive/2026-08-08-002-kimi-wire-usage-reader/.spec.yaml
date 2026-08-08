@@ -1,0 +1,13 @@
+name: 002-kimi-wire-usage-reader
+status: completed
+created: 2026-08-08
+completed: 2026-08-08
+author: crewloop:plan
+affected_files:
+  - servers/dashboard/src/adapters/kimi-session.ts
+  - servers/dashboard/src/adapters/kimi-session.test.ts
+  - servers/dashboard/src/adapters/kimi.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - servers/dashboard/src/config.ts
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/tests/adapters.test.ts

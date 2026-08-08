@@ -1,0 +1,16 @@
+name: 001-kimi-token-telemetry
+status: completed
+created: 2026-08-08
+completed: 2026-08-08
+author: crewloop:plan
+affected_files:
+  - servers/dashboard/src/api/usage.ts
+  - servers/dashboard/src/api/json-body.ts
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/ingest/kimi.ts
+  - servers/dashboard/bin/crewloop-ingest-kimi.js
+  - servers/dashboard/package.json
+  - servers/dashboard/src/tests/usage.test.ts
+  - servers/dashboard/src/tests/adapters.test.ts
+  - servers/dashboard/src/api/event.ts
+  - specs/decisions/009-kimi-token-usage-ingestion.md

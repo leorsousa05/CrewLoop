@@ -85,7 +85,15 @@ export function normalizeOpenCode(payload: OpenCodePluginPayload): DashboardEven
   };
 }
 
-export function normalizePayload(source: AgentSource, raw: unknown): DashboardEvent | undefined {
+export interface NormalizationOptions {
+  kimiDataDir?: string;
+}
+
+export function normalizePayload(
+  source: AgentSource,
+  raw: unknown,
+  options: NormalizationOptions = {}
+): DashboardEvent | undefined {
   if (typeof raw !== 'object' || raw === null) {
     return undefined;
   }
@@ -94,7 +102,7 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
 
   switch (source) {
     case 'kimi':
-      return normalizeKimi(payload as unknown as KimiHookPayload);
+      return normalizeKimi(payload as unknown as KimiHookPayload, { kimiDataDir: options.kimiDataDir });
     case 'claude':
       return normalizeClaude(payload as unknown as ClaudeHookPayload);
     case 'codex':
@@ -111,9 +119,10 @@ export function normalizePayload(source: AgentSource, raw: unknown): DashboardEv
 export function buildEvent(
   source: AgentSource,
   raw: Record<string, unknown>,
-  defaultSkill?: string
+  defaultSkill?: string,
+  options?: NormalizationOptions
 ): DashboardEvent | undefined {
-  const base = normalizePayload(source, raw);
+  const base = normalizePayload(source, raw, options);
   if (!base) {
     return undefined;
   }
@@ -207,6 +216,9 @@ export function runShim(): void {
   }
 
   const defaultSkill = getDefaultSkill(process.argv);
+  const normalizationOptions: NormalizationOptions = {
+    kimiDataDir: process.env.KIMI_DATA_DIR,
+  };
 
   let raw = '';
   process.stdin.setEncoding('utf8');
@@ -216,7 +228,7 @@ export function runShim(): void {
   process.stdin.on('end', () => {
     try {
       const payload = JSON.parse(raw);
-      const event = buildEvent(source, payload, defaultSkill);
+      const event = buildEvent(source, payload, defaultSkill, normalizationOptions);
       if (event) {
         postEvent(event, () => process.exit(0));
         return;
