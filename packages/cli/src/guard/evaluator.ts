@@ -62,7 +62,14 @@ function extractPaths(input: Record<string, unknown> | undefined): string[] {
 
 function ruleMatches(rule: GuardRule, event: NormalizedGuardEvent): boolean {
   if (rule.tools && rule.tools.length > 0) {
-    if (!rule.tools.includes(event.tool)) return false;
+    const eventTool = event.tool;
+    const isMatched = rule.tools.some((t) => {
+      if (t === eventTool) return true;
+      if (t.toLowerCase() === 'bash' && (eventTool === 'run_command' || eventTool === 'bash')) return true;
+      if (t === 'run_command' && (eventTool === 'run_command' || eventTool === 'Bash' || eventTool === 'bash')) return true;
+      return false;
+    });
+    if (!isMatched) return false;
   }
 
   if (rule.commandMatches) {
