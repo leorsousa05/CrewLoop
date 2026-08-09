@@ -18,15 +18,21 @@ export function useSecurity(
 ): SecurityData {
   const [decisions, setDecisions] = useState<ClientSecurityDecision[]>(initialDecisions);
   const [pendingConfirmations, setPendingConfirmations] = useState<ClientConfirmationRequest[]>(
-    initialPendingConfirmations
+    initialPendingConfirmations.filter((c) => c.status === 'pending')
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const previousSessionIdRef = useRef<string | null>(null);
 
+  // Sync state whenever props from WebSocket change
+  const prevSessionIdRef = useRef<string | null>(sessionId);
   useEffect(() => {
-    if (previousSessionIdRef.current !== sessionId) {
-      previousSessionIdRef.current = sessionId;
+    if (prevSessionIdRef.current !== sessionId) {
+      prevSessionIdRef.current = sessionId;
+      setDecisions(initialDecisions);
+      setPendingConfirmations(
+        initialPendingConfirmations.filter((c) => c.status === 'pending')
+      );
+    } else if (initialDecisions.length > 0 || initialPendingConfirmations.length > 0) {
       setDecisions(initialDecisions);
       setPendingConfirmations(
         initialPendingConfirmations.filter((c) => c.status === 'pending')

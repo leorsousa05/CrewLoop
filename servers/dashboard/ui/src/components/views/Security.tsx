@@ -266,7 +266,11 @@ export function Security({ selectedSession }: Props) {
     error,
     approveConfirmation,
     denyConfirmation,
-  } = useSecurity(selectedSession?.id ?? null, selectedSession?.securityDecisions ?? []);
+  } = useSecurity(
+    selectedSession?.id ?? null,
+    selectedSession?.securityDecisions ?? [],
+    selectedSession?.pendingConfirmations ?? []
+  );
 
   const viewDecisions = useMemo<ViewDecision[]>(() => {
     const pendingIds = new Set(pendingConfirmations.map((c) => c.id));
