@@ -46,6 +46,8 @@ function extractCommand(input: Record<string, unknown> | undefined): string | un
   if (typeof input.command === 'string') return input.command;
   if (typeof input.CommandLine === 'string') return input.CommandLine;
   if (typeof input.commandLine === 'string') return input.commandLine;
+  if (typeof input.cmd === 'string') return input.cmd;
+  if (typeof input.script === 'string') return input.script;
   if (Array.isArray(input.args) && typeof input.args[0] === 'string') {
     return input.args.join(' ');
   }

@@ -4,12 +4,12 @@ import type { GuardPostEvent } from './guard.types';
 const DEFAULT_DASHBOARD_URL = 'http://127.0.0.1:7890';
 const POST_TIMEOUT_MS = 100;
 
-export function postDecision(event: GuardPostEvent): void {
-  const serverUrl = process.env.CREWLOOP_DASHBOARD_URL || DEFAULT_DASHBOARD_URL;
+export function postDecision(event: GuardPostEvent, serverUrl?: string): void {
+  const dashboardUrl = serverUrl ?? process.env.CREWLOOP_DASHBOARD_URL ?? DEFAULT_DASHBOARD_URL;
   const body = JSON.stringify(event);
 
   try {
-    const url = new URL('/event', serverUrl);
+    const url = new URL('/event', dashboardUrl);
     const req = http.request(
       {
         hostname: url.hostname,
