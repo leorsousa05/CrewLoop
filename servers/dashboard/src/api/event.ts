@@ -79,6 +79,16 @@ export function createEventHandler(deps: EventHandlerDependencies) {
       return;
     }
 
+    // Guard CLI posts security_decision events with a `decision` field
+    // (allow | block | pending), but DashboardEvent uses `detail` for this.
+    // Map the raw field so state.applyEvent() can recognize pending confirmations.
+    if (event.event_type === 'security_decision') {
+      const raw = event as unknown as Record<string, unknown>;
+      if (typeof raw.decision === 'string' && !event.detail) {
+        event.detail = raw.decision as string;
+      }
+    }
+
     const root = event.workspacePath || process.cwd();
     const workspacePath = event.workspacePath;
     event = normalizePathsToRelative(event, root) as DashboardEvent;
