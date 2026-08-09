@@ -113,7 +113,12 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     maxBodyBytes: config.eventBodyBytes,
   });
   const skillsHandler = createSkillsHandler(registry);
-  const securityHandler = createSecurityHandler({ state });
+  const securityHandler = createSecurityHandler({
+    state,
+    maxBodyBytes: config.eventBodyBytes,
+    broadcast,
+    getActiveSessionId: () => activeSessionId,
+  });
   const usageHandler = createUsageHandler({
     state,
     broadcast,
@@ -164,7 +169,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
       return;
     }
 
-    if (req.method === 'GET' && req.url?.startsWith('/api/security')) {
+    if ((req.method === 'GET' || req.method === 'POST') && req.url?.startsWith('/api/security')) {
       securityHandler(req, res).catch((err) => {
         console.error('Security handler error:', err);
         res.statusCode = 500;
