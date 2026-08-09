@@ -3,6 +3,10 @@ import { canonicalSkillName } from '../lib/skills';
 
 export interface AgyHookPayload {
   hook_event_name?: string;
+  hookEventName?: string;
+  eventType?: string;
+  eventName?: string;
+  hookName?: string;
   conversationId?: string;
   sessionId?: string;
   session_id?: string;
@@ -23,7 +27,13 @@ const EVENT_MAP: Record<string, EventType> = {
   PostToolUse: 'tool_end',
   SessionStart: 'session_start',
   SessionEnd: 'session_end',
+  PreInvocation: 'tool_start',
   Stop: 'session_end',
+  security_decision: 'security_decision',
+  tool_start: 'tool_start',
+  tool_end: 'tool_end',
+  session_start: 'session_start',
+  session_end: 'session_end',
 };
 
 const TOOL_NAME_MAP: Record<string, string> = {
@@ -110,9 +120,19 @@ function generateId(sessionId: string, stepIdx: number | undefined): string {
   return `agy:${sessionId}:${suffix}`;
 }
 
-export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefined {
-  const eventName = payload.hook_event_name || 'PostToolUse';
-  const event_type = EVENT_MAP[eventName];
+export function normalizeAgy(
+  payload: AgyHookPayload,
+  options?: { eventTypeOverride?: string }
+): DashboardEvent | undefined {
+  const rawEventName =
+    options?.eventTypeOverride ||
+    payload.hook_event_name ||
+    payload.hookEventName ||
+    payload.eventType ||
+    payload.eventName ||
+    payload.hookName ||
+    (payload.toolCall ? 'PreToolUse' : 'PostToolUse');
+  const event_type = EVENT_MAP[rawEventName];
   if (!event_type) {
     return undefined;
   }
@@ -125,6 +145,12 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
   const args = toolCall?.args;
   const skill = inferSkillFromReadPath(tool, args);
 
+  const p = payload as Record<string, unknown>;
+  const decision = typeof p.decision === 'string' ? (p.decision as DashboardEvent['detail']) : undefined;
+  const rule = typeof p.rule === 'string' ? (p.rule as string) : undefined;
+  const reason = typeof p.reason === 'string' ? (p.reason as string) : undefined;
+  const confirmationId = typeof p.confirmationId === 'string' ? (p.confirmationId as string) : undefined;
+
   return {
     id: generateId(session_id, stepIdx),
     timestamp: Date.now(),
@@ -133,7 +159,10 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
     event_type,
     tool,
     skill,
-    detail: extractDetail(tool, args),
+    detail: decision || extractDetail(tool, args),
+    rule,
+    reason,
+    confirmationId,
     input: args,
     output: payload.error !== undefined ? { error: payload.error } : undefined,
     workspacePath: payload.workspacePaths?.[0],
