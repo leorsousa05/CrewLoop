@@ -1,0 +1,12 @@
+name: 039-fix-agy-hooks-stale-event-pruning
+status: completed
+created: 2026-08-09
+completed: 2026-08-09
+author: crewloop:plan
+affected_files:
+  - packages/cli/src/hooks.ts
+  - packages/cli/src/tests/hooks.test.ts
+
+subagents:
+  approved: false
+  components: []

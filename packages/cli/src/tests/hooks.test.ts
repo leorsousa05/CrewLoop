@@ -350,7 +350,7 @@ describe('installHooksForAgent', () => {
       assert.ok(Array.isArray(config.crewloop[event]), `expected AGY ${event} hooks`);
       assert.strictEqual(
         config.crewloop[event][0].hooks[0].command,
-        'crewloop-shim agy --default-skill crewloop-plan'
+        `crewloop-shim agy --default-skill crewloop-plan --event-type ${event}`
       );
     }
   });
@@ -397,7 +397,7 @@ describe('installHooksForAgent', () => {
     assert.strictEqual(config.crewloop.PreToolUse.length, 1);
   });
 
-  it('migrates AGY from legacy hooks object to crewloop group', () => {
+  it('migrates AGY from legacy crewloop object to hooks group', () => {
     const configPath = path.join(
       fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-')),
       'config.json'
@@ -418,7 +418,7 @@ describe('installHooksForAgent', () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        hooks: {
+        crewloop: {
           before_tool_use: 'crewloop-shim agy --default-skill crewloop-plan',
           after_tool_use: 'crewloop-shim agy --default-skill crewloop-plan',
         },
@@ -431,9 +431,128 @@ describe('installHooksForAgent', () => {
     assert.ok(result.backupPath);
 
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    assert.strictEqual(config.hooks, undefined);
     assert.ok(config.crewloop);
     assert.ok(Array.isArray(config.crewloop.PreToolUse));
+  });
+
+  it('prunes stale CrewLoop-owned event keys from AGY hooks.json', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-stale-')),
+      'config.json'
+    );
+    const agent = createAgentConfig({
+      id: 'agy',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        lifecycleEvents: ['PreInvocation', 'Stop'],
+      },
+    });
+
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        crewloop: {
+          PreToolUse: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type PreToolUse' }],
+            },
+          ],
+          PostToolUse: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type PostToolUse' }],
+            },
+          ],
+          SessionStart: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type SessionStart' }],
+            },
+          ],
+          SessionEnd: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type SessionEnd' }],
+            },
+          ],
+        },
+      }),
+      'utf8'
+    );
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assertResult(result, 'configured');
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(config.crewloop);
+    assert.ok(Array.isArray(config.crewloop.PreToolUse));
+    assert.ok(Array.isArray(config.crewloop.PostToolUse));
+    assert.ok(!config.crewloop.SessionStart);
+    assert.ok(!config.crewloop.SessionEnd);
+  });
+
+  it('preserves non-CrewLoop AGY hooks while pruning stale CrewLoop events', () => {
+    const configPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'crewloop-agy-stale-preserve-')),
+      'config.json'
+    );
+    const agent = createAgentConfig({
+      id: 'agy',
+      skillsDir: path.join(path.dirname(configPath), 'skills'),
+      hooks: {
+        supported: true,
+        configPath,
+        format: 'json',
+        beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
+        lifecycleEvents: ['PreInvocation', 'Stop'],
+      },
+    });
+
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        crewloop: {
+          PreToolUse: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type PreToolUse' }],
+            },
+          ],
+          SessionStart: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'crewloop-shim agy --default-skill crewloop-plan --event-type SessionStart' }],
+            },
+          ],
+        },
+        'my-linter': {
+          PostToolUse: [
+            {
+              matcher: 'run_command',
+              hooks: [{ type: 'command', command: './scripts/lint.sh' }],
+            },
+          ],
+        },
+      }),
+      'utf8'
+    );
+
+    const result = installHooksForAgent(agent, { backup: true });
+    assertResult(result, 'configured');
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(config.crewloop);
+    assert.ok(!config.crewloop.SessionStart);
+    assert.deepStrictEqual(config['my-linter'].PostToolUse[0].matcher, 'run_command');
   });
 
   it('creates a backup before modifying an existing config', () => {

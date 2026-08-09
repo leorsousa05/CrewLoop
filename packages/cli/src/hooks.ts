@@ -3,13 +3,19 @@ import path from 'node:path';
 import os from 'node:os';
 import type { AgentConfig, HookFormat } from './agents';
 
-export type AgentHookEvent = 'PreToolUse' | 'PostToolUse' | 'SessionStart' | 'SessionEnd' | 'Stop';
+export type AgentHookEvent = 'PreToolUse' | 'PostToolUse' | 'SessionStart' | 'SessionEnd' | 'Stop' | 'PreInvocation';
+
+// Events that use a flat array of {type, command} objects (no matcher wrapper).
+// Per AGY docs, only PreToolUse and PostToolUse use the grouped matcher structure.
+const FLAT_EVENTS: ReadonlySet<string> = new Set(['PreInvocation', 'PostInvocation', 'Stop']);
 
 export interface HookEntry {
   event: AgentHookEvent;
   matcher: string;
   command: string;
   timeout?: number;
+  /** If true, emit as a flat {type, command} object instead of {matcher, hooks:[...]}. */
+  flat?: boolean;
 }
 
 export interface AgentHookConfigFile {
@@ -57,7 +63,7 @@ function configsEqual(a: AgentHookConfigFile, b: AgentHookConfigFile): boolean {
 }
 
 function isCrewLoopCommand(command: string): boolean {
-  return command.includes('crewloop-shim');
+  return command.includes('crewloop-shim') || command.includes('crewloop-guard');
 }
 
 interface ParsedKimiBlock {
@@ -339,21 +345,90 @@ abstract class GroupedJsonHookWriter implements AgentHookConfigWriter {
     const root = clone[this.rootKey] as Record<string, JsonMatcherBlock[] | string | object>;
 
     for (const hook of hooks) {
-      const eventArray = this.ensureEventArray(root, hook.event);
-      const filtered = eventArray.filter((block) => !isCrewLoopMatcherBlock(block));
-      filtered.push(this.toMatcherBlock(hook));
-      root[hook.event] = filtered;
+      if (hook.flat || FLAT_EVENTS.has(hook.event)) {
+        // Flat events: array of {type, command} objects directly.
+        const existing = root[hook.event];
+        const existingArr: JsonHookCommand[] = Array.isArray(existing)
+          ? (existing as unknown as JsonHookCommand[])
+          : [];
+        const filtered = existingArr.filter(
+          (c) => typeof (c as unknown as JsonHookCommand).command !== 'string' || !isCrewLoopCommand((c as unknown as JsonHookCommand).command)
+        );
+        filtered.push(this.toFlatCommand(hook));
+        root[hook.event] = filtered as unknown as JsonMatcherBlock[];
+      } else {
+        const eventArray = this.ensureEventArray(root, hook.event);
+        const filtered = eventArray.filter((block) => !isCrewLoopMatcherBlock(block));
+        filtered.push(this.toMatcherBlock(hook));
+        root[hook.event] = filtered;
+      }
     }
+
+    this.pruneStaleEvents(root, hooks);
 
     return { ...config, raw: clone };
   }
 
-  private buildRoot(hooks: HookEntry[]): Record<string, JsonMatcherBlock[]> {
-    const root: Record<string, JsonMatcherBlock[]> = {};
+  private pruneStaleEvents(
+    root: Record<string, JsonMatcherBlock[] | string | object>,
+    hooks: HookEntry[]
+  ): void {
+    const desiredEvents = new Set<string>(hooks.map((hook) => hook.event));
+
+    for (const event of Object.keys(root)) {
+      if (desiredEvents.has(event)) {
+        continue;
+      }
+
+      const entries = root[event];
+      if (!Array.isArray(entries)) {
+        continue;
+      }
+
+      const pruned = entries.filter((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return true;
+        }
+
+        const maybeMatcher = entry as Partial<JsonMatcherBlock>;
+        if (typeof maybeMatcher.matcher === 'string' && Array.isArray(maybeMatcher.hooks)) {
+          return !isCrewLoopMatcherBlock(entry as JsonMatcherBlock);
+        }
+
+        const maybeCommand = entry as Partial<JsonHookCommand>;
+        if (typeof maybeCommand.command === 'string') {
+          return !isCrewLoopCommand(maybeCommand.command);
+        }
+
+        return true;
+      });
+
+      if (pruned.length === 0) {
+        delete root[event];
+      } else {
+        root[event] = pruned as JsonMatcherBlock[];
+      }
+    }
+  }
+
+  private buildRoot(hooks: HookEntry[]): Record<string, unknown[]> {
+    const root: Record<string, unknown[]> = {};
     for (const hook of hooks) {
-      root[hook.event] = [this.toMatcherBlock(hook)];
+      if (hook.flat || FLAT_EVENTS.has(hook.event)) {
+        root[hook.event] = [this.toFlatCommand(hook)];
+      } else {
+        root[hook.event] = [this.toMatcherBlock(hook)];
+      }
     }
     return root;
+  }
+
+  private toFlatCommand(hook: HookEntry): JsonHookCommand {
+    const command: JsonHookCommand = { type: 'command', command: hook.command };
+    if (hook.timeout !== undefined) {
+      command.timeout = hook.timeout;
+    }
+    return command;
   }
 
   private toMatcherBlock(hook: HookEntry): JsonMatcherBlock {
@@ -410,7 +485,7 @@ class ClaudeHookWriter extends GroupedJsonHookWriter {
 class AgyHookWriter extends GroupedJsonHookWriter {
   readonly agentId = 'agy';
   readonly rootKey = 'crewloop';
-  readonly legacyRootKey = 'hooks';
+  readonly legacyRootKey = 'crewloop';
 }
 
 function cleanupLegacyAgyConfig(): void {
@@ -568,12 +643,14 @@ export function installHooksForAgent(
     const shimCommand = agent.hooks.beforeToolUseCommand || `crewloop-shim ${agent.id}`;
     const guardEnabled = options.guard === true && agent.guardCapable !== false;
     const guardCapability = guardEnabled ? agent.guardCapable : false;
-    const defaultSkillFlag = shimCommand.includes('--default-skill')
-      ? shimCommand.slice(shimCommand.indexOf('--default-skill'))
-      : undefined;
+    const defaultSkillMatch = shimCommand.match(/--default-skill\s+([^\s]+)/);
+    const defaultSkillFlag = defaultSkillMatch ? `--default-skill ${defaultSkillMatch[1]}` : undefined;
+    const eventTypeMatch = shimCommand.match(/--event-type\s+([^\s]+)/);
+    const eventTypeFlag = eventTypeMatch ? `--event-type ${eventTypeMatch[1]}` : undefined;
     const guardCommand = guardCapability
-      ? `crewloop-guard ${agent.id}${defaultSkillFlag ? ` ${defaultSkillFlag}` : ''} --guard-capable ${guardCapability}`
+      ? `crewloop-guard ${agent.id}${defaultSkillFlag ? ` ${defaultSkillFlag}` : ''}${eventTypeFlag ? ` ${eventTypeFlag}` : ''} --guard-capable ${guardCapability}`
       : undefined;
+    const baseShimCommand = `crewloop-shim ${agent.id}${defaultSkillFlag ? ` ${defaultSkillFlag}` : ''}`;
 
     const hooks: HookEntry[] = [
       {
@@ -591,7 +668,9 @@ export function installHooksForAgent(
       ...(agent.hooks.lifecycleEvents || []).map((event) => ({
         event: event as AgentHookEvent,
         matcher: '*',
-        command: shimCommand,
+        command: agent.id === 'agy' ? `${baseShimCommand} --event-type ${event}` : shimCommand,
+        // PreInvocation and Stop use a flat format (no matcher wrapper) per AGY spec.
+        flat: FLAT_EVENTS.has(event),
       })),
     ];
 
