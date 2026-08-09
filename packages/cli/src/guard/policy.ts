@@ -8,7 +8,23 @@ export const DEFAULT_POLICY: GuardPolicy = {
   version: 1,
   mode: 'audit',
   defaultAction: 'allow',
-  rules: [],
+  confirmationTimeout: 300000,
+  rules: [
+    {
+      name: 'confirm git push',
+      action: 'confirm',
+      tools: ['Bash', 'run_command'],
+      commandMatches: '^git\\s+push',
+      confirmationTimeout: 300000,
+    },
+    {
+      name: 'confirm git force push',
+      action: 'confirm',
+      tools: ['Bash', 'run_command'],
+      commandMatches: '^git\\s+push.*--force',
+      confirmationTimeout: 300000,
+    },
+  ],
 };
 
 const GLOBAL_POLICY_PATH = path.join(os.homedir(), '.crewloop', 'guard.yml');
@@ -180,7 +196,21 @@ export interface LoadPolicyOptions {
   cwd?: string;
 }
 
+export function ensureGlobalPolicy(dryRun?: boolean): string {
+  const globalDir = path.dirname(GLOBAL_POLICY_PATH);
+  if (!dryRun && !fs.existsSync(globalDir)) {
+    fs.mkdirSync(globalDir, { recursive: true });
+  }
+  if (!fs.existsSync(GLOBAL_POLICY_PATH)) {
+    if (!dryRun) {
+      fs.writeFileSync(GLOBAL_POLICY_PATH, stringify(DEFAULT_POLICY), 'utf8');
+    }
+  }
+  return GLOBAL_POLICY_PATH;
+}
+
 export function loadPolicy(options: LoadPolicyOptions = {}): GuardPolicy {
+  ensureGlobalPolicy();
   const global = loadPolicyFile(GLOBAL_POLICY_PATH);
   const workspacePath = options.cwd ? findWorkspacePolicy(options.cwd) : undefined;
   const workspace = workspacePath ? loadPolicyFile(workspacePath) : undefined;

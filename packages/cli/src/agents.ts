@@ -4,7 +4,7 @@ import type { AgentGuardCapability } from './guard/guard.types';
 
 export type HookFormat = 'toml' | 'json' | 'plugin' | 'none';
 
-export type AgentLifecycleEvent = 'SessionStart' | 'SessionEnd' | 'Stop';
+export type AgentLifecycleEvent = 'SessionStart' | 'SessionEnd' | 'Stop' | 'PreInvocation';
 
 export interface AgentHookConfig {
   supported: boolean;
@@ -67,16 +67,16 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
   },
   {
     id: 'agy',
-    skillsDir: path.join(os.homedir(), '.agy', 'skills'),
+    skillsDir: path.join(os.homedir(), '.gemini', 'config', 'skills'),
     hooks: {
       supported: true,
       configPath: path.join(os.homedir(), '.gemini', 'config', 'hooks.json'),
       format: 'json',
-      beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
-      afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
-      lifecycleEvents: ['SessionStart', 'SessionEnd'],
+      beforeToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan --event-type PreToolUse',
+      afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan --event-type PostToolUse',
+      lifecycleEvents: ['PreInvocation', 'Stop'],
     },
-    guardCapable: 'audit',
+    guardCapable: 'block',
   },
   {
     id: 'opencode',

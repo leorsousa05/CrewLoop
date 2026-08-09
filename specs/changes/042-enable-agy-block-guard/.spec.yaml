@@ -1,0 +1,7 @@
+version: 1
+status: completed
+agent_parallelization: true
+author: crewloop-plan
+spec_id: "042"
+title: Enable Blocking Guard Capability for AGY
+description: Enable block mode guard capability for AGY agent configuration in CLI and update tests.

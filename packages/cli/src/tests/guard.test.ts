@@ -27,7 +27,7 @@ describe('policy loader', () => {
   it('returns default policy when no files exist', () => {
     const policy = loadPolicy({ cwd: tmpDir });
     assert.strictEqual(policy.defaultAction, 'allow');
-    assert.strictEqual(policy.rules.length, 0);
+    assert.strictEqual(policy.rules.length, 2);
   });
 
   it('loads global policy', () => {
@@ -39,8 +39,8 @@ describe('policy loader', () => {
 
     const policy = loadPolicy({ cwd: tmpDir });
     assert.strictEqual(policy.mode, 'block');
-    assert.strictEqual(policy.rules.length, 1);
-    assert.strictEqual(policy.rules[0].name, 'block bash');
+    assert.strictEqual(policy.rules.length, 3);
+    assert.strictEqual(policy.rules[0].name, 'confirm git push');
   });
 
   it('merges workspace policy overriding rules by name', () => {
@@ -60,8 +60,9 @@ describe('policy loader', () => {
 
     const policy = loadPolicy({ cwd: workspaceDir });
     assert.strictEqual(policy.mode, 'audit');
-    assert.strictEqual(policy.rules.length, 1);
-    assert.strictEqual(policy.rules[0].action, 'allow');
+    assert.strictEqual(policy.rules.length, 3);
+    const sharedRule = policy.rules.find((r) => r.name === 'shared');
+    assert.strictEqual(sharedRule?.action, 'allow');
   });
 
   it('fails open on invalid YAML', () => {
@@ -84,9 +85,10 @@ describe('policy loader', () => {
 
     const policy = loadPolicy({ cwd: tmpDir });
     assert.strictEqual(policy.confirmationTimeout, 120000);
-    assert.strictEqual(policy.rules.length, 1);
-    assert.strictEqual(policy.rules[0].action, 'confirm');
-    assert.strictEqual(policy.rules[0].confirmationTimeout, 60000);
+    assert.strictEqual(policy.rules.length, 2);
+    const confirmRule = policy.rules.find((r) => r.name === 'confirm git push');
+    assert.strictEqual(confirmRule?.action, 'confirm');
+    assert.strictEqual(confirmRule?.confirmationTimeout, 60000);
   });
 
   it('overrides confirm rule action to allow when present in confirmations.yml', () => {
@@ -101,9 +103,9 @@ describe('policy loader', () => {
     saveRememberedConfirmation(workspaceDir, 'confirm git push');
 
     const policy = loadPolicy({ cwd: workspaceDir });
-    assert.strictEqual(policy.rules.length, 1);
-    assert.strictEqual(policy.rules[0].name, 'confirm git push');
-    assert.strictEqual(policy.rules[0].action, 'allow');
+    assert.strictEqual(policy.rules.length, 2);
+    const confirmRule = policy.rules.find((r) => r.name === 'confirm git push');
+    assert.strictEqual(confirmRule?.action, 'allow');
   });
 
   it('fails open on invalid confirmationTimeout', () => {
