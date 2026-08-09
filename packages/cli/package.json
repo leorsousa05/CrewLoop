@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-cli",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "private": true,
   "description": "CLI for installing CrewLoop skills",
   "license": "MIT",
@@ -11,7 +11,8 @@
   },
   "homepage": "https://leorsousa05.github.io/CrewLoop/",
   "bin": {
-    "crewloop": "bin/crewloop.js"
+    "crewloop": "bin/crewloop.js",
+    "crewloop-guard": "bin/crewloop-guard.js"
   },
   "files": [
     "bin/",
@@ -36,5 +37,8 @@
     "skills",
     "crewloop",
     "cli"
-  ]
+  ],
+  "dependencies": {
+    "yaml": "^2.9.0"
+  }
 }

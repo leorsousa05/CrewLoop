@@ -10,6 +10,12 @@ import {
 } from '../hooks';
 import type { AgentConfig, HookFormat } from '../agents';
 
+function defaultGuardCapable(id: string): AgentConfig['guardCapable'] {
+  if (id === 'kimi' || id === 'opencode') return 'block';
+  if (id === 'claude' || id === 'codex' || id === 'agy') return 'audit';
+  return false;
+}
+
 function createAgentConfig(
   overrides: Partial<AgentConfig> & { format?: HookFormat } = {}
 ): AgentConfig {
@@ -28,6 +34,7 @@ function createAgentConfig(
       afterToolUseCommand: `crewloop-shim ${id} --default-skill crewloop-plan`,
       ...hookOverrides,
     },
+    guardCapable: restOverrides.guardCapable ?? defaultGuardCapable(id),
   };
 }
 
@@ -70,6 +77,42 @@ describe('installHooksForAgent', () => {
       .split('[[hooks]]')
       .filter((block) => block.includes('crewloop-shim')).length;
     assert.strictEqual(crewLoopBlocks, 2);
+  });
+
+  it('configures Kimi TOML hooks with guard wrapper when guard is enabled', () => {
+    const agent = createAgentConfig({ id: 'kimi', format: 'toml' });
+    fs.mkdirSync(agent.skillsDir, { recursive: true });
+
+    const result = installHooksForAgent(agent, { backup: true, guard: true });
+    assertResult(result, 'configured');
+
+    const content = fs.readFileSync(result.configPath!, 'utf8');
+    assert.ok(content.includes('command = "crewloop-guard kimi --default-skill crewloop-plan --guard-capable block"'));
+    assert.ok(content.includes('event = "PostToolUse"'));
+    assert.ok(content.includes('command = "crewloop-shim kimi --default-skill crewloop-plan"'));
+  });
+
+  it('configures audit-only agents with guard in audit mode', () => {
+    const agent = createAgentConfig({ id: 'claude', format: 'json' });
+
+    const result = installHooksForAgent(agent, { backup: true, guard: true });
+    assertResult(result, 'configured');
+
+    const config = JSON.parse(fs.readFileSync(result.configPath!, 'utf8'));
+    assert.strictEqual(
+      config.hooks.PreToolUse[0].hooks[0].command,
+      'crewloop-guard claude --default-skill crewloop-plan --guard-capable audit'
+    );
+  });
+
+  it('does not wrap hooks for unsupported agents even when guard is enabled', () => {
+    const agent = createAgentConfig({
+      id: 'cursor',
+      hooks: { supported: false, configPath: '', format: 'none' },
+    });
+
+    const result = installHooksForAgent(agent, { guard: true });
+    assert.strictEqual(result.status, 'unsupported');
   });
 
   it('preserves user Kimi hooks when adding CrewLoop hooks', () => {

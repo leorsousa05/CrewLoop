@@ -1,5 +1,6 @@
 import path from 'node:path';
 import os from 'node:os';
+import type { AgentGuardCapability } from './guard/guard.types';
 
 export type HookFormat = 'toml' | 'json' | 'plugin' | 'none';
 
@@ -19,6 +20,7 @@ export interface AgentConfig {
   id: string;
   skillsDir: string;
   hooks: AgentHookConfig;
+  guardCapable: AgentGuardCapability;
 }
 
 const SUPPORTED_AGENTS: AgentConfig[] = [
@@ -35,6 +37,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       afterToolUseCommand: 'crewloop-shim kimi --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd', 'Stop'],
     },
+    guardCapable: 'block',
   },
   {
     id: 'claude',
@@ -47,6 +50,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       afterToolUseCommand: 'crewloop-shim claude --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
+    guardCapable: 'audit',
   },
   {
     id: 'codex',
@@ -59,6 +63,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       afterToolUseCommand: 'crewloop-shim codex --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'Stop'],
     },
+    guardCapable: 'audit',
   },
   {
     id: 'agy',
@@ -71,6 +76,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       afterToolUseCommand: 'crewloop-shim agy --default-skill crewloop-plan',
       lifecycleEvents: ['SessionStart', 'SessionEnd'],
     },
+    guardCapable: 'audit',
   },
   {
     id: 'opencode',
@@ -82,6 +88,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       beforeToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
       afterToolUseCommand: 'crewloop-shim opencode --default-skill crewloop-plan',
     },
+    guardCapable: 'block',
   },
   {
     id: 'cursor',
@@ -91,6 +98,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       configPath: '',
       format: 'none',
     },
+    guardCapable: false,
   },
   {
     id: 'windsurf',
@@ -100,6 +108,7 @@ const SUPPORTED_AGENTS: AgentConfig[] = [
       configPath: '',
       format: 'none',
     },
+    guardCapable: false,
   },
 ];
 

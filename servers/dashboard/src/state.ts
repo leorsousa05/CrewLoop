@@ -1,10 +1,11 @@
-import type { DashboardEvent, Session, DashboardState, AgentSource, EventStatus } from './types';
+import type { DashboardEvent, Session, DashboardState, AgentSource, EventStatus, SecurityDecision } from './types';
 import { createEmptySessionTokenUsage, mergeTokenUsage } from './telemetry/token-usage';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
 const RUNTIME_ROOTS_FILE = path.join(os.tmpdir(), 'crewloop-session-roots.json');
+const MAX_SECURITY_DECISIONS = 1000;
 
 function saveSessionRootMapping(sessionId: string, workspaceRoot: string) {
   try {
@@ -94,14 +95,25 @@ export class StateStore {
       event.skill = session.active_skill;
     }
 
-    session.events.unshift(event);
+    if (event.event_type === 'security_decision') {
+      session.security_decisions.unshift({
+        timestamp: event.timestamp,
+        tool: event.tool || 'unknown',
+        decision: event.detail === 'block' ? 'block' : 'allow',
+      });
+      if (session.security_decisions.length > MAX_SECURITY_DECISIONS) {
+        session.security_decisions.length = MAX_SECURITY_DECISIONS;
+      }
+    } else {
+      session.events.unshift(event);
 
-    if (session.events.length > this.options.maxEventsPerSession) {
-      session.events.length = this.options.maxEventsPerSession;
-    }
+      if (session.events.length > this.options.maxEventsPerSession) {
+        session.events.length = this.options.maxEventsPerSession;
+      }
 
-    if (event.tool) {
-      session.tool_counts[event.tool] = (session.tool_counts[event.tool] || 0) + 1;
+      if (event.tool) {
+        session.tool_counts[event.tool] = (session.tool_counts[event.tool] || 0) + 1;
+      }
     }
 
     if (event.event_type === 'session_end') {
@@ -181,6 +193,7 @@ export class StateStore {
       events: [],
       tool_counts: {},
       token_usage: createEmptySessionTokenUsage(),
+      security_decisions: [],
       lifecycle: 'starting',
       started_at: now,
       last_event_at: now,
@@ -214,6 +227,8 @@ function deriveSessionStatus(event: DashboardEvent): EventStatus | undefined {
       return event.status || 'success';
     case 'session_end':
       return 'success';
+    case 'security_decision':
+      return undefined;
     default:
       return undefined;
   }

@@ -24,6 +24,7 @@ import { SessionsView } from './components/views/SessionsView';
 import { TimelineView } from './components/views/TimelineView';
 import { FilesView } from './components/views/FilesView';
 import { SkillsView } from './components/views/SkillsView';
+import { Security } from './components/views/Security';
 import { SettingsView } from './components/views/SettingsView';
 import { projectInvocations, buildFileActivity } from '../../src/lib/invocations';
 import { resolvePath, resolvePaths } from '../../src/lib/paths';
@@ -398,6 +399,8 @@ export default function App() {
         );
       case 'skills':
         return <SkillsView invocations={filteredInvocations} filterOptions={filterOptions} />;
+      case 'security':
+        return <Security selectedSession={selectedSession} />;
       case 'settings':
         return <SettingsView />;
       default:

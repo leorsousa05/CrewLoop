@@ -9,6 +9,7 @@ import { SkillInferenceEngine } from './skills/infer';
 import { createEventHandler } from './api/event';
 import { createSkillsHandler } from './api/skills';
 import { createUsageHandler } from './api/usage';
+import { createSecurityHandler } from './api/security';
 import { createSnapshotMessage, createUpdateMessage } from './presenter';
 import { createLocalRequestPolicy } from './lib/local-request-policy';
 import {
@@ -112,6 +113,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     maxBodyBytes: config.eventBodyBytes,
   });
   const skillsHandler = createSkillsHandler(registry);
+  const securityHandler = createSecurityHandler({ state });
   const usageHandler = createUsageHandler({
     state,
     broadcast,
@@ -126,6 +128,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
       req.url === '/event' ||
       req.url === '/ingest/usage' ||
       req.url === '/api/skills' ||
+      req.url?.startsWith('/api/security') ||
       req.url?.startsWith('/api/workspace-files') ||
       req.url?.startsWith('/api/file-content') ||
       req.url?.startsWith('/api/file-diff');
@@ -155,6 +158,15 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     if (req.method === 'GET' && req.url === '/api/skills') {
       skillsHandler(req, res).catch((err) => {
         console.error('Skills handler error:', err);
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Internal server error' }));
+      });
+      return;
+    }
+
+    if (req.method === 'GET' && req.url?.startsWith('/api/security')) {
+      securityHandler(req, res).catch((err) => {
+        console.error('Security handler error:', err);
         res.statusCode = 500;
         res.end(JSON.stringify({ error: 'Internal server error' }));
       });

@@ -1,0 +1,61 @@
+name: 033-security-guard
+status: completed
+created: 2026-08-08
+completed: 2026-08-08
+author: crewloop:plan
+affected_files:
+  - packages/cli/package.json
+  - packages/cli/bin/crewloop-guard.js
+  - packages/cli/src/args.ts
+  - packages/cli/src/commands/install.ts
+  - packages/cli/src/guard/guard.types.ts
+  - packages/cli/src/guard/index.ts
+  - packages/cli/src/guard/policy.ts
+  - packages/cli/src/guard/evaluator.ts
+  - packages/cli/src/guard/normalize.ts
+  - packages/cli/src/guard/post.ts
+  - packages/cli/src/hooks.ts
+  - packages/cli/src/agents.ts
+  - packages/cli/src/tests/guard.test.ts
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/state.ts
+  - servers/dashboard/src/presenter.ts
+  - servers/dashboard/src/api/security.ts
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - servers/dashboard/src/adapters/shim.test.ts
+  - servers/dashboard/src/state.test.ts
+  - servers/dashboard/src/presenter.test.ts
+  - servers/dashboard/src/skills/infer.test.ts
+  - servers/dashboard/src/tests/lib-helpers.test.ts
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/lib/types.ts
+  - servers/dashboard/ui/src/lib/navigation.ts
+  - servers/dashboard/ui/src/lib/shortcuts.ts
+  - servers/dashboard/ui/src/components/views/Security.tsx
+  - servers/dashboard/ui/src/components/TelemetryPanel.test.tsx
+  - servers/dashboard/ui/src/hooks/useSecurity.ts
+  - servers/dashboard/ui/src/components/views/Security.test.tsx
+  - specs/decisions/010-security-guard-architecture.md
+  - specs/living/cli/hooks.md
+  - specs/living/dashboard/spec.md
+
+subagents:
+  approved: true
+  components:
+    - name: guard-core
+      scope: Implement crewloop-guard binary, policy loader, evaluator, and normalization.
+      files: packages/cli/src/guard/**, packages/cli/bin/crewloop-guard.js, packages/cli/src/tests/guard.test.ts
+      constraints: Do not touch dashboard code. Do not change existing shim behavior.
+    - name: cli-install
+      scope: Update hook installation to emit guard-wrapped commands and add guard enable/disable CLI options.
+      files: packages/cli/src/hooks.ts, packages/cli/src/agents.ts, packages/cli/src/args.ts, packages/cli/src/commands/install.ts, packages/cli/package.json
+      constraints: Keep backward-compatible with existing shim-only installs. Guard is opt-in per agent.
+    - name: dashboard-security-api
+      scope: Add security_decision event type, session state tracking, and REST/WebSocket exposure.
+      files: servers/dashboard/src/types.ts, servers/dashboard/src/state.ts, servers/dashboard/src/presenter.ts, servers/dashboard/src/api/security.ts, servers/dashboard/src/server.ts
+      constraints: Do not modify UI. Preserve existing event normalization.
+    - name: dashboard-security-ui
+      scope: Add Security view, navigation item, and hook for security events.
+      files: servers/dashboard/ui/src/components/views/Security.tsx, servers/dashboard/ui/src/hooks/useSecurity.ts, servers/dashboard/ui/src/lib/navigation.ts, servers/dashboard/ui/src/lib/types.ts, servers/dashboard/ui/src/components/views/Security.test.tsx
+      constraints: Follow existing design system and navigation patterns. Use existing data-fetching hooks as reference.

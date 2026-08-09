@@ -94,7 +94,9 @@ JSON grouped object format. CrewLoop uses the `"crewloop"` group to isolate its 
 - **Backup**: A timestamped backup is created before mutating an existing file.
 - **dry-run**: Reports the config path without writing.
 - **Matcher default**: CrewLoop uses a catch-all matcher for every agent. Kimi Code compiles `matcher` as a JavaScript regular expression, so CrewLoop emits `".*"` for Kimi. JSON-based agents (Codex, Claude, AGY) keep their agent-specific `"*"` catch-all.
-- **Identification rule**: A hook belongs to CrewLoop if its command contains `crewloop-shim`.
+- **Identification rule**: A hook belongs to CrewLoop if its command contains `crewloop-shim` or `crewloop-guard`.
+- **Security guard**: When `crewloop install --guard` is used, `PreToolUse` hooks invoke `crewloop-guard <agent>` instead of `crewloop-shim`. The guard evaluates policy and either blocks the tool or delegates to `crewloop-shim`. PostToolUse and lifecycle hooks always use `crewloop-shim`.
+- **Guard capability per agent**: Kimi and OpenCode support blocking (`--guard-capable block`); Claude, Codex, and AGY run in audit mode (`--guard-capable audit`).
 
 ## Implementation notes
 

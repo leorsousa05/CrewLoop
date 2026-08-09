@@ -545,7 +545,7 @@ function createWriter(agent: AgentConfig): AgentHookConfigWriter | undefined {
 
 export function installHooksForAgent(
   agent: AgentConfig,
-  options: { dryRun?: boolean; backup?: boolean } = {}
+  options: { dryRun?: boolean; backup?: boolean; guard?: boolean } = {}
 ): HookWriterResult {
   if (!agent.hooks.supported) {
     return { agent: agent.id, status: 'unsupported' };
@@ -566,11 +566,20 @@ export function installHooksForAgent(
 
   try {
     const shimCommand = agent.hooks.beforeToolUseCommand || `crewloop-shim ${agent.id}`;
+    const guardEnabled = options.guard === true && agent.guardCapable !== false;
+    const guardCapability = guardEnabled ? agent.guardCapable : false;
+    const defaultSkillFlag = shimCommand.includes('--default-skill')
+      ? shimCommand.slice(shimCommand.indexOf('--default-skill'))
+      : undefined;
+    const guardCommand = guardCapability
+      ? `crewloop-guard ${agent.id}${defaultSkillFlag ? ` ${defaultSkillFlag}` : ''} --guard-capable ${guardCapability}`
+      : undefined;
+
     const hooks: HookEntry[] = [
       {
         event: 'PreToolUse',
         matcher: '*',
-        command: shimCommand,
+        command: guardCommand || shimCommand,
       },
       {
         event: 'PostToolUse',
@@ -637,6 +646,7 @@ export interface InstallHooksOptions {
   dryRun?: boolean;
   backup?: boolean;
   agents?: string[];
+  guard?: boolean;
 }
 
 export function installHooks(options: InstallHooksOptions = {}): HookWriterResult[] {
@@ -648,6 +658,10 @@ export function installHooks(options: InstallHooksOptions = {}): HookWriterResul
     : agents;
 
   return filtered.map((agent) =>
-    installHooksForAgent(agent, { dryRun: options.dryRun, backup: options.backup })
+    installHooksForAgent(agent, {
+      dryRun: options.dryRun,
+      backup: options.backup,
+      guard: options.guard,
+    })
   );
 }

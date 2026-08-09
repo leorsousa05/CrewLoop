@@ -12,6 +12,7 @@ function session(overrides: Partial<ClientSession> = {}): ClientSession {
     startTime: 1000,
     lastActivity: 2000,
     toolCounts: {},
+    securityDecisions: [],
     ...overrides,
   };
 }

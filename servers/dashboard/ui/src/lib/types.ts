@@ -9,6 +9,7 @@ export type View =
   | 'timeline'
   | 'files'
   | 'skills'
+  | 'security'
   | 'settings';
 
 export type Theme = 'dark' | 'light' | 'system';

@@ -1,4 +1,4 @@
-export type AgentSource = 'kimi' | 'claude' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
+export type AgentSource = 'kimi' | 'claude' | 'codex' | 'opencode' | 'log-watcher' | 'agy' | 'guard';
 
 export type OperationType = 'read' | 'edit' | 'other';
 
@@ -7,7 +7,8 @@ export type EventType =
   | 'session_end'
   | 'tool_start'
   | 'tool_end'
-  | 'skill_change';
+  | 'skill_change'
+  | 'security_decision';
 
 export type EventStatus = 'running' | 'success' | 'error';
 
@@ -75,6 +76,14 @@ export interface DashboardEvent {
   workspacePath?: string;
 }
 
+export interface SecurityDecision {
+  timestamp: number;
+  tool: string;
+  decision: 'allow' | 'block';
+  rule?: string;
+  reason?: string;
+}
+
 export interface Session {
   id: string;
   source: AgentSource;
@@ -85,6 +94,7 @@ export interface Session {
   events: DashboardEvent[];
   tool_counts: Record<string, number>;
   token_usage: SessionTokenUsage;
+  security_decisions: SecurityDecision[];
   started_at: number;
   last_event_at: number;
   ended_at?: number;
@@ -115,6 +125,14 @@ export interface ClientEvent {
   output?: Record<string, unknown>;
 }
 
+export interface ClientSecurityDecision {
+  timestamp: number;
+  tool: string;
+  decision: 'allow' | 'block';
+  rule?: string;
+  reason?: string;
+}
+
 export interface ClientSession {
   id: string;
   source: AgentSource;
@@ -128,6 +146,7 @@ export interface ClientSession {
   endedAt?: number;
   toolCounts: Record<string, number>;
   tokenUsage?: ClientTokenUsage;
+  securityDecisions: ClientSecurityDecision[];
   workspaceRoot?: string;
 }
 

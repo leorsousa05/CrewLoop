@@ -30,6 +30,7 @@ export interface CliOptions {
   force?: boolean;
   dryRun?: boolean;
   hooks?: boolean;
+  guard?: boolean;
   port?: number;
   host?: string;
   verbose?: boolean;
@@ -74,7 +75,7 @@ const NO_FLAGS: CommandFlags = { values: new Set(), booleans: new Set() };
 const COMMAND_FLAGS: Record<CommandName, CommandFlags> = {
   install: {
     values: new Set(['--target', '--skill', '--agent']),
-    booleans: new Set(['--symlink', '--force', '--dry-run', '--hooks', '--no-hooks', '--verbose']),
+    booleans: new Set(['--symlink', '--force', '--dry-run', '--hooks', '--no-hooks', '--guard', '--no-guard', '--verbose']),
   },
   list: NO_FLAGS,
   agents: NO_FLAGS,
@@ -204,6 +205,12 @@ export function parseArgs(argv: string[]): CliOptions {
           break;
         case '--no-hooks':
           result.hooks = false;
+          break;
+        case '--guard':
+          result.guard = true;
+          break;
+        case '--no-guard':
+          result.guard = false;
           break;
         case '--verbose':
           result.verbose = true;

@@ -35,7 +35,7 @@ export interface DashboardEvent {
   timestamp: number;
   source: AgentSource;
   session_id: string;
-  event_type: EventType; // session_start | session_end | tool_start | tool_end | skill_change
+  event_type: EventType; // session_start | session_end | tool_start | tool_end | skill_change | security_decision
   tool?: string;
   skill?: string;
   detail?: string;
@@ -115,16 +115,21 @@ Kimi sends tool inputs and responses in slightly different shapes from other sou
 
 The dashboard displays token usage in the Overview telemetry strip and the Telemetry panel. Agent hooks are not required to supply usage counters; when they are missing, the UI shows the telemetry as unavailable. For sources that do not report usage through hooks (e.g. Kimi Code), a local-only `POST /ingest/usage` endpoint accepts a Moonshot-compatible `usage` object and merges it into the matching session's token telemetry. A small `crewloop-ingest-kimi` helper forwards payloads from stdin to the dashboard so users can wire it into their own API integration or logging pipeline. The endpoint validates the session id, source, and token counts, and de-duplicates repeated ingestion using the event timestamp.
 
+### Security decisions
+
+The dashboard accepts `security_decision` events from `crewloop-guard` via `POST /event`. These events carry `source: 'guard'`, `tool`, `decision: 'allow' | 'block'`, an optional `rule` name, and an optional `reason`. They are stored separately from tool events in a per-session bounded list (max 1000) and exposed via `GET /api/security?sessionId=...`. The Security view renders them as a decision log.
+
 ## Client views
 
-The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + session selector + connection indicator + command palette trigger), and a main content area. It exposes six views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):
+The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + session selector + connection indicator + command palette trigger), and a main content area. It exposes seven views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):
 
 1. **Overview** — command center for the selected session: a compact Now strip (active skill, lifecycle, confidence, source, elapsed), a dense telemetry strip (Tools, Duration, Rate/min, Files, Errors), an activity graph, a live preview of the last 5 tool invocations with an "Open timeline" entry point, and a horizontally scrollable recent-sessions strip. With zero sessions it renders an empty state.
 2. **Sessions** — filterable, pinnable session list with a segmented sort control (`recent` / `duration` / `events` / `name`) driven by the URL. Pinned sessions stay at the top and persist in `localStorage`. Rows are `div[role=button]` (keyboard-operable) with a real pin button inside.
 3. **Timeline** — tool invocations for the selected session. A `tool_start` and its matching `tool_end` are collapsed into one row that changes color from running (blue) to success (green) or error (red). Rows are `div[role="button"][aria-expanded]` and expand to view sanitized `input`/`output`; events can be copied to the clipboard or exported as JSON. Supports `j`/`k` row selection and `Enter` to expand/collapse. A hover-or-manual pause model buffers live updates while paused and shows a banner with the buffered count and a resume action (manual toggle: `p`).
 4. **Files** — master-detail Explorer: a file tree (read/edit/other badges, `role="tree"` semantics) and a viewer that switches between code reader format (line numbers) and diff comparison format. Below the `md` breakpoint it drills down to the detail pane with a back action; the selected path lives in the URL.
 5. **Skills** — sole owner of aggregate rankings: skill and tool usage bars plus a stat strip (skills, tools, files touched) for the selected session's visible invocations.
-6. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session, plus a keyboard-shortcuts reference generated from the `SHORTCUTS` registry. Settings persist to `localStorage`.
+6. **Security** — guard decisions for the selected session: policy mode, allowed/blocked counts, and a chronological table of decisions (tool, badge, rule, reason, timestamp).
+7. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session, plus a keyboard-shortcuts reference generated from the `SHORTCUTS` registry. Settings persist to `localStorage`.
 
 ## Navigation & routing
 
@@ -132,7 +137,7 @@ Navigation state lives in the URL hash (`#/view?...`), managed by `ui/src/hooks/
 
 ## Keyboard shortcuts
 
-Global shortcuts are guarded against form fields: `⌘/Ctrl+K` opens the command palette, digits `1`–`6` switch views by position, `/` focuses the filter search, and `Esc` closes the topmost overlay. Timeline scope: `j`/`k` select rows, `Enter` expands/collapses, `p` toggles manual pause. The canonical registry is `ui/src/lib/shortcuts.ts` (`SHORTCUTS`), which also feeds the Settings reference section.
+Global shortcuts are guarded against form fields: `⌘/Ctrl+K` opens the command palette, digits `1`–`7` switch views by position, `/` focuses the filter search, and `Esc` closes the topmost overlay. Timeline scope: `j`/`k` select rows, `Enter` expands/collapses, `p` toggles manual pause. The canonical registry is `ui/src/lib/shortcuts.ts` (`SHORTCUTS`), which also feeds the Settings reference section.
 
 ## Command palette
 
@@ -175,6 +180,7 @@ The dashboard does **not** guess a skill from generic tool usage. `SkillInferenc
 - The server exposes:
   - `POST /event` for receiving hooks payloads.
   - `GET /api/skills` to fetch configured skills.
+  - `GET /api/security?sessionId=...` to fetch guard decisions for a session.
   - `GET /api/workspace-files` to fetch the list of relative workspace files.
   - `GET /api/file-content?path=...` to safely fetch full file contents.
   - `GET /api/file-diff?path=...` to safely fetch uncommitted git diffs relative to HEAD.

@@ -47,6 +47,24 @@ describe('StateStore', () => {
     assert.equal(session.tool_counts['Edit'], 1);
   });
 
+  it('stores security_decision events separately and caps them', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ tool: 'Read' }));
+    store.applyEvent(
+      makeEvent({
+        event_type: 'security_decision',
+        tool: 'Bash',
+        detail: 'block',
+        status: 'error',
+      })
+    );
+    const session = store.getSession('sess-1')!;
+    assert.equal(session.events.length, 2);
+    assert.equal(session.security_decisions.length, 1);
+    assert.equal(session.security_decisions[0].decision, 'block');
+    assert.equal(session.security_decisions[0].tool, 'Bash');
+  });
+
   it('aggregates token usage independently of the bounded event list', () => {
     const store = new StateStore({ maxEventsPerSession: 2, sessionMaxAgeMs: 60000 });
     for (let index = 1; index <= 4; index++) {

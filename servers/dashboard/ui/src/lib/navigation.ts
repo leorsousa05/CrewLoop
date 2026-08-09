@@ -14,7 +14,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { key: 'timeline', label: 'Timeline', icon: 'Clock', shortcut: '3', description: 'Tool invocation stream' },
   { key: 'files', label: 'Files', icon: 'Files', shortcut: '4', description: 'File activity and diffs' },
   { key: 'skills', label: 'Skills', icon: 'ChartPie', shortcut: '5', description: 'Skill and tool rankings' },
-  { key: 'settings', label: 'Settings', icon: 'Gear', shortcut: '6', description: 'Appearance and behavior' },
+  { key: 'security', label: 'Security', icon: 'Shield', shortcut: '6', description: 'Guard decisions and policy status' },
+  { key: 'settings', label: 'Settings', icon: 'Gear', shortcut: '7', description: 'Appearance and behavior' },
 ];
 
 export function getNavItem(view: View): NavItem {

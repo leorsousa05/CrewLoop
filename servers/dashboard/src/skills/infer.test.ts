@@ -11,6 +11,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     events: [],
     tool_counts: {},
     token_usage: createEmptySessionTokenUsage(),
+    security_decisions: [],
     lifecycle: 'running',
     started_at: Date.now(),
     last_event_at: Date.now(),

@@ -11,6 +11,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     events: [],
     tool_counts: { Read: 2 },
     token_usage: createEmptySessionTokenUsage(),
+    security_decisions: [],
     started_at: 1000,
     last_event_at: 2000,
     active_skill: 'crewloop:plan',

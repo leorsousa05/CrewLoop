@@ -9,6 +9,7 @@ describe('detectSource', () => {
     assert.equal(detectSource(['node', 'shim', 'codex']), 'codex');
     assert.equal(detectSource(['node', 'shim', 'claude']), 'claude');
     assert.equal(detectSource(['node', 'shim', 'agy']), 'agy');
+    assert.equal(detectSource(['node', 'shim', 'guard']), 'guard');
   });
 
   it('falls back to env var', () => {
@@ -322,6 +323,51 @@ describe('buildEvent', () => {
     assert.equal(event?.tool, 'Read');
     assert.equal(event?.skill, 'crewloop:code');
     assert.equal(event?.default_skill, undefined);
+  });
+});
+
+describe('normalizeGuard', () => {
+  it('builds allow security_decision event', () => {
+    const event = buildEvent('guard' as AgentSource, {
+      event_type: 'security_decision',
+      session_id: 'sess-guard',
+      tool: 'Read',
+      decision: 'allow',
+      rule: 'safe-path',
+      workspacePath: '/project',
+    });
+    assert.equal(event?.source, 'guard');
+    assert.equal(event?.event_type, 'security_decision');
+    assert.equal(event?.tool, 'Read');
+    assert.equal(event?.detail, 'allow');
+    assert.equal(event?.status, 'success');
+    assert.equal(event?.workspacePath, '/project');
+  });
+
+  it('builds block security_decision event', () => {
+    const event = buildEvent('guard' as AgentSource, {
+      event_type: 'security_decision',
+      session_id: 'sess-guard',
+      tool: 'Bash',
+      decision: 'block',
+      rule: 'destructive-command',
+      reason: 'rm -rf /',
+      workspacePath: '/project',
+    });
+    assert.equal(event?.source, 'guard');
+    assert.equal(event?.event_type, 'security_decision');
+    assert.equal(event?.detail, 'block');
+    assert.equal(event?.status, 'error');
+  });
+
+  it('returns undefined for malformed guard payload', () => {
+    const event = buildEvent('guard' as AgentSource, {
+      event_type: 'security_decision',
+      // missing session_id
+      tool: 'Read',
+      decision: 'allow',
+    });
+    assert.equal(event, undefined);
   });
 });
 

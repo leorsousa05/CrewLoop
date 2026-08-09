@@ -38,6 +38,7 @@ export function presentSession(session: Session): ClientSession {
     endedAt: session.ended_at,
     toolCounts: session.tool_counts,
     tokenUsage: presentTokenUsage(session.token_usage),
+    securityDecisions: session.security_decisions,
     workspaceRoot: session.workspaceRoot,
   };
 }

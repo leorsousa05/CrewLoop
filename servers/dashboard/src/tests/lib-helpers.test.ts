@@ -272,6 +272,7 @@ describe('buildGraph3D', () => {
       startTime: 0,
       lastActivity: 0,
       toolCounts: {},
+      securityDecisions: [],
     };
     const invs = [
       { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: {} },
@@ -294,6 +295,7 @@ describe('buildGraph3D', () => {
       startTime: 0,
       lastActivity: 0,
       toolCounts: {},
+      securityDecisions: [],
     };
     const invs = [
       { id: '1', tool: 'Read', eventType: 'tool_end', startTime: 1000, status: 'success', input: { path: 'a.txt' }, output: {}, skill: 'crewloop:plan' },

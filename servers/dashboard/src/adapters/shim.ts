@@ -31,6 +31,7 @@ const KNOWN_SOURCES: ReadonlySet<string> = new Set([
   'opencode',
   'log-watcher',
   'agy',
+  'guard',
 ]);
 
 export function detectSource(argv: string[]): AgentSource | undefined {
@@ -85,6 +86,43 @@ export function normalizeOpenCode(payload: OpenCodePluginPayload): DashboardEven
   };
 }
 
+export interface GuardHookPayload {
+  event_type: 'security_decision';
+  session_id: string;
+  tool: string;
+  decision: 'allow' | 'block';
+  rule?: string;
+  reason?: string;
+  workspacePath?: string;
+  timestamp?: number;
+}
+
+export function normalizeGuard(payload: GuardHookPayload): DashboardEvent | undefined {
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    payload.event_type !== 'security_decision' ||
+    typeof payload.session_id !== 'string' ||
+    typeof payload.tool !== 'string'
+  ) {
+    return undefined;
+  }
+
+  const decision = payload.decision === 'allow' || payload.decision === 'block' ? payload.decision : 'allow';
+
+  return {
+    id: generateId(),
+    timestamp: typeof payload.timestamp === 'number' ? payload.timestamp : Date.now(),
+    source: 'guard' as AgentSource,
+    session_id: payload.session_id,
+    event_type: 'security_decision',
+    tool: payload.tool,
+    detail: decision,
+    status: decision === 'block' ? 'error' : 'success',
+    workspacePath: typeof payload.workspacePath === 'string' ? payload.workspacePath : undefined,
+  };
+}
+
 export interface NormalizationOptions {
   kimiDataDir?: string;
 }
@@ -111,6 +149,8 @@ export function normalizePayload(
       return normalizeAgy(payload as unknown as AgyHookPayload);
     case 'opencode':
       return normalizeOpenCode(payload as unknown as OpenCodePluginPayload);
+    case 'guard':
+      return normalizeGuard(payload as unknown as GuardHookPayload);
     default:
       return undefined;
   }
@@ -136,6 +176,7 @@ export function buildEvent(
     base.default_skill = defaultSkill;
   }
 
+  const isSecurityDecision = base.event_type === 'security_decision';
   const isPost = base.event_type === 'tool_end';
   const rawInput = (base.input || raw.tool_input || raw.toolInput) as
     | Record<string, unknown>
@@ -144,14 +185,16 @@ export function buildEvent(
     | Record<string, unknown>
     | undefined;
 
-  const sanitized = sanitize(
-    {
-      tool_name: base.tool || '',
-      tool_input: rawInput,
-      tool_response: rawOutput,
-    },
-    isPost ? 'post' : 'pre'
-  );
+  const sanitized = isSecurityDecision
+    ? { status: base.status }
+    : sanitize(
+        {
+          tool_name: base.tool || '',
+          tool_input: rawInput,
+          tool_response: rawOutput,
+        },
+        isPost ? 'post' : 'pre'
+      );
 
   const isToolEvent = base.event_type === 'tool_start' || base.event_type === 'tool_end';
   const operationType = isToolEvent && base.tool ? classifyOperation(base.tool) : undefined;
@@ -163,8 +206,8 @@ export function buildEvent(
     detail: sanitized.detail ?? base.detail ?? fileDetail,
     status: sanitized.status ?? base.status,
     duration_ms: sanitized.duration_ms ?? base.duration_ms,
-    input: sanitizeToolInputPayload(base.input),
-    output: sanitizeToolPayload(base.output),
+    input: isSecurityDecision ? undefined : sanitizeToolInputPayload(base.input),
+    output: isSecurityDecision ? undefined : sanitizeToolPayload(base.output),
     workspacePath: base.workspacePath || (typeof raw.cwd === 'string' ? raw.cwd : undefined) || (typeof raw.workspacePath === 'string' ? raw.workspacePath : undefined) || process.cwd(),
   };
 }

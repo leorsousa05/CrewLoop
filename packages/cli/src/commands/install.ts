@@ -74,7 +74,7 @@ export async function runInstall(
     if (options.hooks === false) {
       stdout('dry-run: hooks skipped (--no-hooks)');
     } else {
-      const hookResults = supportedHookResults(installHooksFn({ dryRun: true, backup: true }));
+      const hookResults = supportedHookResults(installHooksFn({ dryRun: true, backup: true, guard: options.guard }));
       const configurable = hookResults.filter((r) => r.status === 'configured');
       const hookErrors = hookResults.filter((r) => r.status === 'error');
       if (configurable.length === 0 && hookErrors.length === 0) {
@@ -128,7 +128,7 @@ export async function runInstall(
   if (options.hooks === false) {
     stdout('hooks: skipped (--no-hooks)');
   } else {
-    const hookResults = supportedHookResults(installHooksFn({ dryRun: false, backup: true }));
+    const hookResults = supportedHookResults(installHooksFn({ dryRun: false, backup: true, guard: options.guard }));
     const configured = hookResults.filter((r) => r.status === 'configured');
     const hookErrors = hookResults.filter((r) => r.status === 'error');
 
