@@ -90,11 +90,15 @@ export interface GuardHookPayload {
   event_type: 'security_decision';
   session_id: string;
   tool: string;
-  decision: 'allow' | 'block';
+  decision: 'allow' | 'block' | 'pending';
   rule?: string;
   reason?: string;
   workspacePath?: string;
   timestamp?: number;
+  confirmationId?: string;
+  input?: Record<string, unknown>;
+  remember?: boolean;
+  timeoutAt?: number;
 }
 
 export function normalizeGuard(payload: GuardHookPayload): DashboardEvent | undefined {
@@ -108,7 +112,10 @@ export function normalizeGuard(payload: GuardHookPayload): DashboardEvent | unde
     return undefined;
   }
 
-  const decision = payload.decision === 'allow' || payload.decision === 'block' ? payload.decision : 'allow';
+  const decision =
+    payload.decision === 'allow' || payload.decision === 'block' || payload.decision === 'pending'
+      ? payload.decision
+      : 'allow';
 
   return {
     id: generateId(),
@@ -118,13 +125,28 @@ export function normalizeGuard(payload: GuardHookPayload): DashboardEvent | unde
     event_type: 'security_decision',
     tool: payload.tool,
     detail: decision,
+    rule: payload.rule,
+    reason: payload.reason,
+    confirmationId: payload.confirmationId,
+    input: payload.input,
+    remember: payload.remember,
+    timeoutAt: payload.timeoutAt,
     status: decision === 'block' ? 'error' : 'success',
     workspacePath: typeof payload.workspacePath === 'string' ? payload.workspacePath : undefined,
   };
 }
 
+export function getEventTypeOverride(argv: string[]): string | undefined {
+  const idx = argv.indexOf('--event-type');
+  if (idx !== -1 && argv[idx + 1]) {
+    return argv[idx + 1];
+  }
+  return undefined;
+}
+
 export interface NormalizationOptions {
   kimiDataDir?: string;
+  eventTypeOverride?: string;
 }
 
 export function normalizePayload(
@@ -146,7 +168,7 @@ export function normalizePayload(
     case 'codex':
       return normalizeCodex(payload as unknown as CodexHookPayload);
     case 'agy':
-      return normalizeAgy(payload as unknown as AgyHookPayload);
+      return normalizeAgy(payload as unknown as AgyHookPayload, options);
     case 'opencode':
       return normalizeOpenCode(payload as unknown as OpenCodePluginPayload);
     case 'guard':
@@ -259,8 +281,10 @@ export function runShim(): void {
   }
 
   const defaultSkill = getDefaultSkill(process.argv);
+  const eventTypeOverride = getEventTypeOverride(process.argv);
   const normalizationOptions: NormalizationOptions = {
     kimiDataDir: process.env.KIMI_DATA_DIR,
+    eventTypeOverride,
   };
 
   let raw = '';
