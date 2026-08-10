@@ -1,5 +1,7 @@
 import type { AgentSource, DashboardEvent, EventType } from '../types';
 import { canonicalSkillName } from '../lib/skills';
+import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
+import { isPlainObject, isSafeTokenCount, parseCapturedAt, stableUsageId } from './usage-utils';
 
 export interface AgyHookPayload {
   hook_event_name?: string;
@@ -12,6 +14,15 @@ export interface AgyHookPayload {
   };
   toolName?: string;
   stepIdx?: number;
+  responseId?: string;
+  timestamp?: number | string;
+  llm_request?: {
+    model?: string;
+  };
+  llm_response?: {
+    candidates?: Array<{ finishReason?: string }>;
+    usageMetadata?: Record<string, unknown>;
+  };
   error?: string;
   workspacePaths?: string[];
   transcriptPath?: string;
@@ -24,6 +35,16 @@ const EVENT_MAP: Record<string, EventType> = {
   SessionStart: 'session_start',
   SessionEnd: 'session_end',
   Stop: 'session_end',
+  AfterModel: 'tool_end',
+};
+
+const MODEL_USAGE_ALIASES: TokenUsageAliases = {
+  input: ['promptTokenCount'],
+  output: ['candidatesTokenCount'],
+  cacheRead: ['cachedContentTokenCount'],
+  cacheWrite: [],
+  reasoning: ['thoughtsTokenCount'],
+  total: ['totalTokenCount'],
 };
 
 const TOOL_NAME_MAP: Record<string, string> = {
@@ -119,15 +140,21 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
 
   const session_id = payload.conversationId || payload.sessionId || payload.session_id || 'unknown';
   const stepIdx = typeof payload.stepIdx === 'number' ? payload.stepIdx : undefined;
+  const token_usage = eventName === 'AfterModel'
+    ? normalizeFinalModelUsage(payload)
+    : undefined;
+  if (eventName === 'AfterModel' && !token_usage) {
+    return undefined;
+  }
   const toolCall = payload.toolCall;
   const rawToolName = toolCall?.name || payload.toolName;
-  const tool = normalizeToolName(rawToolName);
+  const tool = eventName === 'AfterModel' ? 'Model' : normalizeToolName(rawToolName);
   const args = toolCall?.args;
   const skill = inferSkillFromReadPath(tool, args);
 
   return {
-    id: generateId(session_id, stepIdx),
-    timestamp: Date.now(),
+    id: token_usage?.measurementId ?? generateId(session_id, stepIdx),
+    timestamp: token_usage?.capturedAt ?? Date.now(),
     source: 'agy' as AgentSource,
     session_id,
     event_type,
@@ -136,6 +163,40 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
     detail: extractDetail(tool, args),
     input: args,
     output: payload.error !== undefined ? { error: payload.error } : undefined,
+    token_usage,
     workspacePath: payload.workspacePaths?.[0],
   };
+}
+
+function normalizeFinalModelUsage(payload: AgyHookPayload) {
+  const response = payload.llm_response;
+  const usage = response?.usageMetadata;
+  const totalTokens = usage?.totalTokenCount;
+  const hasFinalCandidate = response?.candidates?.some(
+    (candidate) => typeof candidate.finishReason === 'string' && candidate.finishReason.length > 0
+  );
+  const capturedAt = parseCapturedAt(payload.timestamp);
+  if (!isPlainObject(usage) || !isSafeTokenCount(totalTokens) || totalTokens <= 0) {
+    return undefined;
+  }
+  if (!hasFinalCandidate || capturedAt === undefined) {
+    return undefined;
+  }
+
+  const stableIdentity = payload.responseId
+    ?? (Number.isSafeInteger(payload.stepIdx) ? String(payload.stepIdx) : payload.timestamp);
+  if (stableIdentity === undefined) {
+    return undefined;
+  }
+  return normalizeTokenUsage({
+    source: 'agy',
+    rawUsage: usage,
+    model: payload.llm_request?.model,
+    eventId: stableUsageId('agy:model-response', stableIdentity, totalTokens),
+    capturedAt,
+    semantics: 'delta',
+    aliases: MODEL_USAGE_ALIASES,
+    cursorKey: 'agy:model-response',
+    coverage: 'complete',
+  });
 }

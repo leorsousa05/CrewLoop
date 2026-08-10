@@ -2,6 +2,7 @@ import type { AgentSource, DashboardEvent, EventType } from '../types';
 import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
 import { readCodexSessionTokenUsage } from './codex-session';
 import { extractCodexPatchMetadata } from './codex-tool-metadata';
+import { isPlainObject, parseCapturedAt, stableUsageId } from './usage-utils';
 
 export interface CodexHookPayload {
   sessionId?: string;
@@ -26,6 +27,7 @@ export interface CodexHookPayload {
   executed?: boolean;
   success?: boolean;
   durationMs?: number;
+  timestamp?: number | string;
   skill?: string;
 }
 
@@ -61,7 +63,7 @@ export function normalizeCodex(
   }
 
   const id = generateId();
-  const timestamp = Date.now();
+  const timestamp = parseCapturedAt(payload.timestamp) ?? Date.now();
   const sessionId = payload.sessionId || payload.session_id || 'unknown';
   const tool = firstString(payload.toolName, payload.tool_name);
   const rawInput = firstRecord(payload.toolInput, payload.tool_input);
@@ -69,10 +71,12 @@ export function normalizeCodex(
     source: 'codex',
     rawUsage: payload.usage,
     model: payload.model,
-    eventId: `${sessionId}:${eventName}:${payload.callId || payload.turnId || id}`,
+    eventId: directMeasurementId(payload, eventName),
     capturedAt: timestamp,
     semantics: 'cumulative',
     aliases: TOKEN_USAGE_ALIASES,
+    cursorKey: 'codex:direct-session',
+    coverage: 'complete',
   });
   const token_usage = directTokenUsage || readCodexSessionTokenUsage({
     transcriptPath: payload.transcriptPath || payload.transcript_path,
@@ -94,6 +98,25 @@ export function normalizeCodex(
     token_usage,
     workspacePath: payload.cwd,
   };
+}
+
+function directMeasurementId(payload: CodexHookPayload, eventName: string): string {
+  const usage = isPlainObject(payload.usage) ? payload.usage : {};
+  const countIdentity = [
+    ...TOKEN_USAGE_ALIASES.input,
+    ...TOKEN_USAGE_ALIASES.output,
+    ...TOKEN_USAGE_ALIASES.cacheRead,
+    ...TOKEN_USAGE_ALIASES.cacheWrite,
+    ...TOKEN_USAGE_ALIASES.reasoning,
+    ...TOKEN_USAGE_ALIASES.total,
+  ].map((alias) => usage[alias]);
+  return stableUsageId(
+    'codex:direct',
+    payload.callId ?? payload.turnId ?? '',
+    eventName,
+    payload.timestamp ?? '',
+    countIdentity
+  );
 }
 
 function normalizeInput(

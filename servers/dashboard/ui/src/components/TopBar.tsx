@@ -69,13 +69,15 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-1.5">
-        <SessionSelector
-          sessions={sessions}
-          selectedSessionId={selectedSessionId}
-          activeSessionId={activeSessionId}
-          connection={connection}
-          onSelect={onSelectSession}
-        />
+        {activeView !== 'usage' && (
+          <SessionSelector
+            sessions={sessions}
+            selectedSessionId={selectedSessionId}
+            activeSessionId={activeSessionId}
+            connection={connection}
+            onSelect={onSelectSession}
+          />
+        )}
 
         <div className="chip" title={CONNECTION_LABEL[connection]}>
           <span className={`w-2 h-2 rounded-full ${dotColor}`} aria-hidden="true" />

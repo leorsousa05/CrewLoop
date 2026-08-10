@@ -5,23 +5,23 @@ Real-time skill dashboard for CrewLoop agents. It shows which skill an agent is 
 ## Features
 
 - Live skill inference from agent tool usage.
-- WebSocket updates with in-memory session state.
+- WebSocket updates with in-memory live session state and durable SQLite usage history.
 - Sanitized event stream: no commands, secrets, or file contents reach the UI.
 - Vercel-style command-center layout with a persistent sidebar and top bar.
 - Global command palette (`Cmd/Ctrl+K`) for jumping to views, sessions, skills, tools, files, and events.
 - Seven views:
-  - **Overview** — session health, telemetry, activity graph, top skills/tools.
+  - **Overview** — selected-session health, telemetry, live tool activity, and recent sessions.
   - **Sessions** — sortable, filterable, pinnable session list.
   - **Timeline** — reverse-chronological events with filters, export, and copy.
-  - **Network** — interactive 3D skill/tool/file graph.
   - **Files** — two-pane file activity with operation badges, syntax highlighting, and diff/content snippets.
   - **Skills** — aggregate skill/tool/file usage for the selected session.
+  - **Usage** — daily token and estimated API-equivalent cost comparison across coding-agent products.
   - **Settings** — theme, density, reduced motion, auto-follow, and max-events preferences.
 - **Dynamic Multi-Session Workspaces:** Paths and git operations resolve relative to each session's dynamic working directory/workspace root.
 - **Auto-Root Inference:** Automatically reconstructs the repository root using `.git` or `package.json` lookups when CWD metadata is absent.
 - **Syntax Highlighting:** Zero-dependency lexical token-based syntax highlighting for common language constructs in diff and code views.
 - **Bypass Traversal Security:** Restricts filesystem reading to the session's workspace root, permitting access to external files (like global skills in `~/.agents`) only if they are actively registered in the session's execution history.
-- **Bundle Chunk-Splitting:** Custom Rollup chunk splitting for heavy 3D graphs and icons, keeping the main entry script lightweight (~213kB).
+- **Bundle Chunk-Splitting:** Custom Rollup chunk splitting keeps shared React and icon dependencies out of the main entry chunk.
 - Advanced filters by source, skill, status, time window, tool, and operation type.
 - Session pinning with localStorage persistence.
 - JSON export of the visible timeline or file events.
@@ -78,10 +78,12 @@ The CLI looks for the dashboard server inside the `@archznn/crewloop-skills` pac
 |----------|---------|-------------|
 | `CREWLOOP_DASHBOARD_PORT` | `7890` | HTTP/WebSocket port |
 | `CREWLOOP_DASHBOARD_HOST` | `127.0.0.1` | Bind address |
+| `CREWLOOP_TELEMETRY_DB_PATH` | `~/.crewloop/dashboard/telemetry.sqlite` | Path for the local SQLite usage database |
+| `CREWLOOP_TELEMETRY_TIME_ZONE` | System IANA time zone | Calendar time zone used to assign measurements to days |
 
 ## Agent integration
 
-Agents send JSON events to `POST http://127.0.0.1:7890/event`. The included shim (`dist/adapters/shim.js`) normalizes Kimi, Claude, Codex, and AGY hook payloads and forwards them. Tool events are classified (`read`/`edit`/`other`), the affected file path is extracted into `detail`, and input/output payloads are sanitized (secrets removed, base64 blobs truncated) before leaving the shim.
+Agents send JSON events to `POST http://127.0.0.1:7890/event`. The included shim (`dist/adapters/shim.js`) normalizes Kimi, Claude, Codex, AGY, and OpenCode payloads and forwards them. Tool events are classified (`read`/`edit`/`other`), the affected file path is extracted into `detail`, and input/output payloads are sanitized (secrets removed, base64 blobs truncated) before leaving the shim.
 
 See `config-examples/` for:
 - `kimi-code-config.toml` — Kimi Code hook configuration.
@@ -104,24 +106,52 @@ interface DashboardEvent {
   detail?: string;                      // affected file path for read/edit tools
   status?: 'running' | 'success' | 'error';
   duration_ms?: number;
+  token_usage?: TokenUsageMeasurement; // normalized counters; raw provider data is not persisted
   input?: Record<string, unknown>;      // sanitized tool input
   output?: Record<string, unknown>;     // sanitized tool output (tool_end only)
   workspacePath?: string;               // current working directory or workspace path of the agent
 }
 ```
 
+## Usage telemetry
+
+The **Usage** view compares Codex, Kimi, Claude, OpenCode, and AGY by product. It defaults to the current local day plus the previous 29 days and also offers 7-day, 90-day, and all-history ranges. Token totals are authoritative; missing telemetry is shown as unavailable rather than as zero.
+
+Accepted measurements are written to SQLite before the live session total changes. The store de-duplicates replayed measurements, keeps cumulative-counter cursors across dashboard restarts, and attributes each accepted delta to the configured local calendar day. History has no automatic retention limit. Use the reset control in the Usage view to clear all products, or call the local API with exact confirmation:
+
+```bash
+curl -X POST http://127.0.0.1:7890/api/usage/reset \
+  -H "Content-Type: application/json" \
+  -d '{"confirmation":"RESET"}'
+```
+
+The daily query API is `GET /api/usage/daily`. With no query it returns 30 days; `from=YYYY-MM-DD&to=YYYY-MM-DD` accepts at most 366 inclusive days, and `range=all` returns all retained history. `POST /ingest/usage` accepts an optional stable `measurement_id`. Delta measurements without one must include a timestamp; otherwise they are rejected because a retry could be counted twice. Cumulative measurements without an explicit ID receive a deterministic identity derived from their normalized counters.
+
+Monetary values are labelled **Estimated API-equivalent USD**. Provider-reported cost takes precedence; otherwise the server uses an effective-dated exact-model price catalog. The catalog records whether each model's input count includes or excludes cache categories, so provider-specific cache semantics are preserved. Unknown or partially priced models remain unavailable or partial, never `$0`. These estimates do not represent subscriptions, seats, negotiated discounts, taxes, or the provider invoice.
+
+| Product | Usage source | Coverage behavior |
+|---------|--------------|-------------------|
+| Codex | Direct hook counters or bounded local session transcript tail | Stable cumulative measurement per session |
+| Kimi | Direct counters or all contained `wire.jsonl` usage streams | Each wire has an independent durable cursor; unreadable discovered streams make coverage partial |
+| Claude | Direct counters or bounded contained assistant transcript records | Exclusive cache categories are included in the normalized total; unavailable when no verified counters exist |
+| OpenCode | Final assistant message event | Uses stable message identity and provider-reported cost when supplied |
+| AGY | `AfterModel` response metadata | Unavailable when final positive usage metadata is absent |
+
+The database contains normalized numeric counts, product/model metadata, timestamps, immutable cost snapshots, and hashed session identifiers. It never stores prompts, commands, tool input/output, transcript lines, raw usage JSON, filesystem paths, or credentials.
+
 ## UI shortcuts
 
 | Shortcut | Action |
 |----------|--------|
 | `Cmd/Ctrl+K` | Open command palette |
+| `1`–`7` | Switch to a view by sidebar position |
 | `Esc` | Close command palette or clear focus |
 
 ## Filters
 
 The shared filter bar appears on list and graph views. You can filter by:
 
-- **Source** — `kimi`, `codex`, `opencode`, `log-watcher`.
+- **Source** — `kimi`, `claude`, `codex`, `opencode`, `agy`, or `log-watcher`.
 - **Skill** — active skill names observed in the selected session.
 - **Status** — `running`, `success`, `error`.
 - **Tool** — individual tool names.
@@ -147,6 +177,8 @@ Settings are persisted to `localStorage` under `crewloop-dashboard-settings`:
 - Long base64 blobs and oversized strings are truncated; keys the UI renders (`content`, `diff`, `snippet`, file paths, queries) are preserved up to a hard length cap.
 - Events containing dangerous top-level keys are rejected.
 - Sanitization is applied both in the shim and again at the `/event` boundary (defense in depth for events posted directly).
+- Usage history endpoints enforce the same local Host policy as other sensitive APIs.
+- Persistent telemetry is minimized to normalized numeric facts and hashed correlation identifiers; raw agent content is never written to SQLite.
 
 ## Development
 
@@ -163,3 +195,5 @@ npm test
 - **Diff/snippet size limits** — payload sanitization truncates strings above 8 000 characters and base64-looking blobs above 512 characters. Large diffs therefore render truncated in the Files view, with a `…[truncated N chars]` marker.
 - Codex file-edit hooks do not always expose the tool name; in those cases skill inference falls back to the session's previous active skill.
 - The log watcher adapter is a deferred fallback and not yet implemented.
+- Token coverage depends on each product exposing verified usage counters. The Usage view labels missing or incomplete sources instead of inferring tokens from prompts or tool activity.
+- Estimated API-equivalent USD is only available for provider-reported costs or exact models in the versioned price catalog; it is not an invoice or subscription-cost calculation.

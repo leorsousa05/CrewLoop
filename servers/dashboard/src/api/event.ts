@@ -91,6 +91,14 @@ export function createEventHandler(deps: EventHandlerDependencies) {
     if (event.token_usage !== undefined) {
       event.token_usage = validateTokenUsageMeasurement(event.token_usage);
     }
+    if (event.token_usages !== undefined) {
+      event.token_usages = Array.isArray(event.token_usages)
+        ? event.token_usages
+            .slice(0, 128)
+            .map(validateTokenUsageMeasurement)
+            .filter((measurement): measurement is NonNullable<typeof measurement> => measurement !== undefined)
+        : undefined;
+    }
     if (!event.operationType && event.tool) {
       event.operationType = classifyOperation(event.tool);
     }

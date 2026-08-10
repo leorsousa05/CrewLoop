@@ -3,7 +3,13 @@ import path from 'node:path';
 import os from 'node:os';
 import type { AgentConfig, HookFormat } from './agents';
 
-export type AgentHookEvent = 'PreToolUse' | 'PostToolUse' | 'SessionStart' | 'SessionEnd' | 'Stop';
+export type AgentHookEvent =
+  | 'PreToolUse'
+  | 'PostToolUse'
+  | 'SessionStart'
+  | 'SessionEnd'
+  | 'Stop'
+  | 'AfterModel';
 
 export interface HookEntry {
   event: AgentHookEvent;
@@ -451,22 +457,53 @@ function sendEvent(payload) {
   }
 }
 
-export const CrewLoopPlugin = async () => {
+export const CrewLoopPlugin = async ({ directory }) => {
   return {
     'tool.execute.before': async (input, output) => {
       sendEvent({
         tool: input.tool,
         event_type: 'tool_start',
-        cwd: input.cwd,
+        cwd: input.cwd || directory,
+        session_id: input.sessionID,
       });
     },
     'tool.execute.after': async (input, output) => {
       sendEvent({
         tool: input.tool,
         event_type: 'tool_end',
-        cwd: input.cwd,
+        cwd: input.cwd || directory,
+        session_id: input.sessionID,
         success: output?.success !== false,
         duration_ms: output?.duration,
+      });
+    },
+    event: async ({ event }) => {
+      if (event?.type !== 'message.updated') return;
+      const info = event.properties?.info;
+      const tokens = info?.tokens;
+      if (
+        info?.role !== 'assistant'
+        || typeof info.id !== 'string'
+        || typeof info.sessionID !== 'string'
+        || !Number.isSafeInteger(info.time?.completed)
+        || !tokens
+      ) return;
+      sendEvent({
+        event_type: 'model_usage',
+        cwd: directory,
+        session_id: info.sessionID,
+        message_id: info.id,
+        captured_at: info.time.completed,
+        final: true,
+        model: info.modelID,
+        cost_usd: info.cost,
+        usage: {
+          input: tokens.input,
+          output: tokens.output,
+          reasoning: tokens.reasoning,
+          cache_read: tokens.cache?.read,
+          cache_write: tokens.cache?.write,
+        },
       });
     },
   };
@@ -584,6 +621,9 @@ export function installHooksForAgent(
         matcher: '*',
         command: shimCommand,
       })),
+      ...(agent.id === 'agy'
+        ? [{ event: 'AfterModel' as AgentHookEvent, matcher: '*', command: shimCommand }]
+        : []),
     ];
 
     let config = writer.readConfig();

@@ -42,6 +42,8 @@ function makeConfig(port: number, packageRoot: string): ServerConfig {
     fileBytes: 1024 * 1024,
     workspaceEntries: 5000,
     workspaceDepth: 20,
+    telemetryDbPath: ':memory:',
+    telemetryTimeZone: 'UTC',
   };
 }
 
@@ -466,6 +468,37 @@ describe('DashboardServer', () => {
     const validMessage = await validUpdate;
     assert.equal(validMessage.session!.tokenUsage!.totalTokens, 100);
     assert.equal(validMessage.session!.tokenUsage!.model, 'gpt-test');
+
+    const multiUpdate = nextUpdate('sess-token-multi');
+    const multiResponse = await fetch(`http://127.0.0.1:${port}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 'ev-token-multi',
+        timestamp: 2_000,
+        source: 'kimi',
+        session_id: 'sess-token-multi',
+        event_type: 'tool_end',
+        token_usages: ['a', 'b'].map((wire, index) => ({
+          inputTokens: 100,
+          outputTokens: 0,
+          cacheReadTokens: 0,
+          cacheWriteTokens: 0,
+          reasoningTokens: 0,
+          totalTokens: 100,
+          measurementId: `measurement-${wire}`,
+          capturedAt: 2_000 + index,
+          source: 'kimi',
+          quality: 'measured',
+          semantics: 'cumulative',
+          cursorKey: `kimi:wire:${wire}`,
+          coverage: 'complete',
+        })),
+      }),
+    });
+    assert.equal(multiResponse.status, 200);
+    const multiMessage = await multiUpdate;
+    assert.equal(multiMessage.session!.tokenUsage!.totalTokens, 200);
 
     const invalidUpdate = nextUpdate('sess-token-invalid');
     const invalidResponse = await fetch(`http://127.0.0.1:${port}/event`, {

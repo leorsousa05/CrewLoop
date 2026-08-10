@@ -1,0 +1,67 @@
+name: 033-dashboard-usage-telemetry
+status: completed
+created: 2026-08-10
+completed: 2026-08-10
+author: "codex"
+type: feature
+scope: dashboard-telemetry
+priority: P1
+depends_on:
+  - 029-dashboard-event-session-consistency
+  - 030-dashboard-client-correctness
+  - 031-dashboard-responsive-ui-refinement
+supersedes_constraints:
+  - "031 preserves exactly six views; this change adds a seventh Usage view"
+affected_files:
+  - package-lock.json
+  - servers/dashboard/package.json
+  - servers/dashboard/src/types.ts
+  - servers/dashboard/src/config.ts
+  - servers/dashboard/src/state.ts
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/api/usage.ts
+  - servers/dashboard/src/api/daily-usage.ts
+  - servers/dashboard/src/api/reset-usage.ts
+  - servers/dashboard/src/telemetry/token-usage.ts
+  - servers/dashboard/src/telemetry/usage-repository.ts
+  - servers/dashboard/src/telemetry/sqlite-usage-repository.ts
+  - servers/dashboard/src/telemetry/pricing-catalog.ts
+  - servers/dashboard/src/telemetry/cost-estimator.ts
+  - servers/dashboard/src/adapters/codex.ts
+  - servers/dashboard/src/adapters/kimi.ts
+  - servers/dashboard/src/adapters/kimi-session.ts
+  - servers/dashboard/src/adapters/claude.ts
+  - servers/dashboard/src/adapters/claude-session.ts
+  - servers/dashboard/src/adapters/opencode.ts
+  - servers/dashboard/src/adapters/agy.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - packages/cli/src/hooks.ts
+  - servers/dashboard/ui/src/App.tsx
+  - servers/dashboard/ui/src/lib/types.ts
+  - servers/dashboard/ui/src/lib/navigation.ts
+  - servers/dashboard/ui/src/lib/route.ts
+  - servers/dashboard/ui/src/lib/shortcuts.ts
+  - servers/dashboard/ui/src/components/TopBar.tsx
+  - servers/dashboard/ui/src/components/views/Overview.tsx
+  - servers/dashboard/ui/src/components/ActivityGraph.tsx
+  - servers/dashboard/ui/src/components/views/UsageView.tsx
+  - servers/dashboard/ui/src/hooks/useDailyUsage.ts
+  - servers/dashboard/ui/src/lib/usage.ts
+  - servers/dashboard/README.md
+  - specs/living/dashboard/spec.md
+  - specs/decisions/010-durable-product-usage-telemetry.md
+subagents:
+  approved: true
+  components:
+    - name: persistence-and-api
+      scope: "SQLite repository, idempotent ingestion, pricing, daily/reset APIs, and server lifecycle"
+      files: "servers/dashboard/src/{telemetry,api}/**, servers/dashboard/src/{types,config,state,server}.ts, dashboard package manifest"
+      constraints: "Do not modify collectors, UI, CLI hooks, or documentation"
+    - name: collectors
+      scope: "Verified usage extraction for Codex, Kimi, Claude, OpenCode, and AGY"
+      files: "servers/dashboard/src/adapters/**, packages/cli/src/hooks.ts, related fixtures/tests"
+      constraints: "Do not persist raw payloads or change UI/API response shapes"
+    - name: usage-ui
+      scope: "Remove Skill Activity and add the accessible seven-route Usage comparison UI"
+      files: "servers/dashboard/ui/src/**"
+      constraints: "Consume the approved API contract; do not add pricing logic or server behavior"

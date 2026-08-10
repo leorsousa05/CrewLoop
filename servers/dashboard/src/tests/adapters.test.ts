@@ -150,13 +150,14 @@ describe('normalizeKimi', () => {
         { kimiDataDir: dataDir }
       );
 
-      assert.ok(event?.token_usage);
-      assert.equal(event!.token_usage!.totalTokens, 125);
-      assert.equal(event!.token_usage!.inputTokens, 80);
-      assert.equal(event!.token_usage!.outputTokens, 40);
-      assert.equal(event!.token_usage!.cacheReadTokens, 10);
-      assert.equal(event!.token_usage!.cacheWriteTokens, 5);
-      assert.equal(event!.token_usage!.semantics, 'cumulative');
+      const measurement = event?.token_usages?.[0];
+      assert.ok(measurement);
+      assert.equal(measurement.totalTokens, 125);
+      assert.equal(measurement.inputTokens, 80);
+      assert.equal(measurement.outputTokens, 40);
+      assert.equal(measurement.cacheReadTokens, 10);
+      assert.equal(measurement.cacheWriteTokens, 5);
+      assert.equal(measurement.semantics, 'cumulative');
     } finally {
       fs.rmSync(dataDir, { recursive: true, force: true });
     }
@@ -371,7 +372,25 @@ describe('normalizeCodex', () => {
     assert.ok(event?.token_usage);
     assert.equal(event!.token_usage!.totalTokens, 1000);
     assert.equal(event!.token_usage!.reasoningTokens, 50);
-    assert.match(event!.token_usage!.measurementId, /call-1$/);
+    assert.match(event!.token_usage!.measurementId, /^codex:direct:[a-f0-9]{32}$/);
+    assert.doesNotMatch(event!.token_usage!.measurementId, /call-1|session-codex-usage/);
+    assert.equal(
+      event!.token_usage!.measurementId,
+      normalizeCodex({
+        hook_event_name: 'Stop',
+        sessionId: 'session-codex-usage',
+        cwd: '/tmp',
+        callId: 'call-1',
+        model: 'gpt-test',
+        usage: {
+          inputTokens: 700,
+          outputTokens: 300,
+          cachedTokens: 200,
+          reasoningTokens: 50,
+          totalTokens: 1000,
+        },
+      })?.token_usage?.measurementId
+    );
   });
 
   it('prefers direct hook usage over transcript fallback usage', () => {

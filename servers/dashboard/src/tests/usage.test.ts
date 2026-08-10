@@ -31,6 +31,8 @@ function makeConfig(port: number, packageRoot: string): ServerConfig {
     fileBytes: 1024 * 1024,
     workspaceEntries: 5000,
     workspaceDepth: 20,
+    telemetryDbPath: ':memory:',
+    telemetryTimeZone: 'UTC',
   };
 }
 
@@ -184,6 +186,31 @@ describe('POST /ingest/usage', () => {
     const session2 = server.state.getSession('sess-dedup');
     assert.equal(session2!.token_usage.totalTokens, 100);
     assert.equal(session2!.token_usage.measurementCount, 1);
+  });
+
+  it('requires stable identity for deltas and de-duplicates timestamped retries', async () => {
+    const rejected = await postUsage(port, {
+      session_id: 'sess-delta-unstable',
+      semantics: 'delta',
+      usage: { total_tokens: 25 },
+    });
+    assert.equal(rejected.status, 400);
+    assert.deepEqual(rejected.body, {
+      error: 'Delta usage requires a stable measurement_id or timestamp',
+      code: 'STABLE_MEASUREMENT_ID_REQUIRED',
+    });
+
+    const request = {
+      session_id: 'sess-delta-stable',
+      semantics: 'delta',
+      timestamp: 2_000,
+      usage: { total_tokens: 25 },
+    };
+    assert.equal((await postUsage(port, request)).status, 200);
+    assert.equal((await postUsage(port, request)).status, 200);
+    const session = server.state.getSession('sess-delta-stable');
+    assert.equal(session?.token_usage.totalTokens, 25);
+    assert.equal(session?.token_usage.measurementCount, 1);
   });
 
   it('forwards usage via the crewloop-ingest-kimi helper', async () => {

@@ -5,13 +5,13 @@ describe('navigation registry', () => {
   it('covers every view exactly once in canonical order', () => {
     const keys = NAV_ITEMS.map((i) => i.key);
     expect(new Set(keys).size).toBe(keys.length);
-    expect(keys).toEqual(['overview', 'sessions', 'timeline', 'files', 'skills', 'settings']);
+    expect(keys).toEqual(['overview', 'sessions', 'timeline', 'files', 'skills', 'usage', 'settings']);
   });
 
   it('has unique digit shortcuts', () => {
     const shortcuts = NAV_ITEMS.map((i) => i.shortcut);
     expect(new Set(shortcuts).size).toBe(shortcuts.length);
-    for (const s of shortcuts) expect(s).toMatch(/^[1-6]$/);
+    for (const s of shortcuts) expect(s).toMatch(/^[1-7]$/);
   });
 
   it('getNavItem returns the item for each view', () => {

@@ -9,7 +9,10 @@ export type View =
   | 'timeline'
   | 'files'
   | 'skills'
+  | 'usage'
   | 'settings';
+
+export type UsageRange = '7d' | '30d' | '90d' | 'all';
 
 export type Theme = 'dark' | 'light' | 'system';
 export type Density = 'compact' | 'comfortable';
@@ -133,4 +136,5 @@ export interface RouteState {
   filters: Partial<SerializedFilterState>;
   filePath: string | null;
   sort: SessionSortKey | null;
+  usageRange: UsageRange;
 }

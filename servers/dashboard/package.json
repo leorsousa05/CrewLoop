@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-dashboard",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Real-time CrewLoop skill dashboard server and UI",
   "license": "MIT",
   "author": "leorsousa05",
@@ -31,7 +31,7 @@
     "dev:start": "node --watch dist/index.js",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
     "test": "npm run test:server && npm run test:ui",
-    "test:server": "node --test dist/**/*.test.js",
+    "test:server": "node --test dist",
     "test:ui": "vitest run --root ui --config vitest.config.ts",
     "benchmark:tokens": "npm run build:server && node dist/telemetry/benchmark-cli.js",
     "prepublishOnly": "npm run build"
@@ -41,11 +41,13 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
+    "better-sqlite3": "11.10.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

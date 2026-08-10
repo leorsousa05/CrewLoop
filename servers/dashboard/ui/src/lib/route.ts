@@ -1,5 +1,5 @@
 import type { AgentSource, EventStatus } from '../../../src/types';
-import type { FilterState, RouteState, SerializedFilterState, SessionSortKey, TimeRange, View } from './types';
+import type { FilterState, RouteState, SerializedFilterState, SessionSortKey, TimeRange, UsageRange, View } from './types';
 import { NAV_ITEMS } from './navigation';
 
 const VALID_VIEWS = NAV_ITEMS.map((i) => i.key) as View[];
@@ -8,6 +8,7 @@ const VALID_OPS = ['read', 'edit', 'other'];
 const VALID_SOURCES: AgentSource[] = ['kimi', 'claude', 'codex', 'opencode', 'log-watcher', 'agy'];
 const VALID_STATUSES: EventStatus[] = ['running', 'success', 'error'];
 const VALID_SORTS: SessionSortKey[] = ['recent', 'duration', 'events', 'name'];
+const VALID_USAGE_RANGES: UsageRange[] = ['7d', '30d', '90d', 'all'];
 
 export const DEFAULT_ROUTE: RouteState = {
   view: 'overview',
@@ -15,6 +16,7 @@ export const DEFAULT_ROUTE: RouteState = {
   filters: {},
   filePath: null,
   sort: null,
+  usageRange: '30d',
 };
 
 function filterCsv(value: string | null, valid: readonly string[]): string | undefined {
@@ -51,6 +53,7 @@ export function parseRoute(hash: string): RouteState {
   const sessionId = params.get('session');
   const filePath = params.get('file');
   const sort = params.get('sort');
+  const range = params.get('range');
 
   return {
     view,
@@ -58,6 +61,10 @@ export function parseRoute(hash: string): RouteState {
     filters,
     filePath: filePath || null,
     sort: sort && VALID_SORTS.includes(sort as SessionSortKey) ? (sort as SessionSortKey) : null,
+    usageRange:
+      view === 'usage' && range && VALID_USAGE_RANGES.includes(range as UsageRange)
+        ? (range as UsageRange)
+        : '30d',
   };
 }
 
@@ -74,6 +81,7 @@ export function serializeRoute(state: RouteState): string {
   if (state.sessionId) params.set('session', state.sessionId);
   if (state.filePath) params.set('file', state.filePath);
   if (state.sort && state.sort !== 'recent') params.set('sort', state.sort);
+  if (state.view === 'usage' && state.usageRange !== '30d') params.set('range', state.usageRange);
   const query = params.toString();
   return `#/${state.view}${query ? `?${query}` : ''}`;
 }

@@ -1,5 +1,7 @@
 export type AgentSource = 'kimi' | 'claude' | 'codex' | 'opencode' | 'log-watcher' | 'agy';
 
+export type CodingAgentProduct = Exclude<AgentSource, 'log-watcher'>;
+
 export type OperationType = 'read' | 'edit' | 'other';
 
 export type EventType =
@@ -31,6 +33,9 @@ export interface TokenUsageMeasurement extends TokenUsageCounts {
   model?: string;
   quality: Exclude<TokenMeasurementQuality, 'unavailable'>;
   semantics: TokenCounterSemantics;
+  cursorKey?: string;
+  reportedCostMicrousd?: number;
+  coverage?: 'complete' | 'partial';
 }
 
 export interface TokenUsageCursor {
@@ -70,6 +75,7 @@ export interface DashboardEvent {
   status?: EventStatus;
   duration_ms?: number;
   token_usage?: TokenUsageMeasurement;
+  token_usages?: TokenUsageMeasurement[];
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   workspacePath?: string;
@@ -175,5 +181,7 @@ export interface ServerConfig {
   fileBytes: number;
   workspaceEntries: number;
   workspaceDepth: number;
+  telemetryDbPath: string;
+  telemetryTimeZone: string;
 }
 
