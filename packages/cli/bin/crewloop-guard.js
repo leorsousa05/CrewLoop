@@ -4,8 +4,8 @@ const { runGuard } = require('../dist/guard/index.js');
 
 runGuard(process.argv)
   .then((exitCode) => {
-    process.exitCode = exitCode;
+    process.exit(exitCode);
   })
   .catch(() => {
-    process.exitCode = 0;
+    process.exit(0);
   });
