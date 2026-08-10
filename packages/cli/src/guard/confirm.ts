@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { GuardDecision, GuardPostEvent, NormalizedGuardEvent } from './guard.types';
 import { postDecision } from './post';
 
-export const DEFAULT_CONFIRMATION_TIMEOUT_MS = 300000;
+export const DEFAULT_CONFIRMATION_TIMEOUT_MS = 25000;
 export const POLL_INTERVAL_MS = 500;
 
 export interface ConfirmationOptions {

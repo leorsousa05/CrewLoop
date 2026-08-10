@@ -8,21 +8,21 @@ export const DEFAULT_POLICY: GuardPolicy = {
   version: 1,
   mode: 'audit',
   defaultAction: 'allow',
-  confirmationTimeout: 300000,
+  confirmationTimeout: 25000,
   rules: [
     {
       name: 'confirm git push',
       action: 'confirm',
       tools: ['Bash', 'run_command'],
       commandMatches: '^git\\s+push',
-      confirmationTimeout: 300000,
+      confirmationTimeout: 25000,
     },
     {
       name: 'confirm git force push',
       action: 'confirm',
       tools: ['Bash', 'run_command'],
       commandMatches: '^git\\s+push.*--force',
-      confirmationTimeout: 300000,
+      confirmationTimeout: 25000,
     },
   ],
 };
