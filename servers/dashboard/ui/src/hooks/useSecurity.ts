@@ -86,7 +86,7 @@ export function useSecurity(
       const res = await fetch(`/api/security/confirmations/${encodeURIComponent(id)}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }));
@@ -109,7 +109,7 @@ export function useSecurity(
       const res = await fetch(`/api/security/confirmations/${encodeURIComponent(id)}/deny`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }));

@@ -27,6 +27,10 @@ export function readJsonBody(req: IncomingMessage, maxBytes: number): Promise<un
         reject(new PayloadTooLargeError());
         return;
       }
+      if (!body || body.trim() === '') {
+        resolve({});
+        return;
+      }
       try {
         resolve(JSON.parse(body));
       } catch {
