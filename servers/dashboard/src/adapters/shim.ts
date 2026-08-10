@@ -162,7 +162,7 @@ export function normalizePayload(
 
   switch (source) {
     case 'kimi':
-      return normalizeKimi(payload as unknown as KimiHookPayload, { kimiDataDir: options.kimiDataDir });
+      return normalizeKimi(payload as unknown as KimiHookPayload, options);
     case 'claude':
       return normalizeClaude(payload as unknown as ClaudeHookPayload);
     case 'codex':

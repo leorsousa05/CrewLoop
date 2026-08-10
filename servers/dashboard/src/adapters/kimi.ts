@@ -34,13 +34,18 @@ const TOKEN_USAGE_ALIASES: TokenUsageAliases = {
 
 export interface KimiNormalizationOptions {
   kimiDataDir?: string;
+  eventTypeOverride?: string;
 }
 
 export function normalizeKimi(
   payload: KimiHookPayload,
   options: KimiNormalizationOptions = {}
 ): DashboardEvent | undefined {
-  const event_type = EVENT_MAP[payload.hook_event_name];
+  const hookName =
+    payload.hook_event_name ||
+    options.eventTypeOverride ||
+    (payload.tool_name ? 'PreToolUse' : undefined);
+  const event_type = hookName ? EVENT_MAP[hookName] : undefined;
   if (!event_type) {
     return undefined;
   }
