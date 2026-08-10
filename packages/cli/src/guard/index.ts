@@ -78,9 +78,6 @@ export async function runGuard(argv: string[]): Promise<number> {
   if (rawPayload.length === 0) {
     return 0;
   }
-  try {
-    fs.appendFileSync('/tmp/crewloop-agy-hook.log', rawPayload + '\n---\n');
-  } catch {}
 
   let payload: unknown;
   try {

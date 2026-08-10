@@ -43,7 +43,6 @@ export function requestConfirmation(
     confirmationId,
   };
 
-  console.error('[guard] posting pending decision', confirmationId, 'to', serverUrl);
   postDecision(postEvent, serverUrl);
 
   return pollConfirmationStatus(confirmationId, timeout, serverUrl);
@@ -66,7 +65,6 @@ function pollConfirmationStatus(
 
       fetchConfirmationStatus(confirmationId, serverUrl)
         .then((response) => {
-          console.error('[guard] poll response', response);
           if (response.status === 'approved') {
             resolve({ action: 'allow', remember: response.remember });
           } else if (response.status === 'denied') {
@@ -75,8 +73,7 @@ function pollConfirmationStatus(
             scheduleNextPoll(deadline, poll);
           }
         })
-        .catch((err) => {
-          console.error('[guard] poll error', err.message);
+        .catch(() => {
           // Treat polling errors as pending; let the deadline handle timeout.
           scheduleNextPoll(deadline, poll);
         });
