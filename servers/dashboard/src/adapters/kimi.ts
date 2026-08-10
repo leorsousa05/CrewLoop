@@ -76,11 +76,35 @@ export function normalizeKimi(
     event_type,
     tool: payload.tool_name,
     skill: payload.skill,
-    input: payload.tool_input,
+    input: normalizeInput(payload.tool_input),
     output: normalizeOutput(payload.tool_output),
     token_usage,
     workspacePath: payload.cwd,
   };
+}
+
+function normalizeInput(
+  input: unknown
+): Record<string, unknown> | undefined {
+  if (input === undefined || input === null) return undefined;
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(input);
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+          return parsed as Record<string, unknown>;
+        }
+      } catch {
+        // Fallback to wrapping
+      }
+    }
+    return { input };
+  }
+  if (typeof input === 'object' && !Array.isArray(input)) {
+    return input as Record<string, unknown>;
+  }
+  return undefined;
 }
 
 function normalizeOutput(

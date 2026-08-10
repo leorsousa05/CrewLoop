@@ -58,13 +58,13 @@ function delegateToShim(agent: string, defaultSkill: string | undefined, eventTy
   if (eventType) {
     args.push('--event-type', eventType);
   }
-  const shim = spawn('crewloop-shim', args, {
+  const { spawnSync } = require('node:child_process');
+  spawnSync('crewloop-shim', args, {
+    input: rawPayload,
     stdio: ['pipe', 'ignore', 'ignore'],
+    timeout: 2000,
   });
-  shim.unref();
-  shim.stdin.write(rawPayload);
-  shim.stdin.end();
-  // Do not wait for the shim; telemetry must not block the agent.
+  // The shim takes < 50ms, so spawnSync ensures payload is sent before guard exits.
 }
 
 export async function runGuard(argv: string[]): Promise<number> {
