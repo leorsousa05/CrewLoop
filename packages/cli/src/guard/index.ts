@@ -104,7 +104,9 @@ export async function runGuard(argv: string[]): Promise<number> {
         saveRememberedConfirmation(event.cwd, decision.rule);
       }
       if (result.action === 'block') {
-        process.stderr.write(`[crewloop-guard] Action blocked by security decision: ${decision.rule || 'policy'}\n`);
+        const reason = `Action blocked by security decision: ${decision.rule || 'policy'}`;
+        process.stderr.write(`[crewloop-guard] ${reason}\n`);
+        process.stdout.write(JSON.stringify({ decision: 'block', action: 'block', status: 'block', continue: false, reason, error: reason }) + '\n');
         return 1;
       }
       delegateToShim(agent, defaultSkill, eventType, rawPayload);
@@ -120,7 +122,9 @@ export async function runGuard(argv: string[]): Promise<number> {
   postDecision(buildPostEvent(event, decision));
 
   if (decision.action === 'block' && guardCapable === 'block') {
-    process.stderr.write(`[crewloop-guard] Action blocked by security policy: ${decision.rule || 'policy'}\n`);
+    const reason = `Action blocked by security policy: ${decision.rule || 'policy'}`;
+    process.stderr.write(`[crewloop-guard] ${reason}\n`);
+    process.stdout.write(JSON.stringify({ decision: 'block', action: 'block', status: 'block', continue: false, reason, error: reason }) + '\n');
     return 1;
   }
 
