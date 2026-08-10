@@ -161,7 +161,8 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
         inv.status = status;
         inv.endTime = ev.timestamp;
         inv.durationMs = ev.duration_ms;
-        inv.output = ev.output;
+        inv.input = inv.input && Object.keys(inv.input).length > 0 ? inv.input : ev.input;
+        inv.output = ev.output || inv.output;
         inv.detail = ev.detail || inv.detail;
         inv.skill = ev.skill || inv.skill;
         continue;

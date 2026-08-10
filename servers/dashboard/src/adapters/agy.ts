@@ -15,6 +15,8 @@ export interface AgyHookPayload {
     args?: Record<string, unknown>;
   };
   toolName?: string;
+  toolResponse?: string | Record<string, unknown>;
+  tool_response?: string | Record<string, unknown>;
   stepIdx?: number;
   error?: string;
   workspacePaths?: string[];
@@ -131,7 +133,7 @@ export function normalizeAgy(
     payload.eventType ||
     payload.eventName ||
     payload.hookName ||
-    (payload.toolCall ? 'PreToolUse' : 'PostToolUse');
+    (payload.toolResponse ? 'PostToolUse' : payload.toolCall ? 'PreToolUse' : 'PostToolUse');
   const event_type = EVENT_MAP[rawEventName];
   if (!event_type) {
     return undefined;
@@ -151,6 +153,9 @@ export function normalizeAgy(
   const reason = typeof p.reason === 'string' ? (p.reason as string) : undefined;
   const confirmationId = typeof p.confirmationId === 'string' ? (p.confirmationId as string) : undefined;
 
+  const rawOutput = payload.toolResponse || payload.tool_response || (payload.error !== undefined ? { error: payload.error } : undefined);
+  const output = typeof rawOutput === 'object' && rawOutput !== null ? (rawOutput as Record<string, unknown>) : typeof rawOutput === 'string' ? { output: rawOutput } : undefined;
+
   return {
     id: generateId(session_id, stepIdx),
     timestamp: Date.now(),
@@ -164,7 +169,7 @@ export function normalizeAgy(
     reason,
     confirmationId,
     input: args,
-    output: payload.error !== undefined ? { error: payload.error } : undefined,
+    output,
     workspacePath: payload.workspacePaths?.[0],
   };
 }
