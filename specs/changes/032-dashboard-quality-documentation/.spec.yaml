@@ -11,6 +11,7 @@ depends_on:
   - 029-dashboard-event-session-consistency
   - 030-dashboard-client-correctness
   - 031-dashboard-responsive-ui-refinement
+  - 033-dashboard-usage-telemetry
 affected_files:
   - servers/dashboard/src/**/*.test.ts
   - servers/dashboard/ui/src/**/*.test.ts

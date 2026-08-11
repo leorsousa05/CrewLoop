@@ -14,8 +14,9 @@ Dashboard tests focus on pure utilities and basic server startup while filesyste
 
 1. Establish regression evidence across the four implementation phases.
 2. Make README, living spec, ADRs, and tracking artifacts describe verified behavior.
-3. Resolve stale specs 021 and 022 through the normal review/shipping archive process.
-4. Leave one reproducible desktop/mobile acceptance matrix for future releases.
+3. Reconcile the durable product-usage telemetry and seventh Usage view introduced by spec 033.
+4. Resolve stale specs 021 and 022 through the normal review/shipping archive process.
+5. Leave one reproducible desktop/mobile acceptance matrix for future releases.
 
 ## Non-Goals
 
@@ -25,7 +26,7 @@ Dashboard tests focus on pure utilities and basic server startup while filesyste
 
 ## Constraints
 
-- This spec begins only after 028 through 031 are implementation-complete.
+- This spec begins only after 028 through 031 and 033 are implementation-complete.
 - Documentation cannot claim behavior not demonstrated by tests or manual evidence.
 - Shipper alone moves completed/superseded spec folders into archive.
 - Generated build artifacts and screenshots are not committed unless explicitly required.
@@ -43,6 +44,6 @@ Dashboard tests focus on pure utilities and basic server startup while filesyste
 
 - [ ] Critical security, state, adapter, client, and accessibility contracts have regression tests.
 - [ ] Typecheck, build, server tests, UI tests, and skill validation pass.
-- [ ] README and living spec match the six-view, five-agent, localhost-only product.
+- [ ] README and living spec match the seven-view, five-agent, localhost-only product with durable minimized usage telemetry.
 - [ ] ADR 001 clearly identifies clauses superseded by later decisions.
 - [ ] Specs 021 and 022 are correctly archived with preserved history.
