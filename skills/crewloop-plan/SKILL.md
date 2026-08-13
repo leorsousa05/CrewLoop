@@ -49,10 +49,15 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
    ```
 5. **Write Spec Files (`specs/changes/NNN-name/`):**
    - `.spec.yaml`: Metadata, status, subagent parallelization flags.
-   - `proposal.md`: WHY, goals, explicit non-goals, risk assessment.
-   - `design.md`: Architecture, file changes, explicit contracts/interfaces, and input/output edge case matrix.
-   - `tasks.md`: Atomic checklist items with `Files`, `Depends on`, `Verification` command, and `Done when` criteria.
-6. **Pre-Handoff Spec Validation:** Confirm all spec files are non-empty, contracts are typed, and tasks are verifiable.
+   - `proposal.md`: WHY, goals, explicit non-goals, risk assessment, and **Acceptance Criteria** — each criterion MUST be observable/testable (`Given/When/Then` style), not aspirational ("works well" is forbidden).
+   - `design.md`: Architecture, file changes, explicit contracts/interfaces, and a **mandatory Edge Case & Error Handling Matrix** covering at minimum: empty/null/invalid inputs, error paths (sad path), boundary values, concurrency/permission concerns when relevant. Happy-path-only specs are invalid.
+   - `tasks.md`: Atomic checklist items with `Files`, `Depends on`, `Verification` command, and `Done when` criteria. `Done when` MUST reference acceptance criteria IDs from `proposal.md` and include the test that proves it.
+6. **Pre-Handoff Spec Validation (quality gate):** Reject and rewrite the spec if any of these fail:
+   - All spec files are non-empty and contracts are typed.
+   - Every acceptance criterion is testable and mapped to at least one task in `tasks.md`.
+   - The edge case matrix includes at least one failure scenario per public entry point.
+   - Every task has a `Verification` command that actually exists in the project.
+   - Non-goals explicitly state what must NOT be touched (prevents regressions outside scope).
 7. **Hand off Automatically:** Load `crewloop:design` (UI), `crewloop:docs` (docs), or `crewloop:code`.
 
 ---
@@ -63,3 +68,6 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 - ❌ Routing to `crewloop:code` without a spec for non-trivial tasks.
 - ❌ Creating spec files outside `specs/changes/NNN-name/`.
 - ❌ Asking confirmation menus instead of auto-routing when done.
+- ❌ Vague acceptance criteria ("should work", "handle errors properly") — every criterion must be falsifiable.
+- ❌ Specs that only describe the happy path — bugs live in error paths and edge cases.
+- ❌ Tasks whose `Done when` is "code compiles" — completion must be proven by a test or observable behavior.
