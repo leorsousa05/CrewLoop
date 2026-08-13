@@ -98,7 +98,7 @@ function extractDetail(tool: string | undefined, args: Record<string, unknown> |
   for (const field of fields) {
     const value = args[field];
     if (typeof value === 'string' && value.length > 0) {
-      return value;
+      return tool === 'Bash' ? redactCommandLine(value) : value;
     }
   }
 
@@ -109,6 +109,23 @@ function extractDetail(tool: string | undefined, args: Record<string, unknown> |
   const serialized = JSON.stringify(args);
   if (serialized === '{}') return undefined;
   return serialized.length > 200 ? `${serialized.slice(0, 197)}...` : serialized;
+}
+
+const MAX_DETAIL_LENGTH = 200;
+const SECRET_VALUE_RE =
+  /(\b(?:api[-_]?key|secret|token|password|passwd|authorization|bearer|credential)s?\s*[=:]\s*(?:bearer\s+)?[^\s"'&;]+|--(?:api[-_]?key|secret|token|password|authorization|bearer)(?:[=-]\S+|\s+\S+))/gi;
+
+function redactCommandLine(value: string): string {
+  const redacted = value.replace(SECRET_VALUE_RE, (match) => {
+    const eqIndex = match.search(/[=:]/);
+    if (eqIndex !== -1) return `${match.slice(0, eqIndex + 1)}<redacted>`;
+    const flagMatch = match.match(/^--[^\s]+/);
+    if (flagMatch) return `${flagMatch[0]} <redacted>`;
+    return '<redacted>';
+  });
+  return redacted.length > MAX_DETAIL_LENGTH
+    ? `${redacted.slice(0, MAX_DETAIL_LENGTH - 3)}...`
+    : redacted;
 }
 
 const SKILL_PATH_RE = /[\\/]skills[\\/]([^\\/]+)[\\/]SKILL\.md$/i;

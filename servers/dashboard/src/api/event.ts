@@ -78,6 +78,11 @@ export function createEventHandler(deps: EventHandlerDependencies) {
       res.end(JSON.stringify({ error: 'Missing required fields' }));
       return;
     }
+    if (typeof event.session_id !== 'string' || event.session_id.length > 200) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: 'Invalid session_id' }));
+      return;
+    }
 
     const root = event.workspacePath || process.cwd();
     const workspacePath = event.workspacePath;

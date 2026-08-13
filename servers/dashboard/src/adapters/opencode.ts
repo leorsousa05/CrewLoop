@@ -48,15 +48,21 @@ export function normalizeOpenCode(
   const status: EventStatus = eventType === 'tool_start'
     ? 'running'
     : payload.success === false ? 'error' : 'success';
+  const rawDuration = payload.duration_ms;
+  const duration_ms = typeof rawDuration === 'number'
+    && Number.isFinite(rawDuration)
+    && rawDuration >= 0
+    ? rawDuration
+    : undefined;
   return {
     id: generateId(),
     timestamp: Date.now(),
     source: 'opencode' as AgentSource,
-    session_id: payload.session_id || payload.cwd || process.cwd(),
+    session_id: payload.session_id || process.cwd(),
     event_type: eventType,
     tool: payload.tool,
     status,
-    duration_ms: typeof payload.duration_ms === 'number' ? payload.duration_ms : undefined,
+    duration_ms,
     workspacePath: payload.cwd,
   };
 }

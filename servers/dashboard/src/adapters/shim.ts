@@ -182,9 +182,13 @@ export function runShim(): void {
   };
 
   let raw = '';
+  const MAX_STDIN_BYTES = 256 * 1024;
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (chunk) => {
     raw += chunk;
+    if (raw.length > MAX_STDIN_BYTES) {
+      raw = raw.slice(0, MAX_STDIN_BYTES);
+    }
   });
   process.stdin.on('end', () => {
     try {

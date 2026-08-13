@@ -82,7 +82,11 @@ export function normalizeClaude(
     event_type,
     tool: payload.tool_name,
     skill: payload.skill,
-    detail: event_type === 'session_end' ? payload.reason : undefined,
+    detail: event_type === 'session_end' && typeof payload.reason === 'string'
+      ? payload.reason.length > 200
+        ? `${payload.reason.slice(0, 197)}...`
+        : payload.reason
+      : undefined,
     input: payload.tool_input,
     output: normalizeOutput(payload.tool_response),
     token_usage,

@@ -462,6 +462,57 @@ describe('normalizeAgy', () => {
     assert.deepStrictEqual(event!.input, { CommandLine: 'git status', Cwd: '/tmp' });
   });
 
+  it('redacts secrets and bounds length in Bash command detail', () => {
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-secret',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: { CommandLine: 'export API_KEY=abc123 TOKEN=xyz; git push' },
+      },
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.detail, 'export API_KEY=<redacted> TOKEN=<redacted>; git push');
+  });
+
+  it('redacts bearer tokens and flag values in Bash command detail', () => {
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-bearer',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: {
+          CommandLine: 'curl -H "Authorization: Bearer abcdef123" http://x && gh auth login --token ghp_abc',
+        },
+      },
+    });
+
+    assert.ok(event);
+    assert.match(event!.detail!, /Authorization:<redacted>/);
+    assert.match(event!.detail!, /--token <redacted>/);
+    assert.ok(!event!.detail!.includes('abcdef123'));
+    assert.ok(!event!.detail!.includes('ghp_abc'));
+  });
+
+  it('truncates long Bash command detail to 200 chars', () => {
+    const longCommand = 'echo '.repeat(60);
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-long',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: { CommandLine: longCommand },
+      },
+    });
+
+    assert.ok(event);
+    assert.ok(event!.detail!.length <= 200);
+  });
+
   it('normalizes PostToolUse without tool name and wraps error', () => {
     const event = normalizeAgy({
       hook_event_name: 'PostToolUse',

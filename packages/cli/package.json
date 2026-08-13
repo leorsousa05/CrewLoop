@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --test dist",
+    "test": "node --test \"dist/**/*.test.js\"",
     "prepublishOnly": "npm run build"
   },
   "engines": {

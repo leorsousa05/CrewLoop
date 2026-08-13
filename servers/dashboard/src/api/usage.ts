@@ -24,6 +24,9 @@ const TOKEN_USAGE_ALIASES = {
   total: ['total_tokens', 'totalTokens'],
 };
 
+// Reject timestamps beyond year 2100 to bound far-future cursor/dedup keys.
+const MAX_INGEST_TIMESTAMP = 4_102_444_800_000;
+
 export interface UsageHandlerDependencies {
   state: StateStore;
   broadcast: (message: ClientWebSocketMessage) => void;
@@ -73,7 +76,7 @@ export function createUsageHandler(deps: UsageHandlerDependencies) {
     }
 
     const session_id = typeof body.session_id === 'string' ? body.session_id : undefined;
-    if (!session_id) {
+    if (!session_id || !isBoundedString(session_id)) {
       sendJson(res, 400, { error: 'Missing session_id' });
       return;
     }
@@ -131,6 +134,19 @@ export function createUsageHandler(deps: UsageHandlerDependencies) {
         error: 'Delta usage requires a stable measurement_id or timestamp',
         code: 'STABLE_MEASUREMENT_ID_REQUIRED',
       });
+      return;
+    }
+
+    if (
+      body.coverage !== undefined
+      && body.coverage !== 'complete'
+      && body.coverage !== 'partial'
+    ) {
+      sendJson(res, 400, { error: 'Invalid coverage' });
+      return;
+    }
+    if (Number.isSafeInteger(body.timestamp) && (body.timestamp as number) > MAX_INGEST_TIMESTAMP) {
+      sendJson(res, 400, { error: 'Invalid timestamp' });
       return;
     }
 

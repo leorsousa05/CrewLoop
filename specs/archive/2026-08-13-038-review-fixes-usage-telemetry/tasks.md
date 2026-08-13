@@ -1,0 +1,33 @@
+# Tasks: 038-review-fixes-usage-telemetry
+
+- [x] **T1** Revert dashboard test runner to glob `dist/**/*.test.js`
+  - Files: `servers/dashboard/package.json`
+  - Verification: `node --test "dist/**/*.test.js"` completes; `node --test dist` would hang
+  - Done when: full suite runs (306/306) instead of hanging on the entrypoint server.
+- [x] **T2** Revert CLI test runner to glob `dist/**/*.test.js`
+  - Files: `packages/cli/package.json`
+  - Verification: `node --test "dist/**/*.test.js"` completes (97/97)
+  - Done when: CLI suite runs instead of failing on `cli.js`.
+- [x] **T3** Redact secrets and bound Bash `CommandLine` detail in AGY adapter
+  - Files: `servers/dashboard/src/adapters/agy.ts`, `servers/dashboard/src/tests/adapters.test.ts`
+  - Verification: `node --test "dist/**/*.test.js"`
+  - Done when: `API_KEY=<redacted>`, bearer tokens, and `--token` flags are redacted; detail bounded to 200 chars.
+- [x] **T4** Add Origin-based CSRF guard on `/api/usage/reset`
+  - Files: `servers/dashboard/src/lib/local-request-policy.ts`, `servers/dashboard/src/server.ts`, `servers/dashboard/src/tests/usage-history.test.ts`
+  - Verification: `node --test "dist/**/*.test.js"`
+  - Done when: cross-site Origin → 403; matching loopback Origin → 200.
+- [x] **T5** Harden top-level event boundary sanitization
+  - Files: `servers/dashboard/src/filters/sanitize.ts`, `servers/dashboard/src/api/event.ts`, `servers/dashboard/src/api/usage.ts`
+  - Verification: `node --test "dist/**/*.test.js"`
+  - Done when: dangerous top-level variants rejected; `detail` and `session_id` bounded.
+- [x] **T6** Fix server stop() hang and SQLite handle leak
+  - Files: `servers/dashboard/src/server.ts`
+  - Verification: `node --test "dist/**/*.test.js"`
+  - Done when: `stop()` closes idle connections and resolves after never-started start.
+- [x] **T7** Bound durations, stdin, reason, and timestamps in adapters
+  - Files: `servers/dashboard/src/adapters/opencode.ts`, `servers/dashboard/src/adapters/shim.ts`, `servers/dashboard/src/adapters/claude.ts`, `servers/dashboard/src/api/usage.ts`
+  - Verification: `node --test "dist/**/*.test.js"`
+  - Done when: `duration_ms` rejects NaN/negative, stdin capped, `reason` bounded, timestamps capped at year 2100.
+- [x] **T8** Full verification: build + all tests + validator
+  - Verification: `npx tsc && node --test "dist/**/*.test.js" && npm run test:ui` (dashboard); `npx tsc && node --test "dist/**/*.test.js"` (CLI); `python3 scripts/validate-skills.py` (root)
+  - Done when: dashboard 306/306, UI 65/65, CLI 97/97, validator PASS.

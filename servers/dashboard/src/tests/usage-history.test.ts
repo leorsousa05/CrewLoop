@@ -123,6 +123,30 @@ describe('usage history APIs', () => {
     assert.equal(server.state.getSession('api-session')?.token_usage.totalTokens, 0);
   });
 
+  it('rejects reset requests from cross-site origins (CSRF)', async () => {
+    const response = await fetch(`http://127.0.0.1:${port}/api/usage/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'http://evil.example',
+      },
+      body: JSON.stringify({ confirmation: 'RESET' }),
+    });
+    assert.equal(response.status, 403);
+  });
+
+  it('allows reset requests with a matching loopback origin', async () => {
+    const response = await fetch(`http://127.0.0.1:${port}/api/usage/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: `http://127.0.0.1:${port}`,
+      },
+      body: JSON.stringify({ confirmation: 'RESET' }),
+    });
+    assert.equal(response.status, 200);
+  });
+
   it('returns safe 503 errors when persistence is unavailable', async () => {
     server.usageRepository.close();
     const response = await fetch(`http://127.0.0.1:${port}/ingest/usage`, {

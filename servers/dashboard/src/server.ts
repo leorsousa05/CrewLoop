@@ -176,6 +176,10 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     }
 
     if (req.method === 'POST' && req.url === '/api/usage/reset') {
+      if (!requestPolicy.acceptsHttpOrigin(req.headers.origin)) {
+        sendJsonError(res, 403, 'Forbidden', 'INVALID_ORIGIN');
+        return;
+      }
       resetUsageHandler(req, res).catch(() => {
         sendJsonError(res, 500, 'Internal server error');
       });
@@ -432,9 +436,18 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
           });
         };
         if (!httpServer.listening) {
-          finish();
+          // Never started: ensure the WebSocket server is also closed so the
+          // callback fires and stop() resolves rather than hanging.
+          wss.close(() => {
+            usageRepository.close();
+            resolve();
+          });
           return;
         }
+        // Force-close idle keep-alive connections so httpServer.close() does
+        // not wait indefinitely for the SPA's idle socket before releasing
+        // the SQLite handle.
+        httpServer.closeAllConnections();
         httpServer.close(finish);
       });
       return stopPromise;

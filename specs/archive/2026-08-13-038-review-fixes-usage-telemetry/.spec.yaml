@@ -1,0 +1,22 @@
+name: 038-review-fixes-usage-telemetry
+status: completed
+created: 2026-08-13
+completed: 2026-08-13
+author: crewloop:review
+type: bugfix
+affected_files:
+  - servers/dashboard/package.json
+  - packages/cli/package.json
+  - servers/dashboard/src/adapters/agy.ts
+  - servers/dashboard/src/adapters/claude.ts
+  - servers/dashboard/src/adapters/opencode.ts
+  - servers/dashboard/src/adapters/shim.ts
+  - servers/dashboard/src/api/event.ts
+  - servers/dashboard/src/api/usage.ts
+  - servers/dashboard/src/filters/sanitize.ts
+  - servers/dashboard/src/lib/local-request-policy.ts
+  - servers/dashboard/src/server.ts
+  - servers/dashboard/src/tests/adapters.test.ts
+  - servers/dashboard/src/tests/usage-history.test.ts
+parallelization:
+  allow_subagents: false
