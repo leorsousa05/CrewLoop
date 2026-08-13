@@ -13,7 +13,7 @@
 **How it is consumed:** Install the CLI globally and run `crewloop install`. The CLI copies all skills to the agent's skill directory (e.g., `~/.agents/skills/`) and configures hook files for supported agents so that the real-time dashboard receives tool-use events. Supported agents: Kimi Code, Claude, Codex, AGY, OpenCode.
 
 **What this repository contains:**
-- **Skills** — 6 Markdown skill files, each describing a specialist role
+- **Skills** — 7 Markdown skill files, each describing a specialist role
 - **CLI** (`packages/cli/`) — TypeScript tool that installs skills and configures agent hooks
 - **Dashboard** (`servers/dashboard/`) — real-time WebSocket server + browser UI that shows which skill is active and a live event timeline
 - **Docs site** (`docs/`) — Vite + React + Tailwind SPA deployed to GitHub Pages
@@ -87,7 +87,7 @@ crewloop/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── README.md
-├── skills/                          # All 6 skill directories
+├── skills/                          # All 7 skill directories
 │   ├── crewloop-plan/
 │   │   ├── SKILL.md
 │   │   └── references/              # Local references folder
@@ -103,7 +103,10 @@ crewloop/
 │   ├── crewloop-ship/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   └── crewloop-docs/
+│   ├── crewloop-docs/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── crewloop-code-review/
 │       ├── SKILL.md
 │       └── references/
 ├── specs/
@@ -154,7 +157,7 @@ crewloop/
 
 ---
 
-## The 6 Skills
+## The Skills
 
 ### Core Skills — own the mandatory delivery loop (CrewLoop Design is conditional)
 
@@ -171,8 +174,9 @@ crewloop/
 | Skill | Invoked when |
 |-------|-------------|
 | **crewloop:docs** | Pure documentation tasks without code changes |
+| **crewloop:code-review** | Whole-codebase audits and code-debt analysis, independent of any pending diff |
 
-Supporting skills report findings back to the skill that invoked them. `crewloop:docs` returns to `crewloop:plan`. Supporting skills do not write implementation code or run git operations.
+Supporting skills report findings back to the skill that invoked them. `crewloop:docs` returns to `crewloop:plan`. `crewloop:code-review` returns to its invoker (default `crewloop:plan`) and never reviews pending diffs — that is `crewloop:review`'s job. Supporting skills do not write implementation code or run git operations.
 
 ---
 
@@ -200,7 +204,7 @@ Rules — no exceptions:
 7. **Skills auto-route based on the transition contract.** Present navigation options only when the user interrupts with `stop`, `pause`, `volta`, `voltar`, or `re-analyze`.
 8. **Sub-skills assist core skills** — supporting skills return to their invoker; `crewloop:docs` returns to `crewloop:plan` by default.
 9. **Direct handoffs between phases.** Every agent ends by routing to the next skill per the transition contract; `crewloop:plan` is the entry point and AFK fallback router.
-10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the 6 skills defined in this bundle. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the `crewloop:plan` gatekeeper.
+10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the skills registered in `references/skill-contracts.yaml`. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the `crewloop:plan` gatekeeper.
 11. **Bug-Fixing Pipeline:** Bug fixes enter via `crewloop:plan` like any other task and follow the standard chain: `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` (commit/ship and archive the spec).
 
 

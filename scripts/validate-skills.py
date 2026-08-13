@@ -21,6 +21,7 @@ MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 CANONICAL_SKILLS = {
     "crewloop-plan", "crewloop-design", "crewloop-code",
     "crewloop-review", "crewloop-ship", "crewloop-docs",
+    "crewloop-code-review",
 }
 DIRECT_TARGET_CONDITIONALS = {
     "conditional-crewloop:design-or-crewloop:code",
@@ -346,14 +347,14 @@ def validate_repository(skills_dir: Path, contracts_path: Path) -> list[str]:
 
     skill_names = {path.name for path in skills_dir.iterdir() if path.is_dir()}
     contract_dirs = {expected_dir_name(name) for name in contracts}
-    errors = [f"Expected 6 skill contracts, found {len(contracts)}"] if len(contracts) != 6 else []
+    errors = [f"Expected {len(CANONICAL_SKILLS)} skill contracts, found {len(contracts)}"] if len(contracts) != len(CANONICAL_SKILLS) else []
 
     for name in sorted(skill_names - contract_dirs):
         errors.append(f"Skill has no contract: {name}")
     for name in sorted(contract_dirs - skill_names):
         errors.append(f"Contract has no skill directory: {name}")
     if skill_names != CANONICAL_SKILLS:
-        errors.append("Skill directories do not match the canonical 6-skill inventory")
+        errors.append("Skill directories do not match the canonical skill inventory")
     for name in sorted(skill_names & contract_dirs):
         logical_name = next(n for n in contracts if expected_dir_name(n) == name)
         errors.extend(f"{name}: {error}" for error in validate_skill(skills_dir / name, contracts[logical_name]))
@@ -373,12 +374,12 @@ def main() -> int:
 
     skill_dirs = sorted((path for path in SKILLS_DIR.iterdir() if path.is_dir()), key=lambda path: path.name)
     inventory_errors = []
-    if len(contracts) != 6:
-        inventory_errors.append(f"Expected 6 skill contracts, found {len(contracts)}")
+    if len(contracts) != len(CANONICAL_SKILLS):
+        inventory_errors.append(f"Expected {len(CANONICAL_SKILLS)} skill contracts, found {len(contracts)}")
     if {expected_dir_name(n) for n in contracts} != CANONICAL_SKILLS:
-        inventory_errors.append("Skill contracts do not match the canonical 6-skill inventory")
+        inventory_errors.append("Skill contracts do not match the canonical skill inventory")
     if {path.name for path in skill_dirs} != CANONICAL_SKILLS:
-        inventory_errors.append("Skill directories do not match the canonical 6-skill inventory")
+        inventory_errors.append("Skill directories do not match the canonical skill inventory")
     if {path.name for path in skill_dirs} != {expected_dir_name(n) for n in contracts}:
         inventory_errors.append("Skill directories do not match the contract inventory")
 

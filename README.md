@@ -109,7 +109,7 @@ During `crewloop install`, the installer modifies the configuration or custom sc
 
 ## Meet the Crew
 
-CrewLoop ships 6 specialist skills. The core crew owns the main delivery loop; `crewloop:docs` jumps in when the context demands it.
+CrewLoop ships 7 specialist skills. The core crew owns the main delivery loop; `crewloop:docs` and `crewloop:code-review` jump in when the context demands it.
 
 ### Core Crew
 
@@ -126,6 +126,7 @@ CrewLoop ships 6 specialist skills. The core crew owns the main delivery loop; `
 | Skill | Phase | Responsibility |
 |-------|-------|----------------|
 | [`crewloop-docs`](skills/crewloop-docs/SKILL.md) | Docs | Documentation, READMEs, and changelogs |
+| [`crewloop-code-review`](skills/crewloop-code-review/SKILL.md) | Audit | Whole-codebase audit and code-debt analysis |
 
 ### Skills in Action
 

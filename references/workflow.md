@@ -14,6 +14,7 @@ Complete workflow for the CrewLoop team.
 | CrewLoop Review | `skills/crewloop-review/SKILL.md` | Code review and quality gate |
 | CrewLoop Ship | `skills/crewloop-ship/SKILL.md` | Git operations and PR |
 | CrewLoop Docs | `skills/crewloop-docs/SKILL.md` | Documentation-only changes |
+| CrewLoop Code Review | `skills/crewloop-code-review/SKILL.md` | Whole-codebase audit and code-debt analysis |
 
 ---
 
@@ -34,6 +35,7 @@ flowchart TD
     S --> done
 
     DO["📝 CrewLoop Docs<br>Documentation"] --> P
+    CR["🧹 CrewLoop Code Review<br>Codebase Audit"] --> P
 
     style P fill:#e65100,color:#fff
     style D fill:#6a1b9a,color:#fff
@@ -55,9 +57,10 @@ flowchart TD
 7. **`crewloop:review` is the quality gate** — verdict drives the route: PASS → `crewloop:ship`; FAIL → `crewloop:code`.
 8. **`crewloop:ship` is the only skill that touches git** — commit, branch, push, and PR. After shipping it routes to `done`.
 9. **`crewloop:docs` supports documentation tasks** — invoked on demand, returns to `crewloop:plan` when done.
-10. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit by `crewloop:ship`.
-11. **Bug fixes enter via `crewloop:plan`** — bug fixes are triaged like any other task through the Plan skill.
-12. **AFK mode is Plan-driven** — with AFK active, every skill returns to `crewloop:plan` automatically, and Plan loads the next skill per the transition contract, with no menus.
+10. **`crewloop:code-review` audits the whole codebase** — invoked on demand for code-debt analysis, returns to its invoker (default `crewloop:plan`); never part of the mandatory loop and never reviews pending diffs.
+11. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit by `crewloop:ship`.
+12. **Bug fixes enter via `crewloop:plan`** — bug fixes are triaged like any other task through the Plan skill.
+13. **AFK mode is Plan-driven** — with AFK active, every skill returns to `crewloop:plan` automatically, and Plan loads the next skill per the transition contract, with no menus.
 
 ---
 
