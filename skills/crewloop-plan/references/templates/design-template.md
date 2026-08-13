@@ -30,10 +30,21 @@ interface ServiceContract {
 ```
 
 ## Edge Case & Error Handling Matrix
-| Scenario / Input | Expected Behavior | Return Value / Error Thrown |
-|------------------|-------------------|-----------------------------|
-| Empty string / null input | Reject early with validation error | Throws `ValidationError` |
-| Network timeout | Fallback to cached response | Returns `CacheFallback` |
+[MANDATORY — a spec without failure scenarios is invalid. Cover every public entry point:
+empty/null/invalid inputs, boundary values, error paths, external failures (network, I/O, dependency down),
+and concurrency/permission concerns when relevant.]
+| Scenario / Input | Type | Expected Behavior | Return Value / Error Thrown |
+|------------------|------|-------------------|-----------------------------|
+| Valid input (happy path) | happy | Process normally | Returns `Result` |
+| Empty string / null input | edge | Reject early with validation error | Throws `ValidationError` |
+| Boundary value (0, max, overflow) | edge | Clamp or reject per contract | Returns `BoundaryError` |
+| Network timeout / dependency down | error | Fallback to cached response | Returns `CacheFallback` |
+| Concurrent modification | error | Last-write-wins or conflict error | Throws `ConflictError` |
+| Missing permission / unauthorized | error | Reject before side effects | Returns `403` |
+
+## Failure Mode Analysis
+[For each external dependency touched: what happens when it fails, times out, or returns garbage?
+Which failures are retried, which are surfaced to the caller, which are silent fallbacks?]
 
 ## Flow Diagrams
 1. Step 1
