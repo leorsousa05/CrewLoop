@@ -143,12 +143,12 @@ class ValidateSkillsTest(unittest.TestCase):
                 encoding="utf-8",
             )
             errors = validate_skills.validate_repository(skills_dir, contracts)
-            self.assertIn("Expected 6 skill contracts, found 2", errors)
+            self.assertIn(f"Expected {len(validate_skills.CANONICAL_SKILLS)} skill contracts, found 2", errors)
 
     def test_repository_manifest_contains_all_current_skills(self) -> None:
         repository_root = Path(__file__).resolve().parents[2]
         contracts = validate_skills.load_contracts(repository_root / "references" / "skill-contracts.yaml")
-        self.assertEqual(len(contracts), 6)
+        self.assertEqual(len(contracts), len(validate_skills.CANONICAL_SKILLS))
         self.assertEqual(
             {validate_skills.expected_dir_name(n) for n in contracts},
             {path.name for path in (repository_root / "skills").iterdir() if path.is_dir()},

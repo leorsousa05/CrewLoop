@@ -1,0 +1,20 @@
+name: 037-code-review-skill
+status: completed
+created: 2026-08-13
+completed: 2026-08-13
+author: crewloop:plan
+type: feature
+affected_files:
+  - skills/crewloop-code-review/SKILL.md
+  - skills/crewloop-code-review/references/code-review-checklist.md
+  - skills/crewloop-review/SKILL.md
+  - references/skill-contracts.yaml
+  - references/workflow.md
+  - references/conventions.md
+  - AGENTS.md
+  - README.md
+  - scripts/validate-skills.py
+  - scripts/tests/test_validate_skills.py
+parallelization:
+  allow_subagents: true
+  max_parallel_probes: 3

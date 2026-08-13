@@ -38,3 +38,11 @@ skills:
     interactive: false
     direct_target: "crewloop:plan"
     afk_target: "crewloop:plan"
+  crewloop:code-review:
+    kind: supporting
+    prefix: "> 🧹 **CrewLoop Code Review**"
+    default_invoker: "crewloop:plan"
+    return_strategy: invoker
+    interactive: false
+    direct_target: "crewloop:plan"
+    afk_target: "crewloop:plan"

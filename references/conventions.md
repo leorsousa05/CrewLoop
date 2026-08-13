@@ -54,12 +54,14 @@ Each skill has a deterministic outgoing route defined in `references/skill-contr
 | `crewloop:review` | `crewloop:ship` or `crewloop:code` | `crewloop:ship` on PASS, `crewloop:code` on FAIL |
 | `crewloop:ship` | `done` | after a successful push |
 | `crewloop:docs` | `crewloop:plan` | always returns to its invoker or `crewloop:plan` |
+| `crewloop:code-review` | `crewloop:plan` | always returns to its invoker or `crewloop:plan` |
 
 ### Supporting Skills
 
 | Supporting skill | Default invoker | Return target |
 |------------------|-----------------|---------------|
 | `crewloop:docs` | `crewloop:plan` | `crewloop:plan` |
+| `crewloop:code-review` | `crewloop:plan` | invoker / `crewloop:plan` |
 
 ---
 
@@ -144,6 +146,7 @@ Every skill response must start with its prefix on its own line:
 | CrewLoop Review | `> 🔍 **CrewLoop Review**` |
 | CrewLoop Ship | `> 🚀 **CrewLoop Ship**` |
 | CrewLoop Docs | `> 📝 **CrewLoop Docs**` |
+| CrewLoop Code Review | `> 🧹 **CrewLoop Code Review**` |
 
 ### Automatic routing
 
@@ -345,5 +348,5 @@ Every skill ends its final response with a summary block. The blocks below defin
 ## Bundle Lock-In & Self-Consistency Rules
 
 1. **Identity Gate:** At the beginning of every turn, read this conventions file and verify that you are operating exclusively under the CrewLoop skill set. 
-2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the 6 skills defined in the CrewLoop bundle.
+2. **Context Enclosure:** You are strictly forbidden from executing tasks, writing code, or routing workflows using arbitrary rules outside the skills registered in `references/skill-contracts.yaml`.
 3. **Auto-Routing:** Skills hand off automatically to the next skill per the transition contract. `crewloop:plan` is the entry point for new tasks and the AFK fallback router. Every skill must end its turn per the contract. If you receive a handoff that violates the transition contract (e.g. a phase skipped without a recognized interrupt), note the deviation and continue the correct next skill.
