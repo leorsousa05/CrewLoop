@@ -4,6 +4,7 @@ import { normalizeKimi, type KimiHookPayload } from './kimi';
 import { normalizeClaude, type ClaudeHookPayload } from './claude';
 import { normalizeCodex, type CodexHookPayload } from './codex';
 import { normalizeAgy, type AgyHookPayload } from './agy';
+import { normalizeOpenCode, type OpenCodePluginPayload } from './opencode';
 import { sanitize, sanitizeToolInputPayload, sanitizeToolPayload } from '../filters/sanitize';
 import { classifyOperation, extractFileDetail } from '../lib/operations';
 
@@ -43,46 +44,6 @@ export function detectSource(argv: string[]): AgentSource | undefined {
     return env as AgentSource;
   }
   return undefined;
-}
-
-export interface OpenCodePluginPayload {
-  tool: string;
-  event_type: 'tool_start' | 'tool_end';
-  cwd?: string;
-  success?: boolean;
-  duration_ms?: number;
-}
-
-export function normalizeOpenCode(payload: OpenCodePluginPayload): DashboardEvent | undefined {
-  if (typeof payload !== 'object' || payload === null) {
-    return undefined;
-  }
-
-  const p = payload as unknown as Record<string, unknown>;
-  const tool = typeof p.tool === 'string' ? p.tool : undefined;
-  const eventType = p.event_type === 'tool_start' || p.event_type === 'tool_end' ? p.event_type : undefined;
-
-  if (!tool || !eventType) {
-    return undefined;
-  }
-
-  let status: DashboardEvent['status'];
-  if (eventType === 'tool_start') {
-    status = 'running';
-  } else if (eventType === 'tool_end') {
-    status = p.success === false ? 'error' : 'success';
-  }
-
-  return {
-    id: generateId(),
-    timestamp: Date.now(),
-    source: 'opencode' as AgentSource,
-    session_id: typeof p.cwd === 'string' ? p.cwd : process.cwd(),
-    event_type: eventType,
-    tool,
-    status,
-    duration_ms: typeof p.duration_ms === 'number' ? p.duration_ms : undefined,
-  };
 }
 
 export interface NormalizationOptions {
@@ -221,9 +182,13 @@ export function runShim(): void {
   };
 
   let raw = '';
+  const MAX_STDIN_BYTES = 256 * 1024;
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (chunk) => {
     raw += chunk;
+    if (raw.length > MAX_STDIN_BYTES) {
+      raw = raw.slice(0, MAX_STDIN_BYTES);
+    }
   });
   process.stdin.on('end', () => {
     try {

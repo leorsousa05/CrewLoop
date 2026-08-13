@@ -9,6 +9,10 @@ import { SkillInferenceEngine } from './skills/infer';
 import { createEventHandler } from './api/event';
 import { createSkillsHandler } from './api/skills';
 import { createUsageHandler } from './api/usage';
+import { createDailyUsageHandler } from './api/daily-usage';
+import { createResetUsageHandler } from './api/reset-usage';
+import { SqliteUsageRepository } from './telemetry/sqlite-usage-repository';
+import type { TokenUsageRepository } from './telemetry/usage-repository';
 import { createSnapshotMessage, createUpdateMessage } from './presenter';
 import { createLocalRequestPolicy } from './lib/local-request-policy';
 import {
@@ -62,14 +66,20 @@ export interface DashboardServer {
   httpServer: http.Server;
   wss: WebSocketServer;
   state: StateStore;
+  usageRepository: TokenUsageRepository;
   start: () => Promise<void>;
   stop: () => Promise<void>;
 }
 
 export function createDashboardServer(config: ServerConfig): DashboardServer {
+  const usageRepository = new SqliteUsageRepository({
+    databasePath: config.telemetryDbPath,
+    timeZone: config.telemetryTimeZone,
+  });
   const state = new StateStore({
     maxEventsPerSession: config.maxEventsPerSession,
     sessionMaxAgeMs: config.sessionMaxAgeMs,
+    usageRepository,
   });
 
   const registry = new SkillRegistry(config.packageRoot);
@@ -118,6 +128,12 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     getActiveSessionId: () => activeSessionId,
     maxBodyBytes: config.eventBodyBytes,
   });
+  const dailyUsageHandler = createDailyUsageHandler(usageRepository);
+  const resetUsageHandler = createResetUsageHandler({
+    repository: usageRepository,
+    state,
+    maxBodyBytes: config.eventBodyBytes,
+  });
 
   const httpServer = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -125,6 +141,8 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     const isSensitiveRoute =
       req.url === '/event' ||
       req.url === '/ingest/usage' ||
+      req.url?.startsWith('/api/usage/daily') ||
+      req.url === '/api/usage/reset' ||
       req.url === '/api/skills' ||
       req.url?.startsWith('/api/workspace-files') ||
       req.url?.startsWith('/api/file-content') ||
@@ -148,6 +166,22 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
         console.error('Usage handler error:', err);
         res.statusCode = 500;
         res.end(JSON.stringify({ error: 'Internal server error' }));
+      });
+      return;
+    }
+
+    if (req.method === 'GET' && req.url?.startsWith('/api/usage/daily')) {
+      dailyUsageHandler(req, res);
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/api/usage/reset') {
+      if (!requestPolicy.acceptsHttpOrigin(req.headers.origin)) {
+        sendJsonError(res, 403, 'Forbidden', 'INVALID_ORIGIN');
+        return;
+      }
+      resetUsageHandler(req, res).catch(() => {
+        sendJsonError(res, 500, 'Internal server error');
       });
       return;
     }
@@ -318,6 +352,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     }
     state.pruneInactive();
   }, config.pruneIntervalMs);
+  let stopPromise: Promise<void> | undefined;
 
   function serveStaticFile(
     res: http.ServerResponse,
@@ -364,6 +399,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     httpServer,
     wss,
     state,
+    usageRepository,
     start: () =>
       new Promise<void>((resolve, reject) => {
         const onError = (err: Error) => {
@@ -386,18 +422,36 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
           resolve();
         });
       }),
-    stop: () =>
-      new Promise<void>((resolve) => {
+    stop: () => {
+      if (stopPromise) return stopPromise;
+      stopPromise = new Promise<void>((resolve) => {
         clearInterval(pruneInterval);
         for (const client of clients) {
           client.terminate();
         }
-        wss.close(() => {
-          httpServer.close(() => {
+        const finish = () => {
+          wss.close(() => {
+            usageRepository.close();
             resolve();
           });
-        });
-      }),
+        };
+        if (!httpServer.listening) {
+          // Never started: ensure the WebSocket server is also closed so the
+          // callback fires and stop() resolves rather than hanging.
+          wss.close(() => {
+            usageRepository.close();
+            resolve();
+          });
+          return;
+        }
+        // Force-close idle keep-alive connections so httpServer.close() does
+        // not wait indefinitely for the SPA's idle socket before releasing
+        // the SQLite handle.
+        httpServer.closeAllConnections();
+        httpServer.close(finish);
+      });
+      return stopPromise;
+    },
   };
 }
 

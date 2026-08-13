@@ -1,6 +1,6 @@
 {
   "name": "@archznn/crewloop-cli",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "private": true,
   "description": "CLI for installing CrewLoop skills",
   "license": "MIT",
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --test dist/**/*.test.js",
+    "test": "node --test \"dist/**/*.test.js\"",
     "prepublishOnly": "npm run build"
   },
   "engines": {

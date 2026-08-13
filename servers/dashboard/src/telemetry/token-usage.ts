@@ -36,11 +36,16 @@ export interface NormalizeTokenUsageInput {
   capturedAt: number;
   semantics: TokenCounterSemantics;
   aliases: TokenUsageAliases;
+  cursorKey?: string;
+  reportedCostMicrousd?: number;
+  coverage?: 'complete' | 'partial';
 }
 
 export interface MergeTokenUsageResult {
   aggregate: SessionTokenUsage;
   accepted: boolean;
+  delta?: TokenUsageCounts;
+  cursorKey?: string;
   reason?: 'duplicate' | 'invalid' | 'stale';
 }
 
@@ -105,6 +110,15 @@ export function normalizeTokenUsage(
   if (input.model !== undefined && !isBoundedString(input.model)) {
     return undefined;
   }
+  if (input.cursorKey !== undefined && !isBoundedString(input.cursorKey)) {
+    return undefined;
+  }
+  if (
+    input.reportedCostMicrousd !== undefined
+    && !isTokenCount(input.reportedCostMicrousd)
+  ) {
+    return undefined;
+  }
 
   const usage = input.rawUsage;
   const inputCount = readCount(usage, input.aliases.input);
@@ -152,6 +166,9 @@ export function normalizeTokenUsage(
     model: input.model,
     quality: 'measured',
     semantics: input.semantics,
+    cursorKey: input.cursorKey,
+    reportedCostMicrousd: input.reportedCostMicrousd,
+    coverage: input.coverage,
   };
 }
 
@@ -179,6 +196,18 @@ export function validateTokenUsageMeasurement(
   if (value.semantics !== 'delta' && value.semantics !== 'cumulative') {
     return undefined;
   }
+  if (value.cursorKey !== undefined && !isBoundedString(value.cursorKey)) {
+    return undefined;
+  }
+  if (
+    value.reportedCostMicrousd !== undefined
+    && !isTokenCount(value.reportedCostMicrousd)
+  ) {
+    return undefined;
+  }
+  if (value.coverage !== undefined && value.coverage !== 'complete' && value.coverage !== 'partial') {
+    return undefined;
+  }
 
   return {
     inputTokens: value.inputTokens as number,
@@ -193,6 +222,9 @@ export function validateTokenUsageMeasurement(
     model: value.model as string | undefined,
     quality: value.quality,
     semantics: value.semantics,
+    cursorKey: value.cursorKey as string | undefined,
+    reportedCostMicrousd: value.reportedCostMicrousd as number | undefined,
+    coverage: value.coverage as 'complete' | 'partial' | undefined,
   };
 }
 
@@ -252,7 +284,8 @@ function measurementCounts(measurement: TokenUsageMeasurement): TokenUsageCounts
   };
 }
 
-function cumulativeCursorKey(measurement: TokenUsageMeasurement): string {
+export function tokenUsageCursorKey(measurement: TokenUsageMeasurement): string {
+  if (measurement.cursorKey) return measurement.cursorKey;
   if (measurement.source === 'codex') {
     return 'codex:session';
   }
@@ -271,7 +304,7 @@ export function mergeTokenUsage(
     return { aggregate: current, accepted: false, reason: 'duplicate' };
   }
 
-  const cursorKey = cumulativeCursorKey(valid);
+  const cursorKey = tokenUsageCursorKey(valid);
   const previousCursor = current.cursors[cursorKey];
   if (
     valid.semantics === 'cumulative'
@@ -304,6 +337,8 @@ export function mergeTokenUsage(
 
   return {
     accepted: true,
+    delta,
+    cursorKey,
     aggregate: {
       ...current,
       ...totals,

@@ -11,12 +11,13 @@ The CrewLoop dashboard accepts normalized events from multiple agent hook source
 | `kimi` | TOML array-of-tables (`~/.kimi/config/config.toml`) | `PreToolUse` / `PostToolUse` |
 | `claude` | JSON flat object (`~/.claude/config.json`) | `before_tool_use` / `after_tool_use` |
 | `codex` | JSON matcher-array groups (`~/.codex/hooks.json`) | `PreToolUse` / `PostToolUse` |
-| `agy` | JSON matcher-array groups (`~/.gemini/config/hooks.json`, fallback `~/.gemini/antigravity-cli/hooks.json`) | `PreToolUse` / `PostToolUse` |
+| `agy` | JSON matcher-array groups (`~/.gemini/config/hooks.json`, fallback `~/.gemini/antigravity-cli/hooks.json`) | `PreToolUse` / `PostToolUse` / `AfterModel` |
+| `opencode` | JavaScript plugin (`~/.config/opencode/plugins/crewloop.js`) | Tool execution and final assistant message events |
 
 The `crewloop-shim` binary dispatches on the source name passed as the first positional argument:
 
 ```bash
-crewloop-shim <kimi|codex|agy|opencode|log-watcher> --default-skill crewloop-hub
+crewloop-shim <kimi|claude|codex|agy|opencode|log-watcher> --default-skill crewloop-plan
 ```
 
 For sources whose payloads do not include the event name (such as AGY), the event type can be forced with `--event-type`:
@@ -41,6 +42,7 @@ export interface DashboardEvent {
   detail?: string;
   status?: 'running' | 'success' | 'error';
   duration_ms?: number;
+  token_usage?: TokenUsageMeasurement;
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
 }
@@ -53,6 +55,7 @@ export interface ClientEvent {
   detail?: string;
   status?: 'running' | 'success' | 'error';
   duration_ms?: number;
+  tokenUsage?: TokenUsageMeasurement;
   skill?: string;
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
@@ -65,7 +68,7 @@ AGY sends JSON on stdin with camelCase fields. The payload includes `hook_event_
 
 ```typescript
 interface AgyHookPayload {
-  hook_event_name?: 'PreToolUse' | 'PostToolUse';
+  hook_event_name?: 'PreToolUse' | 'PostToolUse' | 'AfterModel';
   conversationId?: string;
   sessionId?: string;
   session_id?: string;
@@ -73,6 +76,7 @@ interface AgyHookPayload {
   toolCall?: { name?: string; args?: Record<string, unknown> };
   stepIdx?: number;
   error?: string;
+  llm_response?: { usageMetadata?: Record<string, unknown> };
 }
 ```
 
@@ -85,6 +89,7 @@ The adapter (`servers/dashboard/src/adapters/agy.ts`) resolves:
 - `detail` by extracting the primary argument for known tools (`CommandLine`, `AbsolutePath`, etc.).
 - `skill` when a `Read` (`view_file`) targets a skill file whose path matches `.../skills/<skill-name>/SKILL.md`.
 - `output` on `PostToolUse` from the `error` field when present.
+- `token_usage` on `AfterModel` from verified positive final-response usage metadata, with replay-stable identity.
 
 Because AGY does not emit `session_start`, the shim applies the `--default-skill` fallback as a separate `default_skill` field on every AGY event that does not already carry an inferred or explicit skill. The state store only uses `default_skill` when the session has no active skill, so an inferred skill from a `Read` of `SKILL.md` is preserved across subsequent tool calls.
 
@@ -113,26 +118,49 @@ Kimi sends tool inputs and responses in slightly different shapes from other sou
 
 ### Token usage ingestion
 
-The dashboard displays token usage in the Overview telemetry strip and the Telemetry panel. Agent hooks are not required to supply usage counters; when they are missing, the UI shows the telemetry as unavailable. For sources that do not report usage through hooks (e.g. Kimi Code), a local-only `POST /ingest/usage` endpoint accepts a Moonshot-compatible `usage` object and merges it into the matching session's token telemetry. A small `crewloop-ingest-kimi` helper forwards payloads from stdin to the dashboard so users can wire it into their own API integration or logging pipeline. The endpoint validates the session id, source, and token counts, and de-duplicates repeated ingestion using the event timestamp.
+The dashboard displays selected-session token usage in Overview and durable cross-session comparisons in Usage. Agent hooks are not required to supply counters; absent verified counters remain `unavailable` rather than being inferred from prompts, tools, or text length.
+
+The supported product collectors are:
+
+- **Codex:** direct hook counters or the bounded tail of the contained local session transcript.
+- **Kimi:** direct counters or every contained session `wire.jsonl` usage stream. Each wire is recorded as an independent cumulative counter stream; discovery/read gaps make coverage `partial`.
+- **Claude:** direct counters or bounded contained assistant-message transcript records. Normalized totals include cache-read and cache-write categories because Claude reports them outside the input count.
+- **OpenCode:** final assistant message usage, stable message identity, and provider-reported cost when present.
+- **AGY:** final positive `AfterModel` response usage metadata.
+
+`POST /ingest/usage` remains a local instrumentation fallback for normalized external counters. The endpoint validates product, session, timestamps, semantics, quality, and non-negative bounded counts. Callers may provide a stable `measurement_id`; a delta measurement without one MUST include a valid timestamp or be rejected. Otherwise the endpoint derives a deterministic identity from the normalized measurement. Deterministic identifiers and product/session/counter-stream cursors prevent replay and cumulative double counting.
+
+### Durable usage history
+
+Accepted usage deltas are committed transactionally to SQLite before live session totals change. The default path is `~/.crewloop/dashboard/telemetry.sqlite`; `CREWLOOP_TELEMETRY_DB_PATH` overrides it. The configured IANA time zone (`CREWLOOP_TELEMETRY_TIME_ZONE`, system time zone by default) is pinned by the database and defines daily attribution, including DST transitions.
+
+The store retains usage until explicit reset. It persists normalized token counts, product/model metadata, captured timestamps, counter semantics/cursors, immutable micro-USD cost snapshots, coverage, and hashed session identifiers. It MUST NOT persist prompts, commands, tool input/output, transcript or wire lines, raw provider JSON, filesystem paths, or credentials.
+
+`GET /api/usage/daily` returns product totals and daily rows for Codex, Kimi, Claude, OpenCode, and AGY. The default range is today plus the previous 29 local dates. Explicit `from`/`to` ranges are inclusive and capped at 366 days; `range=all` returns all retained dates. Every product uses tri-state availability (`measured`, `partial`, `unavailable`), preserving the difference between a measured zero and missing telemetry.
+
+`POST /api/usage/reset` requires an exact `{"confirmation":"RESET"}` body and may restrict deletion to selected products. Reset deletes visible measurements but preserves cumulative counter watermarks so the next snapshot cannot restore previously cleared history. Both endpoints enforce the loopback Host policy and return bounded safe errors.
+
+Tokens are the source of truth. Monetary fields are **Estimated API-equivalent USD**, never invoice or subscription spend. Provider-reported cost wins; otherwise an effective-dated exact-model catalog prices input, output, cache-read, and cache-write tokens in integer micro-USD. Every catalog entry records whether the provider's input count includes its cache categories; the estimator subtracts cache from input only for inclusive models. Unknown models return no cost, and mixed priced/unpriced measurements expose partial price coverage instead of presenting the partial sum as complete.
 
 ## Client views
 
-The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + session selector + connection indicator + command palette trigger), and a main content area. It exposes six views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):
+The dashboard UI is a Vercel-style command center with a persistent sidebar, a top bar (view title + context-appropriate session selector + connection indicator + command palette trigger), and a main content area. It exposes seven views, registered centrally in `ui/src/lib/navigation.ts` (`NAV_ITEMS`):
 
-1. **Overview** — command center for the selected session: a compact Now strip (active skill, lifecycle, confidence, source, elapsed), a dense telemetry strip (Tools, Duration, Rate/min, Files, Errors), an activity graph, a live preview of the last 5 tool invocations with an "Open timeline" entry point, and a horizontally scrollable recent-sessions strip. With zero sessions it renders an empty state.
+1. **Overview** — command center for the selected session: a compact Now strip (active skill, lifecycle, confidence, source, elapsed), a dense telemetry strip (Tools, Duration, Rate/min, Files, Errors), a full-width live preview of the last 5 tool invocations with an "Open timeline" entry point, and a horizontally scrollable recent-sessions strip. With zero sessions it renders an empty state.
 2. **Sessions** — filterable, pinnable session list with a segmented sort control (`recent` / `duration` / `events` / `name`) driven by the URL. Pinned sessions stay at the top and persist in `localStorage`. Rows are `div[role=button]` (keyboard-operable) with a real pin button inside.
 3. **Timeline** — tool invocations for the selected session. A `tool_start` and its matching `tool_end` are collapsed into one row that changes color from running (blue) to success (green) or error (red). Rows are `div[role="button"][aria-expanded]` and expand to view sanitized `input`/`output`; events can be copied to the clipboard or exported as JSON. Supports `j`/`k` row selection and `Enter` to expand/collapse. A hover-or-manual pause model buffers live updates while paused and shows a banner with the buffered count and a resume action (manual toggle: `p`).
 4. **Files** — master-detail Explorer: a file tree (read/edit/other badges, `role="tree"` semantics) and a viewer that switches between code reader format (line numbers) and diff comparison format. Below the `md` breakpoint it drills down to the detail pane with a back action; the selected path lives in the URL.
 5. **Skills** — sole owner of aggregate rankings: skill and tool usage bars plus a stat strip (skills, tools, files touched) for the selected session's visible invocations.
-6. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session, plus a keyboard-shortcuts reference generated from the `SHORTCUTS` registry. Settings persist to `localStorage`.
+6. **Usage** — product-level comparison independent of selected session. It provides 7-day, 30-day, 90-day, and all-history ranges; authoritative token totals and category breakdowns; an accessible ranked comparison; daily trend and exact table; estimated-cost coverage; unavailable/partial states; and confirmed reset. The configured telemetry time zone is visible, and the current day is marked ongoing.
+7. **Settings** — user preferences for theme (`system`/`dark`/`light`), density (`comfortable`/`compact`), reduced motion, auto-follow active session, and max events per session, plus a keyboard-shortcuts reference generated from the `SHORTCUTS` registry. Settings persist to `localStorage`.
 
 ## Navigation & routing
 
-Navigation state lives in the URL hash (`#/view?...`), managed by `ui/src/hooks/useHashRoute.ts` and (de)serialized by `ui/src/lib/route.ts`. The route carries: `view`, `sessionId`, `filePath`, `sort`, and serialized filters (`q`, `sources`, `skills`, `statuses`, `tools`, `ops`, `time`). On mount, contexts and session selection hydrate from the URL; subsequent state changes write through to the hash (`push` for view changes, `replace` for filter mirrors), so refresh restores the exact view/session/filters/file and back/forward works. Switching views via sidebar or palette resets filters.
+Navigation state lives in the URL hash (`#/view?...`), managed by `ui/src/hooks/useHashRoute.ts` and (de)serialized by `ui/src/lib/route.ts`. The route carries: `view`, `sessionId`, `filePath`, `sort`, Usage `range`, and serialized filters (`q`, `sources`, `skills`, `statuses`, `tools`, `ops`, `time`). The default Usage range (`30d`) is omitted; `7d`, `90d`, and `all` round-trip in the hash. On mount, contexts and session selection hydrate from the URL; subsequent state changes write through to the hash (`push` for view changes, `replace` for filter mirrors), so refresh restores the exact view/session/filters/file and back/forward works. Switching views via sidebar or palette resets filters.
 
 ## Keyboard shortcuts
 
-Global shortcuts are guarded against form fields: `⌘/Ctrl+K` opens the command palette, digits `1`–`6` switch views by position, `/` focuses the filter search, and `Esc` closes the topmost overlay. Timeline scope: `j`/`k` select rows, `Enter` expands/collapses, `p` toggles manual pause. The canonical registry is `ui/src/lib/shortcuts.ts` (`SHORTCUTS`), which also feeds the Settings reference section.
+Global shortcuts are guarded against form fields: `⌘/Ctrl+K` opens the command palette, digits `1`–`7` switch views by position, `/` focuses the filter search, and `Esc` closes the topmost overlay. Timeline scope: `j`/`k` select rows, `Enter` expands/collapses, `p` toggles manual pause. The canonical registry is `ui/src/lib/shortcuts.ts` (`SHORTCUTS`), which also feeds the Settings reference section.
 
 ## Command palette
 
@@ -178,4 +206,7 @@ The dashboard does **not** guess a skill from generic tool usage. `SkillInferenc
   - `GET /api/workspace-files` to fetch the list of relative workspace files.
   - `GET /api/file-content?path=...` to safely fetch full file contents.
   - `GET /api/file-diff?path=...` to safely fetch uncommitted git diffs relative to HEAD.
+  - `POST /ingest/usage` to accept validated normalized usage measurements.
+  - `GET /api/usage/daily` to query product totals and local-calendar daily aggregates.
+  - `POST /api/usage/reset` to clear retained usage after exact confirmation.
   - A WebSocket for live updates.

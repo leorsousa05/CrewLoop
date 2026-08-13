@@ -1,5 +1,19 @@
-import type { DashboardEvent, Session, DashboardState, AgentSource, EventStatus } from './types';
-import { createEmptySessionTokenUsage, mergeTokenUsage } from './telemetry/token-usage';
+import type {
+  AgentSource,
+  ClientTokenUsage,
+  CodingAgentProduct,
+  DashboardEvent,
+  DashboardState,
+  EventStatus,
+  Session,
+  SessionTokenUsage,
+} from './types';
+import {
+  createEmptySessionTokenUsage,
+  mergeTokenUsage,
+  tokenUsageCursorKey,
+} from './telemetry/token-usage';
+import type { TokenUsageRepository } from './telemetry/usage-repository';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -29,17 +43,20 @@ function loadSessionRootMappings(): Record<string, string> {
 export interface StateStoreOptions {
   maxEventsPerSession: number;
   sessionMaxAgeMs: number;
+  usageRepository?: TokenUsageRepository;
 }
 
 export class StateStore {
   private sessions: Map<string, Session> = new Map();
   private options: StateStoreOptions;
+  private usageRepository?: TokenUsageRepository;
 
   constructor(options: StateStoreOptions) {
     this.options = options;
+    this.usageRepository = options.usageRepository;
   }
 
-  applyEvent(event: DashboardEvent): Session {
+  applyEvent(event: DashboardEvent, options: { throwOnUsageFailure?: boolean } = {}): Session {
     let session = this.sessions.get(event.session_id);
 
     if (!session) {
@@ -67,15 +84,39 @@ export class StateStore {
       saveSessionRootMapping(event.session_id, event.workspacePath);
     }
 
-    if (event.token_usage) {
-      const merged = mergeTokenUsage(session.token_usage, event.token_usage);
-      if (merged.accepted) {
-        session.token_usage = merged.aggregate;
-      } else if (merged.reason === 'invalid') {
-        session.token_usage = {
-          ...session.token_usage,
-          rejectedMeasurementCount: session.token_usage.rejectedMeasurementCount + 1,
-        };
+    const usageMeasurements = [
+      ...(event.token_usage ? [event.token_usage] : []),
+      ...(event.token_usages ?? []),
+    ];
+    for (const measurement of usageMeasurements) {
+      if (this.usageRepository && isCodingAgentProduct(event.source)) {
+        try {
+          const persisted = this.usageRepository.record({
+            product: event.source,
+            sessionId: event.session_id,
+            cursorKey: tokenUsageCursorKey(measurement),
+            measurement,
+            reportedCostMicrousd: measurement.reportedCostMicrousd,
+          });
+          if (persisted.status === 'accepted' && persisted.sessionUsage) {
+            session.token_usage = hydrateSessionTokenUsage(
+              persisted.sessionUsage,
+              session.token_usage
+            );
+          } else if (persisted.status === 'invalid') {
+            session.token_usage = rejectMeasurement(session.token_usage);
+          }
+        } catch (error) {
+          if (options.throwOnUsageFailure) throw error;
+          console.error('Usage persistence failed; live event retained without token mutation.');
+        }
+      } else {
+        const merged = mergeTokenUsage(session.token_usage, measurement);
+        if (merged.accepted) {
+          session.token_usage = merged.aggregate;
+        } else if (merged.reason === 'invalid') {
+          session.token_usage = rejectMeasurement(session.token_usage);
+        }
       }
     }
 
@@ -145,6 +186,15 @@ export class StateStore {
     };
   }
 
+  clearTokenUsage(products: readonly CodingAgentProduct[]): void {
+    const selected = new Set(products);
+    for (const session of this.sessions.values()) {
+      if (isCodingAgentProduct(session.source) && selected.has(session.source)) {
+        session.token_usage = createEmptySessionTokenUsage();
+      }
+    }
+  }
+
   /**
    * Marks sessions with no activity for `idleTimeoutMs` as ended. This is the
    * fallback for agents that die without emitting SessionEnd (e.g. SIGKILL).
@@ -180,7 +230,7 @@ export class StateStore {
       source,
       events: [],
       tool_counts: {},
-      token_usage: createEmptySessionTokenUsage(),
+      token_usage: this.restoreTokenUsage(source, id),
       lifecycle: 'starting',
       started_at: now,
       last_event_at: now,
@@ -192,6 +242,55 @@ export class StateStore {
     this.sessions.set(id, session);
     return session;
   }
+
+  private restoreTokenUsage(source: AgentSource, sessionId: string): SessionTokenUsage {
+    if (!this.usageRepository || !isCodingAgentProduct(source)) {
+      return createEmptySessionTokenUsage();
+    }
+    try {
+      const usage = this.usageRepository.getSessionUsage(source, sessionId);
+      return usage
+        ? hydrateSessionTokenUsage(usage, createEmptySessionTokenUsage())
+        : createEmptySessionTokenUsage();
+    } catch {
+      console.error('Usage restoration failed; live session started without token history.');
+      return createEmptySessionTokenUsage();
+    }
+  }
+}
+
+function isCodingAgentProduct(source: AgentSource): source is CodingAgentProduct {
+  return source !== 'log-watcher';
+}
+
+function rejectMeasurement(usage: SessionTokenUsage): SessionTokenUsage {
+  return {
+    ...usage,
+    rejectedMeasurementCount: usage.rejectedMeasurementCount + 1,
+  };
+}
+
+function hydrateSessionTokenUsage(
+  persisted: ClientTokenUsage,
+  current: SessionTokenUsage
+): SessionTokenUsage {
+  return {
+    ...current,
+    inputTokens: persisted.inputTokens,
+    outputTokens: persisted.outputTokens,
+    cacheReadTokens: persisted.cacheReadTokens,
+    cacheWriteTokens: persisted.cacheWriteTokens,
+    reasoningTokens: persisted.reasoningTokens,
+    totalTokens: persisted.totalTokens,
+    quality: persisted.quality,
+    model: persisted.model,
+    measurementCount: persisted.measurementCount,
+    rejectedMeasurementCount: persisted.rejectedMeasurementCount,
+    measuredEventCount: persisted.quality === 'measured' ? persisted.measurementCount : 0,
+    estimatedEventCount: persisted.quality === 'estimated' ? persisted.measurementCount : 0,
+    cursors: {},
+    measurementIds: [],
+  };
 }
 
 function deriveLifecycle(event: DashboardEvent, session: Session): 'starting' | 'running' | 'ended' {

@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import type { TokenUsageMeasurement } from '../types';
 import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
+import { stableUsageId } from './usage-utils';
 
 const DEFAULT_MAX_TAIL_BYTES = 256 * 1024;
 const DEFAULT_MAX_LINE_BYTES = 64 * 1024;
@@ -101,9 +102,8 @@ function readBoundedTail(filePath: string, maxTailBytes: number): string | undef
   }
 }
 
-function measurementId(sessionId: string, timestamp: string, totalTokens: unknown): string {
-  const boundedSessionId = sessionId.slice(0, 64);
-  return `codex:${boundedSessionId}:token-count:${timestamp}:${String(totalTokens)}`.slice(0, 200);
+function measurementId(timestamp: string, totalTokens: unknown): string {
+  return stableUsageId('codex:token-count', timestamp, totalTokens);
 }
 
 export function parseLatestCodexTokenUsage(
@@ -140,10 +140,12 @@ export function parseLatestCodexTokenUsage(
         source: 'codex',
         rawUsage: usage,
         model: input.model,
-        eventId: measurementId(input.sessionId, value.timestamp, totalTokens),
+        eventId: measurementId(value.timestamp, totalTokens),
         capturedAt,
         semantics: 'cumulative',
         aliases: CODEX_SESSION_USAGE_ALIASES,
+        cursorKey: 'codex:session-transcript',
+        coverage: 'complete',
       });
       if (normalized) {
         return normalized;

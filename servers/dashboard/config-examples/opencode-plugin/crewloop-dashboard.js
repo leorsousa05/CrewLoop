@@ -1,64 +1,63 @@
-// OpenCode plugin example for CrewLoop dashboard.
-// Loads agent context and posts tool events to the local dashboard server.
+const { spawn } = require('node:child_process');
 
-const http = require('node:http');
-const { env } = require('node:process');
-
-const DEFAULT_URL = 'http://127.0.0.1:7890';
-
-function postEvent(event) {
-  const serverUrl = env.CREWLOOP_DASHBOARD_URL || DEFAULT_URL;
-  const body = JSON.stringify(event);
-  const url = new URL('/event', serverUrl);
-
-  const req = http.request(
-    {
-      hostname: url.hostname,
-      port: url.port,
-      path: url.pathname,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-      },
-      timeout: 300,
-    },
-    () => {}
-  );
-
-  req.on('error', () => {});
-  req.on('timeout', () => req.destroy());
-  req.write(body);
-  req.end();
+function sendEvent(payload) {
+  try {
+    const child = spawn('crewloop-shim', ['opencode'], {
+      stdio: ['pipe', 'ignore', 'ignore'],
+    });
+    child.stdin.write(JSON.stringify(payload));
+    child.stdin.end();
+  } catch {
+    // Dashboard telemetry must never block OpenCode.
+  }
 }
 
-module.exports = function crewloopDashboardPlugin(context) {
-  const sessionId = context.sessionId || `opencode-${Date.now()}`;
-
-  return {
-    name: 'crewloop-dashboard',
-    beforeToolUse(tool) {
-      postEvent({
-        id: `${sessionId}-${Date.now()}`,
-        timestamp: Date.now(),
-        source: 'opencode',
-        session_id: sessionId,
-        event_type: 'tool_start',
-        tool: tool.name,
-        detail: tool.args?.path || tool.args?.skill,
-      });
-    },
-    afterToolUse(tool, result) {
-      postEvent({
-        id: `${sessionId}-${Date.now()}`,
-        timestamp: Date.now(),
-        source: 'opencode',
-        session_id: sessionId,
-        event_type: 'tool_end',
-        tool: tool.name,
-        status: result?.error ? 'error' : 'success',
-        duration_ms: result?.duration_ms,
-      });
-    },
-  };
-};
+export const CrewLoopPlugin = async ({ directory }) => ({
+  'tool.execute.before': async (input) => {
+    sendEvent({
+      tool: input.tool,
+      event_type: 'tool_start',
+      cwd: input.cwd || directory,
+      session_id: input.sessionID,
+    });
+  },
+  'tool.execute.after': async (input, output) => {
+    sendEvent({
+      tool: input.tool,
+      event_type: 'tool_end',
+      cwd: input.cwd || directory,
+      session_id: input.sessionID,
+      success: output?.success !== false,
+      duration_ms: output?.duration,
+    });
+  },
+  event: async ({ event }) => {
+    if (event?.type !== 'message.updated') return;
+    const info = event.properties?.info;
+    const tokens = info?.tokens;
+    if (
+      info?.role !== 'assistant'
+      || typeof info.id !== 'string'
+      || typeof info.sessionID !== 'string'
+      || !Number.isSafeInteger(info.time?.completed)
+      || !tokens
+    ) return;
+    sendEvent({
+      event_type: 'model_usage',
+      cwd: directory,
+      session_id: info.sessionID,
+      message_id: info.id,
+      captured_at: info.time.completed,
+      final: true,
+      model: info.modelID,
+      cost_usd: info.cost,
+      usage: {
+        input: tokens.input,
+        output: tokens.output,
+        reasoning: tokens.reasoning,
+        cache_read: tokens.cache?.read,
+        cache_write: tokens.cache?.write,
+      },
+    });
+  },
+});

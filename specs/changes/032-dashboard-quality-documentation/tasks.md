@@ -2,7 +2,7 @@
 
 ## Setup
 
-- [x] Create the full spec folder and dependencies on specs 028 through 031.
+- [x] Create the full spec folder and dependencies on specs 028 through 031 and 033.
 - [ ] Confirm all dependency implementations reached Reviewer PASS.
 - [ ] Build the requirement-to-evidence matrix.
 
@@ -15,14 +15,14 @@
 
 ## Manual Matrix
 
-- [ ] Verify all six views at desktop and mobile widths.
+- [ ] Verify all seven views at desktop and mobile widths.
 - [ ] Verify light/dark/system themes and compact/comfortable densities.
 - [ ] Verify keyboard shortcuts, overlays, pause/resume, route round-trips, back/forward, and empty states.
 - [ ] Verify reduced motion, connection loss, session removal, file loading, diff, and retry behavior.
 
 ## Documentation
 
-- [ ] Reconcile README features, sources, development ports, settings, security, and limits.
+- [ ] Reconcile README features, sources, durable usage storage, development ports, settings, security, and limits.
 - [ ] Merge final behavior into `specs/living/dashboard/spec.md`.
 - [ ] Add supersession notes to ADR 001 without erasing history.
 - [ ] Normalize final disposition of specs 021 and 022 for Shipper archival.

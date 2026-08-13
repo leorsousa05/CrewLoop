@@ -56,6 +56,10 @@ import {
   TerminalWindow,
   Keyboard,
   Star,
+  ArrowClockwise,
+  Trash,
+  Warning,
+  Database,
 } from '@phosphor-icons/react';
 
 const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
@@ -115,6 +119,10 @@ const ICON_MAP: Record<string, React.ComponentType<IconProps>> = {
   TerminalWindow,
   Keyboard,
   Star,
+  ArrowClockwise,
+  Trash,
+  Warning,
+  Database,
 };
 
 interface Props extends Omit<IconProps, 'ref'> {

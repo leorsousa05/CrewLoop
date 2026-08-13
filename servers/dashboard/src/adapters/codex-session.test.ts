@@ -70,6 +70,9 @@ describe('parseLatestCodexTokenUsage', () => {
     assert.equal(measurement.reasoningTokens, 10);
     assert.equal(measurement.semantics, 'cumulative');
     assert.equal(measurement.model, 'gpt-test');
+    assert.equal(measurement.cursorKey, 'codex:session-transcript');
+    assert.equal(measurement.coverage, 'complete');
+    assert.doesNotMatch(measurement.measurementId, /session-1/);
   });
 
   it('returns a stable identifier for duplicate reads', () => {

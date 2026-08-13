@@ -3,11 +3,15 @@ import os from 'node:os';
 import path from 'node:path';
 import type { TokenUsageMeasurement } from '../types';
 import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
+import { stableUsageId } from './usage-utils';
 
 const DEFAULT_MAX_TAIL_BYTES = 256 * 1024;
 const DEFAULT_MAX_LINE_BYTES = 64 * 1024;
 const MAX_TAIL_BYTES = 1024 * 1024;
 const MAX_LINE_BYTES = 256 * 1024;
+const DEFAULT_MAX_DISCOVERY_ENTRIES = 4096;
+const MAX_DISCOVERY_ENTRIES = 20_000;
+const MAX_WIRE_MEASUREMENTS = 128;
 
 const KIMI_WIRE_USAGE_ALIASES: TokenUsageAliases = {
   input: ['inputOther', 'input_other'],
@@ -24,6 +28,8 @@ export interface ReadKimiSessionUsageInput {
   kimiDataDir?: string;
   maxTailBytes?: number;
   maxLineBytes?: number;
+  maxDiscoveryEntries?: number;
+  wireIdentity?: string;
 }
 
 interface KimiWireUsageRecord {
@@ -78,55 +84,64 @@ function resolveKimiDataDir(input?: string): string | undefined {
   return fs.existsSync(legacy) ? legacy : undefined;
 }
 
-const pathCache = new Map<string, string | undefined>();
+interface WireDiscoveryResult {
+  paths: string[];
+  partial: boolean;
+}
 
-function discoverWireJsonl(sessionId: string, dataDir: string): string | undefined {
-  const cacheKey = `${dataDir}:${sessionId}`;
-  if (pathCache.has(cacheKey)) {
-    return pathCache.get(cacheKey);
+function discoverWireJsonl(
+  sessionId: string,
+  dataDir: string,
+  maxEntries: number
+): WireDiscoveryResult {
+  if (!/^[a-zA-Z0-9._-]{1,128}$/.test(sessionId)) {
+    return { paths: [], partial: false };
   }
 
-  try {
-    const canonicalDataDir = fs.realpathSync(dataDir);
-    const entries = fs.readdirSync(canonicalDataDir, { recursive: true }) as string[];
+  const sessionSegments = new Set([
+    sessionId,
+    sessionId.startsWith('session_') ? sessionId : `session_${sessionId}`,
+  ]);
+  const paths: string[] = [];
+  const pending = [dataDir];
+  let inspected = 0;
+  let partial = false;
 
-    const sessionMatches = entries
-      .filter((relative) => path.basename(relative) === 'wire.jsonl')
-      .map((relative) => path.join(canonicalDataDir, relative))
-      .filter((absolute) => {
-        const normalized = path.normalize(absolute);
-        const withPrefix = sessionId.startsWith('session_')
-          ? sessionId
-          : `session_${sessionId}`;
-        return normalized.includes(`${path.sep}${sessionId}${path.sep}`)
-          || normalized.includes(`${path.sep}${withPrefix}${path.sep}`);
-      });
-
-    if (sessionMatches.length === 0) {
-      pathCache.set(cacheKey, undefined);
-      return undefined;
+  while (pending.length > 0 && inspected < maxEntries) {
+    const directory = pending.pop()!;
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(directory, { withFileTypes: true });
+    } catch {
+      partial = true;
+      continue;
     }
 
-    let newest = sessionMatches[0];
-    let newestMtime = 0;
-    for (const candidate of sessionMatches) {
-      try {
-        const stats = fs.statSync(candidate);
-        if (stats.mtimeMs > newestMtime) {
-          newestMtime = stats.mtimeMs;
-          newest = candidate;
-        }
-      } catch {
-        // Skip files we cannot stat.
+    for (const entry of entries) {
+      inspected += 1;
+      if (inspected > maxEntries) {
+        partial = true;
+        break;
+      }
+      const candidate = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(candidate);
+        continue;
+      }
+      if (!entry.isFile() || entry.name !== 'wire.jsonl') {
+        continue;
+      }
+      const relativeSegments = path.relative(dataDir, candidate).split(path.sep);
+      if (relativeSegments.some((segment) => sessionSegments.has(segment))) {
+        paths.push(candidate);
       }
     }
-
-    pathCache.set(cacheKey, newest);
-    return newest;
-  } catch {
-    pathCache.set(cacheKey, undefined);
-    return undefined;
   }
+
+  if (pending.length > 0) {
+    partial = true;
+  }
+  return { paths: paths.sort(), partial };
 }
 
 function readBoundedTail(filePath: string, maxTailBytes: number): { text: string; mtime: number } | undefined {
@@ -145,7 +160,7 @@ function readBoundedTail(filePath: string, maxTailBytes: number): { text: string
       const firstNewline = text.indexOf('\n');
       text = firstNewline === -1 ? '' : text.slice(firstNewline + 1);
     }
-    return { text, mtime: stats.mtimeMs };
+    return { text, mtime: Math.floor(stats.mtimeMs) };
   } catch {
     return undefined;
   } finally {
@@ -159,15 +174,17 @@ function readBoundedTail(filePath: string, maxTailBytes: number): { text: string
   }
 }
 
-function measurementId(sessionId: string, timestamp: string, totalTokens: unknown): string {
-  const boundedSessionId = sessionId.slice(0, 64);
-  return `kimi:${boundedSessionId}:wire:${timestamp}:${String(totalTokens)}`.slice(0, 200);
+function measurementId(wireIdentity: string, timestamp: string, totalTokens: unknown): string {
+  return stableUsageId('kimi:wire', wireIdentity, timestamp, totalTokens);
 }
 
 export function parseLatestKimiWireUsage(
   jsonlTail: string,
   fileMtime: number,
-  input: Pick<ReadKimiSessionUsageInput, 'sessionId' | 'model' | 'maxLineBytes'>
+  input: Pick<
+    ReadKimiSessionUsageInput,
+    'sessionId' | 'model' | 'maxLineBytes' | 'wireIdentity'
+  >
 ): TokenUsageMeasurement | undefined {
   const maxLineBytes = boundedPositiveInteger(
     input.maxLineBytes,
@@ -210,10 +227,12 @@ export function parseLatestKimiWireUsage(
         source: 'kimi',
         rawUsage: usage,
         model,
-        eventId: measurementId(input.sessionId, String(capturedAt), totalTokens),
+        eventId: measurementId(input.wireIdentity ?? 'standalone', String(capturedAt), totalTokens),
         capturedAt,
         semantics: 'cumulative',
         aliases: KIMI_WIRE_USAGE_ALIASES,
+        cursorKey: `kimi:wire:${input.wireIdentity ?? 'standalone'}`,
+        coverage: 'complete',
       });
       if (normalized) {
         return normalized;
@@ -228,38 +247,68 @@ export function parseLatestKimiWireUsage(
 
 export function readKimiSessionTokenUsage(
   input: ReadKimiSessionUsageInput
-): TokenUsageMeasurement | undefined {
+): TokenUsageMeasurement[] {
   if (!input.sessionId || input.sessionId === 'unknown') {
-    return undefined;
+    return [];
   }
 
   const dataDir = resolveKimiDataDir(input.kimiDataDir);
   if (!dataDir) {
-    return undefined;
+    return [];
   }
 
   try {
     const canonicalDataDir = fs.realpathSync(dataDir);
-    const wirePath = discoverWireJsonl(input.sessionId, canonicalDataDir);
-    if (!wirePath) {
-      return undefined;
+    const maxDiscoveryEntries = boundedPositiveInteger(
+      input.maxDiscoveryEntries,
+      DEFAULT_MAX_DISCOVERY_ENTRIES,
+      MAX_DISCOVERY_ENTRIES
+    );
+    const discovery = discoverWireJsonl(input.sessionId, canonicalDataDir, maxDiscoveryEntries);
+    if (discovery.paths.length === 0) {
+      return [];
     }
-
-    const canonicalWirePath = fs.realpathSync(wirePath);
-    if (!isContainedPath(canonicalDataDir, canonicalWirePath)) {
-      return undefined;
-    }
-
     const maxTailBytes = boundedPositiveInteger(
       input.maxTailBytes,
       DEFAULT_MAX_TAIL_BYTES,
       MAX_TAIL_BYTES
     );
-    const tail = readBoundedTail(canonicalWirePath, maxTailBytes);
-    return tail === undefined
-      ? undefined
-      : parseLatestKimiWireUsage(tail.text, tail.mtime, input);
+    const measurements: TokenUsageMeasurement[] = [];
+    let partial = discovery.partial || discovery.paths.length > MAX_WIRE_MEASUREMENTS;
+
+    for (const wirePath of discovery.paths.slice(0, MAX_WIRE_MEASUREMENTS)) {
+      try {
+        const canonicalWirePath = fs.realpathSync(wirePath);
+        if (!isContainedPath(canonicalDataDir, canonicalWirePath)) {
+          partial = true;
+          continue;
+        }
+        const tail = readBoundedTail(canonicalWirePath, maxTailBytes);
+        if (!tail) {
+          partial = true;
+          continue;
+        }
+        const relativePath = path.relative(canonicalDataDir, canonicalWirePath);
+        const wireIdentity = stableUsageId('stream', relativePath);
+        const measurement = parseLatestKimiWireUsage(tail.text, tail.mtime, {
+          ...input,
+          wireIdentity,
+        });
+        if (!measurement) {
+          partial = true;
+          continue;
+        }
+        measurements.push(measurement);
+      } catch {
+        partial = true;
+      }
+    }
+
+    return measurements.map((measurement) => ({
+      ...measurement,
+      coverage: partial ? 'partial' : 'complete',
+    }));
   } catch {
-    return undefined;
+    return [];
   }
 }

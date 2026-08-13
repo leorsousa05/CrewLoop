@@ -14,6 +14,13 @@ describe('route', () => {
     expect(parseRoute('#/timeline')).toEqual({ ...DEFAULT_ROUTE, view: 'timeline' });
   });
 
+  it('round-trips the Usage range and omits the default range', () => {
+    expect(parseRoute('#/usage')).toEqual({ ...DEFAULT_ROUTE, view: 'usage' });
+    expect(parseRoute('#/usage?range=90d').usageRange).toBe('90d');
+    expect(serializeRoute({ ...DEFAULT_ROUTE, view: 'usage', usageRange: 'all' })).toBe('#/usage?range=all');
+    expect(serializeRoute({ ...DEFAULT_ROUTE, view: 'usage' })).toBe('#/usage');
+  });
+
   it('parses session, file, and sort params', () => {
     const route = parseRoute('#/files?session=s1&file=src/a.ts&sort=duration');
     expect(route.view).toBe('files');
@@ -60,6 +67,7 @@ describe('route', () => {
       filters: { q: 'build', sources: 'kimi', ops: 'read,edit', time: '24h' as const },
       filePath: null,
       sort: 'name' as const,
+      usageRange: '30d' as const,
     };
     expect(parseRoute(serializeRoute(state))).toEqual(state);
   });

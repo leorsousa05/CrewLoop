@@ -67,6 +67,8 @@ describe('parseLatestKimiWireUsage', () => {
     assert.equal(measurement.cacheWriteTokens, 5);
     assert.equal(measurement.semantics, 'cumulative');
     assert.equal(measurement.model, 'kimi-k3');
+    assert.equal(measurement.cursorKey, 'kimi:wire:standalone');
+    assert.equal(measurement.coverage, 'complete');
   });
 
   it('returns a stable identifier for duplicate reads', () => {
@@ -186,7 +188,7 @@ describe('readKimiSessionTokenUsage', () => {
       kimiDataDir: root,
     });
 
-    assert.equal(measurement?.totalTokens, 155);
+    assert.equal(measurement[0]?.totalTokens, 155);
   });
 
   it('matches wire files when the directory has a session_ prefix but the hook id does not', () => {
@@ -205,11 +207,11 @@ describe('readKimiSessionTokenUsage', () => {
       kimiDataDir: root,
     });
 
-    assert.equal(measurement?.totalTokens, 155);
-    assert.equal(measurement?.capturedAt, 1784509271784);
+    assert.equal(measurement[0]?.totalTokens, 155);
+    assert.equal(measurement[0]?.capturedAt, 1784509271784);
   });
 
-  it('picks the most recently modified wire file when multiple agents exist', () => {
+  it('returns every contained wire stream with independent replay-stable cursors', () => {
     const root = createDataDir();
     const agent1Dir = path.join(root, 'sessions', 'workspace-1', 'session-1', 'agents', 'agent-1');
     const agent2Dir = path.join(root, 'sessions', 'workspace-1', 'session-1', 'agents', 'agent-2');
@@ -229,7 +231,45 @@ describe('readKimiSessionTokenUsage', () => {
       kimiDataDir: root,
     });
 
-    assert.equal(measurement?.totalTokens, 155);
+    const replay = readKimiSessionTokenUsage({
+      sessionId: 'session-1',
+      kimiDataDir: root,
+    });
+
+    assert.equal(measurement.reduce((sum, value) => sum + value.totalTokens, 0), 255);
+    assert.equal(new Set(measurement.map((value) => value.cursorKey)).size, 2);
+    assert.equal(measurement.every((value) => value.coverage === 'complete'), true);
+    assert.deepEqual(
+      measurement.map((value) => value.measurementId),
+      replay.map((value) => value.measurementId)
+    );
+    assert.doesNotMatch(JSON.stringify(measurement), /session-1|workspace-1|agent-1/);
+  });
+
+  it('marks readable wire coverage partial when another wire has no counters', () => {
+    const root = createDataDir();
+    const validDir = path.join(root, 'sessions', 'workspace-1', 'session-1', 'agents', 'agent-1');
+    const invalidDir = path.join(root, 'sessions', 'workspace-1', 'session-1', 'agents', 'agent-2');
+    fs.mkdirSync(validDir, { recursive: true });
+    fs.mkdirSync(invalidDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(validDir, 'wire.jsonl'),
+      `${usageRecordLine('2026-08-08T10:00:00.000Z', VALID_USAGE)}\n`,
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(invalidDir, 'wire.jsonl'),
+      `${JSON.stringify({ type: 'usage.record', usage: { total: 'invalid' } })}\n`,
+      'utf8'
+    );
+
+    const measurement = readKimiSessionTokenUsage({
+      sessionId: 'session-1',
+      kimiDataDir: root,
+    });
+
+    assert.equal(measurement[0]?.totalTokens, 155);
+    assert.equal(measurement[0]?.coverage, 'partial');
   });
 
   it('returns unavailable for missing usage records and files', () => {
@@ -239,19 +279,19 @@ describe('readKimiSessionTokenUsage', () => {
     const wirePath = path.join(sessionDir, 'wire.jsonl');
     fs.writeFileSync(wirePath, `${JSON.stringify({ type: 'other.record' })}\n`, 'utf8');
 
-    assert.equal(
+    assert.deepEqual(
       readKimiSessionTokenUsage({
         sessionId: 'session-1',
         kimiDataDir: root,
       }),
-      undefined
+      []
     );
-    assert.equal(
+    assert.deepEqual(
       readKimiSessionTokenUsage({
         sessionId: 'session-missing',
         kimiDataDir: root,
       }),
-      undefined
+      []
     );
   });
 
@@ -267,12 +307,12 @@ describe('readKimiSessionTokenUsage', () => {
     fs.writeFileSync(outsideWire, usageRecordLine('2026-08-08T10:00:00.000Z', VALID_USAGE));
 
     for (const wirePath of [wrongName, outsideWire, path.join(root, '..', 'escape.jsonl')]) {
-      assert.equal(
+      assert.deepEqual(
         readKimiSessionTokenUsage({
           sessionId: 'session-1',
           kimiDataDir: root,
         }),
-        undefined
+        []
       );
     }
   });
@@ -293,22 +333,22 @@ describe('readKimiSessionTokenUsage', () => {
       return;
     }
 
-    assert.equal(
+    assert.deepEqual(
       readKimiSessionTokenUsage({
         sessionId: 'session-1',
         kimiDataDir: root,
       }),
-      undefined
+      []
     );
   });
 
   it('skips discovery for unknown session ids', () => {
-    assert.equal(
+    assert.deepEqual(
       readKimiSessionTokenUsage({
         sessionId: 'unknown',
         kimiDataDir: createDataDir(),
       }),
-      undefined
+      []
     );
   });
 
@@ -326,7 +366,7 @@ describe('readKimiSessionTokenUsage', () => {
     process.env.KIMI_DATA_DIR = root;
     try {
       const measurement = readKimiSessionTokenUsage({ sessionId: 'session-env' });
-      assert.equal(measurement?.totalTokens, 155);
+      assert.equal(measurement[0]?.totalTokens, 155);
     } finally {
       if (original === undefined) {
         delete process.env.KIMI_DATA_DIR;

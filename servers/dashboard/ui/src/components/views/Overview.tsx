@@ -3,7 +3,6 @@ import type { ClientSession } from '../../../../src/types';
 import type { ToolInvocation } from '../../../../src/lib/invocations';
 import { ActiveSkillPanel } from '../ActiveSkillPanel';
 import { TelemetryPanel } from '../TelemetryPanel';
-import { ActivityGraph } from '../ActivityGraph';
 import { sourceIcon } from '../../../../src/lib/constants';
 import { Icon } from '../ui/Icon';
 import { formatTime, truncate } from '../../../../src/lib/format';
@@ -47,11 +46,7 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
           <TelemetryPanel session={selectedSession} />
         </div>
 
-        <div className="xl:col-span-2">
-          <ActivityGraph session={selectedSession} />
-        </div>
-
-        <section className="panel flex flex-col">
+        <section className="panel flex flex-col xl:col-span-3">
           <h2 className="text-caption uppercase tracking-wide text-text-muted px-5 py-3 border-b border-border-default">
             Live
           </h2>

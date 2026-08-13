@@ -24,6 +24,7 @@ import { SessionsView } from './components/views/SessionsView';
 import { TimelineView } from './components/views/TimelineView';
 import { FilesView } from './components/views/FilesView';
 import { SkillsView } from './components/views/SkillsView';
+import { UsageView } from './components/views/UsageView';
 import { SettingsView } from './components/views/SettingsView';
 import { projectInvocations, buildFileActivity } from '../../src/lib/invocations';
 import { resolvePath, resolvePaths } from '../../src/lib/paths';
@@ -320,7 +321,7 @@ export default function App() {
     [navigateToView, navigate, sortedSessions, selectAndRoute, handleExport, toggleDensity]
   );
 
-  // Global view shortcuts (digits 1-6), guarded against form fields
+  // Global view shortcuts (digits 1-7), guarded against form fields
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement | null;
@@ -398,6 +399,13 @@ export default function App() {
         );
       case 'skills':
         return <SkillsView invocations={filteredInvocations} filterOptions={filterOptions} />;
+      case 'usage':
+        return (
+          <UsageView
+            range={route.usageRange}
+            onRangeChange={(usageRange) => navigate({ usageRange })}
+          />
+        );
       case 'settings':
         return <SettingsView />;
       default:

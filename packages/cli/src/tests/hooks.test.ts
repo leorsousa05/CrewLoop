@@ -303,7 +303,7 @@ describe('installHooksForAgent', () => {
     assertResult(result, 'configured');
 
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    for (const event of ['SessionStart', 'SessionEnd']) {
+    for (const event of ['SessionStart', 'SessionEnd', 'AfterModel']) {
       assert.ok(Array.isArray(config.crewloop[event]), `expected AGY ${event} hooks`);
       assert.strictEqual(
         config.crewloop[event][0].hooks[0].command,
@@ -494,6 +494,10 @@ describe('OpenCode plugin writer', () => {
     assert.ok(content.includes("'tool.execute.after'"));
     assert.ok(content.includes("event_type: 'tool_start'"));
     assert.ok(content.includes("event_type: 'tool_end'"));
+    assert.ok(content.includes("event?.type !== 'message.updated'"));
+    assert.ok(content.includes("event_type: 'model_usage'"));
+    assert.ok(content.includes('message_id: info.id'));
+    assert.ok(content.includes('cost_usd: info.cost'));
   });
 
   it('is idempotent on reinstall', () => {

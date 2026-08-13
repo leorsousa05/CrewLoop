@@ -15,14 +15,14 @@ Automated tests omit major public APIs and interactive UI behavior. Manual verif
 
 ### MODIFIED
 
-- README reflects six views, supported sources, actual dev ports, effective settings, and enforced security behavior.
+- README reflects seven views, supported sources, durable minimized usage telemetry, actual dev ports, effective settings, and enforced security behavior.
 - Living spec includes OpenCode consistently and incorporates final server/client/UI contracts.
 - ADR 001 gains a supersession note for generic skill inference and any adapter details overtaken by later accepted decisions.
 - Specs 021 and 022 metadata/tasks clearly state their final disposition before shipping archive.
 
 ### REMOVED
 
-- Claims for a Network 3D view, seven-view navigation, ineffective max-events behavior, and unsafe filesystem guarantees.
+- Claims for a Network 3D view, stale six-view navigation, ineffective max-events behavior, and unsafe filesystem guarantees.
 - Ambiguous or contradictory source lists and shim examples.
 
 ## Migration Notes

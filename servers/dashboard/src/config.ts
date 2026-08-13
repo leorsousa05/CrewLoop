@@ -96,6 +96,31 @@ export const DEFAULT_EVENT_BODY_BYTES = 256 * 1024;
 export const DEFAULT_FILE_BYTES = 1024 * 1024;
 export const DEFAULT_WORKSPACE_ENTRIES = 20000;
 export const DEFAULT_WORKSPACE_DEPTH = 30;
+export const DEFAULT_TELEMETRY_DB_PATH = path.join(
+  os.homedir(),
+  '.crewloop',
+  'dashboard',
+  'telemetry.sqlite'
+);
+
+export function resolveTelemetryTimeZone(value?: string): string {
+  const candidate = value?.trim() || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format(0);
+  } catch {
+    throw new Error('CREWLOOP_TELEMETRY_TIME_ZONE must be a valid IANA time zone.');
+  }
+  return candidate;
+}
+
+export function resolveTelemetryDbPath(value?: string): string {
+  const candidate = value?.trim();
+  if (!candidate) return DEFAULT_TELEMETRY_DB_PATH;
+  if (candidate.includes('\0')) {
+    throw new Error('CREWLOOP_TELEMETRY_DB_PATH contains an invalid character.');
+  }
+  return path.resolve(candidate);
+}
 
 export function resolveKimiDataDir(): string | undefined {
   const env = process.env.KIMI_DATA_DIR;
@@ -132,6 +157,8 @@ export function loadConfig(): ServerConfig {
     fileBytes: DEFAULT_FILE_BYTES,
     workspaceEntries: DEFAULT_WORKSPACE_ENTRIES,
     workspaceDepth: DEFAULT_WORKSPACE_DEPTH,
+    telemetryDbPath: resolveTelemetryDbPath(process.env.CREWLOOP_TELEMETRY_DB_PATH),
+    telemetryTimeZone: resolveTelemetryTimeZone(process.env.CREWLOOP_TELEMETRY_TIME_ZONE),
   };
 }
 

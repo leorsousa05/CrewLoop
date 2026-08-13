@@ -1,6 +1,7 @@
 import type { AgentSource, DashboardEvent, EventType } from '../types';
 import { normalizeTokenUsage, type TokenUsageAliases } from '../telemetry/token-usage';
 import { readKimiSessionTokenUsage } from './kimi-session';
+import { isPlainObject, parseCapturedAt, stableUsageId } from './usage-utils';
 
 export interface KimiHookPayload {
   hook_event_name: string;
@@ -12,6 +13,9 @@ export interface KimiHookPayload {
   stop_reason?: string;
   usage?: unknown;
   model?: string;
+  timestamp?: number | string;
+  call_id?: string;
+  turn_id?: string;
   skill?: string;
 }
 
@@ -46,22 +50,26 @@ export function normalizeKimi(
   }
 
   const id = generateId();
-  const timestamp = Date.now();
+  const timestamp = parseCapturedAt(payload.timestamp) ?? Date.now();
   const sessionId = payload.session_id || 'unknown';
   const directTokenUsage = normalizeTokenUsage({
     source: 'kimi',
     rawUsage: payload.usage,
     model: payload.model,
-    eventId: `${sessionId}:${payload.hook_event_name}:${id}`,
+    eventId: directMeasurementId(payload),
     capturedAt: timestamp,
     semantics: 'cumulative',
     aliases: TOKEN_USAGE_ALIASES,
+    cursorKey: 'kimi:direct-session',
+    coverage: 'complete',
   });
-  const token_usage = directTokenUsage || readKimiSessionTokenUsage({
-    sessionId,
-    model: payload.model,
-    kimiDataDir: options.kimiDataDir,
-  });
+  const token_usages = directTokenUsage
+    ? undefined
+    : readKimiSessionTokenUsage({
+        sessionId,
+        model: payload.model,
+        kimiDataDir: options.kimiDataDir,
+      });
 
   return {
     id,
@@ -73,9 +81,29 @@ export function normalizeKimi(
     skill: payload.skill,
     input: payload.tool_input,
     output: normalizeOutput(payload.tool_output),
-    token_usage,
+    token_usage: directTokenUsage,
+    token_usages: token_usages && token_usages.length > 0 ? token_usages : undefined,
     workspacePath: payload.cwd,
   };
+}
+
+function directMeasurementId(payload: KimiHookPayload): string {
+  const usage = isPlainObject(payload.usage) ? payload.usage : {};
+  const countIdentity = [
+    ...TOKEN_USAGE_ALIASES.input,
+    ...TOKEN_USAGE_ALIASES.output,
+    ...TOKEN_USAGE_ALIASES.cacheRead,
+    ...TOKEN_USAGE_ALIASES.cacheWrite,
+    ...TOKEN_USAGE_ALIASES.reasoning,
+    ...TOKEN_USAGE_ALIASES.total,
+  ].map((alias) => usage[alias]);
+  return stableUsageId(
+    'kimi:direct',
+    payload.call_id ?? payload.turn_id ?? '',
+    payload.hook_event_name,
+    payload.timestamp ?? '',
+    countIdentity
+  );
 }
 
 function normalizeOutput(

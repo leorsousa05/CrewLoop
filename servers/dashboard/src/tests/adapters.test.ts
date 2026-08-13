@@ -150,13 +150,14 @@ describe('normalizeKimi', () => {
         { kimiDataDir: dataDir }
       );
 
-      assert.ok(event?.token_usage);
-      assert.equal(event!.token_usage!.totalTokens, 125);
-      assert.equal(event!.token_usage!.inputTokens, 80);
-      assert.equal(event!.token_usage!.outputTokens, 40);
-      assert.equal(event!.token_usage!.cacheReadTokens, 10);
-      assert.equal(event!.token_usage!.cacheWriteTokens, 5);
-      assert.equal(event!.token_usage!.semantics, 'cumulative');
+      const measurement = event?.token_usages?.[0];
+      assert.ok(measurement);
+      assert.equal(measurement.totalTokens, 125);
+      assert.equal(measurement.inputTokens, 80);
+      assert.equal(measurement.outputTokens, 40);
+      assert.equal(measurement.cacheReadTokens, 10);
+      assert.equal(measurement.cacheWriteTokens, 5);
+      assert.equal(measurement.semantics, 'cumulative');
     } finally {
       fs.rmSync(dataDir, { recursive: true, force: true });
     }
@@ -371,7 +372,25 @@ describe('normalizeCodex', () => {
     assert.ok(event?.token_usage);
     assert.equal(event!.token_usage!.totalTokens, 1000);
     assert.equal(event!.token_usage!.reasoningTokens, 50);
-    assert.match(event!.token_usage!.measurementId, /call-1$/);
+    assert.match(event!.token_usage!.measurementId, /^codex:direct:[a-f0-9]{32}$/);
+    assert.doesNotMatch(event!.token_usage!.measurementId, /call-1|session-codex-usage/);
+    assert.equal(
+      event!.token_usage!.measurementId,
+      normalizeCodex({
+        hook_event_name: 'Stop',
+        sessionId: 'session-codex-usage',
+        cwd: '/tmp',
+        callId: 'call-1',
+        model: 'gpt-test',
+        usage: {
+          inputTokens: 700,
+          outputTokens: 300,
+          cachedTokens: 200,
+          reasoningTokens: 50,
+          totalTokens: 1000,
+        },
+      })?.token_usage?.measurementId
+    );
   });
 
   it('prefers direct hook usage over transcript fallback usage', () => {
@@ -441,6 +460,57 @@ describe('normalizeAgy', () => {
     assert.strictEqual(event!.detail, 'git status');
     assert.strictEqual(event!.id, 'agy:conv-1:3');
     assert.deepStrictEqual(event!.input, { CommandLine: 'git status', Cwd: '/tmp' });
+  });
+
+  it('redacts secrets and bounds length in Bash command detail', () => {
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-secret',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: { CommandLine: 'export API_KEY=abc123 TOKEN=xyz; git push' },
+      },
+    });
+
+    assert.ok(event);
+    assert.strictEqual(event!.detail, 'export API_KEY=<redacted> TOKEN=<redacted>; git push');
+  });
+
+  it('redacts bearer tokens and flag values in Bash command detail', () => {
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-bearer',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: {
+          CommandLine: 'curl -H "Authorization: Bearer abcdef123" http://x && gh auth login --token ghp_abc',
+        },
+      },
+    });
+
+    assert.ok(event);
+    assert.match(event!.detail!, /Authorization:<redacted>/);
+    assert.match(event!.detail!, /--token <redacted>/);
+    assert.ok(!event!.detail!.includes('abcdef123'));
+    assert.ok(!event!.detail!.includes('ghp_abc'));
+  });
+
+  it('truncates long Bash command detail to 200 chars', () => {
+    const longCommand = 'echo '.repeat(60);
+    const event = normalizeAgy({
+      hook_event_name: 'PreToolUse',
+      conversationId: 'conv-long',
+      stepIdx: 1,
+      toolCall: {
+        name: 'run_command',
+        args: { CommandLine: longCommand },
+      },
+    });
+
+    assert.ok(event);
+    assert.ok(event!.detail!.length <= 200);
   });
 
   it('normalizes PostToolUse without tool name and wraps error', () => {

@@ -95,6 +95,41 @@ describe('StateStore', () => {
     assert.equal(store.getSession('sess-1')!.token_usage.totalTokens, 120);
   });
 
+  it('tracks Kimi wire counters independently when only one stream advances', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    const wire = (id: string, cursorKey: string, capturedAt: number, totalTokens: number) => ({
+      inputTokens: totalTokens,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      reasoningTokens: 0,
+      totalTokens,
+      measurementId: id,
+      capturedAt,
+      source: 'kimi' as const,
+      quality: 'measured' as const,
+      semantics: 'cumulative' as const,
+      cursorKey,
+      coverage: 'complete' as const,
+    });
+
+    store.applyEvent(makeEvent({
+      id: 'wires-initial',
+      token_usages: [
+        wire('wire-a-1', 'kimi:wire:a', 1_000, 100),
+        wire('wire-b-1', 'kimi:wire:b', 2_000, 100),
+      ],
+    }));
+    store.applyEvent(makeEvent({
+      id: 'wire-a-advanced',
+      token_usages: [wire('wire-a-2', 'kimi:wire:a', 1_500, 150)],
+    }));
+
+    const usage = store.getSession('sess-1')!.token_usage;
+    assert.equal(usage.totalTokens, 250);
+    assert.equal(usage.measurementCount, 3);
+  });
+
   it('initializes sessions with unavailable token telemetry', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
     store.applyEvent(makeEvent());

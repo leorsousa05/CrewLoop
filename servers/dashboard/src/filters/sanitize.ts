@@ -260,11 +260,40 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 export function sanitizeEventBoundary(payload: Record<string, unknown>): boolean {
-  const keys = Object.keys(payload);
-  for (const key of keys) {
-    if (DANGEROUS_TOOL_INPUT_KEYS.has(key.toLowerCase())) {
+  if (typeof payload.detail === 'string' && payload.detail.length > MAX_PAYLOAD_STRING_LENGTH) {
+    return false;
+  }
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === undefined || value === null) continue;
+    const normalized = key.replace(/_/g, '').toLowerCase();
+    if (DANGEROUS_TOP_LEVEL_KEYS.has(normalized)) {
       return false;
     }
   }
   return true;
 }
+
+// Top-level event keys that must never arrive from a client, including
+// camelCase and snake_case variants. Nested input/output payloads are
+// sanitized separately by sanitizeToolInputPayload, so this only guards the
+// boundary fields a client could set (detail, session_id, source, etc.).
+const DANGEROUS_TOP_LEVEL_KEYS = new Set([
+  'command',
+  'commandline',
+  'content',
+  'text',
+  'code',
+  'prompt',
+  'apikey',
+  'accesskey',
+  'accesstoken',
+  'privatekey',
+  'credentials',
+  'password',
+  'passwd',
+  'secret',
+  'authorization',
+  'bearer',
+  'cookie',
+  'token',
+]);

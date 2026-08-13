@@ -28,6 +28,7 @@ function parseHostHeader(host: string): { name: string; port: number | null } | 
 export interface LocalRequestPolicy {
   acceptsHost(host: string | undefined): boolean;
   acceptsWebSocketOrigin(origin: string | undefined): boolean;
+  acceptsHttpOrigin(origin: string | undefined): boolean;
 }
 
 export function createLocalRequestPolicy(options: LocalRequestPolicyOptions): LocalRequestPolicy {
@@ -52,5 +53,14 @@ export function createLocalRequestPolicy(options: LocalRequestPolicyOptions): Lo
     return parsed.port === String(options.port);
   }
 
-  return { acceptsHost, acceptsWebSocketOrigin };
+  // Same Origin-guard as the WebSocket path, applied to state-changing HTTP
+  // routes so an arbitrary web page cannot issue cross-site requests
+  // (CSRF) against the local dashboard. Requests with no Origin header are
+  // permitted (CLI/shim clients do not send one).
+  function acceptsHttpOrigin(origin: string | undefined): boolean {
+    if (origin === undefined) return true;
+    return acceptsWebSocketOrigin(origin);
+  }
+
+  return { acceptsHost, acceptsWebSocketOrigin, acceptsHttpOrigin };
 }
