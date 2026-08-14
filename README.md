@@ -12,7 +12,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 ## Highlights
 
 - **Process-driven workflow:** CrewLoop Plan, CrewLoop Design, CrewLoop Code, CrewLoop Review, CrewLoop Ship, and `crewloop:docs` each own one phase and never invade another's territory.
-- **Mandatory specs:** Every change, from a one-line fix to a full feature, gets a lightweight spec in `specs/changes/` before implementation starts.
+- **Mandatory specs:** Every change, from a one-line fix to a full feature, gets a single-file feature spec in `specs/features/<domain>/` before implementation starts.
 - **Design before code:** When there is UI, CrewLoop Design defines the aesthetic direction before CrewLoop Code writes markup or styles.
 - **Docs by crewloop:docs:** READMEs, module docs, and changelogs are owned by the `crewloop:docs` skill so `crewloop:code` can focus on code and tests.
 - **Quality gate:** The Reviewer inspects every diff for spec compliance, security, performance, and AI artifacts before anything reaches the repository.
@@ -164,7 +164,7 @@ flowchart TD
 6. **`crewloop:review` is the quality gate** — no code reaches the repository without review. PASS routes to `crewloop:ship`; FAIL routes to `crewloop:code`.
 7. **`crewloop:ship` is the only skill that touches git** — commit, branch, push, and PR. After shipping it routes to `done`.
 8. **Sub-skills assist core skills** — `crewloop:docs` returns to `crewloop:plan` when done.
-9. **Specs are archived** — the `specs/changes/` folder is moved to `specs/archive/` on commit.
+9. **Feature specs are the source of truth** — completed feature specs stay in `specs/features/`; `crewloop:ship` marks them completed, appends a chat-log, and updates `specs/memory/project-state.md`. Only dead or rejected proposals go to `specs/archive/`.
 10. **AFK mode is Plan-driven** — every skill returns control to `crewloop:plan`, which loads the next skill without menus.
 
 > [!NOTE]
@@ -179,10 +179,10 @@ crewloop/
 ├── skills/                # Role-based SKILL.md instructions
 ├── packages/cli/          # npm-published CLI installer
 ├── servers/dashboard/     # Real-time WebSocket dashboard
-├── docs/                  # Docusaurus documentation site
+├── docs/                  # Documentation site (Vite + React + Tailwind)
 ├── references/            # Shared conventions and workflow reference
 ├── scripts/               # Validation and packaging helpers
-└── specs/                 # Active, archived, and living specs
+└── specs/                 # Features (one spec = one task), RFCs, memory, shared refs, archive
 ```
 
 ## Adding a New Skill

@@ -38,20 +38,20 @@ crewloop/
 │       ├── src/
 │       ├── ui/
 │       └── README.md
-├── skills/                          # All 8 skill directories
-│   ├── crewloop-hub/SKILL.md
+├── skills/                          # All 6 skill directories
 │   ├── crewloop-plan/SKILL.md
 │   ├── crewloop-design/SKILL.md
 │   ├── crewloop-code/SKILL.md
 │   ├── crewloop-review/SKILL.md
 │   ├── crewloop-ship/SKILL.md
-│   ├── crewloop-brainstorm/SKILL.md
 │   └── crewloop-docs/SKILL.md
 ├── specs/
-│   ├── changes/                     # Active in-progress specs
-│   ├── archive/                     # Completed specs
-│   ├── living/                      # Merged source of truth per subsystem
-│   └── decisions/                   # Architectural Decision Records
+│   ├── features/                     # The real work — one spec = one task
+│   ├── changes/                      # RFCs only — proposals under discussion
+│   ├── memory/                       # Project state, chat-logs, decisions, incidents
+│   ├── shared/                       # Reusable references (glossary, stack, ADRs)
+│   ├── templates/                    # Feature-spec / RFC / ADR / task-prompt blueprints
+│   └── archive/                      # Dead or legacy specs (indexed in README.md)
 └── tests/
     └── README.md
 ```
@@ -63,15 +63,18 @@ crewloop/
 | New skill | `skills/crewloop-<slug>/SKILL.md` with frontmatter `name: crewloop:<slug>` |
 | Shared conventions | `references/` |
 | Skill-specific references | `skills/crewloop-<slug>/references/` |
-| Active change spec | `specs/changes/NNN-name/` |
-| Architectural decision | `specs/decisions/NNN-name.md` |
+| Active feature spec | `specs/features/<domain>/spec-NN-name.md` |
+| RFC (architecture proposal) | `specs/changes/rfc-NNN-name.md` |
+| Architectural decision | `specs/shared/adrs/adr-NNN-name.md` |
+| Project memory | `specs/memory/project-state.md` |
 | CLI source changes | `packages/cli/src/` |
 | Dashboard source changes | `servers/dashboard/src/` |
 | Documentation pages | `docs/public/docs/` |
 
 ## Where NOT to put things
 
-- Spec files directly in `specs/` — always nested in `specs/changes/NNN-name/`.
+- Spec files directly in `specs/` — always nested in `specs/features/<domain>/` (feature specs) or `specs/changes/` (RFCs).
+- Completed feature specs in `specs/archive/` — they stay in `features/` as the source of truth; only dead/rejected proposals are archived.
 - Shared conventions inside a `SKILL.md` — use `references/`.
 - `.env` files or secrets anywhere in the repository.
 - `node_modules/`, `dist/`, or build output committed to git.

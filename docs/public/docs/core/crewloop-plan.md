@@ -14,13 +14,14 @@ The Planner is a senior systems thinker who thinks in systems, boundaries, and c
 
 ## Responsibilities
 
-1. Read the Task Brief from `crewloop:hub` completely before taking any action.
-2. Explore existing specs in `specs/`, ADRs in `specs/decisions/`, and relevant codebase patterns.
-3. Answer 7 analysis questions: domain placement, component responsibilities, contracts to define, what needs tests, architecture that minimizes ambiguity, project structure changes, and key trade-offs.
-4. Create the spec folder at `specs/changes/NNN-name/` with `.spec.yaml`, `proposal.md`, `specs/`, `design.md`, and `tasks.md`.
+1. Read `specs/memory/project-state.md` and the Task Brief before taking any action.
+2. Explore existing feature specs in `specs/features/`, ADRs in `specs/shared/adrs/`, shared references, and relevant codebase patterns.
+3. Answer the analysis questions: domain placement, component responsibilities, contracts to define, what needs tests, architecture that minimizes ambiguity, project structure changes, and key trade-offs.
+4. Create a single-file feature spec at `specs/features/<domain>/spec-NN-name.md` (or an RFC at `specs/changes/rfc-NNN-name.md` for architecture changes).
 5. Define TypeScript interfaces, API contracts, schemas, and type signatures (no implementation).
 6. Produce a test plan identifying what must be tested and why.
 7. Assess risks, trade-offs, and deferred items.
+8. Update `specs/memory/project-state.md` and append a chat-log at session end.
 
 ## What `crewloop:plan` Never Does
 
@@ -34,21 +35,19 @@ The Planner is a senior systems thinker who thinks in systems, boundaries, and c
 
 | File | Purpose |
 |------|---------|
-| `.spec.yaml` | Status, dates, author, affected files, skills involved |
-| `proposal.md` | WHY: motivation, scope, constraints |
-| `specs/spec.md` | WHAT: delta vs. current system, acceptance criteria |
-| `design.md` | HOW: interfaces, contracts, data flows, architecture |
-| `tasks.md` | Ordered implementation checklist |
+| `specs/features/<domain>/spec-NN-name.md` | Single-file feature spec: Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When |
+| `specs/changes/rfc-NNN-name.md` | RFC for architecture changes (approved → ADR in `specs/shared/adrs/`) |
+| `specs/memory/project-state.md` | Updated module status, decisions, next task |
 
 ## Concrete Example
 
 **`crewloop:plan` receives a brief for a JWT login:**
 1. Explores the React codebase structures.
-2. Creates `specs/changes/003-jwt-login/`.
+2. Creates `specs/features/01-auth/spec-01-jwt-login.md`.
 3. Defines API contract: `POST /auth/login` returning `{token: string, expiresAt: number}`.
 4. Defines TypeScript interfaces `AuthCredentials` and `AuthResponse`.
 5. Establishes the test plan for unit (token validation) and integration (API call) tests.
-6. Populates `tasks.md` with 8 ordered steps.
+6. Defines Acceptance Criteria (AC-01…) and Done When items referencing them.
 7. Routes to `crewloop:design` (or `crewloop:code` if no visual changes are needed).
 
 ## Handoff

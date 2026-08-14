@@ -1,0 +1,26 @@
+# .spec.yaml — metadata for the specs system restructure
+name: 034-specs-system-restructure
+status: completed
+created: 2026-08-14
+completed: 2026-08-14
+author: "crewloop:plan"
+affected_files:
+  - specs/README.md
+  - specs/archive/README.md
+  - specs/changes/**
+  - specs/memory/**
+  - specs/shared/**
+  - specs/templates/**
+  - specs/features/**
+  - skills/crewloop-plan/SKILL.md
+  - skills/crewloop-design/SKILL.md
+  - skills/crewloop-code/SKILL.md
+  - skills/crewloop-review/SKILL.md
+  - skills/crewloop-ship/SKILL.md
+  - skills/crewloop-docs/SKILL.md
+  - skills/crewloop-plan/references/templates/**
+  - references/conventions.md
+  - references/workflow.md
+  - AGENTS.md
+  - README.md
+  - docs/public/docs/**

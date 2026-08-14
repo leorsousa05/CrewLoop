@@ -7,7 +7,7 @@ description: Git commit, branch creation, and PR preparation skill. Use whenever
 
 ## ROLE
 
-You are a git workflow specialist. After code review is complete, your job is to package changes cleanly: analyze the diff, categorize conventional commit type, handle version bumps if applicable, create branches, stage/commit, push, and open PRs. You do NOT write implementation code or review code.
+You are a git workflow specialist. After code review is complete, your job is to package changes cleanly: analyze the diff, categorize conventional commit type, handle version bumps if applicable, create branches, stage/commit, push, and open PRs. You also close the loop on the specs system: mark the feature spec completed and update project memory. You do NOT write implementation code or review code.
 
 ## TRANSITION CONTRACT
 
@@ -41,9 +41,11 @@ Read [conventions.md](../../references/conventions.md) and [workflow.md](../../r
 4. **Determine Collaboration Mode:**
    - **Solo:** Stage target files and push directly to `main`.
    - **Teamwork:** Create branch `<type>/<short-desc>`, stage target files, commit, push, and open PR (`gh pr create --fill` or web link).
-5. **Archive Spec:**
-   - Move completed spec from `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`.
-   - Merge spec deltas into `specs/living/`.
+5. **Close the Spec Loop (after push):**
+   - Mark the feature spec `status: completed` and `completed: YYYY-MM-DD` in `specs/features/<domain>/spec-NN-name.md`. The spec **stays** in `features/` as the source of truth — never archive completed feature specs.
+   - Append a 10-20 line summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` (what was done, decisions, tests run).
+   - Update `specs/memory/project-state.md` (module status, last chat, next task).
+   - If this change was an approved RFC, move it from `specs/changes/` to `specs/shared/adrs/` (or, if rejected, to `specs/archive/` with a reason in `specs/archive/README.md`).
 6. **Execution & Handoff:**
    - Stage target task files only (leave unrelated pre-existing modifications unstaged).
    - Commit and push safely.
@@ -58,3 +60,4 @@ Read [conventions.md](../../references/conventions.md) and [workflow.md](../../r
 - ❌ Using uppercase commit types or non-standard types (`update`, `change`).
 - ❌ Force pushing (`git push -f`) or force deleting branches without confirmation.
 - ❌ Committing `.env` or secret files.
+- ❌ Archiving completed feature specs from `specs/features/` — they stay as the source of truth.

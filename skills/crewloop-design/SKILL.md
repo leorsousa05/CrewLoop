@@ -25,7 +25,7 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 
 ## DESIGN PROCESS & THINKING
 
-1. **Read specs first:** Check `specs/changes/NNN-name/`. Align design with technical constraints from `crewloop:plan`.
+1. **Read specs first:** Check `specs/features/<domain>/spec-NN-name.md`. Align design with technical constraints from `crewloop:plan`.
 2. **Resolve surface & register:**
    - **Surface pack:** Load matching surface in `references/surfaces/` (landing page, dashboard, docs, app).
    - **Register pack:** Load matching register in `references/registers/` (quiet-product default for tools, minimalist, brutalist, editorial, etc.). User style choice always wins.
@@ -35,7 +35,7 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 
 ## DELIVERABLES
 
-Save the spec as `design-ui.md` in `specs/changes/NNN-name/`, scaled to the change size:
+Write the design spec alongside the feature spec in `specs/features/<domain>/spec-NN-name.md` (design section) or, for large UI features, as a `design.md` sub-spec in the same folder, scaled to the change size:
 
 - **UI tweak / component:** Delta spec (affected tokens, states, layout changes).
 - **New page or flow:** Standard spec (sections 1–8).
