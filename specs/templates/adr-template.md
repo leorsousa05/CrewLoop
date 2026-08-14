@@ -1,25 +1,38 @@
-# ADR NNN: [Short Decision Title]
+# adr-NNN-name
 
-- **Status:** proposed | accepted | superseded by [ADR-NNN](NNN-title.md) | deprecated
-- **Date:** YYYY-MM-DD
-- **Related spec:** `specs/changes/NNN-name/` (if any)
+---
+adr: NNN
+title: <Title>
+status: accepted
+date: YYYY-MM-DD
+---
+
+# ADR-NNN: <Title>
 
 ## Context
-[What forces this decision? Constraints, prior state, why now. 2-5 sentences.]
+
+[The situation that forced the decision]
 
 ## Decision
-[The choice made, stated in one clear paragraph. Active voice: "We will ..."]
 
-## Alternatives Considered
-| Alternative | Why rejected |
-|-------------|--------------|
-| [Option A] | [Reason] |
-| [Option B] | [Reason] |
+[The architecture decision, stated clearly]
 
 ## Consequences
-- **Positive:** [What gets easier]
-- **Negative:** [What gets harder, what debt is accepted]
-- **Irreversibility:** [Why this is hard/expensive to reverse — if it is easy to reverse, it does not belong in an ADR]
 
-## References
-- [Links to specs, discussions, external docs]
+### Positive
+
+- [benefit]
+
+### Negative
+
+- [cost]
+
+## Alternatives Considered
+
+| Alternative | Why not chosen |
+|-------------|----------------|
+| [option] | [reason] |
+
+## Related
+
+- [feature spec / RFC / other ADR links]

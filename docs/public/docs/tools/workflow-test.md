@@ -69,7 +69,7 @@ flowchart TD
 ### Deliverables & Boundary Verification
 | Phase | Key Input Path | Key Output Path | Validation Rules |
 | :---: | :--- | :--- | :--- |
-| **🎯 CrewLoop Hub** | Initial prompt | `specs/changes/NNN/.spec.yaml` | Verify context brief contains target files |
+| **🎯 CrewLoop Hub** | Initial prompt | `specs/features/<domain>/spec-NN-name.md` | Verify context brief contains target files |
 
 :::info
 **Routing Transition**: After discovery, present the entry menu and load **`crewloop:plan`** after the user selects it. In AFK mode, the Hub loads `crewloop:plan` automatically.
@@ -79,43 +79,43 @@ flowchart TD
 
 ## 2. CrewLoop Plan Specification Phase
 
-- **Objective**: Design the architecture, define system contracts, and establish implementation checklists.
-- **Inputs**: The CrewLoop Hub's Context Brief and existing domain boundaries.
+- **Objective**: Design the architecture, define system contracts, and establish acceptance criteria.
+- **Inputs**: Project memory (`specs/memory/project-state.md`) and the task request.
 - **Verification Steps**:
-  1. Verify the `specs/changes/NNN-name/` directory is created.
-  2. Confirm the existence and validity of `.spec.yaml`, `proposal.md`, `specs/`, `design.md`, and `tasks.md`.
-  3. Ensure `crewloop:plan` answers the 7 analysis questions.
+  1. Verify a single-file feature spec `specs/features/<domain>/spec-NN-name.md` is created.
+  2. Confirm it contains Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria (AC-01…), and Done When.
+  3. Ensure `crewloop:plan` updates `specs/memory/project-state.md`.
   4. Verify the output follows the `CrewLoop Plan CLI Output` format.
 
 ### Deliverables & Boundary Verification
 | Phase | Key Input Path | Key Output Path | Validation Rules |
 | :---: | :--- | :--- | :--- |
-| **`crewloop:plan`** | Context Brief | `specs/changes/NNN-name/tasks.md` | Specs folder must be complete and YAML linted |
+| **`crewloop:plan`** | Context Brief | `specs/features/<domain>/spec-NN-name.md` | Feature spec must be complete, edge cases covered, ACs testable |
 
 ---
 
 ## 3. CrewLoop Design Specification Phase
 
 - **Objective**: Define visual style, layout structure, color tokens, and layout guidelines.
-- **Inputs**: Spec folder created by `crewloop:plan`.
+- **Inputs**: Feature spec created by `crewloop:plan`.
 - **Verification Steps**:
-  1. Confirm the creation of `design.md` or visual specifications inside the spec folder.
+  1. Confirm design detail is added to the feature spec (or a `design.md` sub-spec in the same feature folder for large UI).
   2. Check theme/mode tokens and ASCII wireframes.
   3. Verify the output follows the `CrewLoop Design CLI Output` format.
 
 ### Deliverables & Boundary Verification
 | Phase | Key Input Path | Key Output Path | Validation Rules |
 | :---: | :--- | :--- | :--- |
-| **`crewloop:design`** | Specs Folder | `specs/changes/NNN-name/design.md` | Define visual style and layout components |
+| **`crewloop:design`** | Feature Spec | `specs/features/<domain>/spec-NN-name.md` (+ optional design sub-spec) | Define visual style and layout components |
 
 ---
 
 ## 4. CrewLoop Code Implementation Phase
 
 - **Objective**: Implement code according to specifications and write automated unit/integration tests.
-- **Inputs**: Technical specifications and tasks checklist.
+- **Inputs**: Feature spec (Requirements, Edge Cases, Done When).
 - **Verification Steps**:
-  1. Confirm `crewloop:code` completes implementation according to `tasks.md`.
+  1. Confirm `crewloop:code` implements per the feature spec and ticks Done When items it proved.
   2. Run the build/compile task.
   3. Execute unit and integration tests.
   4. Verify the output follows the `CrewLoop Code CLI Output` format.
@@ -123,7 +123,7 @@ flowchart TD
 ### Deliverables & Boundary Verification
 | Phase | Key Input Path | Key Output Path | Validation Rules |
 | :---: | :--- | :--- | :--- |
-| **`crewloop:code`** | Tasks Checklist | Target source code and tests | Compilation must pass and TDD rules must be met |
+| **`crewloop:code`** | Feature Spec | Target source code and tests | Compilation must pass and TDD rules must be met |
 
 :::tip
 You can check if the workspace is valid by running `crewloop install --dry-run` or check for compilation issues by running `npm run build` in the package directory.
@@ -163,4 +163,4 @@ To declare the workflow integration test complete and correct, the following art
 | **`crewloop:design`** | UI/UX Visual Spec | Check theme tokens and ASCII layout |
 | **`crewloop:code`** | Completed Code & Tests | Run compile and execution tests |
 | **`crewloop:review`** | Quality Report | Review code diff coverage & security threats |
-| **`crewloop:ship`** | Git branch, commit, PR | Verify branch, commit message, and archived spec |
+| **`crewloop:ship`** | Git branch, commit, PR | Verify branch, commit message, and completed feature spec (status: completed) |

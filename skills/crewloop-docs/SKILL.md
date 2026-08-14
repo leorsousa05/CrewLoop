@@ -39,13 +39,14 @@ Before taking any action, you MUST read the global conventions in [conventions.m
 ## WORKFLOW
 
 1. **Identify Doc & Project Type:** Detect project type (CLI, Monorepo, Library, Web app, Skill bundle) via manifests (`package.json`, `Cargo.toml`, layout).
-2. **Gather Context:** Scan entry points, exported APIs, existing README, and module files.
+2. **Gather Context:** Scan entry points, exported APIs, existing README, module files, and — when a feature spec exists for the task — `specs/features/<domain>/spec-NN-name.md` plus `specs/memory/project-state.md`.
 3. **Select Sections & Format:**
    - **Header:** Centered HTML title/logo/slogan for published projects. Flat-square badges if published.
    - **Structure:** Features (`- **Name:** what it does.`), Quick start / install, runnable code examples, option tables.
    - **Visuals & Alerts:** Use GitHub alerts (`> [!NOTE]`), comparative tables, and collapsible `<details>` panels for long configs.
 4. **Validate Quality:** Verify no missing descriptions, non-runnable code snippets, or leftover default boilerplate.
-5. **Auto-route when done:** Return to the invoking skill or default to `crewloop:plan`.
+5. **Update Memory:** Append a short summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` when the session is documentation-only.
+6. **Auto-route when done:** Return to the invoking skill or default to `crewloop:plan`.
 
 ---
 

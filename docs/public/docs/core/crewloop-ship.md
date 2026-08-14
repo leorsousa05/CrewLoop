@@ -18,7 +18,7 @@ sidebar_position: 6
 2. Read the full diff to understand what changed and categorize the change type.
 3. Determine the correct Conventional Commits type and scope.
 4. Verify and execute package version bumps (`npm version <type>`) if versioning applies, aligning internal dependencies in workspaces.
-5. Archive the spec: move `specs/changes/NNN-name/` to `specs/archive/YYYY-MM-DD-NNN-name/`.
+5. Close the spec loop: mark `specs/features/<domain>/spec-NN-name.md` `status: completed` + date, append a chat-log to `specs/memory/chat-logs/`, and update `specs/memory/project-state.md`.
 6. Draft the commit message: `type(scope): description` in imperative mood, max 72 chars, no trailing period. Add a body for non-trivial changes.
 7. Create the branch: `type/short-description` in kebab-case.
 8. Stage all changes, commit, and push to the remote.
@@ -44,7 +44,8 @@ sidebar_position: 6
 | **Branch** | `type/short-description` (kebab-case) |
 | **Commit** | Conventional Commits message with scope and optional body |
 | **Bumped Version** | Staged manifest changes updating project and dependency versions |
-| **Archived spec** | `specs/archive/YYYY-MM-DD-NNN-name/` |
+| **Completed feature spec** | `specs/features/<domain>/spec-NN-name.md` marked `status: completed` (stays as source of truth) |
+| **Chat-log** | `specs/memory/chat-logs/YYYY-MM-DD-topic.md` summary |
 | **PR link** | Platform URL for opening the pull request |
 | **Tag** | Annotated semver tag (when explicitly requested) |
 | **Release notes** | Markdown notes grouped by Conventional Commits type |
@@ -56,7 +57,7 @@ sidebar_position: 6
 2. Identifies commit type as `feat` (requires a minor version bump).
 3. Executes `npm version minor --workspaces --no-git-tag-version` after user confirmation.
 4. Updates local dependency reference of CLI on the root package.
-5. Archives spec to `specs/archive/2026-06-27-003-jwt-login/`.
+5. Marks the feature spec `status: completed` + date and updates project memory (chat-log + project-state).
 6. Creates branch `feat/jwt-login-page`.
 7. Commits with message:
    ```

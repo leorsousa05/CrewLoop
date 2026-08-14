@@ -69,42 +69,49 @@ Each skill has a deterministic outgoing route defined in `references/skill-contr
 
 ```
 specs/
-├── changes/                        ← Active deltas
-│   └── 001-change-name/
-│       ├── .spec.yaml              ← metadata: name, status, dates, author, affected files
-│       │                             (schema: templates/spec-yaml-template.yaml)
-│       ├── proposal.md             ← WHY (skipped for lightweight specs)
-│       ├── specs/                  ← WHAT (skipped for lightweight specs)
-│       ├── design.md               ← HOW (skipped for lightweight specs)
-│       ├── design-ui.md            ← UI design spec (only when the change involves UI; written by Designer)
-│       └── tasks.md                ← ordered checklist
+├── features/                        ← The real work — one spec = one task
+│   ├── 00-core/
+│   │   └── spec-01-project-setup.md
+│   ├── 01-cli/
+│   │   └── spec-01-install-hooks.md
+│   ├── 02-dashboard/
+│   │   └── spec-01-*.md
+│   ├── 03-docs/
+│   └── 04-workflow/                 ← skills, conventions, references
 │
-├── archive/                        ← Completed changes (YYYY-MM-DD-NNN-name)
+├── changes/                         ← RFCs only — proposals under discussion
+│   ├── README.md                    ← lifecycle: draft → approved/rejected
+│   └── rfc-NNN-name.md              ← never implemented while here
 │
-├── living/                         ← Merged source of truth
-│   └── auth/
-│       └── spec.md
+├── memory/                          ← project brain — always-read context
+│   ├── project-state.md             ← module status, decisions, blockers, next task
+│   ├── chat-logs/                   ← YYYY-MM-DD-topic.md summaries (10-20 lines)
+│   ├── decisions/                   ← lightweight "why X not Y" notes
+│   └── incidents/                   ← YYYY-MM-DD-topic.md post-mortems
 │
-├── decisions/                      ← ADRs
-│   └── 001-architecture-choice.md
+├── shared/                          ← stable references — read when needed
+│   ├── glossary.md
+│   ├── tech-stack.md
+│   ├── conventions.md
+│   ├── architecture-overview.md
+│   └── adrs/                        ← adr-NNN-name.md (approved RFCs land here)
 │
-└── templates/                      ← Reusable templates (working copy; canonical versions
-    ├── proposal-template.md         live in skills/crewloop-plan/references/templates/)
-    ├── spec-delta-template.md
-    ├── design-template.md
-    ├── tasks-template.md
-    ├── spec-yaml-template.yaml
-    └── adr-template.md
+├── templates/                       ← feature-spec, rfc, adr, task-prompt templates
+│
+└── archive/                         ← dead/rejected/completed-legacy specs
+    ├── README.md                    ← index: what was archived and why
+    └── (legacy YYYY-MM-DD-NNN-name/ folders stay untouched)
 ```
 
 Rules:
 
-- Every spec lives inside `specs/changes/NNN-name/`. Never directly in `specs/`.
-- `living/` reflects the current state of the system, organized as one `<domain>/` folder per bounded context. The CrewLoop Ship merges spec deltas into it when archiving a completed change (never before a CrewLoop Review PASS). The CrewLoop Plan reads it during discovery before designing anything that touches an existing domain.
-- `archive/` preserves completed changes for audit.
-- `decisions/` records irreversible or cross-cutting architectural choices as ADRs, written from `templates/adr-template.md` and numbered by incrementing the highest `NNN` in the folder.
-- `specs/README.md` summarizes how each folder is used; the rules here remain canonical.
-- **Lightweight Specs (for bugs and tweaks):** Bug fixes and small tweaks require a lightweight specification, regardless of size. A lightweight spec requires only `.spec.yaml` and `tasks.md` in `specs/changes/NNN-name/`. `proposal.md`, `design.md`, and the `specs/` folder are omitted.
+- **Every task gets one single-file feature spec** in `specs/features/<domain>/spec-NN-name.md` — even 1-line bug fixes. Format: frontmatter (`name`, `domain`, `status`, `created`, `completed`, `supersedes`) + Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria (Given/When/Then, AC-01…), Done When (each item references an AC ID and the test that proves it). Template: `specs/templates/feature-spec.md`.
+- **Completed feature specs stay in `features/`** as the source of truth. CrewLoop Ship marks them `status: completed` + date, appends a chat-log, and updates `project-state.md`. Never archive completed feature specs.
+- **RFC lifecycle:** architecture changes start as `changes/rfc-NNN-name.md`. Approved → moves to `shared/adrs/adr-NNN-name.md` and affected feature specs update. Rejected → moves to `archive/rfc-NNN-name.md` with a reason in `archive/README.md`.
+- **`memory/project-state.md` is read at the start of every session** and updated at session end. Chat-logs are summaries, not transcripts.
+- **`shared/` is referenced by link, never copied** into specs.
+- **Large features may add sub-spec files** inside `features/<domain>/spec-NN-name/` (e.g. a design sub-spec), linked from the main spec.
+- **Lightweight specs:** bugs and tweaks still get a feature spec, but it may be minimal — Objective, Edge Cases, Acceptance Criteria, Done When suffice; Context/Behavior may be one line each.
 
 ---
 

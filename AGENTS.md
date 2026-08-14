@@ -42,8 +42,7 @@ crewloop/
 │   ├── vite.config.ts
 │   ├── tailwind.config.js
 │   ├── public/
-│   ├── src/
-│   └── specs/
+│   └── src/
 ├── packages/
 │   └── cli/                         # @archznn/crewloop-cli (TypeScript)
 │       ├── src/
@@ -110,10 +109,12 @@ crewloop/
 │       ├── SKILL.md
 │       └── references/
 ├── specs/
-│   ├── changes/                     # Active in-progress specs
-│   ├── archive/                     # Completed specs (date-prefixed)
-│   ├── living/                      # Merged source of truth per subsystem
-│   └── decisions/                   # Architectural Decision Records (ADRs)
+│   ├── features/                     # The real work — one spec = one task (per domain)
+│   ├── changes/                      # RFCs only — proposals under discussion
+│   ├── memory/                       # Project state, chat-logs, decisions, incidents
+│   ├── shared/                       # Reusable references (glossary, stack, ADRs)
+│   ├── templates/                    # Feature-spec / RFC / ADR / task-prompt blueprints
+│   └── archive/                      # Dead or legacy specs (indexed in README.md)
 └── tests/
     └── README.md                    # Manual testing guidance
 ```
@@ -132,7 +133,8 @@ crewloop/
 | `assets/templates/skill-template.md` | Template to copy when creating a new skill |
 | `scripts/validate-skills.py` | Validates SKILL.md structure and YAML frontmatter |
 | `scripts/package-skill.py` | Packages a single skill into a `.skill` archive |
-| `specs/decisions/001-dashboard-hybrid-architecture.md` | ADR for the dashboard's hybrid architecture |
+| `specs/memory/project-state.md` | Always-read project status (modules, decisions, blockers, next task) |
+| `specs/shared/adrs/` | Architectural Decision Records (ADR-001..010) |
 | `packages/cli/AGENTS.md` | Agent guide specific to the CLI package |
 | `servers/dashboard/README.md` | Dashboard setup, API, and event schema |
 | `packages/cli/README.md` | CLI install and usage reference |
@@ -196,7 +198,7 @@ User request → CrewLoop Plan → CrewLoop Design (if UI) → CrewLoop Code ⇄
 Rules — no exceptions:
 
 1. **`crewloop:plan` is the first mandatory delivery phase.** Every session starts here; it never routes directly to `crewloop:design` or `crewloop:code` without first creating a spec.
-2. **`crewloop:plan` creates a spec** in `specs/changes/NNN-name/` for every change — including 1-line bug fixes.
+2. **`crewloop:plan` creates a single-file feature spec** in `specs/features/<domain>/spec-NN-name.md` for every change — including 1-line bug fixes.
 3. **CrewLoop Design acts before CrewLoop Code** whenever the change involves a visual interface.
 4. **CrewLoop Code never does git operations** and never reviews its own code.
 5. **CrewLoop Review never writes code** and never runs git operations.
@@ -205,7 +207,7 @@ Rules — no exceptions:
 8. **Sub-skills assist core skills** — supporting skills return to their invoker; `crewloop:docs` returns to `crewloop:plan` by default.
 9. **Direct handoffs between phases.** Every agent ends by routing to the next skill per the transition contract; `crewloop:plan` is the entry point and AFK fallback router.
 10. **Bundle Lock-In:** You are strictly forbidden from loading, referencing, or switching to any skills outside the skills registered in `references/skill-contracts.yaml`. You must strictly execute the CrewLoop workflow steps, and never perform actions that skip the `crewloop:plan` gatekeeper.
-11. **Bug-Fixing Pipeline:** Bug fixes enter via `crewloop:plan` like any other task and follow the standard chain: `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` (commit/ship and archive the spec).
+11. **Bug-Fixing Pipeline:** Bug fixes enter via `crewloop:plan` like any other task and follow the standard chain: `crewloop:plan` → `crewloop:code` → `crewloop:review` → `crewloop:ship` (commit/ship and close the feature spec: mark completed + chat-log + project-state update).
 
 
 ---
@@ -229,13 +231,13 @@ AFK mode allows the workflow to run automatically without waiting for user navig
 
 ## Specs Structure
 
-Every change — no exceptions — gets a spec before any code or documentation is written.
+Every change — no exceptions — gets a feature spec before any code or documentation is written.
 
-See `specs/README.md` for the folder map (who writes/reads `changes/`, `living/`, `archive/`, `decisions/`, `templates/` and when) and `references/conventions.md` §Spec Folder Structure for the canonical tree and rules.
+See `specs/README.md` for the folder map (who writes/reads `features/`, `changes/`, `memory/`, `shared/`, `templates/`, `archive/` and when) and `references/conventions.md` §Spec Folder Structure for the canonical tree and rules.
 
-In short: bug fixes and tweaks get a lightweight spec (`.spec.yaml` + `tasks.md`); features and components get the full spec (`proposal.md` + `specs/` + `design.md` + `tasks.md`); multi-component or architectural changes add an ADR in `decisions/`.
+In short: **one spec = one task**, written as a single file in `specs/features/<domain>/spec-NN-name.md` (Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When). Completed feature specs **stay** in `features/` as the source of truth. Architecture changes start as RFCs in `specs/changes/`; approved RFCs become ADRs in `specs/shared/adrs/`, rejected ones go to `specs/archive/` with a reason in its README.
 
-**Critical:** Every spec file must live inside `specs/changes/NNN-name/`. Never place spec files directly in `specs/`.
+**Critical:** `specs/memory/project-state.md` is read at the start of every session and updated at session end. Never place spec files directly in `specs/` — always in a subfolder above.
 
 ---
 
@@ -279,7 +281,7 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 ## How to Contribute
 
 1. Start with **CrewLoop Plan** — gather context, produce a structured brief, and write a spec.
-2. **CrewLoop Plan** creates or updates a spec in `specs/changes/NNN-name/` before any code is written, then recommends CrewLoop Design (UI) or CrewLoop Code.
+2. **CrewLoop Plan** creates or updates a single-file feature spec in `specs/features/<domain>/spec-NN-name.md` before any code is written, then recommends CrewLoop Design (UI) or CrewLoop Code.
 3. If the change involves a visual interface, **CrewLoop Design** creates a design spec before CrewLoop Code starts, then recommends CrewLoop Code.
 4. **CrewLoop Code** implements the spec, runs verification, and routes to CrewLoop Review automatically.
 5. **CrewLoop Review** inspects the diff for spec compliance, quality, tests, security, and AI artifacts; PASS routes to CrewLoop Ship, FAIL routes to CrewLoop Code.
@@ -297,10 +299,10 @@ Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configur
 
 ## Notes for Agents
 
-- **Documentation-first.** Do not execute build commands, install dependencies, or create runtime configuration files unless an explicit spec in `specs/changes/` requires it.
+- **Documentation-first.** Do not execute build commands, install dependencies, or create runtime configuration files unless an explicit spec in `specs/features/` requires it.
 - **When editing a SKILL.md:** preserve the YAML frontmatter (`--- name: ... description: ... ---`), auto-routing rules, and the clear separation of responsibilities between skills.
 - **New skills:** copy `assets/templates/skill-template.md` → `skills/<skill-name>/SKILL.md`. Shared conventions belong in `references/`. Skill-specific references belong in `skills/<skill-name>/references/`.
-- **Specs:** never write spec files directly in `specs/` — always nested inside `specs/changes/NNN-name/`.
+- **Specs:** never write spec files directly in `specs/` — always nested inside `specs/features/<domain>/` (feature specs) or `specs/changes/` (RFCs).
 - **Git:** never perform git operations directly — always use the Shipper skill.
 - **Language:** project documentation is in English. Keep technical terms in English.
 - **Specs folder is the source of truth.** If a spec exists for the current task, follow it. If it conflicts with this file, the spec takes precedence.

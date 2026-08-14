@@ -26,7 +26,7 @@ flowchart TD
 ## Mandatory routing rules
 
 1. **`crewloop:plan` is the first mandatory delivery phase.** `crewloop:hub` may use `crewloop:brainstorm` for discovery, but never routes directly to `crewloop:design` or `crewloop:code`.
-2. **`crewloop:plan` creates a spec** in `specs/changes/NNN-name/` for every change, including one-line fixes.
+2. **`crewloop:plan` creates a feature spec** in `specs/features/<domain>/spec-NN-name.md` for every change, including one-line fixes.
 3. **`crewloop:design` acts before `crewloop:code`** whenever a change affects a visual interface.
 4. **`crewloop:code` implements and tests**, but never performs Git operations or reviews its own work.
 5. **`crewloop:review` is the quality gate**, but never writes implementation code or performs Git operations.

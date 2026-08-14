@@ -3,11 +3,12 @@
 Run ALL applicable checks below when performing a code review. For each check, produce a verdict: **PASS**, **WARN**, or **FAIL**.
 
 ## 1. Spec Compliance
-If specs exist in `specs/changes/NNN-name/`:
-- [ ] Does the implementation match the spec's contracts and interfaces?
-- [ ] Are all tasks in `tasks.md` addressed?
-- [ ] Does the change align with the architecture described in `design.md`?
-- [ ] Is the scope consistent with `proposal.md`?
+If a feature spec exists in `specs/features/<domain>/spec-NN-name.md`:
+- [ ] Does the implementation match the spec's Requirements, Behavior/Flow, and Constraints?
+- [ ] Are all Edge Cases from the spec's matrix handled in code?
+- [ ] Are all Acceptance Criteria satisfied with observable evidence?
+- [ ] Are all Done When items ticked, each proven by its referenced test?
+- [ ] Is the scope consistent with the spec (no changes outside it)?
 
 **Verdict:** PASS / WARN (minor deviation) / FAIL (major deviation)
 
@@ -72,6 +73,6 @@ If specs exist in `specs/changes/NNN-name/`:
 ## 8. Documentation
 - [ ] Are public APIs documented (JSDoc, docstrings, README updates)?
 - [ ] Are complex algorithms or business rules explained?
-- [ ] Is the `specs/` folder updated (tasks marked complete, status updated)?
+- [ ] Is the `specs/` folder updated (feature spec Done When items ticked, status correct)?
 
 **Verdict:** PASS / WARN / FAIL

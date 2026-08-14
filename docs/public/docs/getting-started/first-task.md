@@ -34,21 +34,18 @@ After your answers, the CrewLoop Hub produces a **Task Brief** and presents:
 
 ## Step 2 — `crewloop:plan`: Specs
 
-**`crewloop:plan`** creates a spec folder:
+**`crewloop:plan`** creates a single-file feature spec:
 
 ```
-specs/changes/042-product-search/
-├── .spec.yaml
-├── proposal.md
-├── design.md
-└── tasks.md
+specs/features/00-core/spec-042-product-search.md
 ```
 
 The spec defines:
 - Component interface: `<SearchBar query={string} onSearch={fn} />`
 - API contract: `GET /products?q={query}&limit=20`
 - TypeScript types for `Product` and `SearchResult`
-- Test plan: unit test for debounce, integration test for API call
+- Edge cases: empty query, debounce race, API failure
+- Acceptance criteria: AC-01… each mapped to a Done When item with its test
 
 ```
 [D] Send to crewloop:design — UI direction
@@ -109,7 +106,7 @@ The design spec covers color states, typography, animation easing, and accessibi
 
 ## Step 6 — `crewloop:ship`: Git & PR
 
-**`crewloop:ship`** archives the spec and commits:
+**`crewloop:ship`** closes the spec loop and commits:
 
 **Branch:** `feat/product-search-bar`
 
@@ -123,7 +120,7 @@ feat(search): add debounced product search bar
 - Accessibility: role=search, aria-label, Escape-to-dismiss
 ```
 
-Spec archived to `specs/archive/2026-06-27-042-product-search/`.
+The feature spec is marked `status: completed` + date and stays in `features/` as the source of truth. A chat-log is appended to `specs/memory/chat-logs/` and `specs/memory/project-state.md` is updated.
 
 ```
 [O] Return to crewloop:hub — Next task
