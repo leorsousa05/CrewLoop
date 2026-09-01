@@ -31,6 +31,13 @@ jobs:
       - name: Run workspace tests
         run: npm test --workspaces
 
+      - name: Run continuous token benchmark
+        run: >-
+          npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard --
+          --baseline src/telemetry/fixtures/baseline.json
+          --candidate src/telemetry/fixtures/candidate.json
+          --format markdown
+
       - name: Validate skills
         run: |
           python3 -m unittest scripts.tests.test_validate_skills

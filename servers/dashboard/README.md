@@ -137,6 +137,21 @@ Monetary values are labelled **Estimated API-equivalent USD**. Provider-reported
 | OpenCode | Final assistant message event | Uses stable message identity and provider-reported cost when supplied |
 | AGY | `AfterModel` response metadata | Unavailable when final positive usage metadata is absent |
 
+## Continuous token benchmark
+
+The fixed benchmark compares the baseline and candidate CrewLoop optimization policies across six synthetic scenarios. It validates policy identity, scenario coverage, token measurement quality, execution metrics, and required quality gates before returning `adopt_candidate` or `keep_baseline`.
+
+Run the same gate used by CI from the repository root:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline src/telemetry/fixtures/baseline.json \
+  --candidate src/telemetry/fixtures/candidate.json \
+  --format markdown
+```
+
+A successful command exits with code `0` and reports `adopt_candidate`. To verify the negative path, replace `candidate.json` with `candidate-fail.json`; it must report `keep_baseline` and exit with code `1`. The benchmark only recommends adoption: it never activates or persists a policy automatically.
+
 The database contains normalized numeric counts, product/model metadata, timestamps, immutable cost snapshots, and hashed session identifiers. It never stores prompts, commands, tool input/output, transcript lines, raw usage JSON, filesystem paths, or credentials.
 
 ## UI shortcuts
