@@ -279,7 +279,7 @@ export default function App() {
 
   const onMessage = useCallback(
     (msg: ClientWebSocketMessage) => {
-      if (pausedRef.current && (msg.type === 'snapshot' || msg.type === 'update')) {
+      if (pausedRef.current && msg.type !== 'pong') {
         setPendingUpdates((prev) => [...prev, msg]);
         return;
       }

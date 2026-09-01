@@ -119,10 +119,11 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
   for (const ev of chronological) {
     const tool = ev.tool || ev.event_type;
     const status = statusFromEvent(ev);
+    const invocationKey = ev.invocation_id || ev.id;
 
     if (ev.event_type === 'tool_start' && ev.tool) {
       const inv: ToolInvocation = {
-        id: ev.id,
+        id: invocationKey,
         tool: ev.tool,
         eventType: ev.event_type,
         status: 'running',
@@ -133,7 +134,7 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
         output: undefined,
       };
       invocations.push(inv);
-      runningById.set(ev.id, inv);
+      runningById.set(invocationKey, inv);
       if (!runningByTool.has(ev.tool)) runningByTool.set(ev.tool, []);
       runningByTool.get(ev.tool)!.push(inv);
       continue;
@@ -142,9 +143,9 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
     if (ev.event_type === 'tool_end') {
       let inv: ToolInvocation | undefined;
 
-      if (runningById.has(ev.id)) {
-        inv = runningById.get(ev.id);
-        runningById.delete(ev.id);
+      if (runningById.has(invocationKey)) {
+        inv = runningById.get(invocationKey);
+        runningById.delete(invocationKey);
         const stack = runningByTool.get(inv!.tool);
         if (stack) {
           const idx = stack.lastIndexOf(inv!);
@@ -168,7 +169,7 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
       }
 
       invocations.push({
-        id: ev.id,
+        id: invocationKey,
         tool: ev.tool || ev.event_type,
         eventType: ev.event_type,
         status,

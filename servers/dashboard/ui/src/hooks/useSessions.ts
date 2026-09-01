@@ -41,6 +41,8 @@ export function useSessions() {
         const s = msg.session;
         sessions.set(s.id, s);
         if (msg.isActive) activeSessionId = s.id;
+      } else if (msg.type === 'remove') {
+        sessions.delete(msg.sessionId);
       }
 
       return {

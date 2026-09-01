@@ -14,6 +14,8 @@ export interface CodexHookPayload {
   model?: string;
   permissionMode?: string;
   callId?: string;
+  call_id?: string;
+  invocation_id?: string;
   toolName?: string;
   tool_name?: string;
   toolKind?: string;
@@ -91,6 +93,7 @@ export function normalizeCodex(
     source: 'codex' as AgentSource,
     session_id: sessionId,
     event_type,
+    invocation_id: payload.invocation_id ?? payload.call_id ?? payload.callId ?? payload.turnId,
     tool,
     skill: payload.skill,
     input: normalizeInput(tool, rawInput),

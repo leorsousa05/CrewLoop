@@ -494,6 +494,7 @@ describe('OpenCode plugin writer', () => {
     assert.ok(content.includes("'tool.execute.after'"));
     assert.ok(content.includes("event_type: 'tool_start'"));
     assert.ok(content.includes("event_type: 'tool_end'"));
+    assert.ok(content.includes('invocation_id: getInvocationId(input'));
     assert.ok(content.includes("event?.type !== 'message.updated'"));
     assert.ok(content.includes("event_type: 'model_usage'"));
     assert.ok(content.includes('message_id: info.id'));

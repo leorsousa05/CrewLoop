@@ -1,0 +1,20 @@
+{
+  "success": {
+    "hook_event_name": "PreToolUse",
+    "sessionId": "codex-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/codex",
+    "toolName": "Read",
+    "toolInput": { "path": "/tmp/crewloop-fixtures/codex/src/app.ts" },
+    "callId": "codex-call-success",
+    "timestamp": 1700000000000
+  },
+  "failure": {
+    "hook_event_name": "PostToolUse",
+    "sessionId": "codex-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/codex",
+    "toolName": "Read",
+    "toolResponse": { "error": "command failed", "durationMs": 63 },
+    "callId": "codex-call-failure",
+    "timestamp": 1700000000063
+  }
+}

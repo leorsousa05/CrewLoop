@@ -1,0 +1,24 @@
+{
+  "success": {
+    "hook_event_name": "PreToolUse",
+    "conversationId": "agy-fixture-session",
+    "workspacePaths": ["/tmp/crewloop-fixtures/agy"],
+    "toolCallId": "agy-call-success",
+    "toolCall": {
+      "name": "view_file",
+      "args": { "AbsolutePath": "/tmp/crewloop-fixtures/agy/src/app.ts" }
+    },
+    "stepIdx": 1,
+    "timestamp": 1700000000000
+  },
+  "failure": {
+    "hook_event_name": "PostToolUse",
+    "conversationId": "agy-fixture-session",
+    "workspacePaths": ["/tmp/crewloop-fixtures/agy"],
+    "toolCallId": "agy-call-failure",
+    "toolCall": { "name": "run_command", "args": { "command": "false" } },
+    "durationMs": 74,
+    "error": "command failed",
+    "timestamp": 1700000000074
+  }
+}

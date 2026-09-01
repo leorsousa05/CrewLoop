@@ -13,7 +13,7 @@ import { createDailyUsageHandler } from './api/daily-usage';
 import { createResetUsageHandler } from './api/reset-usage';
 import { SqliteUsageRepository } from './telemetry/sqlite-usage-repository';
 import type { TokenUsageRepository } from './telemetry/usage-repository';
-import { createSnapshotMessage, createUpdateMessage } from './presenter';
+import { createRemoveMessage, createSnapshotMessage, createUpdateMessage } from './presenter';
 import { createLocalRequestPolicy } from './lib/local-request-policy';
 import {
   resolveContainedPath,
@@ -71,6 +71,23 @@ export interface DashboardServer {
   stop: () => Promise<void>;
 }
 
+export function pruneExpiredSessions(
+  state: StateStore,
+  broadcast: (message: ClientWebSocketMessage) => void,
+  activeSessionId: string | undefined,
+  now: number = Date.now()
+): { activeSessionId: string | undefined; removedSessionIds: string[] } {
+  const removedSessionIds = state.pruneInactive(now);
+  let nextActiveSessionId = activeSessionId;
+  for (const sessionId of removedSessionIds) {
+    if (sessionId === nextActiveSessionId) {
+      nextActiveSessionId = undefined;
+    }
+    broadcast(createRemoveMessage(sessionId));
+  }
+  return { activeSessionId: nextActiveSessionId, removedSessionIds };
+}
+
 export function createDashboardServer(config: ServerConfig): DashboardServer {
   const usageRepository = new SqliteUsageRepository({
     databasePath: config.telemetryDbPath,
@@ -116,7 +133,7 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     inference,
     broadcast,
     getActiveSessionId: () => activeSessionId,
-    setActiveSessionId: (id: string) => {
+    setActiveSessionId: (id: string | undefined) => {
       activeSessionId = id;
     },
     maxBodyBytes: config.eventBodyBytes,
@@ -348,9 +365,12 @@ export function createDashboardServer(config: ServerConfig): DashboardServer {
     // Fallback SessionEnd for agents killed without emitting one (e.g. SIGKILL).
     const endedSessions = state.markIdleSessionsEnded(config.sessionIdleTimeoutMs);
     for (const session of endedSessions) {
+      if (session.id === activeSessionId) {
+        activeSessionId = undefined;
+      }
       broadcast(createUpdateMessage(session, activeSessionId));
     }
-    state.pruneInactive();
+    activeSessionId = pruneExpiredSessions(state, broadcast, activeSessionId).activeSessionId;
   }, config.pruneIntervalMs);
   let stopPromise: Promise<void> | undefined;
 

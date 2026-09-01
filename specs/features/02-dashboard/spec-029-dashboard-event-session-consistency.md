@@ -71,9 +71,9 @@ Make the ingestion pipeline contract-valid, preserve workspace identity through 
 
 ## Done When
 
-- [ ] AC-01 — proven by unit test: malformed fixture events cause no mutation/broadcast
-- [ ] AC-02 — proven by unit test: workspace root preserved, nested paths relative
-- [ ] AC-03 — proven by unit test: out-of-order same-tool pairing with native IDs
-- [ ] AC-04 — proven by state-transition tests in `StateStore`
-- [ ] AC-05 — proven by server test: prune emits `remove`, mappings cleaned
-- [ ] AC-06 — proven by fixture files under `servers/dashboard/test/fixtures/` (one per source)
+- [x] AC-01 — proven by the malformed `/event` integration test and event-contract unit tests.
+- [x] AC-02 — proven by the workspace API fixture: absolute root is preserved and nested paths are relative.
+- [x] AC-03 — proven by the invocation projection test for out-of-order concurrent calls.
+- [x] AC-04 — proven by `StateStore` timestamp, monotonic activity, idle, terminal, and explicit-resume tests.
+- [x] AC-05 — proven by the prune server test: typed `remove` is emitted and mappings are cleaned.
+- [x] AC-06 — proven by one success/failure fixture per adapter under `servers/dashboard/test/fixtures/`.

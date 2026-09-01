@@ -174,7 +174,7 @@ describe('StateStore', () => {
     const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 1000 });
     store.applyEvent(makeEvent());
     const removed = store.pruneInactive(Date.now() + 2000);
-    assert.equal(removed, 1);
+    assert.deepEqual(removed, ['sess-1']);
     assert.equal(store.getSession('sess-1'), undefined);
   });
 
@@ -219,5 +219,31 @@ describe('StateStore', () => {
     store.applyEvent(makeEvent({ event_type: 'tool_start', tool: 'Read' }));
     const session = store.getSession('sess-1')!;
     assert.equal(session.lifecycle, 'ended');
+  });
+
+  it('uses the first accepted event timestamp as the session start', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    const session = store.applyEvent(makeEvent({ timestamp: 1234 }));
+    assert.equal(session.started_at, 1234);
+    assert.equal(session.last_event_at, 1234);
+  });
+
+  it('does not move last_event_at backwards for out-of-order events', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ timestamp: 2000 }));
+    const session = store.applyEvent(makeEvent({ id: 'older', timestamp: 1000 }));
+    assert.equal(session.last_event_at, 2000);
+  });
+
+  it('revives an ended session only on an explicit session_start', () => {
+    const store = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 60000 });
+    store.applyEvent(makeEvent({ event_type: 'session_start', timestamp: 100 }));
+    store.applyEvent(makeEvent({ event_type: 'session_end', timestamp: 200 }));
+    store.applyEvent(makeEvent({ event_type: 'tool_start', tool: 'Read', timestamp: 300 }));
+    assert.equal(store.getSession('sess-1')!.lifecycle, 'ended');
+
+    const resumed = store.applyEvent(makeEvent({ event_type: 'session_start', timestamp: 400 }));
+    assert.equal(resumed.lifecycle, 'starting');
+    assert.equal(resumed.ended_at, undefined);
   });
 });

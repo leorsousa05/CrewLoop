@@ -1,0 +1,18 @@
+{
+  "success": {
+    "event_type": "tool_start",
+    "session_id": "opencode-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/opencode",
+    "tool": "Read",
+    "invocation_id": "opencode-call-success"
+  },
+  "failure": {
+    "event_type": "tool_end",
+    "session_id": "opencode-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/opencode",
+    "tool": "Read",
+    "invocation_id": "opencode-call-failure",
+    "success": false,
+    "duration_ms": 85
+  }
+}

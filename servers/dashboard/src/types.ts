@@ -67,6 +67,7 @@ export interface DashboardEvent {
   source: AgentSource;
   session_id: string;
   event_type: EventType;
+  invocation_id?: string;
   skill?: string;
   default_skill?: string;
   tool?: string;
@@ -110,6 +111,7 @@ export interface ClientEvent {
   id: string;
   timestamp: number;
   event_type: EventType;
+  invocation_id?: string;
   tool?: string;
   operationType?: OperationType;
   detail?: string;
@@ -152,10 +154,17 @@ export interface ClientPongMessage {
   type: 'pong';
 }
 
+export interface ClientRemoveMessage {
+  type: 'remove';
+  sessionId: string;
+  reason: 'pruned';
+}
+
 export type ClientWebSocketMessage =
   | ClientSnapshotMessage
   | ClientUpdateMessage
-  | ClientPongMessage;
+  | ClientPongMessage
+  | ClientRemoveMessage;
 
 export interface SkillMeta {
   name: string;
