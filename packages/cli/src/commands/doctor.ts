@@ -213,9 +213,10 @@ export function runDoctorCommand(
   _options: CliOptions,
   stdout: (line: string) => void,
   stderr: (line: string) => void,
-  resolvePackageRoot: () => string
+  resolvePackageRoot: () => string,
+  homeDir?: string
 ): number {
-  const report = runDoctor({ resolvePackageRoot });
+  const report = runDoctor({ resolvePackageRoot, homeDir });
   for (const check of report.checks) {
     const line = `${check.level} ${check.label}: ${check.detail}`;
     if (check.level === 'error') {
