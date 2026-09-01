@@ -2,11 +2,15 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compareTokenBenchmarks,
+  deduplicateTokenBenchmarkRuns,
   formatBenchmarkMarkdown,
   median,
+  validateTokenOptimizationCorpus,
+  validateTokenBenchmarkDataset,
   type TokenBenchmarkDataset,
   type TokenBenchmarkRun,
 } from './benchmark';
+import { TOKEN_OPTIMIZATION_SCENARIO_IDS } from './execution';
 
 function run(
   variant: 'baseline' | 'candidate',
@@ -22,6 +26,14 @@ function run(
     passed: true,
     durationMs: variant === 'baseline' ? 1000 : 1050,
     toolCalls: 4,
+    modelCalls: variant === 'baseline' ? 2 : 1,
+    turns: variant === 'baseline' ? 3 : 2,
+    attempts: 1,
+    failures: 0,
+    verification: 'passed',
+    outcome: 'completed',
+    stopReason: 'completed',
+    costMicrousd: variant === 'baseline' ? 100 : 75,
     tokenUsage: {
       inputTokens: variant === 'baseline' ? 800 : 600,
       outputTokens: variant === 'baseline' ? 200 : 150,
@@ -135,5 +147,48 @@ describe('token benchmark', () => {
     const markdown = formatBenchmarkMarkdown(result);
     assert.match(markdown, /Token Benchmark: PASS/);
     assert.match(markdown, /Total tokens/);
+    assert.match(markdown, /Model calls/);
+    assert.match(markdown, /Cost per completed task/);
+  });
+
+  it('compares execution metrics and cost per completed task', () => {
+    const result = compareTokenBenchmarks(
+      dataset('before', [run('baseline')]),
+      dataset('after', [run('candidate')])
+    );
+
+    assert.equal(result.execution.modelCalls.baselineMedian, 2);
+    assert.equal(result.execution.modelCalls.candidateMedian, 1);
+    assert.equal(result.execution.turns.deltaPercent, -33.33333333333333);
+    assert.equal(result.execution.costPerCompletedTaskMicrousd.baselineMedian, 100);
+    assert.equal(result.execution.costPerCompletedTaskMicrousd.candidateMedian, 75);
+  });
+
+  it('validates the fixed six-scenario optimization corpus', () => {
+    const baselineRuns = TOKEN_OPTIMIZATION_SCENARIO_IDS.map((scenarioId) => run('baseline', { scenarioId }));
+    const candidateRuns = TOKEN_OPTIMIZATION_SCENARIO_IDS.map((scenarioId) => run('candidate', { scenarioId }));
+
+    assert.doesNotThrow(() => validateTokenOptimizationCorpus(
+      dataset('baseline', baselineRuns),
+      dataset('candidate', candidateRuns)
+    ));
+    assert.throws(() => validateTokenOptimizationCorpus(
+      dataset('baseline', baselineRuns.slice(0, -1)),
+      dataset('candidate', candidateRuns)
+    ), /all token optimization scenarios/);
+  });
+
+  it('accepts identical replayed records once and rejects conflicting duplicates', () => {
+    const deduped = validateTokenBenchmarkDataset(
+      dataset('duplicate', [run('baseline'), run('baseline')])
+    );
+    assert.equal(deduped.runs.length, 1);
+    assert.throws(() => validateTokenBenchmarkDataset(
+      dataset('conflict', [run('baseline'), run('baseline', { durationMs: 2_000 })])
+    ), /conflicting duplicate identity/);
+  });
+
+  it('deduplicates replayed run records before aggregation', () => {
+    assert.equal(deduplicateTokenBenchmarkRuns([run('baseline'), run('baseline')]).length, 1);
   });
 });

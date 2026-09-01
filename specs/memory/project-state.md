@@ -2,7 +2,7 @@
 
 > Always-read file. Updated at the end of every working session by `crewloop:ship` (or `crewloop:plan` during discovery).
 
-**Last updated:** 2026-08-14
+**Last updated:** 2026-09-01
 
 ## Module status
 
@@ -18,6 +18,7 @@
 ## Recent decisions
 
 - 2026-08-14: Specs system restructured — `features/` (one spec = one task), `memory/` (project state, chat-logs, decisions, incidents), `shared/` (glossary, tech-stack, conventions, ADRs), `changes/` (RFCs only). Completed feature specs stay in `features/` as source of truth; RFC lifecycle: approved → `shared/adrs/`, rejected → `archive/` + reason.
+- 2026-09-01: Token optimization starts inside CrewLoop with `specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md`. Reuse the existing dashboard token telemetry and benchmark contracts; do not fabricate provider metrics or add an external optimizer.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -26,5 +27,5 @@
 
 ## Next task suggested
 
-- Adopt the new workflow for the next task: read `specs/memory/project-state.md` + one feature spec from `specs/features/<domain>/`, implement, mark Done When, ship.
+- Implement `spec-014-token-optimization-phase-0-1.md` after reviewing its contracts and edge-case matrix; then mark Done When, review, and ship.
 - Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

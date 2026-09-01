@@ -202,6 +202,13 @@ These rules apply to all code proposed or implemented by any agent:
 - **Eliminate token wasters:** Avoid introductory phrases ("Here is...", "Below you will find...") and closing summaries.
 - **Format:** Use bullet lists instead of paragraphs for anything with more than 2 items. One idea per sentence. No markdown inside code blocks.
 
+### Native CrewLoop Minimalism Policy
+- Inspect existing code, the standard library, and native platform features before adding code or dependencies.
+- Prefer the smallest correct change; record why new dependencies or abstractions are necessary.
+- Send only task-relevant context and reuse results already collected in the current task.
+- Never trade away validation, authentication/authorization, safe error handling, destructive-operation protection, accessibility, essential tests, or user confirmations for fewer tokens.
+- Stop after required validation passes and scope is satisfied; do not create optional retry or review cycles without a measurable purpose.
+
 ### Technical Honesty & Traceability
 - **No impossible solutions:** Never propose technically impossible designs. If a requirement is not viable, say so and suggest an alternative.
 - **Requirement traceability:** Verify every requirement from the original prompt is addressed. List explicitly: "Addressed: X. Deferred: Y (reason)."
