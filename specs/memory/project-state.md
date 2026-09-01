@@ -29,6 +29,7 @@
 - 2026-09-01: Spec 019 implementation adds the shared execution-profile contract to Plan, Code, and Review; high-risk explicit weaker profiles escalate to safe in the existing telemetry selector, with focused regression coverage. The spec passed the Review gate and is complete.
 - 2026-09-01: Spec 020 completes the native optimization loop: benchmark datasets carry bounded policy identity, fixed baseline/candidate corpus coverage is enforced, quality-first comparison returns `adopt_candidate` or `keep_baseline`, and Plan/Code/Review require recommendation-only adoption evidence.
 - 2026-09-01: Spec 021 adds the fixed token benchmark as a post-test CI gate and documents local reproduction. The workflow fails closed on invalid corpus or quality regression while preserving existing build, tests, and skill validation.
+- 2026-09-01: Spec 022 removes Windows shell-glob dependence from the CLI and dashboard server test scripts by using Node's native recursive `node --test dist` discovery. Build, dashboard tests, UI tests, benchmark, YAML, skill validation, and scope review passed; one pre-existing environment-sensitive CLI doctor assertion remains a separate follow-up.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -37,4 +38,4 @@
 
 ## Next task suggested
 
-- Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Ship spec 022, then evaluate the pre-existing CLI doctor-test environment sensitivity separately. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

@@ -31,7 +31,7 @@
     "dev:start": "node --watch dist/index.js",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
     "test": "npm run test:server && npm run test:ui",
-    "test:server": "node --test \"dist/**/*.test.js\"",
+    "test:server": "node --test dist",
     "test:ui": "vitest run --root ui --config vitest.config.ts",
     "benchmark:tokens": "npm run build:server && node dist/telemetry/benchmark-cli.js",
     "prepublishOnly": "npm run build"
