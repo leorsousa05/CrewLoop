@@ -30,7 +30,7 @@
 - 2026-09-01: Spec 020 completes the native optimization loop: benchmark datasets carry bounded policy identity, fixed baseline/candidate corpus coverage is enforced, quality-first comparison returns `adopt_candidate` or `keep_baseline`, and Plan/Code/Review require recommendation-only adoption evidence.
 - 2026-09-01: Spec 021 adds the fixed token benchmark as a post-test CI gate and documents local reproduction. The workflow fails closed on invalid corpus or quality regression while preserving existing build, tests, and skill validation.
 - 2026-09-01: Spec 022 removes Windows shell-glob dependence from the CLI and dashboard server test scripts by using Node's native recursive `node --test dist` discovery. Build, dashboard tests, UI tests, benchmark, YAML, skill validation, and scope review passed; one pre-existing environment-sensitive CLI doctor assertion remains a separate follow-up.
-- 2026-09-01: Spec 023 isolates the CLI doctor test from the host home directory with an optional test-only override while preserving production defaults. CLI, workspace, dashboard, UI, benchmark, and security validation passed; the change is ready for Ship.
+- 2026-09-01: Spec 023 isolates the CLI doctor test from the host home directory with an optional test-only override while preserving production defaults. CLI, workspace, dashboard, UI, benchmark, and security validation passed; commit `01d72f5` is pushed to `origin/token/otimization`.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -39,4 +39,4 @@
 
 ## Next task suggested
 
-- Ship spec 023. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Roadmap phases 0–7 and follow-up specs 022–023 are complete. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

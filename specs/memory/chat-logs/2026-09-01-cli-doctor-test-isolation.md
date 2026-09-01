@@ -10,5 +10,5 @@ topic: cli-doctor-test-isolation
 - Added an optional home-directory override to `runDoctorCommand`; production calls omit it and retain the existing behavior.
 - Updated the affected test to use its temporary home directory, preventing host hook configuration from changing the expected warning output.
 - Validation passed: CLI build, 97 CLI tests, 322 dashboard server tests, 65 UI tests, workspace build, token benchmark with `adopt_candidate`, seven-skill validation, and security/scope scans.
-- Review result: PASS for the scoped change. The work remains unshipped until an explicit CrewLoop Ship step.
-- Next: ship spec 023.
+- Review result: PASS for the scoped change. The work was shipped in commit `01d72f5` and pushed to `origin/token/otimization`.
+- Next: keep the CI benchmark fixtures synchronized with future optimizer-policy changes.

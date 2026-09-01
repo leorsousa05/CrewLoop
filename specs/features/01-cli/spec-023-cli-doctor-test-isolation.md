@@ -1,9 +1,9 @@
 ---
 name: spec-023-cli-doctor-test-isolation
 domain: 01-cli
-status: active
+status: completed
 created: 2026-09-01
-completed: null
+completed: 2026-09-01
 supersedes: []
 ---
 
@@ -69,4 +69,4 @@ Make the CLI doctor's output-routing test deterministic across developer machine
 
 - Scoped review: PASS; the change is ready for CrewLoop Ship.
 - The production CLI call path remains unchanged and continues to use the operating-system home directory by default.
-- The feature remains `active` until Ship commits it, per the repository workflow.
+- The feature was shipped in commit `01d72f5` and is synchronized with `origin/token/otimization`.
