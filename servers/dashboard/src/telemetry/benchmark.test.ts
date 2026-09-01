@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compareTokenBenchmarks,
+  compareTokenOptimizationBenchmarks,
   deduplicateTokenBenchmarkRuns,
   formatBenchmarkMarkdown,
   median,
@@ -51,7 +52,12 @@ function run(
 }
 
 function dataset(label: string, runs: TokenBenchmarkRun[]): TokenBenchmarkDataset {
-  return { schemaVersion: 1, label, runs };
+  return {
+    schemaVersion: 1,
+    label,
+    policy: { id: 'token-optimizer', version: label },
+    runs,
+  };
 }
 
 describe('token benchmark', () => {
@@ -66,7 +72,44 @@ describe('token benchmark', () => {
       dataset('after', [run('candidate')])
     );
     assert.equal(result.passed, true);
+    assert.equal(result.decision, 'adopt_candidate');
+    assert.deepEqual(result.policy, {
+      baseline: { id: 'token-optimizer', version: 'before' },
+      candidate: { id: 'token-optimizer', version: 'after' },
+    });
     assert.equal(result.totalTokens.deltaPercent, -25);
+  });
+
+  it('rejects comparisons across unrelated optimizer policies', () => {
+    assert.throws(
+      () => compareTokenBenchmarks(
+        dataset('before', [run('baseline')]),
+        {
+          ...dataset('after', [run('candidate')]),
+          policy: { id: 'other-optimizer', version: 'after' },
+        }
+      ),
+      /same policy id/
+    );
+  });
+
+  it('rejects missing or unsafe policy metadata without echoing its value', () => {
+    const { policy: _missingPolicy, ...missingPolicy } = dataset('missing-policy', [run('baseline')]);
+    assert.throws(
+      () => validateTokenBenchmarkDataset(missingPolicy),
+      /dataset\.policy must be an object/
+    );
+
+    const unsafeValue = '../private-token';
+    assert.throws(
+      () => validateTokenBenchmarkDataset({
+        ...dataset('unsafe-policy', [run('baseline')]),
+        policy: { id: unsafeValue, version: 'v1' },
+      }),
+      (error: unknown) => error instanceof Error
+        && /dataset\.policy\.id is invalid/.test(error.message)
+        && !error.message.includes(unsafeValue)
+    );
   });
 
   it('fails when token reduction is below the threshold', () => {
@@ -146,6 +189,8 @@ describe('token benchmark', () => {
     );
     const markdown = formatBenchmarkMarkdown(result);
     assert.match(markdown, /Token Benchmark: PASS/);
+    assert.match(markdown, /Decision: adopt_candidate/);
+    assert.match(markdown, /token-optimizer@before/);
     assert.match(markdown, /Total tokens/);
     assert.match(markdown, /Model calls/);
     assert.match(markdown, /Cost per completed task/);
@@ -172,10 +217,40 @@ describe('token benchmark', () => {
       dataset('baseline', baselineRuns),
       dataset('candidate', candidateRuns)
     ));
+    const comparison = compareTokenOptimizationBenchmarks(
+      dataset('baseline', baselineRuns),
+      dataset('candidate', candidateRuns)
+    );
+    assert.equal(comparison.decision, 'adopt_candidate');
     assert.throws(() => validateTokenOptimizationCorpus(
       dataset('baseline', baselineRuns.slice(0, -1)),
       dataset('candidate', candidateRuns)
     ), /all token optimization scenarios/);
+    assert.throws(() => validateTokenOptimizationCorpus(
+      dataset('baseline', baselineRuns),
+      dataset('candidate', candidateRuns.map((candidateRun, index) => (
+        index === 0 ? { ...candidateRun, repetition: 2 } : candidateRun
+      )))
+    ), /all token optimization scenarios/);
+  });
+
+  it('keeps the baseline when all token measurements are unavailable', () => {
+    const unavailable = run('candidate', {
+      tokenUsage: {
+        ...run('candidate').tokenUsage,
+        quality: 'unavailable',
+        totalTokens: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+      },
+    });
+    const result = compareTokenBenchmarks(
+      dataset('before', [run('baseline')]),
+      dataset('after', [unavailable])
+    );
+    assert.equal(result.passed, false);
+    assert.equal(result.decision, 'keep_baseline');
+    assert.equal(result.totalTokens.deltaPercent, null);
   });
 
   it('accepts identical replayed records once and rejects conflicting duplicates', () => {

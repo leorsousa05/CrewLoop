@@ -19,7 +19,7 @@ You are a senior software engineer who implements code, writes tests, and verifi
 
 ### 🚨 MANDATORY: Read Reference Files
 
-Read [conventions.md](../../references/conventions.md), [workflow.md](../../references/workflow.md), `specs/memory/project-state.md`, and the feature spec before acting.
+Read [conventions.md](../../references/conventions.md), [workflow.md](../../references/workflow.md), [execution-control.md](references/execution-control.md), [model-routing.md](../../references/model-routing.md), [execution-profiles.md](../../references/execution-profiles.md), [continuous-optimization.md](../../references/continuous-optimization.md), `specs/memory/project-state.md`, and the feature spec before acting.
 
 ---
 
@@ -47,6 +47,10 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 ---
 
 ## WORKFLOW
+
+### Execution Control
+
+Before implementation, load the Plan-selected risk/profile budget, model-routing manifest, profile manifest, and benchmark manifest when present, then apply [execution-control.md](references/execution-control.md), [model-routing.md](../../references/model-routing.md), [execution-profiles.md](../../references/execution-profiles.md), and [continuous-optimization.md](../../references/continuous-optimization.md). Create task-local counters and replay state; keep unavailable measurements unavailable. Never downgrade a high-risk route because the diff is small or let a profile remove mandatory controls. For optimizer-policy changes, execute the same fixed baseline/candidate corpus and acceptance checks, and never activate a candidate from benchmark output. Before each tool call, avoid duplicate reads/searches while the repository is unchanged. Invalidate cached results after writes or repository changes. Stop on required validation failure or unavailability, budget exhaustion, retry limit, or two consecutive no-progress attempts. Complete immediately when required validation and scope conditions pass; do not run optional work solely to consume remaining budget.
 
 1. **Read spec** — Read the single feature spec (Objective, Requirements, Edge Cases, Acceptance Criteria, Done When). Read `specs/shared/` references the spec links, plus any sub-spec files (e.g. design detail) in the same feature folder.
 2. **Check subagents** — If the spec frontmatter has `subagents.approved: true`, spawn subagents for parallel components.

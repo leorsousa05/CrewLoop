@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {
-  compareTokenBenchmarks,
+  compareTokenOptimizationBenchmarks,
   formatBenchmarkMarkdown,
   validateTokenBenchmarkDataset,
 } from './benchmark';
@@ -48,7 +48,7 @@ export function runBenchmarkCli(
 ): number {
   try {
     const options = parseArgs(argv);
-    const comparison = compareTokenBenchmarks(
+    const comparison = compareTokenOptimizationBenchmarks(
       readDataset(options.baseline),
       readDataset(options.candidate)
     );

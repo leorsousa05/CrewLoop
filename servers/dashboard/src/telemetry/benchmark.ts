@@ -34,8 +34,16 @@ export interface TokenBenchmarkRun {
 export interface TokenBenchmarkDataset {
   schemaVersion: 1;
   label: string;
+  policy: TokenBenchmarkPolicy;
   runs: TokenBenchmarkRun[];
 }
+
+export interface TokenBenchmarkPolicy {
+  id: string;
+  version: string;
+}
+
+export type TokenOptimizationDecision = 'adopt_candidate' | 'keep_baseline';
 
 export interface TokenBenchmarkConfig {
   minimumTokenReductionPercent: number;
@@ -45,10 +53,10 @@ export interface TokenBenchmarkConfig {
 }
 
 export interface TokenMetricComparison {
-  baselineMedian: number;
-  candidateMedian: number;
-  delta: number;
-  deltaPercent: number;
+  baselineMedian: number | null;
+  candidateMedian: number | null;
+  delta: number | null;
+  deltaPercent: number | null;
 }
 
 export interface NullableMetricComparison {
@@ -70,6 +78,11 @@ export interface ExecutionMetricComparison {
 }
 
 export interface TokenBenchmarkComparison {
+  policy: {
+    baseline: TokenBenchmarkPolicy;
+    candidate: TokenBenchmarkPolicy;
+  };
+  decision: TokenOptimizationDecision;
   passed: boolean;
   totalTokens: TokenMetricComparison;
   inputTokens: TokenMetricComparison;
@@ -98,6 +111,8 @@ const AGENT_SOURCES: ReadonlySet<string> = new Set([
   'agy',
 ]);
 
+const POLICY_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -108,6 +123,22 @@ function isNonNegativeNumber(value: unknown): value is number {
 
 function isNonNegativeInteger(value: unknown): value is number {
   return isNonNegativeNumber(value) && Number.isSafeInteger(value);
+}
+
+function isBoundedPolicyIdentifier(value: unknown): value is string {
+  return typeof value === 'string' && POLICY_IDENTIFIER_PATTERN.test(value);
+}
+
+function validatePolicy(value: unknown, path: string): asserts value is TokenBenchmarkPolicy {
+  if (!isObject(value)) {
+    throw new Error(`${path} must be an object`);
+  }
+  if (!isBoundedPolicyIdentifier(value.id)) {
+    throw new Error(`${path}.id is invalid`);
+  }
+  if (!isBoundedPolicyIdentifier(value.version)) {
+    throw new Error(`${path}.version is invalid`);
+  }
 }
 
 function isNullableNonNegativeInteger(value: unknown): value is number | null {
@@ -217,6 +248,7 @@ export function validateTokenBenchmarkDataset(value: unknown): TokenBenchmarkDat
   if (typeof value.label !== 'string' || value.label.length === 0) {
     throw new Error('dataset.label must be a non-empty string');
   }
+  validatePolicy(value.policy, 'dataset.policy');
   if (!Array.isArray(value.runs) || value.runs.length === 0) {
     throw new Error('dataset.runs must be a non-empty array');
   }
@@ -246,12 +278,28 @@ export function validateTokenOptimizationCorpus(
 ): void {
   const baseline = validateTokenBenchmarkDataset(rawBaseline);
   const candidate = validateTokenBenchmarkDataset(rawCandidate);
+  if (baseline.policy.id !== candidate.policy.id) {
+    throw new Error('benchmark policies must share the same policy id');
+  }
   const expected = [...TOKEN_OPTIMIZATION_SCENARIO_IDS].sort();
   const baselineIds = scenarioIds(baseline.runs);
   const candidateIds = scenarioIds(candidate.runs);
-  if (!sameStrings(baselineIds, expected) || !sameStrings(candidateIds, expected)) {
+  if (
+    !sameStrings(baselineIds, expected)
+    || !sameStrings(candidateIds, expected)
+    || !sameStrings(runCoverage(baseline.runs), runCoverage(candidate.runs))
+  ) {
     throw new Error('benchmark corpus must contain all token optimization scenarios in both variants');
   }
+}
+
+export function compareTokenOptimizationBenchmarks(
+  rawBaseline: TokenBenchmarkDataset,
+  rawCandidate: TokenBenchmarkDataset,
+  overrides: Partial<TokenBenchmarkConfig> = {}
+): TokenBenchmarkComparison {
+  validateTokenOptimizationCorpus(rawBaseline, rawCandidate);
+  return compareTokenBenchmarks(rawBaseline, rawCandidate, overrides);
 }
 
 export function deduplicateTokenBenchmarkRuns(
@@ -312,6 +360,18 @@ function compareMetric(baseline: number[], candidate: number[]): TokenMetricComp
   return { baselineMedian, candidateMedian, delta, deltaPercent };
 }
 
+function compareMetricOrEmpty(baseline: number[], candidate: number[]): TokenMetricComparison {
+  if (baseline.length === 0 || candidate.length === 0) {
+    return {
+      baselineMedian: null,
+      candidateMedian: null,
+      delta: null,
+      deltaPercent: null,
+    };
+  }
+  return compareMetric(baseline, candidate);
+}
+
 function emptyNullableMetric(): NullableMetricComparison {
   return {
     baselineMedian: null,
@@ -353,6 +413,10 @@ function scenarioIds(runs: TokenBenchmarkRun[]): string[] {
   return Array.from(new Set(runs.map((run) => run.scenarioId))).sort();
 }
 
+function runCoverage(runs: TokenBenchmarkRun[]): string[] {
+  return Array.from(new Set(runs.map((run) => `${run.scenarioId}:${run.repetition}`))).sort();
+}
+
 function sameStrings(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
@@ -368,7 +432,10 @@ export function compareTokenBenchmarks(
   const failures: string[] = [];
 
   if (!sameStrings(scenarioIds(baseline.runs), scenarioIds(candidate.runs))) {
-    throw new Error('baseline and candidate scenario sets must match');
+    throw new Error('baseline and candidate scenario sets/coverage must match');
+  }
+  if (!sameStrings(runCoverage(baseline.runs), runCoverage(candidate.runs))) {
+    throw new Error('baseline and candidate scenario sets/coverage must match');
   }
   if (baseline.runs.some((run) => run.variant !== 'baseline')) {
     throw new Error('baseline dataset may contain only baseline runs');
@@ -376,22 +443,22 @@ export function compareTokenBenchmarks(
   if (candidate.runs.some((run) => run.variant !== 'candidate')) {
     throw new Error('candidate dataset may contain only candidate runs');
   }
+  if (baseline.policy.id !== candidate.policy.id) {
+    throw new Error('benchmark policies must share the same policy id');
+  }
 
   const measuredBaseline = baseline.runs.filter((run) => run.tokenUsage.quality === 'measured');
   const measuredCandidate = candidate.runs.filter((run) => run.tokenUsage.quality === 'measured');
-  if (measuredBaseline.length === 0 || measuredCandidate.length === 0) {
-    throw new Error('baseline and candidate require at least one measured run');
-  }
 
-  const totalTokens = compareMetric(
+  const totalTokens = compareMetricOrEmpty(
     measuredBaseline.map((run) => run.tokenUsage.totalTokens),
     measuredCandidate.map((run) => run.tokenUsage.totalTokens)
   );
-  const inputTokens = compareMetric(
+  const inputTokens = compareMetricOrEmpty(
     measuredBaseline.map((run) => run.tokenUsage.inputTokens),
     measuredCandidate.map((run) => run.tokenUsage.inputTokens)
   );
-  const outputTokens = compareMetric(
+  const outputTokens = compareMetricOrEmpty(
     measuredBaseline.map((run) => run.tokenUsage.outputTokens),
     measuredCandidate.map((run) => run.tokenUsage.outputTokens)
   );
@@ -436,9 +503,11 @@ export function compareTokenBenchmarks(
     measuredCoverage(baseline.runs),
     measuredCoverage(candidate.runs)
   );
-  const reductionPercent = -totalTokens.deltaPercent;
+  const reductionPercent = totalTokens.deltaPercent === null ? null : -totalTokens.deltaPercent;
 
-  if (reductionPercent < config.minimumTokenReductionPercent) {
+  if (reductionPercent === null) {
+    failures.push('measured token coverage is unavailable for comparison');
+  } else if (reductionPercent < config.minimumTokenReductionPercent) {
     failures.push(
       `token reduction ${reductionPercent.toFixed(2)}% is below ${config.minimumTokenReductionPercent}%`
     );
@@ -448,7 +517,7 @@ export function compareTokenBenchmarks(
       `measured coverage ${measuredCoveragePercent.toFixed(2)}% is below ${config.minimumMeasuredCoveragePercent}%`
     );
   }
-  if (durationMs.deltaPercent > config.maximumDurationRegressionPercent) {
+  if (durationMs.deltaPercent !== null && durationMs.deltaPercent > config.maximumDurationRegressionPercent) {
     failures.push(
       `duration regression ${durationMs.deltaPercent.toFixed(2)}% exceeds ${config.maximumDurationRegressionPercent}%`
     );
@@ -462,6 +531,11 @@ export function compareTokenBenchmarks(
   }
 
   return {
+    policy: {
+      baseline: baseline.policy,
+      candidate: candidate.policy,
+    },
+    decision: failures.length === 0 ? 'adopt_candidate' : 'keep_baseline',
     passed: failures.length === 0,
     totalTokens,
     inputTokens,
@@ -499,6 +573,9 @@ export function formatBenchmarkMarkdown(comparison: TokenBenchmarkComparison): s
     `- Baseline success: ${formatNumber(comparison.baselineSuccessRate)}%`,
     `- Candidate success: ${formatNumber(comparison.candidateSuccessRate)}%`,
     `- Measured coverage: ${formatNumber(comparison.measuredCoveragePercent)}%`,
+    `- Baseline policy: ${comparison.policy.baseline.id}@${comparison.policy.baseline.version}`,
+    `- Candidate policy: ${comparison.policy.candidate.id}@${comparison.policy.candidate.version}`,
+    `- Decision: ${comparison.decision}`,
     '',
     '## Execution metrics',
     '',

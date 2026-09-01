@@ -19,6 +19,15 @@
 
 - 2026-08-14: Specs system restructured — `features/` (one spec = one task), `memory/` (project state, chat-logs, decisions, incidents), `shared/` (glossary, tech-stack, conventions, ADRs), `changes/` (RFCs only). Completed feature specs stay in `features/` as source of truth; RFC lifecycle: approved → `shared/adrs/`, rejected → `archive/` + reason.
 - 2026-09-01: Token optimization starts inside CrewLoop with `specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md`. Reuse the existing dashboard token telemetry and benchmark contracts; do not fabricate provider metrics or add an external optimizer.
+- 2026-09-01: Spec 014 completed. Phase 2 continues inside the Plan skill with deterministic local context selection; use task matches, modified files, imports/consumers, and associated tests before considering broader search.
+- 2026-09-01: Spec 015 adds the portable context-selection contract to Plan. Phase 3 will apply the existing risk budgets and stop categories inside Code with task-local replay only.
+- 2026-09-01: Spec 016 adds task-local execution control to Code: reuse unchanged inspection results, invalidate after mutations, stop bounded retries, and preserve mandatory validation.
+- 2026-09-01: Spec 017 defines fail-closed automatic verification in Review, including required evidence, changed-file and secret scans, destructive-command detection, and one bounded correction round.
+- 2026-09-01: Spec 018 defines provider-neutral model routing: risk takes precedence over change size, high-risk work uses capable routing, and every route retains verification.
+- 2026-09-01: Spec 018 implementation adds provider-neutral routing guidance to Plan and Code; high-risk work remains capable and verification-required.
+- 2026-09-01: Spec 019 defines task-local execution profiles: balanced by default, safe for high-risk conflicts, minimal only for low-risk work, and review for regression/quality impact.
+- 2026-09-01: Spec 019 implementation adds the shared execution-profile contract to Plan, Code, and Review; high-risk explicit weaker profiles escalate to safe in the existing telemetry selector, with focused regression coverage. The spec passed the Review gate and is complete.
+- 2026-09-01: Spec 020 completes the native optimization loop: benchmark datasets carry bounded policy identity, fixed baseline/candidate corpus coverage is enforced, quality-first comparison returns `adopt_candidate` or `keep_baseline`, and Plan/Code/Review require recommendation-only adoption evidence.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -27,5 +36,4 @@
 
 ## Next task suggested
 
-- Implement `spec-014-token-optimization-phase-0-1.md` after reviewing its contracts and edge-case matrix; then mark Done When, review, and ship.
-- Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Use the fixed benchmark corpus and `compareTokenOptimizationBenchmarks` for every future optimizer-policy change; only a reviewed `adopt_candidate` result may replace the baseline. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

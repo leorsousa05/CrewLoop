@@ -1,9 +1,9 @@
 ---
 name: spec-014-token-optimization-phase-0-1
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-09-01
-completed: null
+completed: 2026-09-01
 supersedes: []
 ---
 

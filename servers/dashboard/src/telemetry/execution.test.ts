@@ -84,6 +84,17 @@ describe('task execution telemetry', () => {
     });
   });
 
+  it('escalates a weaker requested profile for high-risk work', () => {
+    assert.deepEqual(selectOptimizationProfile({ risk: 'high', profile: 'minimal' }), {
+      risk: 'high',
+      profile: 'safe',
+    });
+    assert.deepEqual(selectOptimizationProfile({ risk: 'high', profile: 'balanced' }), {
+      risk: 'high',
+      profile: 'safe',
+    });
+  });
+
   it('returns the proposed budgets without enforcing them', () => {
     assert.deepEqual(getInitialExecutionBudget('low'), {
       maxContextTokens: 12_000,

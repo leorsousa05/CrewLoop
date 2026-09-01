@@ -225,6 +225,9 @@ export function selectOptimizationProfile(
 ): OptimizationSelection {
   const risk = isOptimizationRisk(input.risk) ? input.risk : 'low';
   if (isOptimizationProfile(input.profile)) {
+    if (risk === 'high' && input.profile !== 'safe') {
+      return { risk, profile: 'safe' };
+    }
     return { risk, profile: input.profile };
   }
   return { risk, profile: risk === 'high' ? 'safe' : 'balanced' };
