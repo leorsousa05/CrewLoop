@@ -2,7 +2,7 @@
 
 > Always-read file. Updated at the end of every working session by `crewloop:ship` (or `crewloop:plan` during discovery).
 
-**Last updated:** 2026-09-01
+**Last updated:** 2026-09-02
 
 ## Module status
 
@@ -31,7 +31,8 @@
 - 2026-09-01: Spec 021 adds the fixed token benchmark as a post-test CI gate and documents local reproduction. The workflow fails closed on invalid corpus or quality regression while preserving existing build, tests, and skill validation.
 - 2026-09-01: Spec 022 removes Windows shell-glob dependence from the CLI and dashboard server test scripts by using Node's native recursive `node --test dist` discovery. Build, dashboard tests, UI tests, benchmark, YAML, skill validation, and scope review passed; one pre-existing environment-sensitive CLI doctor assertion remains a separate follow-up.
 - 2026-09-01: Spec 023 isolates the CLI doctor test from the host home directory with an optional test-only override while preserving production defaults. CLI, workspace, dashboard, UI, benchmark, and security validation passed; commit `01d72f5` is pushed to `origin/token/otimization`.
-- 2026-09-01: Spec 029 implementation completes the dashboard event/session consistency foundation: canonical boundary validation, workspace-root preservation, stable invocation correlation, deterministic lifecycle/pruning/resume, typed remove messages, OpenCode contract propagation, and five adapter fixtures. Build/tests/benchmark/skill validation passed; review PASS. The change remains unshipped pending CrewLoop Ship.
+- 2026-09-01: Spec 029 shipped in commit `103d57e`, completing the dashboard event/session consistency foundation: canonical boundary validation, workspace-root preservation, stable invocation correlation, deterministic lifecycle/pruning/resume, typed remove messages, OpenCode contract propagation, and five adapter fixtures. Build/tests/benchmark/skill validation passed; review PASS.
+- 2026-09-02: Spec 030 implementation and review PASS. The dashboard client now applies bounded maxEvents projection, complete filters, coalesced pause buffering, deterministic removal/deep-link fallback, reactive theme/reduced-motion settings, protocol-aware WebSocket URLs, versioned settings migration, and abortable identity-guarded file requests. Dashboard build, typecheck, 338 server tests, and 82 UI tests passed.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -40,4 +41,4 @@
 
 ## Next task suggested
 
-- Ship Spec 029, then implement Spec 030 dashboard client correctness. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Ship Spec 030, then route to Spec 031 dashboard responsive UI refinement. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

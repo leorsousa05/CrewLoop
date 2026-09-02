@@ -1,9 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { FileEntry } from '../../../../src/lib/invocations';
 import { FilterBar } from '../FilterBar';
 import { FileActivity } from '../FileActivity';
 import { computeDirectoryPaths } from '../../lib/dirs';
 import type { FilterOptions } from '../../lib/types';
+import { useFilters } from '../../contexts/FilterContext';
+import { isAbortError } from '../../lib/file-loader';
+import { filterWorkspacePaths } from '../../lib/filter';
 
 interface Props {
   files: FileEntry[];
@@ -15,25 +18,36 @@ interface Props {
 
 export function FilesView({ files, filterOptions, selectedSessionId, selectedPath, onSelectPath }: Props) {
   const [allPaths, setAllPaths] = useState<string[]>([]);
+  const requestGeneration = useRef(0);
+  const { filters } = useFilters();
 
   useEffect(() => {
+    setAllPaths([]);
     const url = selectedSessionId
       ? `/api/workspace-files?sessionId=${encodeURIComponent(selectedSessionId)}`
       : '/api/workspace-files';
-    fetch(url)
+    const controller = new AbortController();
+    const generation = ++requestGeneration.current;
+    fetch(url, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (generation === requestGeneration.current && Array.isArray(data)) {
           setAllPaths(data);
         }
       })
-      .catch((err) => console.error('Failed to load workspace files', err));
+      .catch((err: unknown) => {
+        if (isAbortError(err)) return;
+        console.error('Failed to load workspace files', err);
+      });
+    return () => controller.abort();
   }, [selectedSessionId]);
+
+  const workspacePaths = filterWorkspacePaths(allPaths, filters);
 
   const mergedFiles: FileEntry[] = [...files];
   const activePathsSet = new Set(files.map((f) => f.path));
 
-  for (const path of allPaths) {
+  for (const path of workspacePaths) {
     if (!activePathsSet.has(path)) {
       mergedFiles.push({
         path,
@@ -48,7 +62,7 @@ export function FilesView({ files, filterOptions, selectedSessionId, selectedPat
   // they appear as leaf entries (the agent read the directory itself).
   const directoryPaths = useMemo(
     () => computeDirectoryPaths(mergedFiles.map((f) => f.path)),
-    [allPaths, files],
+    [workspacePaths, files],
   );
 
   return (

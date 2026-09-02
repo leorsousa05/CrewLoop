@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { escapeHtml } from '../../../src/lib/format';
 import type { FileEntry } from '../../../src/lib/invocations';
 import { Icon } from './ui/Icon';
 import { StatusBadge } from './ui/StatusBadge';
+import { FileRequestGuard, isAbortError, loadFileResource, type FileRequestIdentity } from '../lib/file-loader';
 
 interface Props {
   file: FileEntry | undefined;
@@ -70,6 +71,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const requestGuard = useRef(new FileRequestGuard());
 
   const hasEdit = file?.ops.some((op) => op.type === 'edit') ?? false;
 
@@ -84,44 +86,41 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   }, [file?.path, hasEdit]);
 
   useEffect(() => {
-    // Directories have no file content — skip the fetch entirely.
-    if (!file || isDirectory) return;
+    const identity: FileRequestIdentity | undefined = file && !isDirectory
+      ? { path: file.path, sessionId, tab: activeTab }
+      : undefined;
+    if (!identity) {
+      requestGuard.current.invalidate();
+      setLoading(false);
+      return;
+    }
 
+    const token = requestGuard.current.begin(identity);
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    const sessQuery = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
+    if (activeTab === 'content') setFileContent(null);
+    else setGitDiff(null);
 
-    if (activeTab === 'content') {
-      fetch(`/api/file-content?path=${encodeURIComponent(file.path)}${sessQuery}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to load file content');
-          return res.json();
-        })
-        .then((data) => {
-          setFileContent(data.content);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setFileContent(null);
-          setLoading(false);
-        });
-    } else {
-      fetch(`/api/file-diff?path=${encodeURIComponent(file.path)}${sessQuery}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to load git diff');
-          return res.json();
-        })
-        .then((data) => {
-          setGitDiff(data.diff);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setGitDiff(null);
-          setLoading(false);
-        });
-    }
+    loadFileResource(identity, controller.signal)
+      .then((data) => {
+        if (!requestGuard.current.isCurrent(token, identity)) return;
+        if (identity.tab === 'content') setFileContent(data.content ?? null);
+        else setGitDiff(data.diff ?? null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (isAbortError(err) || !requestGuard.current.isCurrent(token, identity)) return;
+        setError(err instanceof Error ? err.message : 'Failed to load file');
+        if (identity.tab === 'content') setFileContent(null);
+        else setGitDiff(null);
+        setLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+      requestGuard.current.invalidate();
+    };
   }, [file?.path, activeTab, sessionId, retryKey, isDirectory]);
 
   if (!file) {

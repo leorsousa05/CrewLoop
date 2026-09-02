@@ -3,9 +3,9 @@
 ---
 name: spec-029-dashboard-event-session-consistency
 domain: 02-dashboard
-status: active
+status: completed
 created: 2026-07-15
-completed: null
+completed: 2026-09-01
 supersedes: []
 ---
 

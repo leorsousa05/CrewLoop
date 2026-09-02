@@ -2,7 +2,8 @@ import type { AgentSource, ClientSession, EventStatus } from '../../../src/types
 import type { ToolInvocation } from '../../../src/lib/invocations';
 import { operationType } from '../../../src/lib/invocations';
 import type { FilterOptions, FilterState, PinnedSession, SessionSortKey, TimeRange } from './types';
-import { matchesInvocation } from './search';
+import { matchesInvocation, matchesText } from './search';
+import { projectInvocations } from '../../../src/lib/invocations';
 
 function timeRangeToMs(range: TimeRange): number | null {
   switch (range) {
@@ -48,10 +49,16 @@ export function buildOptions(
   const sources = uniqueSorted<AgentSource>(relevant.map((s) => s.source));
   const skills = uniqueSorted<string>(
     relevant
-      .flatMap((s) => [s.activeSkill?.name, s.skill].filter(Boolean) as string[])
+      .flatMap((s) => [
+        s.activeSkill?.name,
+        s.skill,
+        ...s.events.map((event) => event.skill),
+      ].filter(Boolean) as string[])
   );
   const statuses = uniqueSorted<EventStatus>(
-    relevant.map((s) => s.status).filter(Boolean) as EventStatus[]
+    relevant
+      .flatMap((s) => [s.status, ...s.events.map((event) => event.status)])
+      .filter(Boolean) as EventStatus[]
   );
   const tools = uniqueSorted<string>(
     relevant
@@ -73,6 +80,7 @@ export function filterInvocations(
   now: number
 ): ToolInvocation[] {
   return invocations.filter((inv) => {
+    if (filters.sources.length > 0 && (!session || !filters.sources.includes(session.source))) return false;
     if (filters.query && !matchesInvocation(inv, filters.query)) return false;
     if (filters.statuses.length > 0 && !filters.statuses.includes(inv.status as EventStatus)) return false;
     if (filters.skills.length > 0 && !filters.skills.includes(inv.skill || '')) return false;
@@ -80,6 +88,21 @@ export function filterInvocations(
     if (filters.opTypes.length > 0 && !filters.opTypes.includes(operationType(inv.tool))) return false;
     if (!isWithinTimeRange(inv.startTime, filters.timeRange, now, session)) return false;
     return true;
+  });
+}
+
+export function filterWorkspacePaths(paths: string[], filters: FilterState): string[] {
+  const hasEventFilters =
+    filters.sources.length > 0 ||
+    filters.skills.length > 0 ||
+    filters.statuses.length > 0 ||
+    filters.tools.length > 0 ||
+    filters.opTypes.length > 0 ||
+    filters.timeRange !== 'all';
+
+  return paths.filter((path) => {
+    if (filters.query && !matchesText([path], filters.query)) return false;
+    return !hasEventFilters;
   });
 }
 
@@ -92,12 +115,25 @@ export function filterSessions(
   const pinOrder = new Map(pins.map((p, i) => [p.id, i]));
 
   const filtered = sessions.filter((s) => {
+    const sessionInvocations = projectInvocations(s.events);
     if (filters.sources.length > 0 && !filters.sources.includes(s.source)) return false;
     if (filters.skills.length > 0) {
       const skill = s.activeSkill?.name || s.skill;
-      if (!skill || !filters.skills.includes(skill)) return false;
+      const hasSkill = Boolean(skill && filters.skills.includes(skill)) ||
+        sessionInvocations.some((inv) => Boolean(inv.skill && filters.skills.includes(inv.skill)));
+      if (!hasSkill) return false;
     }
-    if (filters.statuses.length > 0 && !filters.statuses.includes(s.status || 'running')) return false;
+    if (filters.statuses.length > 0) {
+      const hasMatchingStatus = filters.statuses.includes(s.status || 'running') ||
+        sessionInvocations.some((inv) => filters.statuses.includes(inv.status as EventStatus));
+      if (!hasMatchingStatus) return false;
+    }
+    if (filters.query && !matchesText(
+      [s.id, s.source, s.skill || '', s.activeSkill?.name || ''],
+      filters.query
+    ) && !sessionInvocations.some((inv) => matchesInvocation(inv, filters.query))) return false;
+    if (filters.tools.length > 0 && !sessionInvocations.some((inv) => filters.tools.includes(inv.tool))) return false;
+    if (filters.opTypes.length > 0 && !sessionInvocations.some((inv) => filters.opTypes.includes(operationType(inv.tool)))) return false;
     if (!isWithinTimeRange(s.lastActivity, filters.timeRange, now, s)) return false;
     return true;
   });

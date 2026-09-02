@@ -39,6 +39,13 @@ export function search(items: CommandPaletteItem[], query: string): CommandPalet
   return scored.slice(0, 50).map((s) => s.item);
 }
 
+export function matchesText(values: string[], query: string): boolean {
+  const tks = tokens(query);
+  if (tks.length === 0) return true;
+  const hay = normalize(values.join(' '));
+  return tks.every((t) => hay.includes(t));
+}
+
 function invocationText(inv: ToolInvocation): string {
   const parts = [
     inv.tool,
@@ -53,8 +60,5 @@ function invocationText(inv: ToolInvocation): string {
 }
 
 export function matchesInvocation(inv: ToolInvocation, query: string): boolean {
-  const tks = tokens(query);
-  if (tks.length === 0) return true;
-  const hay = invocationText(inv);
-  return tks.every((t) => hay.includes(t));
+  return matchesText([invocationText(inv)], query);
 }

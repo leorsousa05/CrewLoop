@@ -72,10 +72,10 @@ Make every exposed dashboard setting and filter govern its documented runtime be
 
 ## Done When
 
-- [ ] AC-01 — proven by unit tests per filter dimension + manual check
-- [ ] AC-02 — proven by unit tests for projection limits and media-query changes
-- [ ] AC-03 — proven by unit tests for coalescing snapshot/update/remove order
-- [ ] AC-04 — proven by unit tests for session-removal fallback
-- [ ] AC-05 — proven by unit tests for out-of-order/abort/retry/binary/deleted/untracked file states
-- [ ] AC-06 — proven by unit test deriving protocol from page protocol
-- [ ] AC-07 — proven by migration tests (valid/invalid persisted values)
+- [x] AC-01 — proven by filter tests covering source, query, tool, operation, status, and time behavior; Files reuses the same filtered projection and path matching.
+- [x] AC-02 — proven by projection-limit, system-theme, reduced-motion, and settings-bound tests; runtime wiring applies maxEvents and effective motion to the dashboard root.
+- [x] AC-03 — proven by bounded message-buffer tests covering coalesced updates, snapshot replacement, and update/remove ordering.
+- [x] AC-04 — proven by deterministic session fallback tests and route cleanup when a selected session is removed.
+- [x] AC-05 — proven by file request guard and loader tests covering identity changes, API failures, malformed/binary content, nullable diffs, and abort classification; component requests abort on cleanup and retry.
+- [x] AC-06 — proven by protocol derivation tests for http/ws and https/wss.
+- [x] AC-07 — proven by versioned settings envelope tests covering valid migration, legacy values, unknown versions, and invalid values.

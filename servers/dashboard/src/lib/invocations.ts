@@ -2,7 +2,8 @@ import type { ClientEvent } from '../types';
 import { classifyOperation } from './operations';
 
 
-const MAX_EVENTS = 100;
+/** The dashboard server retains at most this many events per session by default. */
+export const MAX_EVENTS = 100;
 
 export interface ToolInvocation {
   id: string;
@@ -110,7 +111,7 @@ export function operationType(tool: string): 'read' | 'edit' | 'other' {
   return classifyOperation(tool);
 }
 
-export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
+export function projectInvocations(events: ClientEvent[], maxEvents: number = MAX_EVENTS): ToolInvocation[] {
   const chronological = events.slice().reverse();
   const invocations: ToolInvocation[] = [];
   const runningById = new Map<string, ToolInvocation>();
@@ -200,7 +201,8 @@ export function projectInvocations(events: ClientEvent[]): ToolInvocation[] {
     });
   }
 
-  const recent = invocations.slice(-MAX_EVENTS);
+  const limit = Number.isInteger(maxEvents) && maxEvents > 0 ? Math.min(maxEvents, MAX_EVENTS) : MAX_EVENTS;
+  const recent = invocations.slice(-limit);
   recent.reverse();
   return recent;
 }

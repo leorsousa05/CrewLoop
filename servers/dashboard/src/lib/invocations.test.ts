@@ -111,4 +111,17 @@ describe('projectInvocations', () => {
       ]
     );
   });
+
+  it('honors a client projection limit without exceeding server-retained events', () => {
+    const events = Array.from({ length: 3 }, (_, index) => makeEvent({
+      id: `end-${index}`,
+      event_type: 'tool_end',
+      tool: 'Read',
+      timestamp: index + 1,
+      status: 'success',
+    })).reverse();
+
+    assert.deepStrictEqual(projectInvocations(events, 2).map((invocation) => invocation.startTime), [3, 2]);
+    assert.strictEqual(projectInvocations(events, 1000).length, 3);
+  });
 });

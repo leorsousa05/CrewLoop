@@ -6,15 +6,15 @@ export interface SessionsState {
   selectedSessionId: string | null;
 }
 
-function defaultSelected(
+export function defaultSelected(
   sessions: Map<string, ClientSession>,
   activeSessionId: string | undefined,
   current: string | null
 ): string | null {
   if (current && sessions.has(current)) return current;
   if (activeSessionId && sessions.has(activeSessionId)) return activeSessionId;
-  const first = sessions.keys().next().value;
-  return first || null;
+  return Array.from(sessions.values())
+    .sort((a, b) => (b.lastActivity - a.lastActivity) || a.id.localeCompare(b.id))[0]?.id || null;
 }
 
 export function useSessions() {

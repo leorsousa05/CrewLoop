@@ -433,3 +433,11 @@ html.light .pause-banner {
     transition-duration: 0.01ms !important;
   }
 }
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

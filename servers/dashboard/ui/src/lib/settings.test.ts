@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { loadSettings, saveSettings, migrate } from './settings';
+import { loadSettings, saveSettings, migrate, SETTINGS_VERSION } from './settings';
 import { DEFAULT_SETTINGS } from './types';
 
 const store: Record<string, string> = {};
@@ -41,6 +41,20 @@ describe('settings', () => {
     const next = { ...DEFAULT_SETTINGS, theme: 'light' as const, density: 'compact' as const };
     saveSettings(next);
     expect(loadSettings()).toEqual(next);
+    expect(JSON.parse(store['crewloop-dashboard-settings'])).toEqual({
+      version: SETTINGS_VERSION,
+      settings: next,
+    });
+  });
+
+  it('migrates the versioned envelope and rejects unknown versions', () => {
+    expect(migrate({ version: SETTINGS_VERSION, settings: { theme: 'light', maxEvents: 50 } })).toEqual({
+      ...DEFAULT_SETTINGS,
+      theme: 'light',
+      maxEvents: 50,
+    });
+    expect(migrate({ version: SETTINGS_VERSION + 1, settings: { theme: 'light' } })).toEqual(DEFAULT_SETTINGS);
+    expect(migrate({ theme: 'dark', maxEvents: 101 })).toEqual({ ...DEFAULT_SETTINGS, theme: 'dark' });
   });
 
   it('falls back to legacy crewloop-theme key', () => {

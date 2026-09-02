@@ -1,5 +1,6 @@
 import { useSettings } from '../../contexts/SettingsContext';
 import { SHORTCUTS, type ShortcutScope } from '../../lib/shortcuts';
+import { MAX_MAX_EVENTS, MIN_MAX_EVENTS } from '../../lib/settings';
 import { Icon } from '../ui/Icon';
 
 const SCOPE_LABELS: Record<ShortcutScope, string> = {
@@ -123,12 +124,17 @@ export function SettingsView() {
                 </div>
                 <input
                   type="number"
-                  min={10}
-                  max={1000}
+                  min={MIN_MAX_EVENTS}
+                  max={MAX_MAX_EVENTS}
                   value={settings.maxEvents}
                   onChange={(e) => {
                     const n = parseInt(e.target.value, 10);
-                    if (!Number.isNaN(n)) setSettings((s) => ({ ...s, maxEvents: Math.max(10, Math.min(1000, n)) }));
+                    if (!Number.isNaN(n)) {
+                      setSettings((s) => ({
+                        ...s,
+                        maxEvents: Math.max(MIN_MAX_EVENTS, Math.min(MAX_MAX_EVENTS, n)),
+                      }));
+                    }
                   }}
                   className="w-24 h-9 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
                 />

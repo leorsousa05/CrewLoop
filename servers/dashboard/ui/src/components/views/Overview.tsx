@@ -21,7 +21,7 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
     () => [...allSessions].sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0)).slice(0, 8),
     [allSessions]
   );
-  const livePreview = useMemo(() => invocations.slice(-5).reverse(), [invocations]);
+  const livePreview = useMemo(() => invocations.slice(0, 5), [invocations]);
 
   if (allSessions.length === 0) {
     return (
