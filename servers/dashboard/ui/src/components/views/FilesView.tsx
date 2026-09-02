@@ -18,29 +18,42 @@ interface Props {
 
 export function FilesView({ files, filterOptions, selectedSessionId, selectedPath, onSelectPath }: Props) {
   const [allPaths, setAllPaths] = useState<string[]>([]);
+  const [workspaceStatus, setWorkspaceStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const requestGeneration = useRef(0);
   const { filters } = useFilters();
 
   useEffect(() => {
     setAllPaths([]);
+    setWorkspaceStatus('loading');
+    setWorkspaceError(null);
     const url = selectedSessionId
       ? `/api/workspace-files?sessionId=${encodeURIComponent(selectedSessionId)}`
       : '/api/workspace-files';
     const controller = new AbortController();
     const generation = ++requestGeneration.current;
     fetch(url, { signal: controller.signal })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
-        if (generation === requestGeneration.current && Array.isArray(data)) {
+        if (!Array.isArray(data)) throw new Error('Workspace file response was invalid');
+        if (generation === requestGeneration.current) {
           setAllPaths(data);
+          setWorkspaceStatus('ready');
         }
       })
       .catch((err: unknown) => {
         if (isAbortError(err)) return;
-        console.error('Failed to load workspace files', err);
+        if (generation === requestGeneration.current) {
+          setWorkspaceStatus('error');
+          setWorkspaceError(err instanceof Error ? err.message : 'Unable to load workspace files');
+        }
       });
     return () => controller.abort();
-  }, [selectedSessionId]);
+  }, [selectedSessionId, retryKey]);
 
   const workspacePaths = filterWorkspacePaths(allPaths, filters);
 
@@ -67,7 +80,26 @@ export function FilesView({ files, filterOptions, selectedSessionId, selectedPat
 
   return (
     <div className="flex-col h-full overflow-hidden flex">
+      <header className="flex items-baseline justify-between gap-3 px-4 md:px-5 py-3 border-b border-border-default flex-shrink-0">
+        <h1 className="font-display text-display-lg text-text-primary">Files</h1>
+        <span className="text-caption text-text-muted" aria-live="polite">{mergedFiles.length} files</span>
+      </header>
       <FilterBar options={filterOptions} resultCount={mergedFiles.length} />
+      {workspaceStatus === 'loading' && (
+        <div role="status" aria-live="polite" className="px-4 py-2 border-b border-border-default text-label text-text-secondary">
+          Loading workspace files…
+        </div>
+      )}
+      {workspaceStatus === 'error' && (
+        <div role="alert" className="flex items-center gap-3 px-4 py-2 border-b border-error/30 bg-error/5 text-label">
+          <span className="text-error flex-1">
+            Workspace files unavailable{workspaceError ? `: ${workspaceError}` : ''}. Showing recorded activity.
+          </span>
+          <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="btn-ghost min-h-11 text-label">
+            Retry
+          </button>
+        </div>
+      )}
       <FileActivity
         files={mergedFiles}
         selectedPath={selectedPath}

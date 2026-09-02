@@ -13,6 +13,9 @@ export function SettingsView() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      <header className="px-4 md:px-5 py-3 border-b border-border-default flex-shrink-0">
+        <h1 className="font-display text-display-lg text-text-primary">Settings</h1>
+      </header>
       <div className="flex-1 overflow-y-auto p-4 md:p-5">
         <div className="max-w-2xl flex flex-col gap-4">
           <section className="panel">
@@ -28,7 +31,7 @@ export function SettingsView() {
                 <select
                   value={settings.theme}
                   onChange={(e) => setSettings((s) => ({ ...s, theme: e.target.value as typeof s.theme }))}
-                  className="h-9 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
+                  className="min-h-11 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
                 >
                   <option value="system">System</option>
                   <option value="dark">Dark</option>
@@ -44,7 +47,7 @@ export function SettingsView() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSettings((s) => ({ ...s, density: 'comfortable' }))}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-label transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-lg border text-label transition-colors ${
                       settings.density === 'comfortable'
                         ? 'border-accent text-accent bg-accent/10'
                         : 'border-border-default text-text-secondary hover:bg-elevated'
@@ -55,7 +58,7 @@ export function SettingsView() {
                   </button>
                   <button
                     onClick={() => setSettings((s) => ({ ...s, density: 'compact' }))}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-label transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 min-h-11 rounded-lg border text-label transition-colors ${
                       settings.density === 'compact'
                         ? 'border-accent text-accent bg-accent/10'
                         : 'border-border-default text-text-secondary hover:bg-elevated'
@@ -74,13 +77,13 @@ export function SettingsView() {
                 </div>
                 <button
                   onClick={() => setSettings((s) => ({ ...s, reducedMotion: !s.reducedMotion }))}
-                  className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${
+                  className={`relative w-11 min-h-11 rounded-full transition-colors flex-shrink-0 ${
                     settings.reducedMotion ? 'bg-accent' : 'bg-border-strong'
                   }`}
                   aria-pressed={settings.reducedMotion}
                 >
                   <span
-                    className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-white transition-transform ${
+                    className={`absolute top-1/2 -translate-y-1/2 left-[3px] w-4 h-4 rounded-full bg-white transition-transform ${
                       settings.reducedMotion ? 'translate-x-[18px]' : 'translate-x-0'
                     }`}
                   />
@@ -104,13 +107,13 @@ export function SettingsView() {
                 </div>
                 <button
                   onClick={() => setSettings((s) => ({ ...s, autoFollowActive: !s.autoFollowActive }))}
-                  className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${
+                  className={`relative w-11 min-h-11 rounded-full transition-colors flex-shrink-0 ${
                     settings.autoFollowActive ? 'bg-accent' : 'bg-border-strong'
                   }`}
                   aria-pressed={settings.autoFollowActive}
                 >
                   <span
-                    className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-white transition-transform ${
+                    className={`absolute top-1/2 -translate-y-1/2 left-[3px] w-4 h-4 rounded-full bg-white transition-transform ${
                       settings.autoFollowActive ? 'translate-x-[18px]' : 'translate-x-0'
                     }`}
                   />
@@ -136,7 +139,7 @@ export function SettingsView() {
                       }));
                     }
                   }}
-                  className="w-24 h-9 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
+                  className="w-24 min-h-11 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
                 />
               </div>
             </div>

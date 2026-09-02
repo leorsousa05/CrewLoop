@@ -48,7 +48,7 @@ export function Timeline({
       onMouseLeave={onMouseLeave}
     >
       {invocations.length === 0 ? (
-        <p className="text-center py-8 text-text-muted text-body">No events match the filters.</p>
+        <p role="status" aria-live="polite" className="text-center py-8 text-text-muted text-body">No events match the filters.</p>
       ) : (
         <ul className="relative list-none m-0 p-0 before:content-[''] before:absolute before:top-3 before:bottom-3 before:left-[32px] before:w-px before:bg-border-default">
           {invocations.map((inv) => (

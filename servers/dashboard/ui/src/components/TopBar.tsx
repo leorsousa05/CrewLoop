@@ -52,9 +52,10 @@ export function TopBar({
     <header className="h-12 bg-surface border-b border-border-default flex items-center justify-between px-4 flex-shrink-0 z-50">
       <div className="flex items-center gap-2.5 min-w-0">
         <button
+          type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle sidebar"
-          className="lg:hidden btn-ghost w-8 h-8 justify-center !px-0"
+          className="lg:hidden btn-ghost touch-target justify-center !px-0"
         >
           <Icon name="List" className="w-5 h-5" />
         </button>
@@ -79,13 +80,14 @@ export function TopBar({
           />
         )}
 
-        <div className="chip" title={CONNECTION_LABEL[connection]}>
+        <div className="chip" role="status" aria-live="polite" title={CONNECTION_LABEL[connection]}>
           <span className={`w-2 h-2 rounded-full ${dotColor}`} aria-hidden="true" />
           <span className="text-label hidden sm:inline">{CONNECTION_LABEL[connection]}</span>
           <span className="sr-only sm:hidden">{CONNECTION_LABEL[connection]}</span>
         </div>
 
         <button
+          type="button"
           onClick={onOpenCommandPalette}
           className="hidden md:flex btn-ghost items-center gap-2 text-label"
         >
@@ -94,17 +96,19 @@ export function TopBar({
           <kbd className="kbd ml-1">{commandHint()}</kbd>
         </button>
         <button
+          type="button"
           onClick={onOpenCommandPalette}
           aria-label="Open command palette"
-          className="md:hidden btn-ghost w-8 h-8 justify-center !px-0"
+          className="md:hidden btn-ghost touch-target justify-center !px-0"
         >
           <Icon name="MagnifyingGlass" className="w-5 h-5" />
         </button>
 
         <button
+          type="button"
           onClick={() => setSettings((s) => ({ ...s, theme: resolvedTheme === 'dark' ? 'light' : 'dark' }))}
           aria-label="Toggle theme"
-          className="btn-ghost w-8 h-8 justify-center !px-0"
+          className="btn-ghost touch-target justify-center !px-0"
         >
           <Icon name={resolvedTheme === 'light' ? 'Sun' : 'Moon'} className="w-5 h-5" />
         </button>

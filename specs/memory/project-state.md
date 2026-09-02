@@ -33,6 +33,7 @@
 - 2026-09-01: Spec 023 isolates the CLI doctor test from the host home directory with an optional test-only override while preserving production defaults. CLI, workspace, dashboard, UI, benchmark, and security validation passed; commit `01d72f5` is pushed to `origin/token/otimization`.
 - 2026-09-01: Spec 029 shipped in commit `103d57e`, completing the dashboard event/session consistency foundation: canonical boundary validation, workspace-root preservation, stable invocation correlation, deterministic lifecycle/pruning/resume, typed remove messages, OpenCode contract propagation, and five adapter fixtures. Build/tests/benchmark/skill validation passed; review PASS.
 - 2026-09-02: Spec 030 implementation and review PASS. The dashboard client now applies bounded maxEvents projection, complete filters, coalesced pause buffering, deterministic removal/deep-link fallback, reactive theme/reduced-motion settings, protocol-aware WebSocket URLs, versioned settings migration, and abortable identity-guarded file requests. Dashboard build, typecheck, 338 server tests, and 82 UI tests passed.
+- 2026-09-02: Spec 031 dashboard responsive UI refinement implemented and Review PASS with a low-risk manual-validation warning. Added the responsive/accessibility design handoff, shared focus trap and overlay shortcut priority, modal mobile navigation/filter behavior, sibling Timeline/Sessions actions, live async states, 44px touch targets, responsive view headings, local-font-only shell, and reduced-motion-safe motion. Typecheck, production build, 338 server tests, and 86 UI tests passed; browser viewport/contrast walkthrough remains the next manual check before shipping.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -41,4 +42,4 @@
 
 ## Next task suggested
 
-- Ship Spec 030, then route to Spec 031 dashboard responsive UI refinement. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Complete the manual desktop/mobile light/dark contrast walkthrough, then ship Spec 031. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

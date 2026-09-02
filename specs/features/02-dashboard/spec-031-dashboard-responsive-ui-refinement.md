@@ -34,6 +34,7 @@ Refine the six-view dashboard into a keyboard/screen-reader coherent operational
 ## Behavior / Flow
 
 1. Designer produces `design-ui.md` before engineering (tokens, hierarchy, responsive compositions, states, motion, accessibility).
+   Design handoff: [`design-ui.md`](design-ui.md).
 2. Foundations: finalize semantic color/type/spacing/motion tokens both themes/densities; shared modal focus lifecycle + live-region primitives.
 3. Shell: closed mobile navigation non-focusable, modal when open; filter sheet/popovers get role, name, containment, dismissal, restoration; session selector combobox/listbox semantics; shortcut priority.
 4. Views: consistent headings/summaries/real states; Timeline/Sessions primary actions separated from nested copy/pin controls; Overview dominated by active-session surface; robust narrow-screen sort/timeline/settings/Files drill-down; announced async states.

@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import type { View } from '../lib/types';
 import { NAV_ITEMS, getNavItem, type NavItem } from '../lib/navigation';
 import { useViewport } from '../hooks/useViewport';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Icon } from './ui/Icon';
 
 const MAIN_ITEMS = NAV_ITEMS.filter((i) => i.key !== 'settings');
@@ -17,6 +19,8 @@ export function Sidebar({ activeView, onChange, mobileOpen, onClose }: Props) {
   const { breakpoint } = useViewport();
   const isMobile = breakpoint === 'mobile';
   const isTablet = breakpoint === 'tablet';
+  const drawerRef = useRef<HTMLElement>(null);
+  const { onKeyDown } = useFocusTrap({ open: isMobile && mobileOpen, containerRef: drawerRef });
 
   function handleSelect(view: View) {
     onChange(view);
@@ -32,7 +36,7 @@ export function Sidebar({ activeView, onChange, mobileOpen, onClose }: Props) {
         aria-current={active ? 'page' : undefined}
         title={isTablet ? `${item.label} — ${item.description}` : undefined}
         className={`sidebar-item group relative flex items-center gap-3 w-full rounded-md transition-colors text-left ${
-          isTablet ? 'justify-center h-11' : 'h-9 px-3'
+          isTablet ? 'justify-center h-11' : isMobile ? 'min-h-11 px-3' : 'h-9 px-3'
         } ${
           active
             ? 'bg-accent-subtle text-text-primary'
@@ -72,13 +76,27 @@ export function Sidebar({ activeView, onChange, mobileOpen, onClose }: Props) {
             aria-hidden="true"
           />
         )}
-        <aside
-          className={`fixed top-12 left-0 bottom-0 w-[280px] bg-surface border-r border-border-default z-40 transform transition-transform ${
-            mobileOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          {content}
-        </aside>
+        {mobileOpen && (
+          <aside
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Main navigation"
+            tabIndex={-1}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                onClose();
+                return;
+              }
+              onKeyDown(event);
+            }}
+            className="fixed top-12 left-0 bottom-0 w-[280px] bg-surface border-r border-border-default z-40 animate-drawer-in"
+          >
+            {content}
+          </aside>
+        )}
       </>
     );
   }

@@ -21,14 +21,16 @@ export function SessionSelector({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const listboxId = 'session-selector-listbox';
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     }
+    if (!open) return;
     document.addEventListener('click', onDocClick);
     return () => document.removeEventListener('click', onDocClick);
-  }, []);
+  }, [open]);
 
   function handleToggle() {
     if (!open) {
@@ -39,13 +41,26 @@ export function SessionSelector({
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (!open) return;
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleToggle();
+      }
+      return;
+    }
+    if (sessions.length === 0 && e.key !== 'Escape') return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveIndex((i) => Math.min(i + 1, sessions.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveIndex(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveIndex(sessions.length - 1);
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const target = sessions[activeIndex];
@@ -72,22 +87,31 @@ export function SessionSelector({
     : 'No session';
 
   return (
-    <div ref={ref} className="relative" onKeyDown={handleKeyDown}>
+    <div ref={ref} className="relative">
       <button
+        type="button"
         onClick={handleToggle}
+        role="combobox"
         aria-haspopup="listbox"
+        aria-autocomplete="none"
         aria-expanded={open}
-        className="chip min-h-[36px] text-label"
+        aria-controls={open ? listboxId : undefined}
+        aria-activedescendant={open && sessions[activeIndex] ? `session-opt-${activeIndex}` : undefined}
+        aria-label="Select session"
+        onKeyDown={handleKeyDown}
+        className="chip min-h-[36px] text-label max-w-[min(38vw,260px)]"
       >
         <span className={`w-2 h-2 rounded-full ${dotColor}`} />
-        <span>{label}</span>
+        <span className="truncate">{label}</span>
         <Icon name="CaretDown" className="w-4 h-4" />
       </button>
       {open && (
         <ul
+          id={listboxId}
           role="listbox"
-          aria-activedescendant={sessions[activeIndex] ? `session-opt-${activeIndex}` : undefined}
-          className="absolute top-[calc(100%+8px)] right-0 min-w-[260px] max-h-[320px] overflow-y-auto bg-surface border border-border-default rounded-lg z-50 shadow-popover p-1.5 animate-fade-in"
+          aria-label="Sessions"
+          aria-busy={connection === 'connecting'}
+          className="absolute top-[calc(100%+8px)] right-0 min-w-[260px] max-w-[calc(100vw-24px)] max-h-[320px] overflow-y-auto bg-surface border border-border-default rounded-lg z-50 shadow-popover p-1.5 animate-fade-in"
         >
           {sessions.map((s, i) => {
             const duration = s.endedAt
@@ -106,7 +130,7 @@ export function SessionSelector({
                   onSelect(s.id);
                   setOpen(false);
                 }}
-                className={`flex items-center gap-2 px-2.5 py-2 rounded cursor-pointer text-label border-l-2 ${
+                className={`flex items-center gap-2 px-2.5 py-2 min-h-11 rounded cursor-pointer text-label border-l-2 ${
                   isActive
                     ? 'bg-elevated border-accent text-text-primary'
                     : isFocused

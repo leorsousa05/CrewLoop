@@ -73,7 +73,7 @@ html.light {
   --border-strong: hsl(214, 20%, 78%);
   --text-primary: hsl(222, 47%, 11%);
   --text-secondary: hsl(215, 16%, 45%);
-  --text-muted: hsl(215, 16%, 60%);
+  --text-muted: hsl(215, 16%, 46%);
   --accent: hsl(230, 90%, 64%);
   --accent-strong: hsl(230, 90%, 54%);
   --accent-dim: hsl(230, 90%, 94%);
@@ -176,7 +176,7 @@ body {
     letter-spacing: 0.04em;
     border-radius: var(--radius-md);
     padding: 8px 14px;
-    transition: transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 120ms ease-out;
   }
   .btn-primary:active {
     transform: scale(0.98);
@@ -196,6 +196,14 @@ body {
   .btn-ghost:hover {
     background: var(--bg-elevated);
     color: var(--text-primary);
+  }
+
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -323,6 +331,17 @@ body {
   }
 }
 
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes banner-in {
   from {
     opacity: 0;
@@ -377,12 +396,27 @@ body {
   animation: sheet-scrim-in 200ms ease-out;
 }
 
+.animate-drawer-in {
+  animation: drawer-in 180ms ease-out;
+}
+
 .animate-banner-in {
   animation: banner-in 150ms ease-out;
 }
 
 .animate-drill-in {
   animation: drill-in 200ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@media (max-width: 767px) {
+  .chip {
+    min-height: 44px;
+  }
+
+  .density-compact .timeline-row,
+  .density-compact .file-list-item {
+    min-height: 44px;
+  }
 }
 
 /* Utilities */

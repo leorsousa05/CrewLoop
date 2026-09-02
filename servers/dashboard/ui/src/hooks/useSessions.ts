@@ -4,6 +4,7 @@ import type { ClientSession, ClientWebSocketMessage } from '../../../src/types';
 export interface SessionsState {
   sessions: Map<string, ClientSession>;
   selectedSessionId: string | null;
+  announcement: string;
 }
 
 export function defaultSelected(
@@ -21,6 +22,7 @@ export function useSessions() {
   const [state, setState] = useState<SessionsState>({
     sessions: new Map(),
     selectedSessionId: null,
+    announcement: '',
   });
 
   const selectSession = useCallback((id: string | null) => {
@@ -48,6 +50,7 @@ export function useSessions() {
       return {
         sessions,
         selectedSessionId: defaultSelected(sessions, activeSessionId, prev.selectedSessionId),
+        announcement: msg.type === 'remove' ? `Session ${msg.sessionId} was removed.` : prev.announcement,
       };
     });
   }, []);
@@ -62,5 +65,6 @@ export function useSessions() {
     selectSession,
     handleMessage,
     sortedSessions,
+    announcement: state.announcement,
   };
 }

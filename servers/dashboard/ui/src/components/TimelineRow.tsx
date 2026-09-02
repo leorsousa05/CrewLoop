@@ -61,8 +61,7 @@ export function TimelineRow({ inv, expanded, selected, onToggle, onSelect, onCop
     [inv.input, inv.output]
   );
 
-  async function handleCopy(e: React.MouseEvent) {
-    e.stopPropagation();
+  async function handleCopy() {
     await onCopy();
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
@@ -71,51 +70,55 @@ export function TimelineRow({ inv, expanded, selected, onToggle, onSelect, onCop
   return (
     <li role="listitem">
       <div
-        role="button"
-        tabIndex={0}
-        aria-expanded={expanded}
-        onClick={() => {
-          onSelect();
-          onToggle();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onSelect();
-            onToggle();
-          }
-        }}
-        className={`timeline-row group grid grid-cols-[80px_16px_1fr_auto] items-start gap-3 py-2 px-2.5 -mx-2.5 rounded cursor-pointer border-l-2 hover:bg-elevated transition-colors animate-row-in ${
+        className={`timeline-row group grid grid-cols-[56px_12px_minmax(0,1fr)_auto] sm:grid-cols-[80px_16px_minmax(0,1fr)_auto] items-start gap-2 sm:gap-3 py-2 px-2.5 -mx-2.5 rounded border-l-2 hover:bg-elevated transition-colors animate-row-in ${
           selected ? 'bg-accent-subtle border-l-accent' : status.row
         }`}
       >
-        <span className="text-micro text-text-muted text-right pt-0.5 tabular">{formatTime(inv.startTime)}</span>
-        <span aria-hidden="true" className={`w-2 h-2 rounded-full justify-self-center mt-1.5 z-10 ${status.dot}`} />
-        <span className="sr-only">{inv.status}</span>
-        <div className="flex items-baseline gap-2.5 min-w-0 flex-wrap">
-          <span className="font-mono text-body font-semibold text-text-primary flex-shrink-0">{inv.tool}</span>
-          <span className="text-body text-text-secondary truncate min-w-0">
-            {inv.detail || inv.skill || ''}
-          </span>
-          {inv.durationMs ? (
-            <span className="text-micro text-text-muted bg-inset px-1.5 py-0.5 rounded ml-auto tabular">
-              {formatDuration(inv.durationMs)}
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-label={`${inv.tool}, ${inv.status}${inv.detail ? `, ${inv.detail}` : ''}`}
+          aria-controls={`timeline-details-${inv.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`}
+          onClick={() => {
+            onSelect();
+            onToggle();
+          }}
+          className="col-span-3 grid grid-cols-[56px_12px_minmax(0,1fr)] sm:grid-cols-[80px_16px_minmax(0,1fr)] items-start gap-2 sm:gap-3 min-w-0 min-h-11 text-left"
+        >
+          <span className="text-micro text-text-muted text-right pt-0.5 tabular">{formatTime(inv.startTime)}</span>
+          <span aria-hidden="true" className={`w-2 h-2 rounded-full justify-self-center mt-1.5 z-10 ${status.dot}`} />
+          <span className="flex items-baseline gap-2.5 min-w-0 flex-wrap">
+            <span className="font-mono text-body font-semibold text-text-primary flex-shrink-0">{inv.tool}</span>
+            <span className="text-body text-text-secondary truncate min-w-0">
+              {inv.detail || inv.skill || ''}
             </span>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-1 text-text-muted mt-0.5">
-          {status.icon ? <Icon name={status.icon} className={`w-4 h-4 ${status.icon === 'Spinner' ? 'animate-spin' : ''}`} /> : null}
+            {inv.durationMs ? (
+              <span className="text-micro text-text-muted bg-inset px-1.5 py-0.5 rounded ml-auto tabular">
+                {formatDuration(inv.durationMs)}
+              </span>
+            ) : null}
+          </span>
+          <span className="sr-only">{inv.status}</span>
+        </button>
+        <div className="flex items-center gap-1 text-text-muted mt-0.5 min-h-11">
+          {status.icon ? <Icon aria-hidden="true" name={status.icon} className={`w-4 h-4 ${status.icon === 'Spinner' ? 'animate-spin' : ''}`} /> : null}
+          <span className="text-micro uppercase text-text-secondary hidden sm:inline">{inv.status}</span>
           <button
+            type="button"
             onClick={handleCopy}
-            aria-label="Copy event"
-            className="p-1 rounded hover:bg-base hover:text-accent transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+            aria-label={copied ? 'Event copied' : 'Copy event'}
+            className="touch-target rounded hover:bg-base hover:text-accent transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
           >
-            <Icon name={copied ? 'Check' : 'Copy'} className="w-3.5 h-3.5" />
+            <Icon aria-hidden="true" name={copied ? 'Check' : 'Copy'} className="w-3.5 h-3.5" />
           </button>
-          <Icon name={expanded ? 'CaretDown' : 'CaretRight'} className="w-3 h-3 flex-shrink-0" />
+          <Icon aria-hidden="true" name={expanded ? 'CaretDown' : 'CaretRight'} className="w-3 h-3 flex-shrink-0" />
         </div>
+        <span aria-live="polite" className="sr-only">{copied ? 'Event copied.' : ''}</span>
         {expanded && (
-          <div className="col-span-3 col-start-2 mt-2 p-3 bg-inset border border-border-default rounded flex flex-col gap-3">
+          <div
+            id={`timeline-details-${inv.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`}
+            className="col-span-4 mt-2 p-3 bg-inset border border-border-default rounded flex flex-col gap-3"
+          >
             {hasDetails ? (
               <>
                 <Payload label="Input" payload={inv.input} />

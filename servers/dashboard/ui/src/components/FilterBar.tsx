@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { FilterOptions, TimeRange } from '../lib/types';
 import { useFilters } from '../contexts/FilterContext';
 import { useViewport } from '../hooks/useViewport';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Icon } from './ui/Icon';
 
 interface Props {
@@ -32,6 +33,14 @@ function FilterPopover({
   const [open, setOpen] = useState(false);
   const [flipLeft, setFlipLeft] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const titleId = `filter-popover-${useId().replace(/:/g, '')}`;
+  const { onKeyDown: onTrapKeyDown } = useFocusTrap({
+    open,
+    containerRef: popoverRef,
+    restoreFocusRef: triggerRef,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -40,14 +49,9 @@ function FilterPopover({
         setOpen(false);
       }
     }
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
-    }
     document.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);
 
@@ -62,9 +66,12 @@ function FilterPopover({
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
+        type="button"
         onClick={handleToggle}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-controls={open ? titleId : undefined}
         className={`chip ${activeCount > 0 ? 'chip-active' : ''}`}
       >
         <span className="text-label">{label}</span>
@@ -76,6 +83,20 @@ function FilterPopover({
       </button>
       {open && (
         <div
+          ref={popoverRef}
+          id={titleId}
+          role="dialog"
+          aria-label={`${label} filter`}
+          tabIndex={-1}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              event.stopPropagation();
+              setOpen(false);
+              return;
+            }
+            onTrapKeyDown(event);
+          }}
           className={`absolute top-[calc(100%+6px)] ${
             flipLeft ? 'right-0' : 'left-0'
           } z-30 min-w-[200px] max-h-64 overflow-y-auto bg-surface border border-border-default rounded-lg shadow-popover p-2 animate-fade-in`}
@@ -123,7 +144,7 @@ function RadioRow({
       role="radio"
       aria-checked={checked}
       onClick={onSelect}
-      className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded text-body text-left transition-colors ${
+      className={`w-full min-h-11 flex items-center justify-between gap-2 px-2 py-1.5 rounded text-body text-left transition-colors ${
         checked ? 'bg-elevated text-text-primary' : 'text-text-secondary hover:bg-elevated'
       }`}
     >
@@ -138,6 +159,13 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
   const { breakpoint } = useViewport();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const filterTriggerRef = useRef<HTMLButtonElement>(null);
+  const { onKeyDown: onSheetTrapKeyDown } = useFocusTrap({
+    open: sheetOpen,
+    containerRef: sheetRef,
+    restoreFocusRef: filterTriggerRef,
+  });
 
   const activeCount =
     filters.sources.length +
@@ -150,15 +178,6 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
   function toggleList<T extends string>(current: T[], value: T): T[] {
     return current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
   }
-
-  useEffect(() => {
-    if (!sheetOpen) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setSheetOpen(false);
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [sheetOpen]);
 
   const popovers = (
     <>
@@ -249,9 +268,10 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
           />
           {filters.query ? (
             <button
+              type="button"
               onClick={() => setFilters({ query: '' })}
               aria-label="Clear search"
-              className="absolute right-2 text-text-muted hover:text-text-primary"
+              className="absolute right-0 top-1/2 -translate-y-1/2 touch-target text-text-muted hover:text-text-primary"
             >
               <Icon name="XCircle" className="w-4 h-4" />
             </button>
@@ -269,9 +289,13 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
 
         {breakpoint === 'mobile' ? (
           <button
+            ref={filterTriggerRef}
+            type="button"
             onClick={() => setSheetOpen(true)}
             className={`chip ${activeCount > 0 ? 'chip-active' : ''}`}
             aria-haspopup="dialog"
+            aria-expanded={sheetOpen}
+            aria-controls={sheetOpen ? 'mobile-filter-sheet' : undefined}
           >
             <Icon name="Faders" className="w-4 h-4" />
             <span className="text-label">Filters</span>
@@ -287,8 +311,9 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
 
         {activeCount > 0 && (
           <button
+            type="button"
             onClick={resetFilters}
-            className="text-label text-text-muted hover:text-text-primary transition-colors"
+            className="min-h-11 px-2 text-label text-text-muted hover:text-text-primary transition-colors"
           >
             Clear all
           </button>
@@ -296,9 +321,10 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
 
         {onExport && (
           <button
+            type="button"
             onClick={onExport}
             aria-label="Export JSON"
-            className="btn-ghost w-9 h-9 justify-center !px-0"
+            className="btn-ghost touch-target justify-center !px-0"
           >
             <Icon name="DownloadSimple" className="w-4 h-4" />
           </button>
@@ -314,13 +340,35 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
             className="fixed inset-0 z-40 animate-sheet-scrim-in"
             style={{ backgroundColor: 'var(--overlay)' }}
             onClick={() => setSheetOpen(false)}
+            aria-hidden="true"
           />
-          <div className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-y-auto bg-surface border-t border-border-default rounded-t-xl p-3 animate-sheet-in">
-            <div className="w-8 h-1 rounded-full bg-border-strong mx-auto mb-3" />
+          <div
+            ref={sheetRef}
+            id="mobile-filter-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-filter-sheet-title"
+            tabIndex={-1}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                setSheetOpen(false);
+                return;
+              }
+              onSheetTrapKeyDown(event);
+            }}
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-y-auto bg-surface border-t border-border-default rounded-t-xl p-3 animate-sheet-in"
+          >
+            <div className="w-8 h-1 rounded-full bg-border-strong mx-auto mb-3" aria-hidden="true" />
+            <h2 id="mobile-filter-sheet-title" className="font-display text-heading text-text-primary px-1 mb-2">
+              Filters
+            </h2>
             <div className="flex flex-col gap-1 [&_label]:min-h-[44px] [&_label]:items-center [&_button]:min-h-[44px] [&_.relative]:static [&_.absolute]:static [&_.absolute]:mt-1 [&_.absolute]:max-h-none [&_.absolute]:shadow-none">
               {popovers}
             </div>
             <button
+              type="button"
               onClick={() => setSheetOpen(false)}
               className="btn-primary w-full justify-center mt-3"
             >

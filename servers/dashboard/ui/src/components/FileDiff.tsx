@@ -125,7 +125,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
 
   if (!file) {
     return (
-      <div className="flex-1 flex items-center justify-center text-text-muted text-body bg-base/50">
+      <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center text-text-muted text-body bg-base/50">
         Select a file to view activity.
       </div>
     );
@@ -140,7 +140,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
               <button
                 onClick={onBack}
                 aria-label="Back to file list"
-                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+                className="md:hidden touch-target flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
               >
                 <Icon name="CaretLeft" className="w-4 h-4" />
                 Files
@@ -250,7 +250,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   };
 
   const tabClass = (active: boolean) =>
-    `py-2 text-caption font-mono font-semibold relative transition-colors ${
+    `min-h-11 flex items-center py-2 text-caption font-mono font-semibold relative transition-colors ${
       active ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
     }`;
 
@@ -263,7 +263,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
               <button
                 onClick={onBack}
                 aria-label="Back to file list"
-                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+                className="md:hidden touch-target flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
               >
                 <Icon name="CaretLeft" className="w-4 h-4" />
                 Files
@@ -327,13 +327,13 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
 
       <div className="flex-1 overflow-auto p-4 font-mono text-body">
         {loading ? (
-          <p className="text-text-muted animate-pulse">Loading file…</p>
+          <p role="status" aria-live="polite" className="text-text-muted animate-pulse">Loading file…</p>
         ) : error ? (
-          <div className="flex items-center gap-3 p-3 rounded border-l-2 border-error bg-inset">
+          <div role="alert" className="flex items-center gap-3 p-3 rounded border-l-2 border-error bg-inset">
             <p className="text-label text-text-secondary flex-1">
               Failed to load file: {error}. It may be binary or have been deleted locally.
             </p>
-            <button onClick={() => setRetryKey((k) => k + 1)} className="btn-ghost text-label flex-shrink-0">
+            <button type="button" onClick={() => setRetryKey((k) => k + 1)} className="btn-ghost min-h-11 text-label flex-shrink-0">
               Retry
             </button>
           </div>

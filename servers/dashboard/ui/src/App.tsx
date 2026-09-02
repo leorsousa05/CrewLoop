@@ -42,6 +42,7 @@ import {
   type PendingMessageBuffer,
 } from './lib/message-buffer';
 import { dashboardWebSocketUrl } from './lib/websocket-url';
+import { hasOpenOverlay } from './hooks/useFocusTrap';
 
 function serializedEqual(a: Partial<SerializedFilterState>, b: Partial<SerializedFilterState>): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
@@ -198,7 +199,7 @@ export default function App() {
   const { settings, setSettings } = useSettings();
   const { pins } = usePinnedSessions();
   const { filters, setFilters, resetFilters } = useFilters();
-  const { sessions, selectedSessionId, selectSession, handleMessage, sortedSessions } = useSessions();
+  const { sessions, selectedSessionId, selectSession, handleMessage, sortedSessions, announcement } = useSessions();
   const { route, navigate } = useHashRoute();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -347,6 +348,7 @@ export default function App() {
   // Global view shortcuts (digits 1-7), guarded against form fields
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (hasOpenOverlay()) return;
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName ?? '';
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
@@ -362,11 +364,14 @@ export default function App() {
   }, [navigateToView]);
 
   const focusFilterSearch = useCallback(() => {
+    if (hasOpenOverlay()) return;
     document.getElementById('filter-search')?.focus();
   }, []);
 
   useKeyboardShortcut('/', focusFilterSearch);
-  useKeyboardShortcut('k', () => setCmdOpen(true), { meta: true });
+  useKeyboardShortcut('k', () => {
+    if (!hasOpenOverlay()) setCmdOpen(true);
+  }, { meta: true });
   useKeyboardShortcut('Escape', () => setCmdOpen(false), { disabled: !cmdOpen });
 
   const handleResume = useCallback(() => {
@@ -449,7 +454,7 @@ export default function App() {
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
       />
       {connection === 'connecting' && (
-        <div className="h-6 flex items-center justify-center px-4 flex-shrink-0 bg-error/10 border-b border-error/30 text-micro text-error">
+        <div role="status" aria-live="polite" className="h-6 flex items-center justify-center px-4 flex-shrink-0 bg-error/10 border-b border-error/30 text-micro text-error">
           Connection lost — reconnecting…
         </div>
       )}
@@ -462,6 +467,7 @@ export default function App() {
         />
         <main className="flex-1 min-w-0 overflow-hidden animate-fade-in">{renderView()}</main>
       </div>
+      <div aria-live="polite" className="sr-only">{announcement}</div>
       <CommandPalette items={paletteItems} open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   );

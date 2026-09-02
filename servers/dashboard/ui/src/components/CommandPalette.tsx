@@ -3,6 +3,7 @@ import type { CommandPaletteItem } from '../lib/types';
 import { NAV_ITEMS } from '../lib/navigation';
 import { search } from '../lib/search';
 import { useCommandPalette } from '../hooks/useCommandPalette';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useSettings } from '../contexts/SettingsContext';
 import { Icon } from './ui/Icon';
 
@@ -44,9 +45,11 @@ export function CommandPalette({ items, open, onClose }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  const FOCUSABLE =
-    'input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])';
+  const { onKeyDown: onTrapKeyDown } = useFocusTrap({
+    open,
+    containerRef: dialogRef,
+    initialFocusRef: inputRef,
+  });
 
   const results = useMemo(() => search(items, query), [items, query]);
   const flatResults = useMemo(() => {
@@ -61,7 +64,6 @@ export function CommandPalette({ items, open, onClose }: Props) {
   useEffect(() => {
     if (open) {
       setQuery('');
-      inputRef.current?.focus();
     }
   }, [open, setQuery]);
 
@@ -83,26 +85,6 @@ export function CommandPalette({ items, open, onClose }: Props) {
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Tab') {
-        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE);
-        if (!focusable || focusable.length === 0) return;
-        const current = document.activeElement as HTMLElement | null;
-        const idx = Array.from(focusable).indexOf(current as HTMLElement);
-        if (e.shiftKey) {
-          const prev = idx <= 0 ? focusable[focusable.length - 1] : focusable[idx - 1];
-          prev.focus();
-        } else {
-          const next = idx === -1 || idx >= focusable.length - 1 ? focusable[0] : focusable[idx + 1];
-          next.focus();
-        }
-        e.preventDefault();
-        return;
-      }
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-        return;
-      }
       if (flatResults.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -135,7 +117,7 @@ export function CommandPalette({ items, open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       <div
-        className="absolute inset-0 backdrop-blur-sm"
+        className="absolute inset-0"
         style={{ backgroundColor: 'var(--overlay)' }}
         onClick={onClose}
         aria-hidden="true"
@@ -145,6 +127,16 @@ export function CommandPalette({ items, open, onClose }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
+        tabIndex={-1}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            onClose();
+            return;
+          }
+          onTrapKeyDown(event);
+        }}
         className={`relative w-full max-w-[560px] mx-4 bg-surface border border-border-default rounded-xl shadow-modal overflow-hidden ${
           reducedMotion ? '' : 'animate-modal-in'
         }`}
@@ -154,6 +146,7 @@ export function CommandPalette({ items, open, onClose }: Props) {
           <input
             ref={inputRef}
             type="text"
+            aria-label="Search commands"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search views, sessions, skills, tools, files..."
@@ -163,7 +156,7 @@ export function CommandPalette({ items, open, onClose }: Props) {
         </div>
         <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2">
           {flatResults.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-10 text-text-muted">
+            <div role="status" aria-live="polite" className="flex flex-col items-center justify-center gap-2 py-10 text-text-muted">
               <Icon name="MagnifyingGlass" className="w-8 h-8" />
               <p className="text-body">No results found.</p>
             </div>
@@ -180,7 +173,7 @@ export function CommandPalette({ items, open, onClose }: Props) {
                     data-active={active}
                     onMouseEnter={() => setSelectedIndex(idx)}
                     onClick={() => activate(idx)}
-                    className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors border-l-2 ${
+                    className={`w-full min-h-11 flex items-center gap-3 px-4 py-2 text-left transition-colors border-l-2 ${
                       active ? 'bg-accent-subtle border-accent' : 'border-transparent hover:bg-elevated'
                     }`}
                   >
