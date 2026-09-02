@@ -203,6 +203,14 @@ npm run build
 npm test
 ```
 
+To reproduce the automated browser checkpoint from the acceptance matrix, run the production server and connect the preflight to an already-running local Chrome CDP endpoint:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229
+```
+
+The command creates an isolated browser target, emits one JSON result for each of the 112 supported combinations, and exits non-zero on render, overflow, or accessible-name failures. It is automated evidence only; the manual screen-reader and visual walkthrough remains required.
+
 ## Known limitations
 
 - **Session lifecycle on forced kills** — if an agent process is killed with `SIGKILL` (or crashes hard), it never emits `SessionEnd`. The server compensates with an idle timeout (`CREWLOOP_SESSION_IDLE_TIMEOUT_MS`, default 10 minutes): sessions with no activity for that window are marked as ended. Until the timeout fires, the session still shows as running.

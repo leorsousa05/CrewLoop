@@ -4,7 +4,24 @@ import type { ToolInvocation } from '../../../src/lib/invocations';
 import { TimelineRow } from './TimelineRow';
 import { Sidebar } from './Sidebar';
 import { SessionSelector } from './SessionSelector';
+import { FilterBar } from './FilterBar';
 import { getFocusableElements, nextFocusableIndex } from '../hooks/useFocusTrap';
+
+vi.mock('../contexts/FilterContext', () => ({
+  useFilters: () => ({
+    filters: {
+      query: '',
+      sources: [],
+      skills: [],
+      statuses: [],
+      tools: [],
+      opTypes: [],
+      timeRange: 'all',
+    },
+    setFilters: vi.fn(),
+    resetFilters: vi.fn(),
+  }),
+}));
 
 vi.mock('../hooks/useViewport', () => ({
   useViewport: () => ({ width: 390, breakpoint: 'mobile' }),
@@ -73,5 +90,17 @@ describe('dashboard accessibility contracts', () => {
 
     expect(html).toContain('aria-haspopup="listbox"');
     expect(html).not.toContain('role="option"');
+  });
+
+  it('names the shared filter search input', () => {
+    const html = renderToStaticMarkup(
+      <FilterBar
+        options={{ sources: [], skills: [], statuses: [], tools: [], opTypes: [] }}
+        resultCount={0}
+      />
+    );
+
+    expect(html).toContain('id="filter-search"');
+    expect(html).toContain('aria-label="Filter events"');
   });
 });

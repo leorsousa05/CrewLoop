@@ -31,6 +31,8 @@ This checkpoint is evidence for the later manual walkthrough; it does not mark t
 - A global visible-control-name scan covered all seven routes at both recorded viewports (14 route × viewport combinations): every combination reported zero unnamed visible controls. Control counts were 17/31/25/35/17/16/16 on desktop and 11/20/14/24/6/10/10 on mobile for Overview/Sessions/Timeline/Files/Skills/Usage/Settings.
 - Chrome's native accessibility tree scan covered the same 14 route × viewport combinations: every interactive AX node had a non-empty name. Interactive-node counts were 18/33/25/17/17/18/19 on desktop and 12/22/14/6/6/12/13 on mobile for Overview/Sessions/Timeline/Files/Skills/Usage/Settings.
 
+The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary` completed `112/112` combinations with `passed: 112`, `failed: 0`, and exit code `0`. The live target-preservation probe kept the operator's page-tab count unchanged (`1` before and `1` after).
+
 The smoke checks used Chrome DevTools Protocol with no assistive technology. Keyboard, full contrast coverage, async-state, and screen-reader observations still require the manual matrix below.
 
 ## View matrix

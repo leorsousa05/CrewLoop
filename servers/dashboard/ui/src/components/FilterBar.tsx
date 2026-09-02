@@ -259,6 +259,7 @@ export function FilterBar({ options, resultCount, onExport }: Props) {
           <input
             id="filter-search"
             type="text"
+            aria-label="Filter events"
             value={filters.query}
             onChange={(e) => setFilters({ query: e.target.value })}
             onFocus={() => setSearchFocused(true)}
