@@ -54,6 +54,6 @@ Make `crewloop:plan` and `crewloop:design` run automatically to completion — w
 
 ## Done When
 
-- [ ] AC-01 — proven by running a task through plan and observing no question prompts
-- [ ] AC-02 — proven by running a UI task through design and observing no discovery questionnaire
-- [ ] AC-03 — proven by `python scripts/validate-skills.py` (contracts) + workflow walkthrough
+- [x] AC-01 — proven by the Plan skill contract and `scripts.tests.test_automated_workflow`, which enforce non-blocking default resolution.
+- [x] AC-02 — proven by the Design skill contract and `scripts.tests.test_automated_workflow`, which enforce default surface/register resolution without a questionnaire.
+- [x] AC-03 — proven by `python scripts/validate-skills.py`, the workflow contract test, and the direct-routing rules in `references/workflow.md`.

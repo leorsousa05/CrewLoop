@@ -28,7 +28,7 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
       <div className="flex flex-col h-full items-center justify-center gap-3 text-center p-6">
         <Icon name="TerminalWindow" className="w-8 h-8 text-text-muted" />
         <h1 className="font-display text-display-lg text-text-primary">No sessions yet</h1>
-        <p className="text-body text-text-secondary max-w-sm">
+        <p className="w-full text-body text-text-secondary max-w-sm">
           Start an agent session with CrewLoop installed and events will stream here in real time.
         </p>
       </div>

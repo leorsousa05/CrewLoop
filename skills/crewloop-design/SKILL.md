@@ -33,6 +33,8 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 
 ---
 
+4. **Resolve without a questionnaire:** If the spec does not provide a visual preference, use the selected surface/register defaults, record the decision in the design spec, and continue without asking discovery questions.
+
 ## DELIVERABLES
 
 Write the design spec alongside the feature spec in `specs/features/<domain>/spec-NN-name.md` (design section) or, for large UI features, as a `design.md` sub-spec in the same folder, scaled to the change size:

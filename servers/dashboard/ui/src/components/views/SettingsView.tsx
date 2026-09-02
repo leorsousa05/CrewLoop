@@ -31,6 +31,7 @@ export function SettingsView() {
                 <select
                   value={settings.theme}
                   onChange={(e) => setSettings((s) => ({ ...s, theme: e.target.value as typeof s.theme }))}
+                  aria-label="Theme"
                   className="min-h-11 px-3 rounded-lg bg-elevated border border-border-default text-body text-text-primary outline-none focus:border-accent"
                 >
                   <option value="system">System</option>
@@ -77,6 +78,7 @@ export function SettingsView() {
                 </div>
                 <button
                   onClick={() => setSettings((s) => ({ ...s, reducedMotion: !s.reducedMotion }))}
+                  aria-label={settings.reducedMotion ? 'Disable reduced motion' : 'Enable reduced motion'}
                   className={`relative w-11 min-h-11 rounded-full transition-colors flex-shrink-0 ${
                     settings.reducedMotion ? 'bg-accent' : 'bg-border-strong'
                   }`}
@@ -107,6 +109,7 @@ export function SettingsView() {
                 </div>
                 <button
                   onClick={() => setSettings((s) => ({ ...s, autoFollowActive: !s.autoFollowActive }))}
+                  aria-label={settings.autoFollowActive ? 'Disable auto-follow active session' : 'Enable auto-follow active session'}
                   className={`relative w-11 min-h-11 rounded-full transition-colors flex-shrink-0 ${
                     settings.autoFollowActive ? 'bg-accent' : 'bg-border-strong'
                   }`}
@@ -129,6 +132,7 @@ export function SettingsView() {
                   type="number"
                   min={MIN_MAX_EVENTS}
                   max={MAX_MAX_EVENTS}
+                  aria-label="Max events per session"
                   value={settings.maxEvents}
                   onChange={(e) => {
                     const n = parseInt(e.target.value, 10);

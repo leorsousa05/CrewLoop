@@ -233,7 +233,8 @@ When running on platforms that support interactive agent tools, agents must prio
 
 ### 1. Interactive Questions (`ask_question`)
 - **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the transition options for the current skill (e.g. `["[R] Send to Reviewer", "[E] Keep implementing", "[A] Back to Architect"]`).
-- **Discovery & Questionnaires:** For multi-step questions (e.g. scope discovery or visual styling), group them into structured multiple-choice questions via `ask_question` (using `is_multi_select: false` or `is_multi_select: true` as appropriate) to present checkboxes/radio buttons in a modal.
+- **Discovery & Questionnaires:** The automated Plan/Design workflow does not open discovery questionnaires. Resolve unspecified scope or visual choices with repository-backed defaults and record the assumption; explicit user requirements always win.
+- **Other interactive decisions:** When a user explicitly needs to choose between materially different options that cannot be resolved safely from repository context, use `ask_question` with structured choices rather than a free-form typed menu.
 - **Confirmations:** Use `ask_question` to ask for confirmations (like before committing or pushing changes).
 
 ### 2. Timers & Scheduling (`schedule`)

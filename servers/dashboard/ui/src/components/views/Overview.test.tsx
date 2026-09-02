@@ -14,6 +14,20 @@ const session: ClientSession = {
 };
 
 describe('Overview telemetry layout', () => {
+  it('keeps the empty-state guidance within the available width', () => {
+    const html = renderToStaticMarkup(
+      <Overview
+        sessions={new Map()}
+        selectedSession={undefined}
+        invocations={[]}
+        onSelectSession={vi.fn()}
+        onOpenTimeline={vi.fn()}
+      />
+    );
+    expect(html).toContain('w-full text-body text-text-secondary max-w-sm');
+    expect(html).toContain('Start an agent session with CrewLoop installed');
+  });
+
   it('removes Skill Activity and lets Live span the content grid', () => {
     const html = renderToStaticMarkup(
       <Overview

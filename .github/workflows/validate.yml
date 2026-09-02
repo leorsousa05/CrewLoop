@@ -40,5 +40,5 @@ jobs:
 
       - name: Validate skills
         run: |
-          python3 -m unittest scripts.tests.test_validate_skills
+          python3 -m unittest scripts.tests.test_validate_skills scripts.tests.test_automated_workflow
           python3 scripts/validate-skills.py

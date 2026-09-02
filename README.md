@@ -73,11 +73,13 @@ The `crewloop` CLI provides commands to manage skills and integrate them with yo
 
 ## Real-time Activity Dashboard
 
-The dashboard provides a real-time WebSocket visualization of active skills, tool-use events, and execution logs.
+The dashboard is CrewLoop's localhost-only operational surface. It visualizes active skills, tool-use events, execution logs, and durable minimized token-usage telemetry over WebSocket and SQLite.
 
 ![Dashboard overview](assets/screenshots/dashboard-overview.png)
 
 By default, the dashboard binds to `http://127.0.0.1:7890`. You can change this port by setting the `CREWLOOP_DASHBOARD_PORT` environment variable.
+
+The dashboard supports five agent products — Kimi Code, Claude, Codex, OpenCode, and AGY — and exposes seven views: Overview, Sessions, Timeline, Files, Skills, Usage, and Settings. Usage history stores normalized numeric facts and hashed correlation identifiers only; prompts, commands, transcripts, workspace paths, and credentials are not persisted.
 
 ### Running the Dashboard
 

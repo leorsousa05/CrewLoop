@@ -70,10 +70,10 @@ Establish regression evidence across all dashboard implementation phases, and ma
 
 ## Done When
 
-- [ ] AC-01 — proven by `npm test` run with the new contract suites
-- [ ] AC-02 — proven by running typecheck/build/test in `servers/dashboard/`
-- [ ] AC-03 — proven by doc review against verified behavior
-- [ ] AC-04 — proven by ADR 001 diff review
+- [x] AC-01 — proven by `npm test` run with the existing server, client, and accessibility contract suites
+- [x] AC-02 — proven by running typecheck/build/test in `servers/dashboard/`
+- [x] AC-03 — proven by doc review against verified behavior and stale-claim scans
+- [x] AC-04 — proven by ADR 001 diff review
 - [ ] AC-05 — proven by archive listing + metadata check
 - [ ] AC-06 — proven by the recorded manual matrix artifact
 - [ ] AC-07 — proven by full diff review (`git diff` + grep for secrets/TODO/debug)

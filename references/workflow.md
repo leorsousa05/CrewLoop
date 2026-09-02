@@ -51,7 +51,7 @@ flowchart TD
 1. **`crewloop:plan` is the entry point** — every session starts here. It routes to `crewloop:design` if the change involves UI, otherwise to `crewloop:code`.
 2. **Skills route automatically** — each skill evaluates its outcome and hands off directly to the next skill per the transition contract. No end-of-skill menus.
 3. **User interrupts are explicit** — recognized commands are `stop`, `pause`, `volta`, `voltar`, and `re-analyze`. Any of these halts the flow and returns to `crewloop:plan`.
-4. **`crewloop:plan` is ALWAYS the first stop** — every task (bug fix, feature, design, refactor) gets a feature spec in `specs/features/<domain>/spec-NN-name.md` before implementation. `crewloop:plan` is interactive during discovery but auto-routes once the spec is ready.
+4. **`crewloop:plan` is ALWAYS the first stop** — every task (bug fix, feature, design, refactor) gets a feature spec in `specs/features/<domain>/spec-NN-name.md` before implementation. Plan resolves unspecified choices with repository-backed defaults and auto-routes once the spec is ready; it does not block on a discovery questionnaire.
 5. **`crewloop:design` acts BEFORE `crewloop:code`** — when the change involves UI, `crewloop:design` hands off directly to `crewloop:code`.
 6. **`crewloop:code` never does git or review** — implements code/tests, then auto-routes to `crewloop:review` on success or back to `crewloop:plan` after a failed build that could not be fixed.
 7. **`crewloop:review` is the quality gate** — verdict drives the route: PASS → `crewloop:ship`; FAIL → `crewloop:code`.

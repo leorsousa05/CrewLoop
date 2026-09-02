@@ -1,6 +1,6 @@
 # Tests
 
-This project is primarily documentation, so it does not have a traditional automated test suite.
+CrewLoop is documentation-first, but its CLI and dashboard have automated regression suites. The dashboard also has a reproducible browser acceptance matrix.
 
 ## Validation
 
@@ -10,7 +10,28 @@ Run the skill validator to check all `SKILL.md` files:
 python scripts/validate-skills.py
 ```
 
-## Manual Testing
+Run the workflow contract tests for the non-blocking Plan/Design handoff:
+
+```bash
+python -m unittest scripts.tests.test_automated_workflow
+```
+
+For the dashboard regression suite:
+
+```bash
+cd servers/dashboard
+npm run typecheck
+npm run build
+npm test
+```
+
+The dashboard test command covers server security and filesystem boundaries, event contracts, lifecycle/state behavior, all supported adapters, token telemetry, client projection/filter/settings logic, request races, and UI accessibility/live-state contracts.
+
+## Dashboard Manual Testing
+
+Use the [dashboard acceptance matrix](dashboard-acceptance-matrix.md) for the required view, viewport, theme, density, keyboard, async-state, and reduced-motion walkthrough. Record the browser, OS, commit, actual viewport, and observed result before marking a row complete.
+
+## Skill Manual Testing
 
 To test a skill in practice:
 
