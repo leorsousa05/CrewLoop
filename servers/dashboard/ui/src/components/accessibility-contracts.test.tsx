@@ -51,6 +51,29 @@ describe('dashboard accessibility contracts', () => {
     expect(getFocusableElements(container)).toEqual([visible]);
   });
 
+  it('ignores controls inside hidden, aria-hidden, and inert ancestors', () => {
+    const visible = {
+      getAttribute: () => null,
+      hasAttribute: () => false,
+      parentElement: null,
+    } as unknown as HTMLElement;
+    const hiddenAncestors = ['hidden', 'aria-hidden', 'inert'].map((attribute) => ({
+      getAttribute: (name: string) => (name === 'aria-hidden' && attribute === 'aria-hidden' ? 'true' : null),
+      hasAttribute: (name: string) => name === attribute,
+      parentElement: null,
+    } as unknown as HTMLElement));
+    const nested = hiddenAncestors.map((parentElement) => ({
+      getAttribute: () => null,
+      hasAttribute: () => false,
+      parentElement,
+    } as unknown as HTMLElement));
+    const container = {
+      querySelectorAll: () => [visible, ...nested],
+    } as unknown as HTMLElement;
+
+    expect(getFocusableElements(container)).toEqual([visible]);
+  });
+
   it('keeps timeline primary and copy actions as sibling controls', () => {
     const html = renderToStaticMarkup(
       <TimelineRow

@@ -3,10 +3,25 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 export const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+function isHiddenFromFocus(element: HTMLElement): boolean {
+  let current: HTMLElement | null = element;
+  while (current) {
+    if (
+      current.hasAttribute('hidden') ||
+      current.hasAttribute('inert') ||
+      current.getAttribute('aria-hidden')?.toLowerCase() === 'true'
+    ) {
+      return true;
+    }
+    current = current.parentElement;
+  }
+  return false;
+}
+
 export function getFocusableElements(container: HTMLElement | null): HTMLElement[] {
   if (!container) return [];
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) => element.getAttribute('aria-hidden') !== 'true' && !element.hasAttribute('hidden')
+    (element) => !isHiddenFromFocus(element)
   );
 }
 
