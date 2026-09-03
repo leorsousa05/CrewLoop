@@ -8,8 +8,8 @@ Fill these fields for each release candidate:
 
 | Field | Value |
 | :--- | :--- |
-| Date/time | `2026-09-03 15:08:13 -03:00` |
-| Commit | `afdb3ef` |
+| Date/time | `2026-09-03 17:03:36 -03:00` |
+| Commit | `a11f7a3` |
 | OS | `Windows 10.0.26200.0` |
 | Browser | `Chrome/152.0.7977.65` |
 | Server URL | `http://127.0.0.1:7891` |
@@ -33,9 +33,9 @@ This checkpoint is evidence for the later manual walkthrough; it does not mark t
 
 The source-CSS semantic-token guard passed `2/2`, verifying the eight text tokens against every declared surface in both themes and the theme-aware primary-button foreground at WCAG AA contrast. The rendered-style browser audit also passed across `14` explicit light/dark route pairs, checking `574` visible text elements with `0` unsupported styles.
 
-The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary` completed `112/112` combinations at commit `afdb3ef`, with `passed: 112`, `failed: 0`, and exit code `0`.
+The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9231 --timeout 5000 --summary` completed `112/112` combinations at commit `a11f7a3` in a fresh isolated Chrome profile, with `passed: 112`, `failed: 0`, and exit code `0`.
 
-The optional interaction preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary --interaction-smoke` also passed at commit `afdb3ef` with `7/7` interaction cases, `interactionSuccess: true`, and exit code `0`. The empty session-selector case reported `state: "empty"` and `optionCount: 0`; drawer, command palette, and filter sheet cases used real CDP keyboard events for `Tab`, `Shift+Tab`, Escape, focus containment, and restoration.
+The optional interaction preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9231 --timeout 5000 --summary --interaction-smoke` also passed at commit `a11f7a3` in the fresh profile with `8/8` interaction cases, `interactionSuccess: true`, and exit code `0`. The empty session-selector case reported `state: "empty"` and `optionCount: 0`; drawer, command palette, and filter sheet cases used real CDP keyboard events for `Tab`, `Shift+Tab`, Escape, focus containment, and restoration. The rendered-contrast case covered `14` explicit light/dark route pairs, `574` text candidates, and `0` unsupported styles.
 
 The smoke checks used Chrome DevTools Protocol with no assistive technology. Keyboard, full contrast coverage, async-state, and screen-reader observations still require the manual matrix below.
 
@@ -64,7 +64,7 @@ Each cell is one walkthrough. Mark `P` only after the view renders without clipp
 | AC-03 | — | Root [README](../README.md), [architecture overview](../specs/shared/architecture-overview.md), and [dashboard README](../servers/dashboard/README.md) | Document review |
 | AC-04 | — | [ADR 001](../specs/shared/adrs/adr-001-dashboard-hybrid-architecture.md) supersession notes plus preserved historical text | Document review |
 | AC-05 | — | Archive listing and frontmatter verification for specs 021 and 022 during Ship | Pending Ship |
-| AC-06 | UI component and state tests cover the interaction contracts; run `npm test` before the walkthrough; Chrome preflight passed 112/112 view combinations and optional interaction smoke passed 7/7 | View matrix and interaction matrix in this file, with the run record completed | Manual pending; preflight recorded |
+| AC-06 | UI component and state tests cover the interaction contracts; run `npm test` before the walkthrough; Chrome preflight passed 112/112 view combinations and optional interaction smoke passed 8/8 | View matrix and interaction matrix in this file, with the run record completed | Manual pending; preflight recorded |
 | AC-07 | `git diff --check` plus repository scans for secrets, generated artifacts, debug logs, empty catches, and stale TODOs | Diff review before Ship | Review pending |
 
 The automated evidence is intentionally contract-oriented; this project does not use an arbitrary global coverage target.
