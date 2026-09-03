@@ -12,7 +12,7 @@
   --border-strong: hsl(222, 20%, 28%);
   --text-primary: hsl(210, 40%, 96%);
   --text-secondary: hsl(215, 16%, 70%);
-  --text-muted: hsl(215, 16%, 50%);
+  --text-muted: hsl(215, 16%, 56%);
 
   /* Signal — refined indigo (live/selected/focus/primary only) */
   --accent: hsl(230, 90%, 70%);
@@ -73,15 +73,15 @@ html.light {
   --border-strong: hsl(214, 20%, 78%);
   --text-primary: hsl(222, 47%, 11%);
   --text-secondary: hsl(215, 16%, 45%);
-  --text-muted: hsl(215, 16%, 46%);
-  --accent: hsl(230, 90%, 64%);
+  --text-muted: hsl(215, 16%, 45%);
+  --accent: hsl(230, 90%, 60%);
   --accent-strong: hsl(230, 90%, 54%);
   --accent-dim: hsl(230, 90%, 94%);
   --accent-subtle: hsl(230, 80%, 96%);
-  --success: hsl(152, 60%, 32%);
-  --error: hsl(8, 70%, 48%);
-  --warning: hsl(38, 90%, 42%);
-  --running: hsl(192, 80%, 38%);
+  --success: hsl(152, 60%, 30%);
+  --error: hsl(8, 70%, 46%);
+  --warning: hsl(38, 90%, 30%);
+  --running: hsl(192, 80%, 30%);
   --focus: hsl(230, 90%, 64%);
   --overlay: rgba(20, 20, 25, 0.35);
 
@@ -170,7 +170,7 @@ body {
     align-items: center;
     gap: 6px;
     background: var(--accent);
-    color: hsl(210, 40%, 98%);
+    color: var(--bg-base);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
