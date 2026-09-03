@@ -248,6 +248,14 @@ npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.
 
 The command creates an isolated browser target, emits one JSON result for each of the 112 supported combinations, and exits non-zero on render, overflow, or accessible-name failures. It is automated evidence only; the manual screen-reader and visual walkthrough remains required.
 
+For the bounded interaction checkpoint, add `--interaction-smoke`:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
+```
+
+The additional summary covers mobile overlay focus restoration, keyboard access to the empty session selector, reduced-motion persistence, hash history, and external font requests. It remains separate from the manual visual, contrast, keyboard, async-state, and screen-reader walkthrough.
+
 ## Known limitations
 
 - **Session lifecycle on forced kills** — if an agent process is killed with `SIGKILL` (or crashes hard), it never emits `SessionEnd`. The server compensates with an idle timeout (`CREWLOOP_SESSION_IDLE_TIMEOUT_MS`, default 10 minutes): sessions with no activity for that window are marked as ended. Until the timeout fires, the session still shows as running.

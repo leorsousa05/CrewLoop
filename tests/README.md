@@ -35,6 +35,14 @@ npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.
 
 The command emits JSON Lines for all `112/112` view, viewport, theme, and density combinations. It checks render state, horizontal overflow, and visible interactive accessible names through CDP. It does not launch Chrome, touch an existing tab, or replace the manual screen-reader, keyboard, contrast, async-state, and visual walkthrough in the [dashboard acceptance matrix](dashboard-acceptance-matrix.md).
 
+To add the bounded interaction checkpoint to the same run, pass `--interaction-smoke`:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
+```
+
+This adds checks for mobile overlays and focus restoration, keyboard-opening the empty session selector, reduced-motion persistence, hash history restoration, and external font requests. The interaction summary fails closed on an invariant failure; with `--summary`, it is nested in the single final summary object. These checks remain automated evidence and do not replace the manual matrix.
+
 ## Dashboard Manual Testing
 
 Use the [dashboard acceptance matrix](dashboard-acceptance-matrix.md) for the required view, viewport, theme, density, keyboard, async-state, and reduced-motion walkthrough. Record the browser, OS, commit, actual viewport, and observed result before marking a row complete.

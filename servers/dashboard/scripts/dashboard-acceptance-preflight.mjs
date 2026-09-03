@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import wsPackage from 'ws';
+import { runInteractionSmoke } from './dashboard-interaction-smoke.mjs';
 
 const WebSocket = wsPackage.WebSocket || wsPackage;
 
@@ -65,6 +66,7 @@ function usage() {
     `  --cdp <url>       Chrome CDP endpoint (default: ${DEFAULT_CDP_URL})`,
     `  --timeout <ms>    Per-operation timeout (default: ${DEFAULT_TIMEOUT_MS})`,
     '  --summary         Emit only the final JSON summary',
+    '  --interaction-smoke  Run bounded keyboard and state-transition checks',
     '  --help            Show this help',
   ].join('\n');
 }
@@ -75,6 +77,7 @@ function parseArgs(argv) {
     cdp: DEFAULT_CDP_URL,
     timeout: DEFAULT_TIMEOUT_MS,
     summaryOnly: false,
+    interactionSmoke: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -82,6 +85,10 @@ function parseArgs(argv) {
     if (argument === '--help') return { ...options, help: true };
     if (argument === '--summary') {
       options.summaryOnly = true;
+      continue;
+    }
+    if (argument === '--interaction-smoke') {
+      options.interactionSmoke = true;
       continue;
     }
     if (!['--url', '--cdp', '--timeout'].includes(argument)) {
@@ -415,15 +422,39 @@ async function run(options) {
 
     const passed = results.filter((result) => result.ok).length;
     const failed = results.length - passed;
-    emit({
+    let interactionSummary;
+    if (options.interactionSmoke) {
+      try {
+        interactionSummary = await runInteractionSmoke(client, sessionId, options.url, options.timeout);
+      } catch (error) {
+        interactionSummary = {
+          type: 'interaction-summary',
+          total: 0,
+          passed: 0,
+          failed: 1,
+          success: false,
+          error: errorMessage(error),
+          cases: [],
+        };
+      }
+      if (!options.summaryOnly) emit(interactionSummary);
+    }
+    const summary = {
       type: 'summary',
       total: results.length,
       expected: expected.length,
       passed,
       failed,
       success: failed === 0,
-    });
-    return failed === 0 ? 0 : 1;
+    };
+    if (interactionSummary) {
+      summary.interactionSmoke = true;
+      summary.interactionSuccess = interactionSummary.success;
+      summary.success = summary.success && interactionSummary.success;
+      if (options.summaryOnly) summary.interaction = interactionSummary;
+    }
+    emit(summary);
+    return failed === 0 && (interactionSummary?.success ?? true) ? 0 : 1;
   } finally {
     if (client && targetId) {
       try {
