@@ -10,7 +10,7 @@ sidebar_position: 6
 
 ## Role
 
-`crewloop:ship` is the only skill authorized to perform git operations. After `crewloop:review` approves, it packages the changes cleanly: analyzes the diff, archives the spec, drafts a Conventional Commits message, creates a branch, commits, pushes, prepares a PR, and can create annotated tags and draft releases when explicitly requested.
+`crewloop:ship` is the only skill authorized to perform git operations. After `crewloop:review` approves, it packages the changes cleanly: analyzes the diff, records the completed feature spec in `specs/features/`, drafts a Conventional Commits message, creates a branch, commits, pushes, prepares a PR, and can create annotated tags and draft releases when explicitly requested. Only dead or rejected proposals use `specs/archive/`.
 
 ## Responsibilities
 

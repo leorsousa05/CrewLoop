@@ -63,9 +63,9 @@ Each cell is one walkthrough. Mark `P` only after the view renders without clipp
 | AC-02 | `npm run typecheck`, `npm run build`, and `npm test` from `servers/dashboard/` | — | Automated |
 | AC-03 | — | Root [README](../README.md), [architecture overview](../specs/shared/architecture-overview.md), and [dashboard README](../servers/dashboard/README.md) | Document review |
 | AC-04 | — | [ADR 001](../specs/shared/adrs/adr-001-dashboard-hybrid-architecture.md) supersession notes plus preserved historical text | Document review |
-| AC-05 | — | Archive listing and frontmatter verification for specs 021 and 022 during Ship | Pending Ship |
+| AC-05 | — | Feature-path and frontmatter verification for specs 021 and 022; completed feature specs remain in `specs/features/` per the current convention | Recorded |
 | AC-06 | UI component and state tests cover the interaction contracts; run `npm test` before the walkthrough; Chrome preflight passed 112/112 view combinations and optional interaction smoke passed 8/8 | View matrix and interaction matrix in this file, with the run record completed | Manual pending; preflight recorded |
-| AC-07 | `git diff --check` plus repository scans for secrets, generated artifacts, debug logs, empty catches, and stale TODOs | Diff review before Ship | Review pending |
+| AC-07 | `git diff --check` plus repository scans for secrets, generated artifacts, debug logs, empty catches, and stale TODOs | Shipped diff review at commit `88ff8f3` | Recorded |
 
 The automated evidence is intentionally contract-oriented; this project does not use an arbitrary global coverage target.
 
