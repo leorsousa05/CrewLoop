@@ -1,6 +1,7 @@
 const SETTINGS_KEY = 'crewloop-dashboard-settings';
 const SETTINGS_VERSION = 1;
 const SHIFT_MODIFIER = 8;
+const CONTRAST_ROUTES = ['overview', 'sessions', 'timeline', 'files', 'skills', 'usage', 'settings'];
 
 function dashboardUrl(baseUrl, view) {
   const url = new URL(baseUrl);
@@ -50,18 +51,26 @@ async function pressKey(client, sessionId, key, modifiers = 0) {
   await client.call('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, modifiers }, sessionId);
 }
 
-async function prepareInteractionPage(client, sessionId, url, timeout) {
+async function prepareInteractionPage(client, sessionId, url, timeout, options = {}) {
+  const {
+    width = 390,
+    height = 844,
+    mobile = true,
+    theme = 'light',
+    media = 'light',
+    density = 'comfortable',
+  } = options;
   await client.call(
     'Emulation.setDeviceMetricsOverride',
-    { width: 390, height: 844, deviceScaleFactor: 1, mobile: true },
+    { width, height, deviceScaleFactor: 1, mobile },
     sessionId
   );
   await client.call(
     'Emulation.setEmulatedMedia',
-    { features: [{ name: 'prefers-color-scheme', value: 'light' }] },
+    { features: [{ name: 'prefers-color-scheme', value: media }] },
     sessionId
   );
-  await client.evaluate(settingsScript('light', 'comfortable'), sessionId);
+  await client.evaluate(settingsScript(theme, density), sessionId);
   const result = await client.call('Page.navigate', { url }, sessionId);
   if (result.errorText) throw new Error(`Navigation failed: ${result.errorText}`);
   const deadline = Date.now() + timeout;
@@ -78,6 +87,118 @@ async function prepareInteractionPage(client, sessionId, url, timeout) {
     await sleep(50);
   }
   throw new Error('Timed out waiting for document.readyState');
+}
+
+function renderedContrastExpression() {
+  return `(() => {
+    const minimumRatio = 4.5;
+    const semanticClasses = new Map([
+      ['text-text-primary', 'text-primary'],
+      ['text-text-secondary', 'text-secondary'],
+      ['text-text-muted', 'text-muted'],
+      ['text-accent', 'accent'],
+      ['text-success', 'success'],
+      ['text-error', 'error'],
+      ['text-warning', 'warning'],
+      ['text-running', 'running'],
+    ]);
+    const visible = (element) => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+      for (let current = element; current; current = current.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+      }
+      return true;
+    };
+    const hasDirectText = (element) => [...element.childNodes]
+      .some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    const parseColor = (value) => {
+      const channels = value.match(/[\\d.]+/g)?.map(Number) || [];
+      if (channels.length < 3 || channels.length > 4) return null;
+      return {
+        red: channels[0],
+        green: channels[1],
+        blue: channels[2],
+        alpha: channels.length === 4 ? channels[3] : 1,
+      };
+    };
+    const composite = (foreground, background) => {
+      const alpha = foreground.alpha + background.alpha * (1 - foreground.alpha);
+      if (alpha === 0) return { red: 0, green: 0, blue: 0, alpha: 0 };
+      return {
+        red: (foreground.red * foreground.alpha + background.red * background.alpha * (1 - foreground.alpha)) / alpha,
+        green: (foreground.green * foreground.alpha + background.green * background.alpha * (1 - foreground.alpha)) / alpha,
+        blue: (foreground.blue * foreground.alpha + background.blue * background.alpha * (1 - foreground.alpha)) / alpha,
+        alpha,
+      };
+    };
+    const backgroundFor = (element) => {
+      const ancestors = [];
+      for (let current = element; current; current = current.parentElement) ancestors.push(current);
+      let background = { red: 0, green: 0, blue: 0, alpha: 0 };
+      for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+        const style = getComputedStyle(ancestors[index]);
+        if (style.backgroundImage !== 'none') return null;
+        const color = parseColor(style.backgroundColor);
+        if (color) background = composite(color, background);
+      }
+      return background.alpha > 0.99 ? background : null;
+    };
+    const channel = (value) => {
+      const normalized = value / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (color) => (
+      0.2126 * channel(color.red)
+      + 0.7152 * channel(color.green)
+      + 0.0722 * channel(color.blue)
+    );
+    const contrast = (foreground, background) => {
+      const foregroundLuminance = luminance(foreground);
+      const backgroundLuminance = luminance(background);
+      return (
+        (Math.max(foregroundLuminance, backgroundLuminance) + 0.05)
+        / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05)
+      );
+    };
+    const tokenFor = (element) => {
+      const className = typeof element.className === 'string' ? element.className : '';
+      for (const [classToken, semanticToken] of semanticClasses) {
+        if (className.split(/\\s+/).includes(classToken)) return semanticToken;
+      }
+      return 'computed';
+    };
+    const candidates = [...document.querySelectorAll('body *')]
+      .filter((element) => visible(element) && hasDirectText(element))
+      .filter((element) => !element.matches(':disabled, [aria-disabled="true"]'));
+    const failures = [];
+    let unsupported = 0;
+    for (const element of candidates) {
+      const style = getComputedStyle(element);
+      const foreground = parseColor(style.color);
+      const background = backgroundFor(element);
+      if (!foreground || !background || style.backgroundImage !== 'none') {
+        unsupported += 1;
+        continue;
+      }
+      const ratio = contrast(foreground, background);
+      if (ratio < minimumRatio) {
+        failures.push({
+          token: tokenFor(element),
+          ratio: Number(ratio.toFixed(3)),
+          tag: element.tagName.toLowerCase(),
+        });
+      }
+    }
+    return {
+      ok: candidates.length > 0 && failures.length === 0 && unsupported === 0,
+      candidateCount: candidates.length,
+      failureCount: failures.length,
+      unsupportedCount: unsupported,
+      failures: failures.slice(0, 8),
+    };
+  })()`;
 }
 
 export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
@@ -309,6 +430,33 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
         .filter((name) => new URL(name, location.href).origin !== location.origin);
       return { ok: externalFonts.length === 0 };
     })()`);
+  });
+
+  await runCase('rendered text contrast', async () => {
+    let candidateCount = 0;
+    let unsupportedCount = 0;
+    for (const theme of ['light', 'dark']) {
+      for (const view of CONTRAST_ROUTES) {
+        await prepareInteractionPage(client, sessionId, dashboardUrl(baseUrl, view), timeout, {
+          width: 1440,
+          height: 1000,
+          mobile: false,
+          theme,
+          media: theme,
+        });
+        const result = await client.evaluate(renderedContrastExpression(), sessionId);
+        candidateCount += result?.candidateCount || 0;
+        unsupportedCount += result?.unsupportedCount || 0;
+        if (!result?.ok) {
+          const failure = result?.failures?.[0];
+          const diagnostic = failure
+            ? `${failure.token}/${failure.tag}=${failure.ratio}`
+            : `unsupported=${result?.unsupportedCount || 0}`;
+          throw new Error(`${theme}/${view}: rendered contrast below AA or unavailable (${diagnostic})`);
+        }
+      }
+    }
+    return { routeThemePairs: CONTRAST_ROUTES.length * 2, candidateCount, unsupportedCount };
   });
 
   return {

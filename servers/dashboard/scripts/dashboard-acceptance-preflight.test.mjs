@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import test from 'node:test';
@@ -40,4 +41,13 @@ test('rejects a timeout below the minimum before connecting to Chrome', () => {
 
   assert.notEqual(result.status, 0);
   assert.match(`${result.stdout}\n${result.stderr}`, /--timeout must be an integer of at least 100 milliseconds/);
+});
+
+test('keeps the rendered contrast audit in the interaction smoke', () => {
+  const source = fs.readFileSync(path.join(packageRoot, 'dashboard-interaction-smoke.mjs'), 'utf8');
+
+  assert.match(source, /rendered text contrast/);
+  assert.match(source, /getComputedStyle/);
+  assert.match(source, /minimumRatio = 4\.5/);
+  assert.match(source, /unsupportedCount/);
 });
