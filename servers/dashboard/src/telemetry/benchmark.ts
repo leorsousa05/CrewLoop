@@ -118,6 +118,17 @@ export interface ExecutionMetricComparison {
   costPerCompletedTaskMicrousd: NullableMetricComparison;
 }
 
+export interface TokenBenchmarkScenarioComparison {
+  scenarioId: string;
+  totalTokens: TokenMetricComparison;
+  inputTokens: TokenMetricComparison;
+  outputTokens: TokenMetricComparison;
+  durationMs: TokenMetricComparison;
+  baselineSuccessRate: number;
+  candidateSuccessRate: number;
+  costPerCompletedTaskMicrousd: NullableMetricComparison;
+}
+
 export interface TokenBenchmarkComparison {
   policy: {
     baseline: TokenBenchmarkPolicy;
@@ -130,6 +141,7 @@ export interface TokenBenchmarkComparison {
   outputTokens: TokenMetricComparison;
   durationMs: TokenMetricComparison;
   execution: ExecutionMetricComparison;
+  scenarioMetrics: TokenBenchmarkScenarioComparison[];
   baselineSuccessRate: number;
   candidateSuccessRate: number;
   measuredCoveragePercent: number;
@@ -529,6 +541,44 @@ function runCoverage(runs: TokenBenchmarkRun[]): string[] {
   return Array.from(new Set(runs.map((run) => `${run.scenarioId}:${run.repetition}`))).sort();
 }
 
+function runsForScenario(runs: TokenBenchmarkRun[], scenarioId: string): TokenBenchmarkRun[] {
+  return runs.filter((run) => run.scenarioId === scenarioId);
+}
+
+function compareScenarioMetrics(
+  scenarioId: string,
+  baselineRuns: TokenBenchmarkRun[],
+  candidateRuns: TokenBenchmarkRun[]
+): TokenBenchmarkScenarioComparison {
+  const measuredBaseline = baselineRuns.filter((run) => run.tokenUsage.quality === 'measured');
+  const measuredCandidate = candidateRuns.filter((run) => run.tokenUsage.quality === 'measured');
+  return {
+    scenarioId,
+    totalTokens: compareMetricOrEmpty(
+      measuredBaseline.map((run) => run.tokenUsage.totalTokens),
+      measuredCandidate.map((run) => run.tokenUsage.totalTokens)
+    ),
+    inputTokens: compareMetricOrEmpty(
+      measuredBaseline.map((run) => run.tokenUsage.inputTokens),
+      measuredCandidate.map((run) => run.tokenUsage.inputTokens)
+    ),
+    outputTokens: compareMetricOrEmpty(
+      measuredBaseline.map((run) => run.tokenUsage.outputTokens),
+      measuredCandidate.map((run) => run.tokenUsage.outputTokens)
+    ),
+    durationMs: compareMetric(
+      baselineRuns.map((run) => run.durationMs),
+      candidateRuns.map((run) => run.durationMs)
+    ),
+    baselineSuccessRate: successRate(baselineRuns),
+    candidateSuccessRate: successRate(candidateRuns),
+    costPerCompletedTaskMicrousd: compareNullableMetric(
+      [costPerCompletedTask(baselineRuns)],
+      [costPerCompletedTask(candidateRuns)]
+    ),
+  };
+}
+
 function sameStrings(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
@@ -616,6 +666,13 @@ export function compareTokenBenchmarks(
       [costPerCompletedTask(candidate.runs)]
     ),
   };
+  const scenarioMetrics = scenarioIds(baseline.runs).map((scenarioId) => (
+    compareScenarioMetrics(
+      scenarioId,
+      runsForScenario(baseline.runs, scenarioId),
+      runsForScenario(candidate.runs, scenarioId)
+    )
+  ));
   const baselineSuccessRate = successRate(baseline.runs);
   const candidateSuccessRate = successRate(candidate.runs);
   const measuredCoveragePercent = Math.min(
@@ -669,6 +726,7 @@ export function compareTokenBenchmarks(
     outputTokens,
     durationMs,
     execution,
+    scenarioMetrics,
     baselineSuccessRate,
     candidateSuccessRate,
     measuredCoveragePercent,
@@ -720,6 +778,17 @@ export function formatBenchmarkMarkdown(comparison: TokenBenchmarkComparison): s
       const value = metric as NullableMetricComparison | TokenMetricComparison;
       const delta = formatNumber(value.deltaPercent);
       return `| ${label} | ${formatNumber(value.baselineMedian)} | ${formatNumber(value.candidateMedian)} | ${delta === 'n/a' ? delta : `${delta}%`} |`;
+    }),
+    '',
+    '## Scenario metrics',
+    '',
+    '| Scenario | Total token delta % | Duration delta % | Baseline success | Candidate success | Cost/task delta % |',
+    '|---|---:|---:|---:|---:|---:|',
+    ...comparison.scenarioMetrics.map((scenario) => {
+      const tokenDelta = formatNumber(scenario.totalTokens.deltaPercent);
+      const durationDelta = formatNumber(scenario.durationMs.deltaPercent);
+      const costDelta = formatNumber(scenario.costPerCompletedTaskMicrousd.deltaPercent);
+      return `| ${scenario.scenarioId.replaceAll('|', '\\|').replace(/[\r\n]/g, ' ')} | ${tokenDelta === 'n/a' ? tokenDelta : `${tokenDelta}%`} | ${durationDelta === 'n/a' ? durationDelta : `${durationDelta}%`} | ${formatNumber(scenario.baselineSuccessRate)}% | ${formatNumber(scenario.candidateSuccessRate)}% | ${costDelta === 'n/a' ? costDelta : `${costDelta}%`} |`;
     }),
   ];
   if (comparison.failures.length > 0) {

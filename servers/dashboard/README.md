@@ -141,6 +141,8 @@ Monetary values are labelled **Estimated API-equivalent USD**. Provider-reported
 
 The fixed benchmark compares the baseline and candidate CrewLoop optimization policies across six synthetic scenarios. It validates policy identity, scenario coverage, token measurement quality, execution metrics, measured cost per correctly completed task, and required quality gates before returning `adopt_candidate` or `keep_baseline`. A candidate must not regress cost per completed task; missing cost evidence fails closed.
 
+Benchmark reports also include a deterministic scenario breakdown for total/input/output tokens, duration, success rate, and cost per completed task. This breakdown is diagnostic evidence for regression tracking; it does not change the aggregate adoption gate or activate a policy.
+
 Verified host execution records can be projected into the existing benchmark-run contract with the provider-neutral `projectTaskExecutionRecord` adapter. Records without verified token usage, duration, or tool-call measurements return a bounded unavailable result and are not converted into synthetic zeroes.
 
 Use `buildTokenBenchmarkDatasetFromExecutionRecords` to collect a local batch of validated execution records into a benchmark dataset. The collector preserves input order, lets the existing dataset validator handle identical or conflicting duplicates, and returns every unavailable record index without exposing a partial dataset. Baseline/candidate coverage and adoption decisions remain the responsibility of the existing corpus comparator.

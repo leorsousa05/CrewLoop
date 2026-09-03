@@ -420,6 +420,81 @@ describe('token benchmark', () => {
     assert.match(markdown, /Total tokens/);
     assert.match(markdown, /Model calls/);
     assert.match(markdown, /Cost per completed task/);
+    assert.match(markdown, /Scenario metrics/);
+    assert.match(markdown, /small-change/);
+  });
+
+  it('reports deterministic per-scenario metrics in scenario-id order', () => {
+    const scenarioIds = [...TOKEN_OPTIMIZATION_SCENARIO_IDS];
+    const result = compareTokenOptimizationBenchmarks(
+      dataset('before', [...scenarioIds].reverse().map((scenarioId) => run('baseline', { scenarioId }))),
+      dataset('after', scenarioIds.map((scenarioId) => run('candidate', { scenarioId })))
+    );
+
+    assert.deepEqual(
+      result.scenarioMetrics.map((scenario) => scenario.scenarioId),
+      [...scenarioIds].sort()
+    );
+    assert.equal(result.scenarioMetrics[0].totalTokens.baselineMedian, 1000);
+    assert.equal(result.scenarioMetrics[0].totalTokens.candidateMedian, 750);
+    assert.equal(result.scenarioMetrics[0].totalTokens.deltaPercent, -25);
+    assert.equal(result.scenarioMetrics[0].costPerCompletedTaskMicrousd.deltaPercent, -25);
+  });
+
+  it('exposes a per-scenario regression hidden by aggregate medians', () => {
+    const scenarioIds = [...TOKEN_OPTIMIZATION_SCENARIO_IDS];
+    const regressedScenario = scenarioIds[scenarioIds.length - 1];
+    const candidateRuns = scenarioIds.map((scenarioId) => {
+      const candidate = run('candidate', { scenarioId });
+      const regressed = scenarioId === regressedScenario;
+      candidate.durationMs = regressed ? 2_000 : 1_050;
+      candidate.costMicrousd = regressed ? 200 : 75;
+      candidate.tokenUsage = {
+        ...candidate.tokenUsage,
+        inputTokens: regressed ? 1_600 : 600,
+        outputTokens: regressed ? 400 : 150,
+        totalTokens: regressed ? 2_000 : 750,
+      };
+      return candidate;
+    });
+    const result = compareTokenOptimizationBenchmarks(
+      dataset('before', scenarioIds.map((scenarioId) => run('baseline', { scenarioId }))),
+      dataset('after', candidateRuns)
+    );
+
+    assert.equal(result.passed, true);
+    const scenario = result.scenarioMetrics.find(({ scenarioId }) => scenarioId === regressedScenario);
+    assert.ok(scenario);
+    assert.equal(scenario.totalTokens.deltaPercent, 100);
+    assert.equal(scenario.durationMs.deltaPercent, 100);
+    assert.equal(scenario.costPerCompletedTaskMicrousd.deltaPercent, 100);
+  });
+
+  it('keeps unavailable scenario token and cost metrics explicit', () => {
+    const candidate = run('candidate', {
+      costMicrousd: null,
+      tokenUsage: {
+        ...run('candidate').tokenUsage,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        quality: 'unavailable',
+      },
+    });
+    const result = compareTokenBenchmarks(
+      dataset('before', [run('baseline')]),
+      dataset('after', [candidate])
+    );
+
+    assert.deepEqual(result.scenarioMetrics[0].totalTokens, {
+      baselineMedian: null,
+      candidateMedian: null,
+      delta: null,
+      deltaPercent: null,
+    });
+    assert.equal(result.scenarioMetrics[0].costPerCompletedTaskMicrousd.deltaPercent, null);
+    assert.match(formatBenchmarkMarkdown(result), /small-change.*n\/a/);
+    assert.doesNotMatch(JSON.stringify(result), /prompt|response|command|path|credential|transcript|session/i);
   });
 
   it('compares execution metrics and cost per completed task', () => {

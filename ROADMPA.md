@@ -65,7 +65,7 @@ As Fases 0 a 7 ja possuem contratos portateis, testes e evidencias locais no pro
 | 4 - Verificacao automatica | Implementada | [Spec 017](specs/features/04-workflow/spec-017-token-optimization-phase-4-automatic-verification.md) |
 | 5 - Roteamento de modelos | Implementada | [Spec 018](specs/features/04-workflow/spec-018-token-optimization-phase-5-model-routing.md) |
 | 6 - Perfis de execucao | Implementada | [Spec 019](specs/features/04-workflow/spec-019-token-optimization-phase-6-execution-profiles.md) |
-| 7 - Otimizacao continua | Implementada | [Spec 020](specs/features/04-workflow/spec-020-token-optimization-phase-7-continuous-optimization.md), [Spec 021](specs/features/04-workflow/spec-021-continuous-benchmark-ci-gate.md), [Spec 022](specs/features/04-workflow/spec-022-cross-platform-test-runner.md), [Specs 037-042](specs/features/04-workflow/), [Spec 051](specs/features/04-workflow/spec-051-benchmark-cost-gate.md), [Spec 052](specs/features/04-workflow/spec-052-cost-gate-contract-sync.md) |
+| 7 - Otimizacao continua | Implementada | [Spec 020](specs/features/04-workflow/spec-020-token-optimization-phase-7-continuous-optimization.md), [Spec 021](specs/features/04-workflow/spec-021-continuous-benchmark-ci-gate.md), [Spec 022](specs/features/04-workflow/spec-022-cross-platform-test-runner.md), [Specs 037-042](specs/features/04-workflow/), [Spec 051](specs/features/04-workflow/spec-051-benchmark-cost-gate.md), [Spec 052](specs/features/04-workflow/spec-052-cost-gate-contract-sync.md), [Spec 055](specs/features/04-workflow/spec-055-benchmark-scenario-regression-report.md) |
 
 O benchmark de seis cenarios e os fixtures de execution-record sao evidencia sintetica, deterministica e local. Eles nao representam telemetria inventada de provedores. Registros reais so podem entrar no mesmo contrato quando forem produzidos pelo fluxo de execucao e validados com medicoes disponiveis.
 
@@ -318,7 +318,7 @@ Melhorar o sistema com dados reais, não com suposições.
 - testes A/B;
 - conjunto fixo de tarefas de avaliação;
 - comparação entre políticas;
-- relatório de custo e qualidade;
+- relatório de custo e qualidade, detalhado por cenário;
 - acompanhamento de regressões;
 - ajuste de limites e roteamento.
 
@@ -390,6 +390,6 @@ Essa combinação transforma o conceito de “agente minimalista” em uma camad
 
 ## 12. Proximo passo
 
-Concluir o gate manual do dashboard descrito em [`tests/dashboard-acceptance-matrix.md`](tests/dashboard-acceptance-matrix.md) e nos Specs 031/032, registrando viewport, tema, densidade, navegador, teclado, contraste e leitor de tela. A automacao de preflight e interaction smoke e complementar e nao substitui essa validacao humana.
+Concluir o gate manual do dashboard descrito em [`tests/dashboard-acceptance-matrix.md`](tests/dashboard-acceptance-matrix.md) e nos Specs 031/032, registrando viewport, tema, densidade, navegador, teclado, contraste e leitor de tela. A automacao de preflight e interaction smoke e complementar e nao substitui essa validacao humana. A Fase 7 tambem passa a expor regressoes por cenario no relatorio local, conforme [`Spec 055`](specs/features/04-workflow/spec-055-benchmark-scenario-regression-report.md), sem ativar politicas automaticamente.
 
 Depois, quando existirem registros reais suficientes, comparar uma execucao baseline e uma candidate com o benchmark existente, usando o contrato [`TaskExecutionRecord`](specs/features/04-workflow/spec-040-execution-record-handoff.md). A decisao continua sendo apenas `adopt_candidate` ou `keep_baseline`; nenhuma politica e ativada automaticamente.

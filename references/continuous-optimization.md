@@ -55,4 +55,8 @@ Every continuous comparison reports:
 - `adopt_candidate` or `keep_baseline`;
 - measured token, input, output, duration, coverage, success, and cost-per-completed-task metrics;
 - model-call, tool-call, turn, attempt, failure, and supporting cost metrics when available;
+- deterministic per-scenario total-token, input-token, output-token, duration, success-rate, and cost-per-completed-task comparisons, ordered by scenario ID;
 - bounded failure categories and no raw task or provider content.
+
+Scenario metrics are diagnostic evidence for regression tracking. They do not add a
+new activation path or bypass the existing aggregate quality and cost gates.

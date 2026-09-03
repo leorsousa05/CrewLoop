@@ -103,10 +103,15 @@ describe('token benchmark CLI', () => {
     const report = JSON.parse(stdout) as {
       decision: string;
       policy: { baseline: { version: string }; candidate: { version: string } };
+      scenarioMetrics: Array<{ scenarioId: string }>;
     };
     assert.equal(report.decision, 'adopt_candidate');
     assert.equal(report.policy.baseline.version, 'baseline-v1');
     assert.equal(report.policy.candidate.version, 'candidate-v1');
+    assert.deepEqual(
+      report.scenarioMetrics.map(({ scenarioId }) => scenarioId),
+      [...SCENARIOS].sort()
+    );
   });
 
   it('emits keep_baseline and a failing exit code for a quality regression', () => {
