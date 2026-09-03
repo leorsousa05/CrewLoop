@@ -73,11 +73,19 @@ Refine the six-view dashboard into a keyboard/screen-reader coherent operational
 
 ## Done When
 
-- [ ] AC-01 — proven by keyboard-only test (hidden-sidebar reachability)
-- [ ] AC-02 — proven by focus trap/restoration tests
-- [ ] AC-03 — proven by semantic DOM assertions
-- [ ] AC-04 — proven by desktop/mobile viewport walkthroughs
-- [ ] AC-05 — proven by live-region assertions in component tests
-- [ ] AC-06 — proven by contrast review + touch-target audit
-- [ ] AC-07 — proven by reduced-motion mode tests
-- [ ] AC-08 — proven by network inspection (no font CDN requests)
+- [x] AC-01 — proven by `getFocusableElements` hidden/aria-hidden/inert tests and the
+  browser interaction smoke's drawer focus-containment case.
+- [x] AC-02 — proven by the focus-trap/restoration tests and the browser interaction
+  smoke's drawer, command-palette, and filter-sheet cases (`8/8` interaction cases).
+- [x] AC-03 — proven by the accessibility contract test asserting sibling timeline
+  and copy buttons without a nested interactive row wrapper.
+- [ ] AC-04 — requires the desktop/mobile visual hierarchy walkthrough in the manual
+  acceptance matrix.
+- [ ] AC-05 — live-region primitives have automated coverage, but the complete
+  connection/pause/copy/loading/error/removal event matrix remains manual.
+- [ ] AC-06 — source and rendered contrast plus automated touch-target checks pass,
+  but the required human visual/contrast review remains pending.
+- [x] AC-07 — proven by the reduced-motion state tests and the browser persistence
+  interaction case.
+- [x] AC-08 — proven by the browser external-font resource case and the local-font
+  source contract.
