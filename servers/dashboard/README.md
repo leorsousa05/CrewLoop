@@ -254,7 +254,7 @@ For the bounded interaction checkpoint, add `--interaction-smoke`:
 npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
 ```
 
-The additional summary covers mobile overlay focus restoration, keyboard access to the empty session selector, reduced-motion persistence, hash history, and external font requests. It remains separate from the manual visual, contrast, keyboard, async-state, and screen-reader walkthrough.
+The additional summary covers mobile overlay `Tab`/`Shift+Tab` focus containment and restoration, keyboard access to the empty session selector, reduced-motion persistence, hash history, and external font requests. It remains separate from the manual visual, contrast, keyboard, async-state, and screen-reader walkthrough.
 
 ## Known limitations
 

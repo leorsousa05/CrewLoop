@@ -1,5 +1,6 @@
 const SETTINGS_KEY = 'crewloop-dashboard-settings';
 const SETTINGS_VERSION = 1;
+const SHIFT_MODIFIER = 8;
 
 function dashboardUrl(baseUrl, view) {
   const url = new URL(baseUrl);
@@ -44,9 +45,9 @@ async function requireInteraction(client, sessionId, label, expression) {
   return result;
 }
 
-async function pressKey(client, sessionId, key) {
-  await client.call('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key }, sessionId);
-  await client.call('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key }, sessionId);
+async function pressKey(client, sessionId, key, modifiers = 0) {
+  await client.call('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key, modifiers }, sessionId);
+  await client.call('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, modifiers }, sessionId);
 }
 
 async function prepareInteractionPage(client, sessionId, url, timeout) {
@@ -105,6 +106,16 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const dialog = document.querySelector('[role="dialog"][aria-label="Main navigation"]');
       return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
     })()`);
+    await pressKey(client, sessionId, 'Tab');
+    await requireInteraction(client, sessionId, 'drawer forward focus trap', `(() => {
+      const dialog = document.querySelector('[role="dialog"][aria-label="Main navigation"]');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
+    await pressKey(client, sessionId, 'Tab', SHIFT_MODIFIER);
+    await requireInteraction(client, sessionId, 'drawer reverse focus trap', `(() => {
+      const dialog = document.querySelector('[role="dialog"][aria-label="Main navigation"]');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
     await pressKey(client, sessionId, 'Escape');
     await sleep(75);
     const result = await requireInteraction(client, sessionId, 'drawer close focus', `(() => {
@@ -112,7 +123,7 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const dialog = document.querySelector('[role="dialog"][aria-label="Main navigation"]');
       return { ok: Boolean(trigger && !dialog && document.activeElement === trigger) };
     })()`);
-    return { restored: result.ok };
+    return { focusContained: true, restored: result.ok };
   });
 
   await runCase('command palette focus restoration', async () => {
@@ -130,6 +141,16 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const input = document.querySelector('[aria-label="Search commands"]');
       return { ok: Boolean(dialog && input && dialog.contains(document.activeElement) && document.activeElement === input) };
     })()`);
+    await pressKey(client, sessionId, 'Tab');
+    await requireInteraction(client, sessionId, 'command palette forward focus trap', `(() => {
+      const dialog = document.querySelector('[role="dialog"][aria-label="Command palette"]');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
+    await pressKey(client, sessionId, 'Tab', SHIFT_MODIFIER);
+    await requireInteraction(client, sessionId, 'command palette reverse focus trap', `(() => {
+      const dialog = document.querySelector('[role="dialog"][aria-label="Command palette"]');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
     await pressKey(client, sessionId, 'Escape');
     await sleep(75);
     const result = await requireInteraction(client, sessionId, 'command palette close focus', `(() => {
@@ -137,7 +158,7 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const dialog = document.querySelector('[role="dialog"][aria-label="Command palette"]');
       return { ok: Boolean(trigger && !dialog && document.activeElement === trigger) };
     })()`);
-    return { restored: result.ok };
+    return { focusContained: true, restored: result.ok };
   });
 
   await runCase('mobile filter sheet focus restoration', async () => {
@@ -155,6 +176,16 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const dialog = document.querySelector('#mobile-filter-sheet');
       return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
     })()`);
+    await pressKey(client, sessionId, 'Tab');
+    await requireInteraction(client, sessionId, 'filter sheet forward focus trap', `(() => {
+      const dialog = document.querySelector('#mobile-filter-sheet');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
+    await pressKey(client, sessionId, 'Tab', SHIFT_MODIFIER);
+    await requireInteraction(client, sessionId, 'filter sheet reverse focus trap', `(() => {
+      const dialog = document.querySelector('#mobile-filter-sheet');
+      return { ok: Boolean(dialog && dialog.contains(document.activeElement)) };
+    })()`);
     await pressKey(client, sessionId, 'Escape');
     await sleep(75);
     const result = await requireInteraction(client, sessionId, 'filter sheet close focus', `(() => {
@@ -163,7 +194,7 @@ export async function runInteractionSmoke(client, sessionId, baseUrl, timeout) {
       const dialog = document.querySelector('#mobile-filter-sheet');
       return { ok: Boolean(trigger && !dialog && document.activeElement === trigger) };
     })()`);
-    return { restored: result.ok };
+    return { focusContained: true, restored: result.ok };
   });
 
   await runCase('empty session selector keyboard state', async () => {

@@ -41,7 +41,7 @@ To add the bounded interaction checkpoint to the same run, pass `--interaction-s
 npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
 ```
 
-This adds checks for mobile overlays and focus restoration, keyboard-opening the empty session selector, reduced-motion persistence, hash history restoration, and external font requests. The interaction summary fails closed on an invariant failure; with `--summary`, it is nested in the single final summary object. These checks remain automated evidence and do not replace the manual matrix.
+This adds checks for mobile overlays, real `Tab`/`Shift+Tab` focus containment and restoration, keyboard-opening the empty session selector, reduced-motion persistence, hash history restoration, and external font requests. The interaction summary fails closed on an invariant failure; with `--summary`, it is nested in the single final summary object. These checks remain automated evidence and do not replace the manual matrix.
 
 ## Dashboard Manual Testing
 

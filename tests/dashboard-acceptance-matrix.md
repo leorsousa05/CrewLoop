@@ -33,7 +33,7 @@ This checkpoint is evidence for the later manual walkthrough; it does not mark t
 
 The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary` completed `112/112` combinations at commit `e971854`, with `passed: 112`, `failed: 0`, and exit code `0`.
 
-The optional interaction preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary --interaction-smoke` also passed with `7/7` interaction cases, `interactionSuccess: true`, and exit code `0`. The empty session-selector case reported `state: "empty"` and `optionCount: 0`; drawer, command palette, and filter sheet cases used real CDP keyboard events for Escape and focus restoration.
+The optional interaction preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary --interaction-smoke` also passed with `7/7` interaction cases, `interactionSuccess: true`, and exit code `0`. The empty session-selector case reported `state: "empty"` and `optionCount: 0`; drawer, command palette, and filter sheet cases used real CDP keyboard events for `Tab`, `Shift+Tab`, Escape, focus containment, and restoration.
 
 The smoke checks used Chrome DevTools Protocol with no assistive technology. Keyboard, full contrast coverage, async-state, and screen-reader observations still require the manual matrix below.
 
