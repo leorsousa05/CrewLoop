@@ -52,6 +52,23 @@ custo total por tarefa concluída corretamente
 
 Menos tokens com mais falhas não é otimização.
 
+## 3.1 Status atual da implementacao
+
+As Fases 0 a 7 ja possuem contratos portateis, testes e evidencias locais no proprio CrewLoop:
+
+| Fase | Status | Evidencia principal |
+|---|---|---|
+| 0 - Medicao e linha de base | Implementada | [Spec 014](specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md) |
+| 1 - Politica minimalista | Implementada | [Spec 014](specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md) |
+| 2 - Contexto inteligente | Implementada | [Spec 015](specs/features/04-workflow/spec-015-token-optimization-phase-2-context-selection.md) |
+| 3 - Controle de execucao | Implementada | [Spec 016](specs/features/04-workflow/spec-016-token-optimization-phase-3-execution-control.md) |
+| 4 - Verificacao automatica | Implementada | [Spec 017](specs/features/04-workflow/spec-017-token-optimization-phase-4-automatic-verification.md) |
+| 5 - Roteamento de modelos | Implementada | [Spec 018](specs/features/04-workflow/spec-018-token-optimization-phase-5-model-routing.md) |
+| 6 - Perfis de execucao | Implementada | [Spec 019](specs/features/04-workflow/spec-019-token-optimization-phase-6-execution-profiles.md) |
+| 7 - Otimizacao continua | Implementada | [Spec 020](specs/features/04-workflow/spec-020-token-optimization-phase-7-continuous-optimization.md), [Spec 021](specs/features/04-workflow/spec-021-continuous-benchmark-ci-gate.md), [Spec 037](specs/features/04-workflow/spec-037-execution-record-benchmark-bridge.md) e specs relacionadas |
+
+O benchmark de seis cenarios e os fixtures de execution-record sao evidencia sintetica, deterministica e local. Eles nao representam telemetria inventada de provedores. Registros reais so podem entrar no mesmo contrato quando forem produzidos pelo fluxo de execucao e validados com medicoes disponiveis.
+
 ## 4. Princípios do sistema
 
 ### 4.1 Política minimalista
@@ -371,14 +388,8 @@ Orientar o modelo
 
 Essa combinação transforma o conceito de “agente minimalista” em uma camada real de otimização do orquestrador.
 
-## 12. Próximo passo
+## 12. Proximo passo
 
-Transformar as Fases 0 e 1 em uma especificação técnica contendo:
+Concluir o gate manual do dashboard descrito em [`tests/dashboard-acceptance-matrix.md`](tests/dashboard-acceptance-matrix.md) e nos Specs 031/032, registrando viewport, tema, densidade, navegador, teclado, contraste e leitor de tela. A automacao de preflight e interaction smoke e complementar e nao substitui essa validacao humana.
 
-- eventos disponíveis no orquestrador;
-- formato da telemetria;
-- política inicial;
-- limites de tokens;
-- condições de parada;
-- tarefas usadas no benchmark;
-- critérios de aprovação.
+Depois, quando existirem registros reais suficientes, comparar uma execucao baseline e uma candidate com o benchmark existente, usando o contrato [`TaskExecutionRecord`](specs/features/04-workflow/spec-040-execution-record-handoff.md). A decisao continua sendo apenas `adopt_candidate` ou `keep_baseline`; nenhuma politica e ativada automaticamente.
