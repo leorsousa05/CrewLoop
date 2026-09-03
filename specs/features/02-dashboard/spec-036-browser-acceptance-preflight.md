@@ -3,9 +3,9 @@
 ---
 name: spec-036-browser-acceptance-preflight
 domain: 02-dashboard
-status: active
+status: completed
 created: 2026-09-02
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 

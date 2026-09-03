@@ -1,9 +1,9 @@
 ---
 name: spec-015-token-optimization-phase-2-context-selection
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-09-01
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 

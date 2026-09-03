@@ -3,9 +3,9 @@
 ---
 name: spec-013-automated-architect-and-designer
 domain: 04-workflow
-status: in-progress
+status: completed
 created: 2026-06-27
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 

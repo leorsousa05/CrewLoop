@@ -3,9 +3,9 @@
 ---
 name: spec-037-execution-record-benchmark-bridge
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-09-02
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 

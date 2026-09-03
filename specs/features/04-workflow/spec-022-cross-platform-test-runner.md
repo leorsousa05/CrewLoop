@@ -1,9 +1,9 @@
 ---
 name: spec-022-cross-platform-test-runner
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-09-01
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 

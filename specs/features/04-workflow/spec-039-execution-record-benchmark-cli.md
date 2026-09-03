@@ -3,9 +3,9 @@
 ---
 name: spec-039-execution-record-benchmark-cli
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-09-03
-completed: null
+completed: 2026-09-03
 supersedes: []
 ---
 
