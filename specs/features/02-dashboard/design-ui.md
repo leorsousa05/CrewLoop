@@ -167,15 +167,17 @@ References: `skills/crewloop-design/references/motion-playbook.md`, `skills/crew
 
 ## Engineering handoff checklist
 
-- [ ] Add/reuse one focus-trap lifecycle primitive for the mobile nav, filter sheet, desktop filter popovers, and command palette.
-- [ ] Ensure closed mobile navigation has no mounted reachable controls; apply modal semantics only while open.
-- [ ] Normalize session selector combobox/listbox keyboard and selection semantics.
-- [ ] Refactor Timeline and Sessions rows so content actions are sibling controls.
-- [ ] Add stable live-region announcements and explicit async states across shell and views.
-- [ ] Apply narrow-layout stacking, 44px touch targets, and readable overflow handling to all six views.
-- [ ] Retain both theme token sets, strengthen any metadata token that fails AA for its actual usage, and verify status cues without color alone.
-- [ ] Remove blur/bounce motion and verify manual/OS reduced-motion behavior.
-- [ ] Verify there are no external font requests and add component tests for keyboard, focus, semantics, states, and responsive class contracts.
+- [x] Add/reuse one focus-trap lifecycle primitive for the mobile nav, filter sheet, desktop filter popovers, and command palette.
+- [x] Ensure closed mobile navigation has no mounted reachable controls; apply modal semantics only while open.
+- [x] Normalize session selector combobox/listbox keyboard and selection semantics.
+- [x] Refactor Timeline and Sessions rows so content actions are sibling controls.
+- [x] Add stable live-region announcements and explicit async states across shell and views.
+- [x] Apply narrow-layout stacking, 44px touch targets, and readable overflow handling to all six views.
+- [ ] Retain both theme token sets, strengthen any metadata token that fails AA for its actual usage, and verify status cues without color alone. Full body-contrast walkthrough remains pending in Specs 031/032.
+- [ ] Remove blur/bounce motion and verify manual/OS reduced-motion behavior. OS-preference walkthrough remains pending in Specs 031/032.
+- [x] Verify there are no external font requests and add component tests for keyboard, focus, semantics, states, and responsive class contracts.
+
+Automated evidence for the checked items includes the dashboard accessibility contract suite, the 112-combination browser preflight, the 7-case interaction smoke, and the hidden-subtree regression in Spec 046. The unchecked visual contrast and OS reduced-motion items remain part of the manual acceptance matrix.
 
 ## Acceptance mapping
 
@@ -189,4 +191,3 @@ References: `skills/crewloop-design/references/motion-playbook.md`, `skills/crew
 | AC-06 | Semantic theme tokens, AA audit, contextual 44px touch sizing |
 | AC-07 | Transform/opacity-only motion and dual reduced-motion controls |
 | AC-08 | Existing fallback fonts only; no network font source |
-
