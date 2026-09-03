@@ -89,6 +89,7 @@ export interface TokenBenchmarkConfig {
   minimumTokenReductionPercent: number;
   minimumMeasuredCoveragePercent: number;
   maximumDurationRegressionPercent: number;
+  maximumCostRegressionPercent: number;
   requireCandidateSuccessForPassingBaseline: boolean;
 }
 
@@ -139,6 +140,7 @@ export const DEFAULT_TOKEN_BENCHMARK_CONFIG: TokenBenchmarkConfig = {
   minimumTokenReductionPercent: 15,
   minimumMeasuredCoveragePercent: 95,
   maximumDurationRegressionPercent: 10,
+  maximumCostRegressionPercent: 0,
   requireCandidateSuccessForPassingBaseline: true,
 };
 
@@ -531,6 +533,12 @@ function sameStrings(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
+function validateBenchmarkConfig(config: TokenBenchmarkConfig): void {
+  if (!Number.isFinite(config.maximumCostRegressionPercent) || config.maximumCostRegressionPercent < 0) {
+    throw new Error('maximumCostRegressionPercent must be a finite non-negative number');
+  }
+}
+
 export function compareTokenBenchmarks(
   rawBaseline: TokenBenchmarkDataset,
   rawCandidate: TokenBenchmarkDataset,
@@ -539,6 +547,7 @@ export function compareTokenBenchmarks(
   const baseline = validateTokenBenchmarkDataset(rawBaseline);
   const candidate = validateTokenBenchmarkDataset(rawCandidate);
   const config = { ...DEFAULT_TOKEN_BENCHMARK_CONFIG, ...overrides };
+  validateBenchmarkConfig(config);
   const failures: string[] = [];
 
   if (!sameStrings(scenarioIds(baseline.runs), scenarioIds(candidate.runs))) {
@@ -630,6 +639,14 @@ export function compareTokenBenchmarks(
   if (durationMs.deltaPercent !== null && durationMs.deltaPercent > config.maximumDurationRegressionPercent) {
     failures.push(
       `duration regression ${durationMs.deltaPercent.toFixed(2)}% exceeds ${config.maximumDurationRegressionPercent}%`
+    );
+  }
+  const costPerCompletedTaskMetric = execution.costPerCompletedTaskMicrousd;
+  if (costPerCompletedTaskMetric.deltaPercent === null) {
+    failures.push('cost per completed task is unavailable for comparison');
+  } else if (costPerCompletedTaskMetric.deltaPercent > config.maximumCostRegressionPercent) {
+    failures.push(
+      `cost per completed task regression ${costPerCompletedTaskMetric.deltaPercent.toFixed(2)}% exceeds ${config.maximumCostRegressionPercent}%`
     );
   }
   if (

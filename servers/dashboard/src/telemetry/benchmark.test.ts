@@ -319,6 +319,45 @@ describe('token benchmark', () => {
     assert.match(result.failures.join('\n'), /pass every run/);
   });
 
+  it('fails when token reduction hides a cost regression', () => {
+    const result = compareTokenBenchmarks(
+      dataset('before', [run('baseline')]),
+      dataset('after', [run('candidate', { costMicrousd: 120 })])
+    );
+    assert.equal(result.passed, false);
+    assert.equal(result.decision, 'keep_baseline');
+    assert.match(result.failures.join('\n'), /cost per completed task regression/);
+  });
+
+  it('fails closed when cost per completed task is unavailable', () => {
+    const result = compareTokenBenchmarks(
+      dataset('before', [run('baseline')]),
+      dataset('after', [run('candidate', { costMicrousd: null })])
+    );
+    assert.equal(result.passed, false);
+    assert.equal(result.decision, 'keep_baseline');
+    assert.match(result.failures.join('\n'), /cost per completed task is unavailable/);
+  });
+
+  it('rejects an invalid cost regression threshold', () => {
+    assert.throws(
+      () => compareTokenBenchmarks(
+        dataset('before', [run('baseline')]),
+        dataset('after', [run('candidate')]),
+        { maximumCostRegressionPercent: Number.NaN }
+      ),
+      /maximumCostRegressionPercent must be a finite non-negative number/
+    );
+    assert.throws(
+      () => compareTokenBenchmarks(
+        dataset('before', [run('baseline')]),
+        dataset('after', [run('candidate')]),
+        { maximumCostRegressionPercent: -1 }
+      ),
+      /maximumCostRegressionPercent must be a finite non-negative number/
+    );
+  });
+
   it('fails on insufficient measured coverage', () => {
     const result = compareTokenBenchmarks(
       dataset('before', [run('baseline'), run('baseline', { repetition: 2 })]),

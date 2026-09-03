@@ -139,7 +139,7 @@ Monetary values are labelled **Estimated API-equivalent USD**. Provider-reported
 
 ## Continuous token benchmark
 
-The fixed benchmark compares the baseline and candidate CrewLoop optimization policies across six synthetic scenarios. It validates policy identity, scenario coverage, token measurement quality, execution metrics, and required quality gates before returning `adopt_candidate` or `keep_baseline`.
+The fixed benchmark compares the baseline and candidate CrewLoop optimization policies across six synthetic scenarios. It validates policy identity, scenario coverage, token measurement quality, execution metrics, measured cost per correctly completed task, and required quality gates before returning `adopt_candidate` or `keep_baseline`. A candidate must not regress cost per completed task; missing cost evidence fails closed.
 
 Verified host execution records can be projected into the existing benchmark-run contract with the provider-neutral `projectTaskExecutionRecord` adapter. Records without verified token usage, duration, or tool-call measurements return a bounded unavailable result and are not converted into synthetic zeroes.
 
@@ -176,7 +176,7 @@ npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
   --format markdown
 ```
 
-The command is launched from the repository root; npm resolves the fixture arguments from the dashboard workspace directory. This deterministic fixture run should report `adopt_candidate`, 100% measured coverage, and a 25% total-token reduction. The fixtures are synthetic evidence for local validation, not production provider telemetry.
+The command is launched from the repository root; npm resolves the fixture arguments from the dashboard workspace directory. This deterministic fixture run should report `adopt_candidate`, 100% measured coverage, a 25% total-token reduction, and a 25% cost-per-completed-task reduction. The fixtures are synthetic evidence for local validation, not production provider telemetry.
 
 Run the same gate used by CI from the repository root:
 
