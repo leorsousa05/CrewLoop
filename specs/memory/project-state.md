@@ -52,6 +52,7 @@
 - 2026-09-03: Spec 047 synchronizes `ROADMPA.md` with the shipped token-optimization phases 0-7, replaces the stale Phase 0/1 next-step note with the dashboard manual gate, and documents the boundary between synthetic fixtures and future real execution records. The roadmap remains recommendation-only and local; no provider telemetry or automatic policy activation was added.
 - 2026-09-03: Reconciled feature-spec state against recorded evidence. Specs 013, 015–018, 022, 030, and 034–039 are now marked completed; Specs 031 and 032 remain active because their manual dashboard matrix still has unchecked visual, keyboard, contrast, and screen-reader results. Completed feature specs remain in `specs/features/` per repository convention; no archive move was performed.
 - 2026-09-03: Re-ran the dashboard browser acceptance preflight at commit `e2e83f7` using an isolated local server and Chrome profile. All 112 route/viewport/theme/density combinations passed with 0 failures; the manual visual, keyboard, contrast, and screen-reader matrix remains open and explicitly separate.
+- 2026-09-03: Re-ran the dashboard preflight at commit `461c322` after the shared focus-discovery hardening. The isolated Chrome run passed `112/112` route combinations and `7/7` interaction cases, including focus containment/restoration for the drawer, command palette, and filter sheet; temporary server, CDP, and browser profile were removed afterward.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
