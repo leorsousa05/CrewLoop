@@ -51,3 +51,11 @@ test('keeps the rendered contrast audit in the interaction smoke', () => {
   assert.match(source, /minimumRatio = 4\.5/);
   assert.match(source, /unsupportedCount/);
 });
+
+test('waits for browser style and paint readiness before interaction assertions', () => {
+  const source = fs.readFileSync(path.join(packageRoot, 'dashboard-interaction-smoke.mjs'), 'utf8');
+
+  assert.match(source, /document\.fonts\?\.ready/);
+  assert.match(source, /requestAnimationFrame\(\(\) => requestAnimationFrame/);
+  assert.match(source, /waitForRenderedStyles\(client, sessionId\)/);
+});

@@ -30,6 +30,13 @@ function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+async function waitForRenderedStyles(client, sessionId) {
+  await client.evaluate(`(async () => {
+    if (document.fonts?.ready) await document.fonts.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  })()`, sessionId);
+}
+
 async function waitForHash(client, sessionId, expectedHash, timeout) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
@@ -78,6 +85,7 @@ async function prepareInteractionPage(client, sessionId, url, timeout, options =
     try {
       const readyState = await client.evaluate('document.readyState', sessionId);
       if (readyState === 'interactive' || readyState === 'complete') {
+        await waitForRenderedStyles(client, sessionId);
         await sleep(Math.min(100, Math.max(25, timeout / 100)));
         return;
       }
