@@ -49,6 +49,7 @@ Read [conventions.md](../../references/conventions.md) and [workflow.md](../../r
 6. **Execution & Handoff:**
    - Stage target task files only (leave unrelated pre-existing modifications unstaged).
    - Commit and push safely.
+   - When a benchmark record is part of the task, carry only one sanitized `TaskExecutionRecord` or the bounded `execution_record_unavailable` result. Never stage raw telemetry, provider payloads, prompts, responses, paths, credentials, or session identifiers, and never activate a policy from benchmark output.
    - End on `done` (In AFK, return to `crewloop:plan`).
 
 ---

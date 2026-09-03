@@ -2,7 +2,7 @@
 
 > Always-read file. Updated at the end of every working session by `crewloop:ship` (or `crewloop:plan` during discovery).
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-09-03
 
 ## Module status
 
@@ -42,6 +42,9 @@
 - 2026-09-02: Spec 037 added `projectTaskExecutionRecord`, a side-effect-free bridge from validated provider-neutral execution telemetry to the existing benchmark-run contract. It preserves optional metrics, marks missing token/duration/tool measurements unavailable instead of zero, derives success only from passed verification plus completed outcome, and passed focused projection tests.
 - 2026-09-03: Spec 038 added `buildTokenBenchmarkDatasetFromExecutionRecords`, a deterministic local collector that turns complete validated execution records into benchmark datasets, reports all unavailable indexes without partial output, and preserves duplicate/conflict validation. Focused tests passed 24/24; the complete dashboard suite passed 346 server tests and 89 UI tests, with typecheck and production build green.
 - 2026-09-03: Spec 039 added paired `--baseline-records`/`--candidate-records` input to the local benchmark CLI. It routes host execution records through the existing collector, preserves the dataset-file mode, fails closed on incomplete or ambiguous input, and keeps the same adoption recommendation and exit codes. Focused CLI/benchmark tests passed 30/30; the complete dashboard suite passed 350 server tests and 89 UI tests, with typecheck, production build, and fixed benchmark green.
+- 2026-09-03: Spec 040 adds the task-boundary `TaskExecutionRecord` handoff across Plan, Code, Review, and Ship. The shared contract keeps benchmark metadata bounded, preserves unavailable host measurements, validates evidence fail-closed, and excludes prompts, responses, paths, credentials, provider payloads, and session identifiers. Workflow contract tests passed 4/4; skill validation passed for all 7 skills; the dashboard suite passed 350 server tests and 89 UI tests, typecheck/build passed, and the fixed benchmark returned `adopt_candidate` with 25% lower total tokens.
+- 2026-09-03: Spec 041 makes record-mode benchmarking reproducible with checked-in sanitized baseline/candidate fixtures covering all six canonical scenarios. The CLI now proves exact schema/privacy boundaries and clean output from those fixtures. Focused benchmark tests passed 7/7; the complete dashboard suite passed 351 server tests and 89 UI tests, typecheck/build passed, and the documented record-mode benchmark returned `adopt_candidate` with 25% lower tokens and cost at 100% measured coverage.
+- 2026-09-03: Spec 042 adds the record-mode benchmark as a required post-dataset gate in `.github/workflows/validate.yml`. It reuses CLI exit codes, preserves all existing gates, and has workflow contract coverage for order and paired fixtures. Contract tests passed 5/5; skill validation passed for all 7 skills; workspace build/tests passed, and both dataset-mode and record-mode CI-equivalent benchmarks returned `adopt_candidate` with 100% coverage and 25% token reduction.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -50,4 +53,4 @@
 
 ## Next task suggested
 
-- Run the record-mode benchmark with representative sanitized execution records, complete and record the dashboard browser acceptance matrix, then use Ship to close Spec 013, archive specs 021/022, and close Specs 032/034/035/037/038/039. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Complete and record the dashboard browser acceptance matrix, then use Ship to close Spec 013, archive specs 021/022, and close Specs 032/034/035/037/038/039. Keep both dataset and execution-record CI fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

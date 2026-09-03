@@ -167,6 +167,17 @@ npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
 
 The two record files must be supplied together. Missing required measurements fail closed with record indexes and reason codes; no partial dataset or synthetic zero is compared.
 
+To reproduce the checked-in sanitized six-scenario record-mode benchmark from the repository root:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline-records src/telemetry/fixtures/execution-baseline.json \
+  --candidate-records src/telemetry/fixtures/execution-candidate.json \
+  --format markdown
+```
+
+The command is launched from the repository root; npm resolves the fixture arguments from the dashboard workspace directory. This deterministic fixture run should report `adopt_candidate`, 100% measured coverage, and a 25% total-token reduction. The fixtures are synthetic evidence for local validation, not production provider telemetry.
+
 Run the same gate used by CI from the repository root:
 
 ```bash

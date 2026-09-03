@@ -38,6 +38,13 @@ jobs:
           --candidate src/telemetry/fixtures/candidate.json
           --format markdown
 
+      - name: Run execution-record token benchmark
+        run: >-
+          npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard --
+          --baseline-records src/telemetry/fixtures/execution-baseline.json
+          --candidate-records src/telemetry/fixtures/execution-candidate.json
+          --format markdown
+
       - name: Validate skills
         run: |
           python3 -m unittest scripts.tests.test_validate_skills scripts.tests.test_automated_workflow

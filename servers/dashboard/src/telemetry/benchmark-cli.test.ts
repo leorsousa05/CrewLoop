@@ -4,9 +4,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { runBenchmarkCli } from './benchmark-cli';
+import { TOKEN_OPTIMIZATION_SCENARIO_IDS, validateTaskExecutionRecord } from './execution';
 
 function fixture(name: string): string {
   return path.resolve(__dirname, '../../src/telemetry/fixtures', name);
+}
+
+function readJsonFixture(name: string): Record<string, unknown> {
+  return JSON.parse(fs.readFileSync(fixture(name), 'utf8')) as Record<string, unknown>;
+}
+
+function assertSortedKeys(value: Record<string, unknown>, expected: string[]): void {
+  assert.deepEqual(Object.keys(value).sort(), [...expected].sort());
 }
 
 const SCENARIOS = [
@@ -161,6 +170,72 @@ describe('token benchmark CLI', () => {
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  it('runs the checked-in sanitized execution-record fixtures', () => {
+    const expectedContainerKeys = ['label', 'policy', 'source', 'records'];
+    const expectedRecordKeys = [
+      'schemaVersion', 'taskId', 'scenarioId', 'variant', 'repetition', 'risk', 'profile',
+      'startedAt', 'endedAt', 'durationMs', 'modelCalls', 'toolCalls', 'turns', 'attempts',
+      'failures', 'verification', 'outcome', 'stopReason', 'tokenUsage', 'costMicrousd',
+    ];
+    const expectedTokenUsageKeys = [
+      'inputTokens', 'outputTokens', 'cacheReadTokens', 'cacheWriteTokens', 'reasoningTokens',
+      'totalTokens', 'quality', 'model', 'measurementCount', 'rejectedMeasurementCount',
+    ];
+    const fixtures = [
+      ['execution-baseline.json', 'baseline'],
+      ['execution-candidate.json', 'candidate'],
+    ] as const;
+
+    for (const [name, variant] of fixtures) {
+      const container = readJsonFixture(name);
+      assertSortedKeys(container, expectedContainerKeys);
+      assert.equal(container.source, 'codex');
+      assertSortedKeys(container.policy as Record<string, unknown>, ['id', 'version']);
+      const records = container.records as Array<Record<string, unknown>>;
+      assert.equal(records.length, TOKEN_OPTIMIZATION_SCENARIO_IDS.length);
+      assert.deepEqual(
+        records.map((record) => record.scenarioId).sort(),
+        [...TOKEN_OPTIMIZATION_SCENARIO_IDS].sort(),
+      );
+
+      for (const record of records) {
+        assertSortedKeys(record, expectedRecordKeys);
+        assert.equal(record.variant, variant);
+        validateTaskExecutionRecord(record);
+        assertSortedKeys(record.tokenUsage as Record<string, unknown>, expectedTokenUsageKeys);
+        assert.equal((record.tokenUsage as Record<string, unknown>).quality, 'measured');
+        assert.equal(record.durationMs !== null, true);
+        assert.equal(record.toolCalls !== null, true);
+      }
+
+      const serialized = JSON.stringify(container);
+      assert.doesNotMatch(serialized, /prompt|response|command|path|credential|transcript|session/i);
+    }
+
+    let stdout = '';
+    let stderr = '';
+    const exitCode = runBenchmarkCli([
+      '--baseline-records', fixture('execution-baseline.json'),
+      '--candidate-records', fixture('execution-candidate.json'),
+      '--format', 'json',
+    ], {
+      stdout: (value) => { stdout += value; },
+      stderr: (value) => { stderr += value; },
+    });
+
+    const report = JSON.parse(stdout) as {
+      decision: string;
+      totalTokens: { deltaPercent: number | null };
+      measuredCoveragePercent: number;
+    };
+    assert.equal(exitCode, 0);
+    assert.equal(stderr, '');
+    assert.equal(report.decision, 'adopt_candidate');
+    assert.equal(report.totalTokens.deltaPercent, -25);
+    assert.equal(report.measuredCoveragePercent, 100);
+    assert.doesNotMatch(stdout, /record-(baseline|candidate)-0[1-6]|fixture-model/);
   });
 
   it('fails closed when an execution-record file has unavailable measurements', () => {

@@ -36,6 +36,17 @@ The manifest contains no prompts, responses, paths, credentials, provider payloa
 - Ship may commit or push only after Review passes; benchmark output never bypasses Shipper's Git boundary.
 - A single noisy run cannot auto-tune limits, routing, profiles, or context selection. Any adoption is a separately reviewed policy change with a new candidate version.
 
+## Execution Record Handoff
+
+When a task explicitly requests benchmark evidence, the workflow carries one task-local `TaskExecutionRecord` and emits it only at the task or benchmark boundary. Ordinary turns do not repeat the record because telemetry must not add avoidable context overhead.
+
+- **Plan** supplies bounded task/scenario identity, baseline/candidate variant, repetition, and risk/profile metadata. Policy ID/version stays in the existing benchmark manifest and is not added to `TaskExecutionRecord`.
+- **Code** adds only verified timestamps, model/tool/turn/attempt/failure counters, outcomes, stop reasons, and normalized token usage. Host-unavailable values remain `null`.
+- **Review** validates the record shape, required verification evidence, scope, and exclusion of raw task/provider data before it is benchmark evidence.
+- **Ship** carries one sanitized record to the local benchmark workflow or reports a bounded unavailable result. It never commits raw telemetry or activates a policy from the recommendation.
+
+The handoff may contain only the existing record fields: bounded identifiers, numeric measurements, approved enum values, and normalized `ClientTokenUsage`. It must not contain prompts, responses, commands, paths, credentials, transcript content, raw provider payloads, or session identifiers. If a required identity or timestamp is unavailable, the workflow reports `execution_record_unavailable` instead of fabricating a value.
+
 ## Report Contract
 
 Every continuous comparison reports:
