@@ -26,6 +26,7 @@ npm test
 ```
 
 The dashboard test command covers server security and filesystem boundaries, event contracts, lifecycle/state behavior, all supported adapters, token telemetry, client projection/filter/settings logic, request races, and UI accessibility/live-state contracts.
+It also runs the browser-free preflight CLI contract checks for help and fail-closed argument validation; browser interaction coverage remains an explicit CDP preflight step below.
 
 For the reproducible browser preflight, start the production dashboard and Chrome with a local CDP endpoint, then run from `servers/dashboard/`:
 

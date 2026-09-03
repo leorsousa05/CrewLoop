@@ -240,6 +240,8 @@ npm run build
 npm test
 ```
 
+The package test command includes the server suite, UI suite, and browser-free acceptance-preflight CLI contract checks.
+
 To reproduce the automated browser checkpoint from the acceptance matrix, run the production server and connect the preflight to an already-running local Chrome CDP endpoint:
 
 ```bash
