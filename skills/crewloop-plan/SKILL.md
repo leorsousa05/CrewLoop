@@ -46,7 +46,7 @@ Apply [execution-profiles.md](../../references/execution-profiles.md) after risk
 
 ### Continuous Optimization
 
-When the task changes context selection, execution budgets, stop conditions, model routing, or execution profiles, apply [continuous-optimization.md](../../references/continuous-optimization.md). Emit one bounded baseline/candidate policy manifest for the fixed corpus, identical acceptance checks, and required comparison gates. Treat the result as evidence for Review, never as automatic policy activation.
+When the task changes context selection, execution budgets, stop conditions, model routing, or execution profiles, apply [continuous-optimization.md](../../references/continuous-optimization.md). Emit one bounded baseline/candidate policy manifest for the fixed corpus, identical acceptance checks, and required comparison gates, including measured cost per correctly completed task at or below baseline; unavailable cost evidence keeps the baseline. Treat the result as evidence for Review, never as automatic policy activation.
 
 When the user requests benchmark evidence, add one compact `TaskExecutionRecord` manifest to the task brief: bounded task/scenario identity, `baseline`/`candidate` variant, repetition, risk, profile, and whether the host can provide verified timestamps and counters. Keep policy ID/version in the existing benchmark manifest alongside the record; do not extend the record schema. If the required identity or timestamp cannot be verified, mark the handoff `execution_record_unavailable` instead of fabricating evidence. Do not include task text, prompts, responses, paths, credentials, or session identifiers. If no benchmark evidence is requested, omit the manifest to avoid adding context overhead.
 

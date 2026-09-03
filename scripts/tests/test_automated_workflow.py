@@ -62,6 +62,15 @@ class AutomatedWorkflowTest(unittest.TestCase):
         self.assertIn("execution_record_unavailable", self.review)
         self.assertIn("never activate a policy", self.ship)
 
+    def test_cost_gate_is_present_in_shared_workflow_handoffs(self) -> None:
+        self.assertIn("measured cost per correctly completed task at or below baseline", self.continuous_optimization)
+        self.assertIn("default cost-regression tolerance is 0%", self.continuous_optimization)
+        self.assertIn("Missing cost evidence fails closed", self.continuous_optimization)
+        self.assertIn("measured cost per correctly completed task at or below baseline", self.plan)
+        self.assertIn("verified cost when available", self.code)
+        self.assertIn("measured cost per correctly completed task at or below baseline", self.review)
+        self.assertIn("a cost regression", self.review)
+
     def test_ci_runs_dataset_and_execution_record_benchmarks(self) -> None:
         dataset_step = self.validation_workflow.index("name: Run continuous token benchmark")
         record_step = self.validation_workflow.index("name: Run execution-record token benchmark")

@@ -65,7 +65,7 @@ As Fases 0 a 7 ja possuem contratos portateis, testes e evidencias locais no pro
 | 4 - Verificacao automatica | Implementada | [Spec 017](specs/features/04-workflow/spec-017-token-optimization-phase-4-automatic-verification.md) |
 | 5 - Roteamento de modelos | Implementada | [Spec 018](specs/features/04-workflow/spec-018-token-optimization-phase-5-model-routing.md) |
 | 6 - Perfis de execucao | Implementada | [Spec 019](specs/features/04-workflow/spec-019-token-optimization-phase-6-execution-profiles.md) |
-| 7 - Otimizacao continua | Implementada | [Spec 020](specs/features/04-workflow/spec-020-token-optimization-phase-7-continuous-optimization.md), [Spec 021](specs/features/04-workflow/spec-021-continuous-benchmark-ci-gate.md), [Spec 022](specs/features/04-workflow/spec-022-cross-platform-test-runner.md), [Specs 037-042](specs/features/04-workflow/), [Spec 051](specs/features/04-workflow/spec-051-benchmark-cost-gate.md) |
+| 7 - Otimizacao continua | Implementada | [Spec 020](specs/features/04-workflow/spec-020-token-optimization-phase-7-continuous-optimization.md), [Spec 021](specs/features/04-workflow/spec-021-continuous-benchmark-ci-gate.md), [Spec 022](specs/features/04-workflow/spec-022-cross-platform-test-runner.md), [Specs 037-042](specs/features/04-workflow/), [Spec 051](specs/features/04-workflow/spec-051-benchmark-cost-gate.md), [Spec 052](specs/features/04-workflow/spec-052-cost-gate-contract-sync.md) |
 
 O benchmark de seis cenarios e os fixtures de execution-record sao evidencia sintetica, deterministica e local. Eles nao representam telemetria inventada de provedores. Registros reais so podem entrar no mesmo contrato quando forem produzidos pelo fluxo de execucao e validados com medicoes disponiveis.
 

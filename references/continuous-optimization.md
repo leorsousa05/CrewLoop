@@ -25,7 +25,7 @@ The manifest contains no prompts, responses, paths, credentials, provider payloa
 1. Run baseline and candidate with the same six scenario IDs, repetitions, inputs, acceptance checks, and relevant environment assumptions.
 2. Validate both datasets with `validateTokenOptimizationCorpus`.
 3. Compare them with `compareTokenOptimizationBenchmarks` and retain the existing execution and cost metrics.
-4. Require the configured quality gates: at least 15% measured token reduction, at least 95% measured coverage, no more than 10% duration regression, and candidate success for every baseline-passing run.
+4. Require the configured quality and cost gates: at least 15% measured token reduction, at least 95% measured coverage, no more than 10% duration regression, measured cost per correctly completed task at or below baseline (the default cost-regression tolerance is 0%), and candidate success for every baseline-passing run. Missing cost evidence fails closed.
 5. Treat `adopt_candidate` as evidence for the normal reviewed workflow. Treat `keep_baseline` or unavailable required evidence as a reason to preserve the baseline and report bounded failure categories.
 
 ## Workflow Boundaries
@@ -53,6 +53,6 @@ Every continuous comparison reports:
 
 - baseline and candidate policy ID/version;
 - `adopt_candidate` or `keep_baseline`;
-- measured token, input, output, duration, coverage, and success metrics;
-- model-call, tool-call, turn, attempt, failure, and cost metrics when available;
+- measured token, input, output, duration, coverage, success, and cost-per-completed-task metrics;
+- model-call, tool-call, turn, attempt, failure, and supporting cost metrics when available;
 - bounded failure categories and no raw task or provider content.
