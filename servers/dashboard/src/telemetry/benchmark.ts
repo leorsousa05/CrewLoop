@@ -6,6 +6,7 @@ import {
   type OptimizationProfile,
   type OptimizationRisk,
   type VerificationResult,
+  validateTaskExecutionRecord,
 } from './execution';
 
 export interface TokenBenchmarkRun {
@@ -30,6 +31,45 @@ export interface TokenBenchmarkRun {
   costMicrousd?: number | null;
   tokenUsage: ClientTokenUsage;
 }
+
+export type TaskExecutionBenchmarkProjection =
+  | {
+    status: 'ready';
+    run: TokenBenchmarkRun;
+  }
+  | {
+    status: 'unavailable';
+    reason: 'token_usage_unavailable' | 'duration_unavailable' | 'tool_calls_unavailable';
+  };
+
+export interface TaskExecutionBenchmarkDatasetInput {
+  label: string;
+  policy: TokenBenchmarkPolicy;
+  source: AgentSource;
+  records: readonly unknown[];
+}
+
+export type TaskExecutionBenchmarkUnavailableReason =
+  | 'token_usage_unavailable'
+  | 'duration_unavailable'
+  | 'tool_calls_unavailable';
+
+export interface TaskExecutionBenchmarkUnavailableRecord {
+  index: number;
+  reason: TaskExecutionBenchmarkUnavailableReason;
+}
+
+export type TaskExecutionBenchmarkDatasetProjection =
+  | {
+    status: 'ready';
+    dataset: TokenBenchmarkDataset;
+  }
+  | {
+    status: 'unavailable';
+    reason: 'no_records' | 'required_measurement_unavailable';
+    unavailable: TaskExecutionBenchmarkUnavailableRecord[];
+    dataset: null;
+  };
 
 export interface TokenBenchmarkDataset {
   schemaVersion: 1;
@@ -110,6 +150,76 @@ const AGENT_SOURCES: ReadonlySet<string> = new Set([
   'log-watcher',
   'agy',
 ]);
+
+export function projectTaskExecutionRecord(
+  value: unknown,
+  source: AgentSource
+): TaskExecutionBenchmarkProjection {
+  const record = validateTaskExecutionRecord(value);
+  if (!AGENT_SOURCES.has(source)) throw new Error('benchmark projection source is invalid');
+  if (record.tokenUsage === null) return { status: 'unavailable', reason: 'token_usage_unavailable' };
+  if (record.durationMs === null) return { status: 'unavailable', reason: 'duration_unavailable' };
+  if (record.toolCalls === null) return { status: 'unavailable', reason: 'tool_calls_unavailable' };
+
+  return {
+    status: 'ready',
+    run: {
+      schemaVersion: 1,
+      scenarioId: record.scenarioId,
+      variant: record.variant,
+      repetition: record.repetition,
+      model: record.tokenUsage.model,
+      source,
+      passed: record.verification === 'passed' && record.outcome === 'completed',
+      durationMs: record.durationMs,
+      toolCalls: record.toolCalls,
+      risk: record.risk,
+      profile: record.profile,
+      modelCalls: record.modelCalls,
+      turns: record.turns,
+      attempts: record.attempts,
+      failures: record.failures,
+      verification: record.verification,
+      outcome: record.outcome,
+      stopReason: record.stopReason,
+      costMicrousd: record.costMicrousd,
+      tokenUsage: record.tokenUsage,
+    },
+  };
+}
+
+export function buildTokenBenchmarkDatasetFromExecutionRecords(
+  input: TaskExecutionBenchmarkDatasetInput
+): TaskExecutionBenchmarkDatasetProjection {
+  if (input.records.length === 0) {
+    return { status: 'unavailable', reason: 'no_records', unavailable: [], dataset: null };
+  }
+
+  const runs: TokenBenchmarkRun[] = [];
+  const unavailable: TaskExecutionBenchmarkUnavailableRecord[] = [];
+  for (const [index, record] of input.records.entries()) {
+    const projection = projectTaskExecutionRecord(record, input.source);
+    if (projection.status === 'ready') runs.push(projection.run);
+    else unavailable.push({ index, reason: projection.reason });
+  }
+
+  if (unavailable.length > 0) {
+    return {
+      status: 'unavailable',
+      reason: 'required_measurement_unavailable',
+      unavailable,
+      dataset: null,
+    };
+  }
+
+  const dataset = validateTokenBenchmarkDataset({
+    schemaVersion: 1,
+    label: input.label,
+    policy: input.policy,
+    runs,
+  });
+  return { status: 'ready', dataset };
+}
 
 const POLICY_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 

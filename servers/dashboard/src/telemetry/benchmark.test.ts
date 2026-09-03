@@ -1,17 +1,19 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  buildTokenBenchmarkDatasetFromExecutionRecords,
   compareTokenBenchmarks,
   compareTokenOptimizationBenchmarks,
   deduplicateTokenBenchmarkRuns,
   formatBenchmarkMarkdown,
   median,
+  projectTaskExecutionRecord,
   validateTokenOptimizationCorpus,
   validateTokenBenchmarkDataset,
   type TokenBenchmarkDataset,
   type TokenBenchmarkRun,
 } from './benchmark';
-import { TOKEN_OPTIMIZATION_SCENARIO_IDS } from './execution';
+import { TOKEN_OPTIMIZATION_SCENARIO_IDS, type TaskExecutionRecord } from './execution';
 
 function run(
   variant: 'baseline' | 'candidate',
@@ -60,7 +62,192 @@ function dataset(label: string, runs: TokenBenchmarkRun[]): TokenBenchmarkDatase
   };
 }
 
+function executionRecord(overrides: Partial<TaskExecutionRecord> = {}): TaskExecutionRecord {
+  return {
+    schemaVersion: 1,
+    taskId: 'task-1',
+    scenarioId: 'cli-small',
+    variant: 'candidate',
+    repetition: 1,
+    risk: 'low',
+    profile: 'balanced',
+    startedAt: 1_000,
+    endedAt: 1_500,
+    durationMs: 500,
+    modelCalls: 2,
+    toolCalls: 3,
+    turns: 2,
+    attempts: 1,
+    failures: 0,
+    verification: 'passed',
+    outcome: 'completed',
+    stopReason: 'completed',
+    tokenUsage: {
+      inputTokens: 600,
+      outputTokens: 150,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      reasoningTokens: 0,
+      totalTokens: 750,
+      quality: 'measured',
+      model: 'gpt-test',
+      measurementCount: 1,
+      rejectedMeasurementCount: 0,
+    },
+    costMicrousd: 75,
+    ...overrides,
+  };
+}
+
 describe('token benchmark', () => {
+  it('projects a complete execution record without losing benchmark metrics', () => {
+    const record = executionRecord();
+    const first = projectTaskExecutionRecord(record, 'codex');
+    const second = projectTaskExecutionRecord(record, 'codex');
+
+    assert.equal(first.status, 'ready');
+    assert.deepEqual(first, second);
+    if (first.status !== 'ready') return;
+    assert.deepEqual(first.run, {
+      schemaVersion: 1,
+      scenarioId: 'cli-small',
+      variant: 'candidate',
+      repetition: 1,
+      model: 'gpt-test',
+      source: 'codex',
+      passed: true,
+      durationMs: 500,
+      toolCalls: 3,
+      risk: 'low',
+      profile: 'balanced',
+      modelCalls: 2,
+      turns: 2,
+      attempts: 1,
+      failures: 0,
+      verification: 'passed',
+      outcome: 'completed',
+      stopReason: 'completed',
+      costMicrousd: 75,
+      tokenUsage: record.tokenUsage,
+    });
+  });
+
+  it('derives benchmark success only from completed passed execution', () => {
+    const failed = projectTaskExecutionRecord(
+      executionRecord({ verification: 'failed', outcome: 'failed', stopReason: 'validation_failed' }),
+      'codex'
+    );
+    const incomplete = projectTaskExecutionRecord(
+      executionRecord({ outcome: 'incomplete', stopReason: 'budget_exhausted' }),
+      'codex'
+    );
+
+    assert.equal(failed.status, 'ready');
+    assert.equal(incomplete.status, 'ready');
+    if (failed.status === 'ready') assert.equal(failed.run.passed, false);
+    if (incomplete.status === 'ready') assert.equal(incomplete.run.passed, false);
+  });
+
+  it('keeps unavailable execution measurements out of benchmark runs', () => {
+    const cases: [keyof TaskExecutionRecord, string][] = [
+      ['tokenUsage', 'token_usage_unavailable'],
+      ['durationMs', 'duration_unavailable'],
+      ['toolCalls', 'tool_calls_unavailable'],
+    ];
+
+    for (const [field, reason] of cases) {
+      const result = projectTaskExecutionRecord(
+        executionRecord({ [field]: null } as Partial<TaskExecutionRecord>),
+        'codex'
+      );
+      assert.deepEqual(result, { status: 'unavailable', reason });
+    }
+  });
+
+  it('rejects invalid records and unknown sources with bounded errors', () => {
+    assert.throws(
+      () => projectTaskExecutionRecord(executionRecord({ taskId: '../secret' }), 'codex'),
+      (error: unknown) => error instanceof Error
+        && /taskId is invalid/.test(error.message)
+        && !error.message.includes('secret')
+    );
+    assert.throws(
+      () => projectTaskExecutionRecord(executionRecord(), 'unknown' as never),
+      /benchmark projection source is invalid/
+    );
+  });
+
+  it('builds a deterministic benchmark dataset from complete execution records', () => {
+    const input = {
+      label: 'execution-records',
+      policy: { id: 'token-optimizer', version: 'candidate-v1' },
+      source: 'codex' as const,
+      records: [
+        executionRecord({ variant: 'baseline' }),
+        executionRecord({ variant: 'candidate' }),
+      ],
+    };
+    const first = buildTokenBenchmarkDatasetFromExecutionRecords(input);
+    const second = buildTokenBenchmarkDatasetFromExecutionRecords(input);
+
+    assert.equal(first.status, 'ready');
+    assert.deepEqual(first, second);
+    if (first.status !== 'ready') return;
+    assert.deepEqual(first.dataset.runs.map((benchmarkRun) => benchmarkRun.variant), [
+      'baseline',
+      'candidate',
+    ]);
+    assert.equal(first.dataset.runs[0].tokenUsage.totalTokens, 750);
+  });
+
+  it('reports every unavailable required measurement without producing a dataset', () => {
+    const result = buildTokenBenchmarkDatasetFromExecutionRecords({
+      label: 'incomplete-execution-records',
+      policy: { id: 'token-optimizer', version: 'candidate-v1' },
+      source: 'codex',
+      records: [
+        executionRecord({ durationMs: null }),
+        executionRecord({ variant: 'baseline', toolCalls: null }),
+        executionRecord({ tokenUsage: null }),
+      ],
+    });
+
+    assert.deepEqual(result, {
+      status: 'unavailable',
+      reason: 'required_measurement_unavailable',
+      unavailable: [
+        { index: 0, reason: 'duration_unavailable' },
+        { index: 1, reason: 'tool_calls_unavailable' },
+        { index: 2, reason: 'token_usage_unavailable' },
+      ],
+      dataset: null,
+    });
+  });
+
+  it('returns a bounded result for an empty execution record collection', () => {
+    assert.deepEqual(
+      buildTokenBenchmarkDatasetFromExecutionRecords({
+        label: 'empty-execution-records',
+        policy: { id: 'token-optimizer', version: 'candidate-v1' },
+        source: 'codex',
+        records: [],
+      }),
+      { status: 'unavailable', reason: 'no_records', unavailable: [], dataset: null }
+    );
+  });
+
+  it('retains duplicate-conflict validation at the dataset boundary', () => {
+    assert.throws(() => buildTokenBenchmarkDatasetFromExecutionRecords({
+      label: 'conflicting-execution-records',
+      policy: { id: 'token-optimizer', version: 'candidate-v1' },
+      source: 'codex',
+      records: [
+        executionRecord(),
+        executionRecord({ durationMs: 501 }),
+      ],
+    }), /conflicting duplicate identity/);
+  });
+
   it('calculates medians for odd and even sets', () => {
     assert.equal(median([3, 1, 2]), 2);
     assert.equal(median([4, 1, 3, 2]), 2.5);
