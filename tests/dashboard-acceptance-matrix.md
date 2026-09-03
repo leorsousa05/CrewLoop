@@ -8,11 +8,11 @@ Fill these fields for each release candidate:
 
 | Field | Value |
 | :--- | :--- |
-| Date/time | `2026-09-03 14:18:45 -03:00` |
-| Commit | `e2e83f7` |
+| Date/time | `2026-09-03 14:55:54 -03:00` |
+| Commit | `e971854` |
 | OS | `Windows 10.0.26200.0` |
 | Browser | `Chrome/152.0.7977.65` |
-| Server URL | `http://127.0.0.1:7890` |
+| Server URL | `http://127.0.0.1:7891` |
 | Actual desktop viewport | `1440 × 1000 CSS px` |
 | Actual mobile viewport | `390 × 844 CSS px` |
 | Assistive technology | `None; screen-reader walkthrough pending` |
@@ -31,7 +31,9 @@ This checkpoint is evidence for the later manual walkthrough; it does not mark t
 - A global visible-control-name scan covered all seven routes at both recorded viewports (14 route × viewport combinations): every combination reported zero unnamed visible controls. Control counts were 17/31/25/35/17/16/16 on desktop and 11/20/14/24/6/10/10 on mobile for Overview/Sessions/Timeline/Files/Skills/Usage/Settings.
 - Chrome's native accessibility tree scan covered the same 14 route × viewport combinations: every interactive AX node had a non-empty name. Interactive-node counts were 18/33/25/17/17/18/19 on desktop and 12/22/14/6/6/12/13 on mobile for Overview/Sessions/Timeline/Files/Skills/Usage/Settings.
 
-The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary` completed `112/112` combinations at commit `e2e83f7`, with `passed: 112`, `failed: 0`, and exit code `0`. The live target-preservation probe kept the operator's page-tab count unchanged (`1` before and `1` after).
+The repository preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary` completed `112/112` combinations at commit `e971854`, with `passed: 112`, `failed: 0`, and exit code `0`.
+
+The optional interaction preflight `npm run acceptance:browser -- --url http://127.0.0.1:7891/ --cdp http://127.0.0.1:9229 --timeout 5000 --summary --interaction-smoke` also passed with `7/7` interaction cases, `interactionSuccess: true`, and exit code `0`. The empty session-selector case reported `state: "empty"` and `optionCount: 0`; drawer, command palette, and filter sheet cases used real CDP keyboard events for Escape and focus restoration.
 
 The smoke checks used Chrome DevTools Protocol with no assistive technology. Keyboard, full contrast coverage, async-state, and screen-reader observations still require the manual matrix below.
 
@@ -60,7 +62,7 @@ Each cell is one walkthrough. Mark `P` only after the view renders without clipp
 | AC-03 | — | Root [README](../README.md), [architecture overview](../specs/shared/architecture-overview.md), and [dashboard README](../servers/dashboard/README.md) | Document review |
 | AC-04 | — | [ADR 001](../specs/shared/adrs/adr-001-dashboard-hybrid-architecture.md) supersession notes plus preserved historical text | Document review |
 | AC-05 | — | Archive listing and frontmatter verification for specs 021 and 022 during Ship | Pending Ship |
-| AC-06 | UI component and state tests cover the interaction contracts; run `npm test` before the walkthrough; Chrome preflight passed 112/112 view combinations | View matrix and interaction matrix in this file, with the run record completed | Manual pending; preflight recorded |
+| AC-06 | UI component and state tests cover the interaction contracts; run `npm test` before the walkthrough; Chrome preflight passed 112/112 view combinations and optional interaction smoke passed 7/7 | View matrix and interaction matrix in this file, with the run record completed | Manual pending; preflight recorded |
 | AC-07 | `git diff --check` plus repository scans for secrets, generated artifacts, debug logs, empty catches, and stale TODOs | Diff review before Ship | Review pending |
 
 The automated evidence is intentionally contract-oriented; this project does not use an arbitrary global coverage target.
