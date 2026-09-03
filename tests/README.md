@@ -44,6 +44,22 @@ npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.
 
 This adds checks for mobile overlays, real `Tab`/`Shift+Tab` focus containment and restoration, keyboard-opening the empty session selector, reduced-motion persistence, hash history restoration, external font requests, and rendered text contrast across all seven routes in light and dark themes. The interaction summary fails closed on an invariant failure; with `--summary`, it is nested in the single final summary object. These checks remain automated evidence and do not replace the manual matrix.
 
+To check whether the manual matrix is fully recorded, run from the repository root:
+
+```bash
+npm run check:dashboard-acceptance
+```
+
+The checker is read-only. It returns exit code `1` while environment fields, view
+cells, or interaction results remain placeholders, and returns `0` only after every
+manual result is recorded. It does not judge whether a recorded result is truthful,
+and therefore does not replace the human walkthrough. Use `--format json` through
+the underlying command when machine-readable counts are needed:
+
+```bash
+node scripts/check-dashboard-acceptance-matrix.mjs --format json
+```
+
 ## Dashboard Manual Testing
 
 Use the [dashboard acceptance matrix](dashboard-acceptance-matrix.md) for the required view, viewport, theme, density, keyboard, async-state, and reduced-motion walkthrough. Record the browser, OS, commit, actual viewport, and observed result before marking a row complete.
