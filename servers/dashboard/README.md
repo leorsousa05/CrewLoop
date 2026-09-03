@@ -145,6 +145,28 @@ Verified host execution records can be projected into the existing benchmark-run
 
 Use `buildTokenBenchmarkDatasetFromExecutionRecords` to collect a local batch of validated execution records into a benchmark dataset. The collector preserves input order, lets the existing dataset validator handle identical or conflicting duplicates, and returns every unavailable record index without exposing a partial dataset. Baseline/candidate coverage and adoption decisions remain the responsibility of the existing corpus comparator.
 
+The CLI can consume those collections directly. Each `--baseline-records` or `--candidate-records` file must contain a `label`, a `{ "id", "version" }` policy, a known `source`, and a `records` array of `TaskExecutionRecord` values:
+
+```json
+{
+  "label": "execution-candidate",
+  "policy": { "id": "token-optimizer", "version": "candidate-v1" },
+  "source": "codex",
+  "records": []
+}
+```
+
+Run the record mode from the repository root with:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline-records path/to/baseline-records.json \
+  --candidate-records path/to/candidate-records.json \
+  --format markdown
+```
+
+The two record files must be supplied together. Missing required measurements fail closed with record indexes and reason codes; no partial dataset or synthetic zero is compared.
+
 Run the same gate used by CI from the repository root:
 
 ```bash

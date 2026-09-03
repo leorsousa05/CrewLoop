@@ -41,6 +41,7 @@
 - 2026-09-02: Spec 036 added a package-local Chrome CDP acceptance preflight. It covers exactly 112 dashboard combinations, checks render state, horizontal overflow, DOM/AX accessible names, and exits non-zero on setup or invariant failures. A live run passed `112/112` with the isolated target preserving the operator's page-tab count; it also exposed and fixed the shared FilterBar's missing accessible name. The manual screen-reader and visual matrix remains separate and pending.
 - 2026-09-02: Spec 037 added `projectTaskExecutionRecord`, a side-effect-free bridge from validated provider-neutral execution telemetry to the existing benchmark-run contract. It preserves optional metrics, marks missing token/duration/tool measurements unavailable instead of zero, derives success only from passed verification plus completed outcome, and passed focused projection tests.
 - 2026-09-03: Spec 038 added `buildTokenBenchmarkDatasetFromExecutionRecords`, a deterministic local collector that turns complete validated execution records into benchmark datasets, reports all unavailable indexes without partial output, and preserves duplicate/conflict validation. Focused tests passed 24/24; the complete dashboard suite passed 346 server tests and 89 UI tests, with typecheck and production build green.
+- 2026-09-03: Spec 039 added paired `--baseline-records`/`--candidate-records` input to the local benchmark CLI. It routes host execution records through the existing collector, preserves the dataset-file mode, fails closed on incomplete or ambiguous input, and keeps the same adoption recommendation and exit codes. Focused CLI/benchmark tests passed 30/30; the complete dashboard suite passed 350 server tests and 89 UI tests, with typecheck, production build, and fixed benchmark green.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
 ## Blockers
@@ -49,4 +50,4 @@
 
 ## Next task suggested
 
-- Complete and record the dashboard browser acceptance matrix, then use Ship to close Spec 013, archive specs 021/022, and close Specs 032/034/035. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Run the record-mode benchmark with representative sanitized execution records, complete and record the dashboard browser acceptance matrix, then use Ship to close Spec 013, archive specs 021/022, and close Specs 032/034/035/037/038/039. Keep the CI benchmark fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
