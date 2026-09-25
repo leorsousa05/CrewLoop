@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --test dist",
+    "test": "npm run build && node ../../scripts/run-node-tests.mjs dist",
     "prepublishOnly": "npm run build"
   },
   "engines": {

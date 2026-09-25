@@ -32,7 +32,7 @@
     "acceptance:browser": "node scripts/dashboard-acceptance-preflight.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
     "test": "npm run test:server && npm run test:ui && npm run test:preflight",
-    "test:server": "node --test dist",
+    "test:server": "npm run build:server && node ../../scripts/run-node-tests.mjs dist",
     "test:ui": "vitest run --root ui --config vitest.config.ts",
     "test:preflight": "node --test scripts/dashboard-acceptance-preflight.test.mjs",
     "benchmark:tokens": "npm run build:server && node dist/telemetry/benchmark-cli.js",
@@ -42,6 +42,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@archznn/crewloop-skills": "^0.22.0",
     "@phosphor-icons/react": "^2.1.7",
     "better-sqlite3": "11.10.0",
     "react": "^18.3.1",
