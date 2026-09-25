@@ -17,6 +17,7 @@
 
 ## Recent decisions
 
+- 2026-09-25: Spec 059 fixes dashboard acceptance-checker tests that incorrectly assumed the checked-in matrix remained incomplete. Fixtures now normalize all run-record fields and both matrix states. Workspace build/tests, both token benchmarks, acceptance checks, Python skill validation, and two consecutive browser preflights passed. The first browser preflight was 111/112; the optional workspace typecheck stalled and was interrupted. Refresh the manual matrix run record to the exact release candidate before publishing.
 - 2026-09-25: Specs 031 and 032 completed after the operator-confirmed dashboard manual acceptance matrix recorded all 112 view combinations and 12 interaction rows; the user-provided checker output was `COMPLETE`. The screen-reader walkthrough is confirmed, but its specific assistive technology was not recorded. No dashboard runtime code changed.
 - 2026-08-14: Specs system restructured — `features/` (one spec = one task), `memory/` (project state, chat-logs, decisions, incidents), `shared/` (glossary, tech-stack, conventions, ADRs), `changes/` (RFCs only). Completed feature specs stay in `features/` as source of truth; RFC lifecycle: approved → `shared/adrs/`, rejected → `archive/` + reason.
 - 2026-09-01: Token optimization starts inside CrewLoop with `specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md`. Reuse the existing dashboard token telemetry and benchmark contracts; do not fabricate provider metrics or add an external optimizer.
@@ -72,4 +73,4 @@
 
 ## Next task suggested
 
-- Keep both dataset and execution-record CI fixtures synchronized with every future optimizer-policy change, and require a reviewed `adopt_candidate` result before adoption. Specs 031 and 032 are complete; completed feature specs stay in `specs/features/`, and future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Before publishing, refresh the dashboard acceptance run record for the exact release candidate and record the assistive technology used. Keep both dataset and execution-record CI fixtures synchronized with optimizer-policy changes, and require a reviewed `adopt_candidate` result before adoption. Specs 031 and 032 are complete; completed feature specs stay in `specs/features/`, and future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
