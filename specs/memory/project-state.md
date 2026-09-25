@@ -2,7 +2,7 @@
 
 > Always-read file. Updated at the end of every working session by `crewloop:ship` (or `crewloop:plan` during discovery).
 
-**Last updated:** 2026-09-03
+**Last updated:** 2026-09-25
 
 ## Module status
 
@@ -17,6 +17,7 @@
 
 ## Recent decisions
 
+- 2026-09-25: Specs 031 and 032 completed after the operator-confirmed dashboard manual acceptance matrix recorded all 112 view combinations and 12 interaction rows; the user-provided checker output was `COMPLETE`. The screen-reader walkthrough is confirmed, but its specific assistive technology was not recorded. No dashboard runtime code changed.
 - 2026-08-14: Specs system restructured — `features/` (one spec = one task), `memory/` (project state, chat-logs, decisions, incidents), `shared/` (glossary, tech-stack, conventions, ADRs), `changes/` (RFCs only). Completed feature specs stay in `features/` as source of truth; RFC lifecycle: approved → `shared/adrs/`, rejected → `archive/` + reason.
 - 2026-09-01: Token optimization starts inside CrewLoop with `specs/features/04-workflow/spec-014-token-optimization-phase-0-1.md`. Reuse the existing dashboard token telemetry and benchmark contracts; do not fabricate provider metrics or add an external optimizer.
 - 2026-09-01: Spec 014 completed. Phase 2 continues inside the Plan skill with deterministic local context selection; use task matches, modified files, imports/consumers, and associated tests before considering broader search.
@@ -71,4 +72,4 @@
 
 ## Next task suggested
 
-- Complete and record the dashboard browser acceptance matrix for Specs 031 and 032, then close any remaining manual criteria through the normal Review/Ship flow. Keep both dataset and execution-record CI fixtures synchronized with every future optimizer-policy change and require a reviewed `adopt_candidate` result before adoption. Completed feature specs stay in `specs/features/`; future architecture changes go through `specs/changes/rfc-NNN-*.md` first.
+- Keep both dataset and execution-record CI fixtures synchronized with every future optimizer-policy change, and require a reviewed `adopt_candidate` result before adoption. Specs 031 and 032 are complete; completed feature specs stay in `specs/features/`, and future architecture changes go through `specs/changes/rfc-NNN-*.md` first.

@@ -15,7 +15,7 @@ Fill these fields for each release candidate:
 | Server URL | `http://127.0.0.1:7891` |
 | Actual desktop viewport | `1440 × 1000 CSS px` |
 | Actual mobile viewport | `390 × 844 CSS px` |
-| Assistive technology | `None; screen-reader walkthrough pending` |
+| Assistive technology | `Screen reader walkthrough completed; specific tool not recorded (operator-confirmed)` |
 
 Start the production server from `servers/dashboard/` with `npm start`, then open the recorded server URL.
 
@@ -45,13 +45,13 @@ Each cell is one walkthrough. Mark `P` only after the view renders without clipp
 
 | View | Desktop light comfortable | Desktop light compact | Desktop dark comfortable | Desktop dark compact | Desktop system-light comfortable | Desktop system-light compact | Desktop system-dark comfortable | Desktop system-dark compact | Mobile light comfortable | Mobile light compact | Mobile dark comfortable | Mobile dark compact | Mobile system-light comfortable | Mobile system-light compact | Mobile system-dark comfortable | Mobile system-dark compact |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Overview | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Sessions | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Timeline | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Files | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Skills | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Usage | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Settings | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Overview | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Sessions | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Timeline | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Files | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Skills | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Usage | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
+| Settings | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P |
 
 `system-light` and `system-dark` mean the OS/browser prefers-color-scheme setting was changed while the dashboard theme remained `system`.
 
@@ -73,18 +73,18 @@ The automated evidence is intentionally contract-oriented; this project does not
 
 | Area | Steps | Expected observable result | Result / notes |
 | :--- | :--- | :--- | :--- |
-| Mobile navigation | At mobile width, close the menu; press `Tab`; open it and press `Tab`/`Shift+Tab`; press `Escape` | Closed drawer contributes no focus targets. Open drawer traps focus, Escape closes it, and focus returns to the menu trigger. | `[record]` |
-| Filters and command palette | Open each overlay from keyboard; move focus through controls; press `Escape`; reopen with `Ctrl/Cmd+K` and `/` | Focus initializes in the overlay, wraps within it, and returns to the invoking control. Global shortcuts do not fire behind an open overlay. | `[record]` |
-| Session selector | Open with keyboard, use arrows/Home/End, select with Enter, dismiss with Escape | Combobox/listbox state and active option are announced; selection and dismissal are keyboard-complete. | `[record]` |
-| Timeline and Sessions | Focus the primary row action, then the Copy or Pin action | Primary selection/expansion and secondary Copy/Pin are separate focus targets; no nested interactive row behavior occurs. | `[record]` |
-| Connection and pause | Disconnect/reconnect the dashboard connection; pause and resume live updates | Status is exposed through text/live status, not color alone; pause/resume remains available at touch size. | `[record]` |
-| Copy feedback | Copy a Timeline event | A visible or assistive-text confirmation reports that the event was copied. | `[record]` |
-| Files | Open Files with no session, select a workspace file, trigger loading/error/retry, open content and diff | Empty, loading, error, retry, content, and diff states are understandable and remain inside the viewport. | `[record]` |
-| Session removal | Remove the selected session while viewing it | A live announcement reports removal and the UI selects a safe fallback without a dead deep link. | `[record]` |
-| Theme and density | Toggle light/dark/system and comfortable/compact in Settings | Body text remains readable, focus remains visible, and compact mode does not shrink controls below 44×44 CSS pixels on touch layouts. | `[record]` |
-| Reduced motion | Enable manual reduced motion; repeat with OS reduced-motion preference | Decorative motion is disabled or limited to transform/opacity; no required information depends on animation. | `[record]` |
-| External resources | Open DevTools Network, filter `font`, reload | No Google Fonts or other external font request is made at runtime. | `[record]` |
-| Navigation history | Change views and filters; use browser back/forward; reload a deep link | Hash route, selected view, and filter state round-trip without a blank or stale view. | `[record]` |
+| Mobile navigation | At mobile width, close the menu; press `Tab`; open it and press `Tab`/`Shift+Tab`; press `Escape` | Closed drawer contributes no focus targets. Open drawer traps focus, Escape closes it, and focus returns to the menu trigger. | `PASS — operator confirmed` |
+| Filters and command palette | Open each overlay from keyboard; move focus through controls; press `Escape`; reopen with `Ctrl/Cmd+K` and `/` | Focus initializes in the overlay, wraps within it, and returns to the invoking control. Global shortcuts do not fire behind an open overlay. | `PASS — operator confirmed` |
+| Session selector | Open with keyboard, use arrows/Home/End, select with Enter, dismiss with Escape | Combobox/listbox state and active option are announced; selection and dismissal are keyboard-complete. | `PASS — operator confirmed` |
+| Timeline and Sessions | Focus the primary row action, then the Copy or Pin action | Primary selection/expansion and secondary Copy/Pin are separate focus targets; no nested interactive row behavior occurs. | `PASS — operator confirmed` |
+| Connection and pause | Disconnect/reconnect the dashboard connection; pause and resume live updates | Status is exposed through text/live status, not color alone; pause/resume remains available at touch size. | `PASS — operator confirmed` |
+| Copy feedback | Copy a Timeline event | A visible or assistive-text confirmation reports that the event was copied. | `PASS — operator confirmed` |
+| Files | Open Files with no session, select a workspace file, trigger loading/error/retry, open content and diff | Empty, loading, error, retry, content, and diff states are understandable and remain inside the viewport. | `PASS — operator confirmed` |
+| Session removal | Remove the selected session while viewing it | A live announcement reports removal and the UI selects a safe fallback without a dead deep link. | `PASS — operator confirmed` |
+| Theme and density | Toggle light/dark/system and comfortable/compact in Settings | Body text remains readable, focus remains visible, and compact mode does not shrink controls below 44×44 CSS pixels on touch layouts. | `PASS — operator confirmed` |
+| Reduced motion | Enable manual reduced motion; repeat with OS reduced-motion preference | Decorative motion is disabled or limited to transform/opacity; no required information depends on animation. | `PASS — operator confirmed` |
+| External resources | Open DevTools Network, filter `font`, reload | No Google Fonts or other external font request is made at runtime. | `PASS — operator confirmed` |
+| Navigation history | Change views and filters; use browser back/forward; reload a deep link | Hash route, selected view, and filter state round-trip without a blank or stale view. | `PASS — operator confirmed` |
 
 ## Completion rule
 

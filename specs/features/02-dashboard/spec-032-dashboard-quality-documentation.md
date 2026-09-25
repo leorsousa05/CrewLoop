@@ -3,9 +3,9 @@
 ---
 name: spec-032-dashboard-quality-documentation
 domain: 02-dashboard
-status: active
+status: completed
 created: 2026-07-15
-completed: null
+completed: 2026-09-25
 supersedes: []
 ---
 
@@ -75,5 +75,7 @@ Establish regression evidence across all dashboard implementation phases, and ma
 - [x] AC-03 — proven by doc review against verified behavior and stale-claim scans
 - [x] AC-04 — proven by ADR 001 diff review
 - [x] AC-05 — proven by feature-path/frontmatter inspection; both specs remain under `specs/features/04-workflow/` with `status: completed`.
-- [ ] AC-06 — proven by the recorded manual matrix artifact
+- [x] AC-06 — proven by the completed manual matrix: all 112 view cells and 12 interaction
+  rows are recorded, with the run environment and operator-confirmed assistive-technology
+  walkthrough noted in the artifact.
 - [x] AC-07 — proven by the shipped diff review, `git diff --check`, and scans for secrets, generated artifacts, debug logs, empty catches, and stale TODOs.

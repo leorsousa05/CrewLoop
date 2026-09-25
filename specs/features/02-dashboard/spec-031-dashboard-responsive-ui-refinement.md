@@ -3,9 +3,9 @@
 ---
 name: spec-031-dashboard-responsive-ui-refinement
 domain: 02-dashboard
-status: active
+status: completed
 created: 2026-07-15
-completed: null
+completed: 2026-09-25
 supersedes: []
 ---
 
@@ -79,12 +79,13 @@ Refine the six-view dashboard into a keyboard/screen-reader coherent operational
   smoke's drawer, command-palette, and filter-sheet cases (`8/8` interaction cases).
 - [x] AC-03 — proven by the accessibility contract test asserting sibling timeline
   and copy buttons without a nested interactive row wrapper.
-- [ ] AC-04 — requires the desktop/mobile visual hierarchy walkthrough in the manual
+- [x] AC-04 — completed in the desktop/mobile visual hierarchy walkthrough recorded in the manual
   acceptance matrix.
-- [ ] AC-05 — live-region primitives have automated coverage, but the complete
-  connection/pause/copy/loading/error/removal event matrix remains manual.
-- [ ] AC-06 — source and rendered contrast plus automated touch-target checks pass,
-  but the required human visual/contrast review remains pending.
+- [x] AC-05 — the operator-confirmed interaction matrix records the connection/pause,
+  copy, loading/error, and removal state walkthroughs.
+- [x] AC-06 — the operator-confirmed theme/density walkthrough records readable text,
+  visible focus, and touch-target review; automated source and rendered contrast evidence
+  is recorded in Spec 049/050 and the acceptance matrix.
 - [x] AC-07 — proven by the reduced-motion state tests and the browser persistence
   interaction case.
 - [x] AC-08 — proven by the browser external-font resource case and the local-font
