@@ -5,6 +5,7 @@ import { Timeline } from '../Timeline';
 import { PauseBanner } from '../PauseBanner';
 import { Icon } from '../ui/Icon';
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut';
+import { hasOpenOverlay } from '../../hooks/useFocusTrap';
 import { toJson, download, filename, toExportableEvent } from '../../lib/export';
 import type { FilterOptions } from '../../lib/types';
 
@@ -41,11 +42,14 @@ export function TimelineView({
     });
   }, []);
 
-  useKeyboardShortcut('p', onManualPauseToggle);
+  useKeyboardShortcut('p', () => {
+    if (!hasOpenOverlay()) onManualPauseToggle();
+  });
 
   // j/k move the selection; Enter expands or collapses the selected row.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (hasOpenOverlay()) return;
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName ?? '';
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
@@ -76,6 +80,10 @@ export function TimelineView({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      <header className="flex items-baseline justify-between gap-3 px-4 md:px-5 py-3 border-b border-border-default flex-shrink-0">
+        <h1 className="font-display text-display-lg text-text-primary">Timeline</h1>
+        <span className="text-caption text-text-muted" aria-live="polite">{invocations.length} events</span>
+      </header>
       <div className="flex items-stretch border-b border-border-default flex-shrink-0">
         <div className="flex-1 min-w-0 [&_.filter-bar]:border-b-0">
           <FilterBar options={filterOptions} resultCount={invocations.length} onExport={handleExport} />
@@ -86,7 +94,7 @@ export function TimelineView({
             aria-pressed={manualPaused}
             aria-label={manualPaused ? 'Resume live updates' : 'Pause live updates'}
             title="Pause (p)"
-            className={`btn-ghost w-9 h-9 justify-center !px-0 ${manualPaused ? 'text-accent' : ''}`}
+            className={`btn-ghost touch-target justify-center !px-0 ${manualPaused ? 'text-accent' : ''}`}
           >
             <Icon name={manualPaused ? 'Play' : 'Pause'} className="w-4 h-4" />
           </button>

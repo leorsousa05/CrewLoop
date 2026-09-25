@@ -8,24 +8,30 @@ import { classifyOperation } from '../lib/operations';
 import { createUpdateMessage } from '../presenter';
 import { validateTokenUsageMeasurement } from '../telemetry/token-usage';
 import { PayloadTooLargeError, readJsonBody } from './json-body';
+import { validateDashboardEvent } from '../lib/event-contract';
 
 export interface EventHandlerDependencies {
   state: StateStore;
   inference: SkillInferenceEngine;
   broadcast: (message: ClientWebSocketMessage) => void;
   getActiveSessionId: () => string | undefined;
-  setActiveSessionId: (id: string) => void;
+  setActiveSessionId: (id: string | undefined) => void;
   maxBodyBytes: number;
 }
 
 function normalizePathsToRelative(obj: unknown, root: string): unknown {
   if (typeof obj === 'string') {
-    if (path.isAbsolute(obj) && obj.startsWith(root)) {
+    const normalizedValue = obj.replace(/\\/g, '/');
+    const normalizedRoot = root.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const rootPrefix = normalizedRoot === '/' ? '/' : `${normalizedRoot}/`;
+    const isInsideRoot = normalizedValue === normalizedRoot
+      || normalizedValue.startsWith(rootPrefix);
+    if (path.isAbsolute(obj) && isInsideRoot) {
       const rel = path.relative(root, obj);
       return rel.replace(/\\/g, '/');
     }
-    if (obj.includes(root)) {
-      const rootPattern = root.replace(/\\/g, '/');
+    if (normalizedRoot !== '/' && normalizedValue.includes(normalizedRoot)) {
+      const rootPattern = normalizedRoot;
       const escapedRoot = rootPattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       const regex = new RegExp(escapedRoot + '[/\\\\]?', 'g');
       return obj.replace(regex, '');
@@ -67,27 +73,24 @@ export function createEventHandler(deps: EventHandlerDependencies) {
       return;
     }
 
+    if (!validateDashboardEvent(event)) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: 'Invalid event' }));
+      return;
+    }
+
     if (!sanitizeEventBoundary(event as unknown as Record<string, unknown>)) {
       res.statusCode = 400;
       res.end(JSON.stringify({ error: 'Event contains unsafe fields' }));
       return;
     }
 
-    if (!event.session_id || !event.event_type) {
-      res.statusCode = 400;
-      res.end(JSON.stringify({ error: 'Missing required fields' }));
-      return;
-    }
-    if (typeof event.session_id !== 'string' || event.session_id.length > 200) {
-      res.statusCode = 400;
-      res.end(JSON.stringify({ error: 'Invalid session_id' }));
-      return;
-    }
-
     const root = event.workspacePath || process.cwd();
-    const workspacePath = event.workspacePath;
-    event = normalizePathsToRelative(event, root) as DashboardEvent;
-    event.workspacePath = workspacePath;
+    event.input = normalizePathsToRelative(event.input, root) as DashboardEvent['input'];
+    event.output = normalizePathsToRelative(event.output, root) as DashboardEvent['output'];
+    if (event.detail) {
+      event.detail = normalizePathsToRelative(event.detail, root) as string;
+    }
 
     // Defense in depth: events can be POSTed by arbitrary clients, so the
     // payloads are re-sanitized and classified here regardless of the shim.
@@ -116,7 +119,13 @@ export function createEventHandler(deps: EventHandlerDependencies) {
     }
 
     const updatedSession = deps.state.getSession(session.id)!;
-    deps.setActiveSessionId(updatedSession.id);
+    if (updatedSession.lifecycle === 'ended') {
+      if (deps.getActiveSessionId() === updatedSession.id) {
+        deps.setActiveSessionId(undefined);
+      }
+    } else {
+      deps.setActiveSessionId(updatedSession.id);
+    }
 
     deps.broadcast(createUpdateMessage(updatedSession, deps.getActiveSessionId()));
 

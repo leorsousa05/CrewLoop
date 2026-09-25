@@ -16,6 +16,7 @@ export interface OpenCodeToolEvent {
   args?: Record<string, unknown>;
   duration?: number;
   success?: boolean;
+  invocation_id?: string;
 }
 
 export interface OpenCodePluginPayload {
@@ -27,6 +28,9 @@ export interface OpenCodePluginPayload {
   duration_ms?: number;
   message_id?: string;
   part_id?: string;
+  invocation_id?: string;
+  call_id?: string;
+  tool_call_id?: string;
   captured_at?: number | string;
   final?: boolean;
   model?: string;
@@ -60,6 +64,7 @@ export function normalizeOpenCode(
     source: 'opencode' as AgentSource,
     session_id: payload.session_id || process.cwd(),
     event_type: eventType,
+    invocation_id: payload.invocation_id ?? payload.call_id ?? payload.tool_call_id,
     tool: payload.tool,
     status,
     duration_ms,
@@ -123,6 +128,7 @@ export function createOpenCodeEvent(
     source: 'opencode' as AgentSource,
     session_id: sessionId,
     event_type: eventType,
+    invocation_id: data.invocation_id,
     tool: data.tool,
     status,
     duration_ms: data.duration,

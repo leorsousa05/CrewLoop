@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildOptions, filterInvocations, filterSessions, sortSessions } from './filter';
+import { buildOptions, filterInvocations, filterSessions, filterWorkspacePaths, sortSessions } from './filter';
 import type { AgentSource, ClientSession, EventStatus } from '../../../src/types';
 import type { ToolInvocation } from '../../../src/lib/invocations';
 import { DEFAULT_FILTER_STATE } from './types';
@@ -32,13 +32,13 @@ describe('filter', () => {
   it('builds options from selected session', () => {
     const session = makeSession('s1', 'kimi', {
       activeSkill: { name: 'crewloop:code', confidence: 'explicit' },
-      events: [{ id: 'e1', timestamp: 0, event_type: 'tool_end', tool: 'Read' }],
+      events: [{ id: 'e1', timestamp: 0, event_type: 'tool_end', tool: 'Read', status: 'error', skill: 'crewloop:plan' }],
     });
     const sessions = new Map<string, ClientSession>([['s1', session]]);
     expect(buildOptions(sessions, 's1')).toEqual({
       sources: ['kimi'],
-      skills: ['crewloop:code'],
-      statuses: [],
+      skills: ['crewloop:code', 'crewloop:plan'],
+      statuses: ['error'],
       tools: ['Read'],
       opTypes: ['read'],
     });
@@ -52,6 +52,13 @@ describe('filter', () => {
     ];
     const filters = { ...DEFAULT_FILTER_STATE, tools: ['Read', 'Edit'], statuses: ['success' as EventStatus] };
     expect(filterInvocations(invs, undefined, filters, 1000)).toHaveLength(1);
+  });
+
+  it('filters selected-session invocations by source', () => {
+    const inv = makeInv('Read');
+    const session = makeSession('s1', 'codex');
+    expect(filterInvocations([inv], session, { ...DEFAULT_FILTER_STATE, sources: ['kimi'] }, 1000)).toHaveLength(0);
+    expect(filterInvocations([inv], session, { ...DEFAULT_FILTER_STATE, sources: ['codex'] }, 1000)).toHaveLength(1);
   });
 
   it('filters invocations by time range', () => {
@@ -69,6 +76,41 @@ describe('filter', () => {
     const filters = { ...DEFAULT_FILTER_STATE, sources: ['kimi', 'codex'] as AgentSource[] };
     const result = filterSessions([a, b], filters, [{ id: 'a', pinnedAt: 0 }], 4000);
     expect(result.map((s) => s.id)).toEqual(['a', 'b']);
+  });
+
+  it('applies query, tool, and operation filters to session results', () => {
+    const session = makeSession('s1', 'codex', {
+      skill: 'crewloop:code',
+      events: [{
+        id: 'end-1',
+        timestamp: 900,
+        event_type: 'tool_end',
+        tool: 'Edit',
+        status: 'success',
+        skill: 'crewloop:code',
+      }],
+    });
+    const sessions = [session];
+
+    expect(filterSessions(sessions, { ...DEFAULT_FILTER_STATE, query: 'Edit' }, [], 1000)).toHaveLength(1);
+    expect(filterSessions(sessions, { ...DEFAULT_FILTER_STATE, tools: ['Edit'] }, [], 1000)).toHaveLength(1);
+    expect(filterSessions(sessions, { ...DEFAULT_FILTER_STATE, opTypes: ['edit'] }, [], 1000)).toHaveLength(1);
+    expect(filterSessions(sessions, { ...DEFAULT_FILTER_STATE, query: 'missing' }, [], 1000)).toHaveLength(0);
+  });
+
+  it('matches a session when a historical invocation carries the selected status', () => {
+    const session = makeSession('s1', 'codex', {
+      status: 'success',
+      events: [{ id: 'end-1', timestamp: 900, event_type: 'tool_end', tool: 'Edit', status: 'error' }],
+    });
+    expect(filterSessions([session], { ...DEFAULT_FILTER_STATE, statuses: ['error'] }, [], 1000)).toHaveLength(1);
+  });
+
+  it('filters untracked workspace paths by query and excludes them for event filters', () => {
+    expect(filterWorkspacePaths(['src/app.ts', 'README.md'], { ...DEFAULT_FILTER_STATE, query: 'app' }))
+      .toEqual(['src/app.ts']);
+    expect(filterWorkspacePaths(['src/app.ts'], { ...DEFAULT_FILTER_STATE, tools: ['Read'] }))
+      .toEqual([]);
   });
 
   it('sortSessions keeps pins first and sorts unpinned by key', () => {

@@ -21,14 +21,14 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
     () => [...allSessions].sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0)).slice(0, 8),
     [allSessions]
   );
-  const livePreview = useMemo(() => invocations.slice(-5).reverse(), [invocations]);
+  const livePreview = useMemo(() => invocations.slice(0, 5), [invocations]);
 
   if (allSessions.length === 0) {
     return (
       <div className="flex flex-col h-full items-center justify-center gap-3 text-center p-6">
         <Icon name="TerminalWindow" className="w-8 h-8 text-text-muted" />
         <h1 className="font-display text-display-lg text-text-primary">No sessions yet</h1>
-        <p className="text-body text-text-secondary max-w-sm">
+        <p className="w-full text-body text-text-secondary max-w-sm">
           Start an agent session with CrewLoop installed and events will stream here in real time.
         </p>
       </div>
@@ -38,6 +38,10 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
   return (
     <div className="h-full overflow-y-auto">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 p-4 md:p-6">
+        <header className="xl:col-span-3 flex items-baseline justify-between gap-3">
+          <h1 className="font-display text-display-lg text-text-primary">Overview</h1>
+          <span className="text-caption text-text-muted">{allSessions.length} sessions</span>
+        </header>
         <div className="xl:col-span-3">
           <ActiveSkillPanel session={selectedSession} />
         </div>
@@ -76,7 +80,7 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
           </div>
           <button
             onClick={onOpenTimeline}
-            className="flex items-center gap-1 px-5 py-2.5 border-t border-border-default text-label text-accent hover:bg-elevated transition-colors"
+            className="flex items-center gap-1 px-5 py-2.5 min-h-11 border-t border-border-default text-label text-accent hover:bg-elevated transition-colors"
           >
             Open timeline
             <Icon name="CaretRight" className="w-3.5 h-3.5" />
@@ -92,7 +96,7 @@ export function Overview({ sessions, selectedSession, invocations, onSelectSessi
               <button
                 key={s.id}
                 onClick={() => onSelectSession(s.id)}
-                className={`snap-start w-48 flex-shrink-0 flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
+                className={`snap-start w-48 min-h-11 flex-shrink-0 flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
                   s.id === selectedSession?.id
                     ? 'border-accent bg-accent-subtle'
                     : 'border-border-default bg-elevated hover:border-border-strong'

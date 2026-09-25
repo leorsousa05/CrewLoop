@@ -95,7 +95,7 @@ export function FileList({ files, selectedPath, onSelect, directoryPaths }: Prop
 
   if (files.length === 0) {
     return (
-      <div className="w-full flex items-center justify-center text-text-muted text-body p-4">
+      <div role="status" aria-live="polite" className="w-full flex items-center justify-center text-text-muted text-body p-4">
         No file activity matches the filters.
       </div>
     );
@@ -137,7 +137,7 @@ export function FileList({ files, selectedPath, onSelect, directoryPaths }: Prop
   };
 
   const fileRowClass = (isActive: boolean, hasOps: boolean) =>
-    `file-list-item w-full flex flex-col gap-1 text-left py-1.5 px-2 rounded border border-l-2 transition-colors ${
+    `file-list-item w-full flex flex-col gap-1 text-left py-1.5 px-2 min-h-11 rounded border border-l-2 transition-colors ${
       isActive
         ? 'bg-elevated border-border-default border-l-accent text-text-primary'
         : hasOps
@@ -153,7 +153,9 @@ export function FileList({ files, selectedPath, onSelect, directoryPaths }: Prop
     return (
       <button
         key={file.path}
+        type="button"
         role="treeitem"
+        aria-level={1}
         aria-selected={isActive}
         onClick={() => onSelect(file.path)}
         className={fileRowClass(isActive, hasOps)}
@@ -183,11 +185,15 @@ export function FileList({ files, selectedPath, onSelect, directoryPaths }: Prop
 
     if (isDirectory) {
       return (
-        <div key={node.path} className="flex flex-col" role="treeitem" aria-expanded={isExpanded}>
+        <div key={node.path} className="flex flex-col">
           <button
+            type="button"
+            role="treeitem"
+            aria-level={depth + 1}
+            aria-expanded={isExpanded}
             onClick={() => toggleExpand(node.path)}
             style={indentStyle}
-            className="w-full flex items-center gap-1.5 py-1.5 text-left text-text-secondary hover:text-text-primary hover:bg-elevated/20 transition-colors font-mono text-label rounded border border-transparent"
+            className="w-full flex items-center gap-1.5 py-1.5 min-h-11 text-left text-text-secondary hover:text-text-primary hover:bg-elevated/20 transition-colors font-mono text-label rounded border border-transparent"
           >
             <Icon
               name={isExpanded ? 'CaretDown' : 'CaretRight'}
@@ -216,7 +222,9 @@ export function FileList({ files, selectedPath, onSelect, directoryPaths }: Prop
     return (
       <button
         key={file.path}
+        type="button"
         role="treeitem"
+        aria-level={depth + 1}
         aria-selected={isActive}
         onClick={() => onSelect(file.path)}
         style={indentStyle}

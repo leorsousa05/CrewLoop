@@ -16,7 +16,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 - **Design before code:** When there is UI, CrewLoop Design defines the aesthetic direction before CrewLoop Code writes markup or styles.
 - **Docs by crewloop:docs:** READMEs, module docs, and changelogs are owned by the `crewloop:docs` skill so `crewloop:code` can focus on code and tests.
 - **Quality gate:** The Reviewer inspects every diff for spec compliance, security, performance, and AI artifacts before anything reaches the repository.
-- **Conventional Commits:** The Shipper generates commit messages, branches, archives specs, and opens PRs following the Conventional Commits standard.
+- **Conventional Commits:** The Shipper generates commit messages, branches, records completed feature specs, and opens PRs following the Conventional Commits standard.
 
 ## Quick Start
 
@@ -73,11 +73,13 @@ The `crewloop` CLI provides commands to manage skills and integrate them with yo
 
 ## Real-time Activity Dashboard
 
-The dashboard provides a real-time WebSocket visualization of active skills, tool-use events, and execution logs.
+The dashboard is CrewLoop's localhost-only operational surface. It visualizes active skills, tool-use events, execution logs, and durable minimized token-usage telemetry over WebSocket and SQLite.
 
 ![Dashboard overview](assets/screenshots/dashboard-overview.png)
 
 By default, the dashboard binds to `http://127.0.0.1:7890`. You can change this port by setting the `CREWLOOP_DASHBOARD_PORT` environment variable.
+
+The dashboard supports five agent products — Kimi Code, Claude, Codex, OpenCode, and AGY — and exposes seven views: Overview, Sessions, Timeline, Files, Skills, Usage, and Settings. Usage history stores normalized numeric facts and hashed correlation identifiers only; prompts, commands, transcripts, workspace paths, and credentials are not persisted.
 
 ### Running the Dashboard
 
@@ -191,7 +193,7 @@ crewloop/
 2. Fill in the YAML frontmatter with `name: crewloop:<slug>` and role instructions.
 3. Add the skill to the README tables if it is user-facing.
 4. Run `python scripts/validate-skills.py`.
-5. Open a PR; the CrewLoop Review validates structure and the CrewLoop Ship archives the spec.
+5. Open a PR; the CrewLoop Review validates structure and the CrewLoop Ship records the completed feature spec.
 
 ## Releasing
 

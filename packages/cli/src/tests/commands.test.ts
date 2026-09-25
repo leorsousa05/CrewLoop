@@ -125,7 +125,8 @@ describe('commands', () => {
       (line) => errors.push(line),
       () => {
         throw new Error('no root');
-      }
+      },
+      home
     );
     assert.strictEqual(code, 1);
     assert.ok(errors.some((line) => line.startsWith('error package root:')));

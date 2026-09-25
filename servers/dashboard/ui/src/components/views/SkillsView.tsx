@@ -38,6 +38,10 @@ export function SkillsView({ invocations, filterOptions }: Props) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      <header className="flex items-baseline justify-between gap-3 px-4 md:px-5 py-3 border-b border-border-default flex-shrink-0">
+        <h1 className="font-display text-display-lg text-text-primary">Skills</h1>
+        <span className="text-caption text-text-muted" aria-live="polite">{invocations.length} events</span>
+      </header>
       <FilterBar options={filterOptions} resultCount={invocations.length} />
       <div className="flex-1 overflow-y-auto p-4 md:p-5">
         <section className="panel px-5 py-3 mb-4">

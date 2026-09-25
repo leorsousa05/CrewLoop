@@ -8,7 +8,13 @@ export interface AgyHookPayload {
   conversationId?: string;
   sessionId?: string;
   session_id?: string;
+  invocation_id?: string;
+  invocationId?: string;
+  toolCallId?: string;
   toolCall?: {
+    id?: string;
+    callId?: string;
+    invocation_id?: string;
     name?: string;
     args?: Record<string, unknown>;
   };
@@ -16,6 +22,9 @@ export interface AgyHookPayload {
   stepIdx?: number;
   responseId?: string;
   timestamp?: number | string;
+  durationMs?: number;
+  duration_ms?: number;
+  success?: boolean;
   llm_request?: {
     model?: string;
   };
@@ -168,6 +177,13 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
   const tool = eventName === 'AfterModel' ? 'Model' : normalizeToolName(rawToolName);
   const args = toolCall?.args;
   const skill = inferSkillFromReadPath(tool, args);
+  const invocation_id = payload.invocation_id
+    ?? payload.invocationId
+    ?? payload.toolCallId
+    ?? toolCall?.invocation_id
+    ?? toolCall?.callId
+    ?? toolCall?.id
+    ?? (eventName === 'AfterModel' ? payload.responseId : undefined);
 
   return {
     id: token_usage?.measurementId ?? generateId(session_id, stepIdx),
@@ -175,7 +191,16 @@ export function normalizeAgy(payload: AgyHookPayload): DashboardEvent | undefine
     source: 'agy' as AgentSource,
     session_id,
     event_type,
+    invocation_id,
     tool,
+    status: event_type === 'tool_start'
+      ? 'running'
+      : event_type === 'tool_end'
+        ? payload.error !== undefined || payload.success === false ? 'error' : 'success'
+        : undefined,
+    duration_ms: typeof payload.durationMs === 'number'
+      ? payload.durationMs
+      : payload.duration_ms,
     skill,
     detail: extractDetail(tool, args),
     input: args,

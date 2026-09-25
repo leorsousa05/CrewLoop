@@ -6,6 +6,7 @@ export function presentEvent(event: Session['events'][number]): ClientEvent {
     id: event.id,
     timestamp: event.timestamp,
     event_type: event.event_type,
+    invocation_id: event.invocation_id,
     tool: event.tool,
     operationType: event.operationType,
     detail: event.detail,
@@ -61,5 +62,13 @@ export function createUpdateMessage(
     type: 'update',
     session: presentSession(session),
     isActive: activeSessionId === session.id,
+  };
+}
+
+export function createRemoveMessage(sessionId: string): ClientWebSocketMessage {
+  return {
+    type: 'remove',
+    sessionId,
+    reason: 'pruned',
   };
 }

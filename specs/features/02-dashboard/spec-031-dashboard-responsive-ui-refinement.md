@@ -3,9 +3,9 @@
 ---
 name: spec-031-dashboard-responsive-ui-refinement
 domain: 02-dashboard
-status: active
+status: completed
 created: 2026-07-15
-completed: null
+completed: 2026-09-25
 supersedes: []
 ---
 
@@ -34,6 +34,7 @@ Refine the six-view dashboard into a keyboard/screen-reader coherent operational
 ## Behavior / Flow
 
 1. Designer produces `design-ui.md` before engineering (tokens, hierarchy, responsive compositions, states, motion, accessibility).
+   Design handoff: [`design-ui.md`](design-ui.md).
 2. Foundations: finalize semantic color/type/spacing/motion tokens both themes/densities; shared modal focus lifecycle + live-region primitives.
 3. Shell: closed mobile navigation non-focusable, modal when open; filter sheet/popovers get role, name, containment, dismissal, restoration; session selector combobox/listbox semantics; shortcut priority.
 4. Views: consistent headings/summaries/real states; Timeline/Sessions primary actions separated from nested copy/pin controls; Overview dominated by active-session surface; robust narrow-screen sort/timeline/settings/Files drill-down; announced async states.
@@ -72,11 +73,20 @@ Refine the six-view dashboard into a keyboard/screen-reader coherent operational
 
 ## Done When
 
-- [ ] AC-01 — proven by keyboard-only test (hidden-sidebar reachability)
-- [ ] AC-02 — proven by focus trap/restoration tests
-- [ ] AC-03 — proven by semantic DOM assertions
-- [ ] AC-04 — proven by desktop/mobile viewport walkthroughs
-- [ ] AC-05 — proven by live-region assertions in component tests
-- [ ] AC-06 — proven by contrast review + touch-target audit
-- [ ] AC-07 — proven by reduced-motion mode tests
-- [ ] AC-08 — proven by network inspection (no font CDN requests)
+- [x] AC-01 — proven by `getFocusableElements` hidden/aria-hidden/inert tests and the
+  browser interaction smoke's drawer focus-containment case.
+- [x] AC-02 — proven by the focus-trap/restoration tests and the browser interaction
+  smoke's drawer, command-palette, and filter-sheet cases (`8/8` interaction cases).
+- [x] AC-03 — proven by the accessibility contract test asserting sibling timeline
+  and copy buttons without a nested interactive row wrapper.
+- [x] AC-04 — completed in the desktop/mobile visual hierarchy walkthrough recorded in the manual
+  acceptance matrix.
+- [x] AC-05 — the operator-confirmed interaction matrix records the connection/pause,
+  copy, loading/error, and removal state walkthroughs.
+- [x] AC-06 — the operator-confirmed theme/density walkthrough records readable text,
+  visible focus, and touch-target review; automated source and rendered contrast evidence
+  is recorded in Spec 049/050 and the acceptance matrix.
+- [x] AC-07 — proven by the reduced-motion state tests and the browser persistence
+  interaction case.
+- [x] AC-08 — proven by the browser external-font resource case and the local-font
+  source contract.

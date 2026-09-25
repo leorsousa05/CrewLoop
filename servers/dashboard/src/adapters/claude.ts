@@ -18,6 +18,7 @@ export interface ClaudeHookPayload {
   model?: string;
   message_id?: string;
   request_id?: string;
+  invocation_id?: string;
   timestamp?: number | string;
   skill?: string;
 }
@@ -80,6 +81,7 @@ export function normalizeClaude(
     source: 'claude' as AgentSource,
     session_id: sessionId,
     event_type,
+    invocation_id: payload.invocation_id ?? payload.request_id ?? payload.message_id,
     tool: payload.tool_name,
     skill: payload.skill,
     detail: event_type === 'session_end' && typeof payload.reason === 'string'

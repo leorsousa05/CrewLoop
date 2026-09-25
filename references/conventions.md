@@ -202,6 +202,13 @@ These rules apply to all code proposed or implemented by any agent:
 - **Eliminate token wasters:** Avoid introductory phrases ("Here is...", "Below you will find...") and closing summaries.
 - **Format:** Use bullet lists instead of paragraphs for anything with more than 2 items. One idea per sentence. No markdown inside code blocks.
 
+### Native CrewLoop Minimalism Policy
+- Inspect existing code, the standard library, and native platform features before adding code or dependencies.
+- Prefer the smallest correct change; record why new dependencies or abstractions are necessary.
+- Send only task-relevant context and reuse results already collected in the current task.
+- Never trade away validation, authentication/authorization, safe error handling, destructive-operation protection, accessibility, essential tests, or user confirmations for fewer tokens.
+- Stop after required validation passes and scope is satisfied; do not create optional retry or review cycles without a measurable purpose.
+
 ### Technical Honesty & Traceability
 - **No impossible solutions:** Never propose technically impossible designs. If a requirement is not viable, say so and suggest an alternative.
 - **Requirement traceability:** Verify every requirement from the original prompt is addressed. List explicitly: "Addressed: X. Deferred: Y (reason)."
@@ -226,7 +233,8 @@ When running on platforms that support interactive agent tools, agents must prio
 
 ### 1. Interactive Questions (`ask_question`)
 - **Navigation Prompts:** Instead of printing a text menu and waiting for the user to type, call `ask_question` with the transition options for the current skill (e.g. `["[R] Send to Reviewer", "[E] Keep implementing", "[A] Back to Architect"]`).
-- **Discovery & Questionnaires:** For multi-step questions (e.g. scope discovery or visual styling), group them into structured multiple-choice questions via `ask_question` (using `is_multi_select: false` or `is_multi_select: true` as appropriate) to present checkboxes/radio buttons in a modal.
+- **Discovery & Questionnaires:** The automated Plan/Design workflow does not open discovery questionnaires. Resolve unspecified scope or visual choices with repository-backed defaults and record the assumption; explicit user requirements always win.
+- **Other interactive decisions:** When a user explicitly needs to choose between materially different options that cannot be resolved safely from repository context, use `ask_question` with structured choices rather than a free-form typed menu.
 - **Confirmations:** Use `ask_question` to ask for confirmations (like before committing or pushing changes).
 
 ### 2. Timers & Scheduling (`schedule`)

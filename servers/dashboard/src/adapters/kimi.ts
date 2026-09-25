@@ -16,6 +16,7 @@ export interface KimiHookPayload {
   timestamp?: number | string;
   call_id?: string;
   turn_id?: string;
+  invocation_id?: string;
   skill?: string;
 }
 
@@ -77,6 +78,7 @@ export function normalizeKimi(
     source: 'kimi' as AgentSource,
     session_id: payload.session_id || 'unknown',
     event_type,
+    invocation_id: payload.invocation_id ?? payload.call_id ?? payload.turn_id,
     tool: payload.tool_name,
     skill: payload.skill,
     input: payload.tool_input,

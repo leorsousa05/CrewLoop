@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import WebSocket from 'ws';
-import { createDashboardServer } from './server';
+import { createDashboardServer, pruneExpiredSessions } from './server';
+import { StateStore } from './state';
 import type { ServerConfig } from './types';
 
 function httpGetStatus(port: number, path: string): Promise<number> {
@@ -126,6 +127,82 @@ describe('DashboardServer', () => {
     assert.equal(res.status, 400);
   });
 
+  it('rejects malformed events without mutating state or broadcasting', async () => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('WebSocket timeout')), 2000);
+      ws.once('message', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+
+    let broadcasted = false;
+    const listener = (data: WebSocket.RawData) => {
+      const message = JSON.parse(data.toString()) as { type?: string; session?: { id?: string } };
+      if (message.type === 'update' && message.session?.id === 'sess-invalid-contract') {
+        broadcasted = true;
+      }
+    };
+    ws.on('message', listener);
+
+    const res = await fetch(`http://127.0.0.1:${port}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 'ev-invalid-contract',
+        timestamp: 'not-a-number',
+        source: 'codex',
+        session_id: 'sess-invalid-contract',
+        event_type: 'tool_start',
+        tool: 'Read',
+      }),
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    ws.off('message', listener);
+    ws.close();
+    assert.equal(res.status, 400);
+    assert.equal(server.state.getSession('sess-invalid-contract'), undefined);
+    assert.equal(broadcasted, false);
+  });
+
+  it('emits typed remove messages and cleans pruned workspace mappings', () => {
+    const state = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 10 });
+    state.applyEvent({
+      id: 'prune-event',
+      timestamp: 100,
+      source: 'codex',
+      session_id: 'sess-prune-contract',
+      event_type: 'session_start',
+      workspacePath: process.cwd(),
+    });
+    const messages: Array<{ type: string; sessionId?: string; reason?: string }> = [];
+
+    const result = pruneExpiredSessions(
+      state,
+      (message) => messages.push(message as typeof messages[number]),
+      'sess-prune-contract',
+      1_000
+    );
+
+    assert.deepEqual(result.removedSessionIds, ['sess-prune-contract']);
+    assert.equal(result.activeSessionId, undefined);
+    assert.deepEqual(messages, [{ type: 'remove', sessionId: 'sess-prune-contract', reason: 'pruned' }]);
+
+    const restored = new StateStore({ maxEventsPerSession: 10, sessionMaxAgeMs: 10 });
+    assert.equal(
+      restored.applyEvent({
+        id: 'after-prune',
+        timestamp: 2_000,
+        source: 'codex',
+        session_id: 'sess-prune-contract',
+        event_type: 'session_start',
+      }).workspaceRoot,
+      undefined
+    );
+  });
+
   it('blocks static file path traversal', async () => {
     const status = await httpGetStatus(port, '/../../package.json');
     assert.equal(status, 403);
@@ -227,9 +304,13 @@ describe('DashboardServer', () => {
           session_id: sessionId,
           event_type: 'session_start',
           workspacePath: workspace,
+          input: { path: path.join(workspace, 'src', 'a.txt') },
         }),
       });
       assert.equal(res.status, 200);
+      const session = server.state.getSession(sessionId)!;
+      assert.equal(session.workspaceRoot, workspace);
+      assert.equal(session.events[0].input?.path, 'src/a.txt');
     });
 
     after(async () => {

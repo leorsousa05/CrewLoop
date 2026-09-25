@@ -40,6 +40,24 @@ function loadSessionRootMappings(): Record<string, string> {
   return {};
 }
 
+function removeSessionRootMappings(sessionIds: readonly string[]): void {
+  if (sessionIds.length === 0) return;
+  try {
+    if (!fs.existsSync(RUNTIME_ROOTS_FILE)) return;
+    const mappings = JSON.parse(fs.readFileSync(RUNTIME_ROOTS_FILE, 'utf-8')) as Record<string, unknown>;
+    let changed = false;
+    for (const sessionId of sessionIds) {
+      if (Object.prototype.hasOwnProperty.call(mappings, sessionId)) {
+        delete mappings[sessionId];
+        changed = true;
+      }
+    }
+    if (changed) {
+      fs.writeFileSync(RUNTIME_ROOTS_FILE, JSON.stringify(mappings, null, 2));
+    }
+  } catch {}
+}
+
 export interface StateStoreOptions {
   maxEventsPerSession: number;
   sessionMaxAgeMs: number;
@@ -60,7 +78,7 @@ export class StateStore {
     let session = this.sessions.get(event.session_id);
 
     if (!session) {
-      session = this.createSession(event.session_id, event.source);
+      session = this.createSession(event.session_id, event.source, event.timestamp);
       // Lazy start: agents that never emit an explicit SessionStart still get
       // a valid session_start event recorded before their first tool event.
       if (event.event_type !== 'session_start') {
@@ -77,7 +95,7 @@ export class StateStore {
     }
 
     session.source = event.source;
-    session.last_event_at = event.timestamp;
+    session.last_event_at = Math.max(session.last_event_at, event.timestamp);
 
     if (event.workspacePath) {
       session.workspaceRoot = event.workspacePath;
@@ -147,6 +165,10 @@ export class StateStore {
 
     if (event.event_type === 'session_end') {
       session.ended_at = event.timestamp;
+    } else if (event.event_type === 'session_start') {
+      // A new SessionStart is the explicit resume signal. Other activity
+      // after a terminal event remains historical and cannot revive it.
+      session.ended_at = undefined;
     }
     session.lifecycle = deriveLifecycle(event, session);
 
@@ -212,19 +234,19 @@ export class StateStore {
     return ended;
   }
 
-  pruneInactive(now: number = Date.now()): number {
-    let removed = 0;
+  pruneInactive(now: number = Date.now()): string[] {
+    const removed: string[] = [];
     for (const [id, session] of this.sessions) {
       if (now - session.last_event_at > this.options.sessionMaxAgeMs) {
         this.sessions.delete(id);
-        removed++;
+        removed.push(id);
       }
     }
+    removeSessionRootMappings(removed);
     return removed;
   }
 
-  private createSession(id: string, source: AgentSource): Session {
-    const now = Date.now();
+  private createSession(id: string, source: AgentSource, startedAt: number): Session {
     const session: Session = {
       id,
       source,
@@ -232,8 +254,8 @@ export class StateStore {
       tool_counts: {},
       token_usage: this.restoreTokenUsage(source, id),
       lifecycle: 'starting',
-      started_at: now,
-      last_event_at: now,
+      started_at: startedAt,
+      last_event_at: startedAt,
     };
     const mappings = loadSessionRootMappings();
     if (mappings[id]) {
@@ -294,11 +316,11 @@ function hydrateSessionTokenUsage(
 }
 
 function deriveLifecycle(event: DashboardEvent, session: Session): 'starting' | 'running' | 'ended' {
+  if (event.event_type === 'session_start') {
+    return 'starting';
+  }
   if (event.event_type === 'session_end' || session.ended_at) {
     return 'ended';
-  }
-  if (event.event_type === 'session_start' && session.events.length <= 1) {
-    return 'starting';
   }
   return 'running';
 }

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { presentSession, presentState, createSnapshotMessage, createUpdateMessage } from './presenter';
+import { presentSession, presentState, createRemoveMessage, createSnapshotMessage, createUpdateMessage } from './presenter';
 import type { Session, ClientUpdateMessage } from './types';
 import { createEmptySessionTokenUsage } from './telemetry/token-usage';
 
@@ -102,5 +102,13 @@ describe('presenter', () => {
 
     const inactive = createUpdateMessage(makeSession(), 'sess-2') as ClientUpdateMessage;
     assert.equal(inactive.isActive, false);
+  });
+
+  it('creates a typed remove message for pruned sessions', () => {
+    assert.deepEqual(createRemoveMessage('sess-pruned'), {
+      type: 'remove',
+      sessionId: 'sess-pruned',
+      reason: 'pruned',
+    });
   });
 });

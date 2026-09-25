@@ -1,6 +1,6 @@
 # Tests
 
-This project is primarily documentation, so it does not have a traditional automated test suite.
+CrewLoop is documentation-first, but its CLI and dashboard have automated regression suites. The dashboard also has a reproducible browser acceptance matrix.
 
 ## Validation
 
@@ -10,7 +10,61 @@ Run the skill validator to check all `SKILL.md` files:
 python scripts/validate-skills.py
 ```
 
-## Manual Testing
+Run the workflow contract tests for the non-blocking Plan/Design handoff:
+
+```bash
+python -m unittest scripts.tests.test_automated_workflow
+```
+
+For the dashboard regression suite:
+
+```bash
+cd servers/dashboard
+npm run typecheck
+npm run build
+npm test
+```
+
+The dashboard test command covers server security and filesystem boundaries, event contracts, lifecycle/state behavior, all supported adapters, token telemetry, client projection/filter/settings logic, request races, and UI accessibility/live-state contracts.
+It also runs the browser-free preflight CLI contract checks for help and fail-closed argument validation; browser interaction coverage remains an explicit CDP preflight step below.
+
+For the reproducible browser preflight, start the production dashboard and Chrome with a local CDP endpoint, then run from `servers/dashboard/`:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229
+```
+
+The command emits JSON Lines for all `112/112` view, viewport, theme, and density combinations. It checks render state, horizontal overflow, and visible interactive accessible names through CDP. It does not launch Chrome, touch an existing tab, or replace the manual screen-reader, keyboard, contrast, async-state, and visual walkthrough in the [dashboard acceptance matrix](dashboard-acceptance-matrix.md).
+
+To add the bounded interaction checkpoint to the same run, pass `--interaction-smoke`:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
+```
+
+This adds checks for mobile overlays, real `Tab`/`Shift+Tab` focus containment and restoration, keyboard-opening the empty session selector, reduced-motion persistence, hash history restoration, external font requests, and rendered text contrast across all seven routes in light and dark themes. The interaction summary fails closed on an invariant failure; with `--summary`, it is nested in the single final summary object. These checks remain automated evidence and do not replace the manual matrix.
+
+To check whether the manual matrix is fully recorded, run from the repository root:
+
+```bash
+npm run check:dashboard-acceptance
+```
+
+The checker is read-only. It returns exit code `1` while environment fields, view
+cells, or interaction results remain placeholders, and returns `0` only after every
+manual result is recorded. It does not judge whether a recorded result is truthful,
+and therefore does not replace the human walkthrough. Use `--format json` through
+the underlying command when machine-readable counts are needed:
+
+```bash
+node scripts/check-dashboard-acceptance-matrix.mjs --format json
+```
+
+## Dashboard Manual Testing
+
+Use the [dashboard acceptance matrix](dashboard-acceptance-matrix.md) for the required view, viewport, theme, density, keyboard, async-state, and reduced-motion walkthrough. Record the browser, OS, commit, actual viewport, and observed result before marking a row complete.
+
+## Skill Manual Testing
 
 To test a skill in practice:
 

@@ -31,6 +31,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm test --workspaces",
+    "test:dashboard-acceptance": "node --test scripts/tests/dashboard-acceptance-matrix.test.mjs",
+    "check:dashboard-acceptance": "node scripts/check-dashboard-acceptance-matrix.mjs",
     "prepublishOnly": "npm run build --workspaces"
   },
   "dependencies": {

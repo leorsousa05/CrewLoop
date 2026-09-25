@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { escapeHtml } from '../../../src/lib/format';
 import type { FileEntry } from '../../../src/lib/invocations';
 import { Icon } from './ui/Icon';
 import { StatusBadge } from './ui/StatusBadge';
+import { FileRequestGuard, isAbortError, loadFileResource, type FileRequestIdentity } from '../lib/file-loader';
 
 interface Props {
   file: FileEntry | undefined;
@@ -70,6 +71,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const requestGuard = useRef(new FileRequestGuard());
 
   const hasEdit = file?.ops.some((op) => op.type === 'edit') ?? false;
 
@@ -84,49 +86,46 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   }, [file?.path, hasEdit]);
 
   useEffect(() => {
-    // Directories have no file content — skip the fetch entirely.
-    if (!file || isDirectory) return;
+    const identity: FileRequestIdentity | undefined = file && !isDirectory
+      ? { path: file.path, sessionId, tab: activeTab }
+      : undefined;
+    if (!identity) {
+      requestGuard.current.invalidate();
+      setLoading(false);
+      return;
+    }
 
+    const token = requestGuard.current.begin(identity);
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    const sessQuery = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
+    if (activeTab === 'content') setFileContent(null);
+    else setGitDiff(null);
 
-    if (activeTab === 'content') {
-      fetch(`/api/file-content?path=${encodeURIComponent(file.path)}${sessQuery}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to load file content');
-          return res.json();
-        })
-        .then((data) => {
-          setFileContent(data.content);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setFileContent(null);
-          setLoading(false);
-        });
-    } else {
-      fetch(`/api/file-diff?path=${encodeURIComponent(file.path)}${sessQuery}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to load git diff');
-          return res.json();
-        })
-        .then((data) => {
-          setGitDiff(data.diff);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setGitDiff(null);
-          setLoading(false);
-        });
-    }
+    loadFileResource(identity, controller.signal)
+      .then((data) => {
+        if (!requestGuard.current.isCurrent(token, identity)) return;
+        if (identity.tab === 'content') setFileContent(data.content ?? null);
+        else setGitDiff(data.diff ?? null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (isAbortError(err) || !requestGuard.current.isCurrent(token, identity)) return;
+        setError(err instanceof Error ? err.message : 'Failed to load file');
+        if (identity.tab === 'content') setFileContent(null);
+        else setGitDiff(null);
+        setLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+      requestGuard.current.invalidate();
+    };
   }, [file?.path, activeTab, sessionId, retryKey, isDirectory]);
 
   if (!file) {
     return (
-      <div className="flex-1 flex items-center justify-center text-text-muted text-body bg-base/50">
+      <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center text-text-muted text-body bg-base/50">
         Select a file to view activity.
       </div>
     );
@@ -141,7 +140,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
               <button
                 onClick={onBack}
                 aria-label="Back to file list"
-                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+                className="md:hidden touch-target flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
               >
                 <Icon name="CaretLeft" className="w-4 h-4" />
                 Files
@@ -251,7 +250,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
   };
 
   const tabClass = (active: boolean) =>
-    `py-2 text-caption font-mono font-semibold relative transition-colors ${
+    `min-h-11 flex items-center py-2 text-caption font-mono font-semibold relative transition-colors ${
       active ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
     }`;
 
@@ -264,7 +263,7 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
               <button
                 onClick={onBack}
                 aria-label="Back to file list"
-                className="md:hidden flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
+                className="md:hidden touch-target flex items-center gap-1 text-label text-text-muted hover:text-text-primary flex-shrink-0"
               >
                 <Icon name="CaretLeft" className="w-4 h-4" />
                 Files
@@ -328,13 +327,13 @@ export function FileDiff({ file, sessionId, onBack, isDirectory, childCount }: P
 
       <div className="flex-1 overflow-auto p-4 font-mono text-body">
         {loading ? (
-          <p className="text-text-muted animate-pulse">Loading file…</p>
+          <p role="status" aria-live="polite" className="text-text-muted animate-pulse">Loading file…</p>
         ) : error ? (
-          <div className="flex items-center gap-3 p-3 rounded border-l-2 border-error bg-inset">
+          <div role="alert" className="flex items-center gap-3 p-3 rounded border-l-2 border-error bg-inset">
             <p className="text-label text-text-secondary flex-1">
               Failed to load file: {error}. It may be binary or have been deleted locally.
             </p>
-            <button onClick={() => setRetryKey((k) => k + 1)} className="btn-ghost text-label flex-shrink-0">
+            <button type="button" onClick={() => setRetryKey((k) => k + 1)} className="btn-ghost min-h-11 text-label flex-shrink-0">
               Retry
             </button>
           </div>

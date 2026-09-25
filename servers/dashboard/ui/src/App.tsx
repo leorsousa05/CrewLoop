@@ -34,6 +34,15 @@ import { NAV_ITEMS } from './lib/navigation';
 import { toExportableEvent, toJson, download, filename } from './lib/export';
 import { sourceIcon } from '../../src/lib/constants';
 import { formatTime } from '../../src/lib/format';
+import {
+  bufferClientMessage,
+  createPendingMessageBuffer,
+  flushPendingMessages,
+  pendingMessageCount,
+  type PendingMessageBuffer,
+} from './lib/message-buffer';
+import { dashboardWebSocketUrl } from './lib/websocket-url';
+import { hasOpenOverlay } from './hooks/useFocusTrap';
 
 function serializedEqual(a: Partial<SerializedFilterState>, b: Partial<SerializedFilterState>): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
@@ -65,7 +74,8 @@ function buildPaletteItems(
   sessions: ClientSession[],
   selectAndRoute: (id: string | null) => void,
   exportJson: () => void,
-  toggleDensity: () => void
+  toggleDensity: () => void,
+  maxEvents: number
 ): CommandPaletteItem[] {
   const items: CommandPaletteItem[] = [];
 
@@ -101,15 +111,15 @@ function buildPaletteItems(
   for (const s of sessions) {
     if (s.activeSkill?.name) skills.add(s.activeSkill.name);
     if (s.skill) skills.add(s.skill);
-    for (const e of s.events.slice(-10)) {
-      if (e.tool) tools.add(e.tool);
-      const path = resolvePath(e.input, e.output);
+    for (const inv of projectInvocations(s.events, maxEvents).slice(0, 10)) {
+      if (inv.tool) tools.add(inv.tool);
+      const path = resolvePath(inv.input, inv.output);
       if (path) files.add(path);
       recentEvents.push({
-        id: e.id,
-        title: e.tool || e.event_type,
-        tool: e.tool,
-        time: e.timestamp,
+        id: inv.id,
+        title: inv.tool || inv.eventType,
+        tool: inv.tool,
+        time: inv.startTime,
       });
     }
   }
@@ -189,13 +199,13 @@ export default function App() {
   const { settings, setSettings } = useSettings();
   const { pins } = usePinnedSessions();
   const { filters, setFilters, resetFilters } = useFilters();
-  const { sessions, selectedSessionId, selectSession, handleMessage, sortedSessions } = useSessions();
+  const { sessions, selectedSessionId, selectSession, handleMessage, sortedSessions, announcement } = useSessions();
   const { route, navigate } = useHashRoute();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hoverPaused, setHoverPaused] = useState(false);
   const [manualPaused, setManualPaused] = useState(false);
-  const [pendingUpdates, setPendingUpdates] = useState<ClientWebSocketMessage[]>([]);
+  const [pendingUpdates, setPendingUpdates] = useState<PendingMessageBuffer>(createPendingMessageBuffer);
   const now = useNow();
 
   const paused = hoverPaused || manualPaused;
@@ -227,6 +237,12 @@ export default function App() {
     }
   }, [route.sessionId, selectedSessionId, sessions, selectSession]);
 
+  useEffect(() => {
+    if (sessions.size > 0 && route.sessionId && !sessions.has(route.sessionId)) {
+      navigate({ sessionId: selectedSessionId }, 'replace');
+    }
+  }, [navigate, route.sessionId, selectedSessionId, sessions]);
+
   // Hydrate filters from the URL
   useEffect(() => {
     const params = new URLSearchParams();
@@ -249,10 +265,10 @@ export default function App() {
   );
 
   const activeSessionId = useMemo(() => {
-    for (const s of sessions.values()) {
-      if (s.lifecycle === 'running') return s.id;
-    }
-    return sortedWithPins[0]?.id;
+    const active = Array.from(sessions.values())
+      .filter((s) => s.lifecycle === 'running')
+      .sort((a, b) => (b.lastActivity - a.lastActivity) || a.id.localeCompare(b.id))[0];
+    return active?.id || sortedWithPins[0]?.id;
   }, [sessions, sortedWithPins]);
 
   const selectedSession = useMemo(
@@ -267,9 +283,9 @@ export default function App() {
   }, [activeSessionId, selectedSessionId, selectSession, settings.autoFollowActive]);
 
   const flushPending = useCallback(() => {
-    if (pendingUpdates.length === 0) return;
-    const batch = pendingUpdates;
-    setPendingUpdates([]);
+    const batch = flushPendingMessages(pendingUpdates);
+    if (batch.length === 0) return;
+    setPendingUpdates(createPendingMessageBuffer());
     for (const msg of batch) handleMessage(msg);
   }, [pendingUpdates, handleMessage]);
 
@@ -279,8 +295,8 @@ export default function App() {
 
   const onMessage = useCallback(
     (msg: ClientWebSocketMessage) => {
-      if (pausedRef.current && (msg.type === 'snapshot' || msg.type === 'update')) {
-        setPendingUpdates((prev) => [...prev, msg]);
+      if (pausedRef.current && msg.type !== 'pong') {
+        setPendingUpdates((prev) => bufferClientMessage(prev, msg));
         return;
       }
       handleMessage(msg);
@@ -288,11 +304,11 @@ export default function App() {
     [handleMessage]
   );
 
-  const { status: connection } = useWebSocket(`ws://${location.host}/ws`, onMessage);
+  const { status: connection } = useWebSocket(dashboardWebSocketUrl(location), onMessage);
 
   const invocations = useMemo(
-    () => projectInvocations(selectedSession?.events || []),
-    [selectedSession]
+    () => projectInvocations(selectedSession?.events || [], settings.maxEvents),
+    [selectedSession?.events, settings.maxEvents]
   );
   const filteredInvocations = useMemo(
     () => filterInvocations(invocations, selectedSession, filters, now),
@@ -303,8 +319,8 @@ export default function App() {
     [filteredInvocations]
   );
   const filterOptions = useMemo<FilterOptions>(
-    () => buildOptions(sessions, selectedSessionId),
-    [sessions, selectedSessionId]
+    () => buildOptions(sessions, route.view === 'sessions' ? null : selectedSessionId),
+    [sessions, route.view, selectedSessionId]
   );
 
   const handleExport = useCallback(() => {
@@ -317,13 +333,22 @@ export default function App() {
   }, [setSettings]);
 
   const paletteItems = useMemo(
-    () => buildPaletteItems(navigateToView, navigate, sortedSessions, selectAndRoute, handleExport, toggleDensity),
-    [navigateToView, navigate, sortedSessions, selectAndRoute, handleExport, toggleDensity]
+    () => buildPaletteItems(
+      navigateToView,
+      navigate,
+      sortedSessions,
+      selectAndRoute,
+      handleExport,
+      toggleDensity,
+      settings.maxEvents
+    ),
+    [navigateToView, navigate, sortedSessions, selectAndRoute, handleExport, toggleDensity, settings.maxEvents]
   );
 
   // Global view shortcuts (digits 1-7), guarded against form fields
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (hasOpenOverlay()) return;
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName ?? '';
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
@@ -339,11 +364,14 @@ export default function App() {
   }, [navigateToView]);
 
   const focusFilterSearch = useCallback(() => {
+    if (hasOpenOverlay()) return;
     document.getElementById('filter-search')?.focus();
   }, []);
 
   useKeyboardShortcut('/', focusFilterSearch);
-  useKeyboardShortcut('k', () => setCmdOpen(true), { meta: true });
+  useKeyboardShortcut('k', () => {
+    if (!hasOpenOverlay()) setCmdOpen(true);
+  }, { meta: true });
   useKeyboardShortcut('Escape', () => setCmdOpen(false), { disabled: !cmdOpen });
 
   const handleResume = useCallback(() => {
@@ -381,7 +409,7 @@ export default function App() {
             filterOptions={filterOptions}
             paused={paused}
             manualPaused={manualPaused}
-            bufferedCount={pendingUpdates.length}
+            bufferedCount={pendingMessageCount(pendingUpdates)}
             onHoverChange={setHoverPaused}
             onManualPauseToggle={() => setManualPaused((v) => !v)}
             onResume={handleResume}
@@ -426,7 +454,7 @@ export default function App() {
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
       />
       {connection === 'connecting' && (
-        <div className="h-6 flex items-center justify-center px-4 flex-shrink-0 bg-error/10 border-b border-error/30 text-micro text-error">
+        <div role="status" aria-live="polite" className="h-6 flex items-center justify-center px-4 flex-shrink-0 bg-error/10 border-b border-error/30 text-micro text-error">
           Connection lost — reconnecting…
         </div>
       )}
@@ -439,6 +467,7 @@ export default function App() {
         />
         <main className="flex-1 min-w-0 overflow-hidden animate-fade-in">{renderView()}</main>
       </div>
+      <div aria-live="polite" className="sr-only">{announcement}</div>
       <CommandPalette items={paletteItems} open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   );

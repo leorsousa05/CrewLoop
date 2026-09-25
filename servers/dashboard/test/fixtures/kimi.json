@@ -1,0 +1,20 @@
+{
+  "success": {
+    "hook_event_name": "PreToolUse",
+    "session_id": "kimi-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/kimi",
+    "tool_name": "Read",
+    "tool_input": { "path": "/tmp/crewloop-fixtures/kimi/src/app.ts" },
+    "call_id": "kimi-call-success",
+    "timestamp": 1700000000000
+  },
+  "failure": {
+    "hook_event_name": "PostToolUse",
+    "session_id": "kimi-fixture-session",
+    "cwd": "/tmp/crewloop-fixtures/kimi",
+    "tool_name": "Read",
+    "tool_output": { "error": "file unavailable", "duration_ms": 41 },
+    "call_id": "kimi-call-failure",
+    "timestamp": 1700000000041
+  }
+}

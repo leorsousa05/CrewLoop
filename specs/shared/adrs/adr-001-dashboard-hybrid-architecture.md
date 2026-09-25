@@ -11,6 +11,16 @@ date: 2026-08-14
 
 Accepted
 
+## Supersession Notes
+
+The historical context and decision text below are preserved as originally accepted. Later decisions extend or supersede specific clauses:
+
+- The original three-agent scope is now five supported products — Kimi Code, Claude, Codex, OpenCode, and AGY — as documented in the current [architecture overview](../architecture-overview.md) and [ADR 010](adr-010-durable-product-usage-telemetry.md).
+- The original in-memory token-usage assumption is superseded by durable normalized usage storage in SQLite; general live events remain in memory. See [ADR 010](adr-010-durable-product-usage-telemetry.md).
+- The dashboard remains loopback-only, with origin, host, filesystem, and payload protections defined by [ADR 005](adr-005-dashboard-local-trust-boundary.md).
+- The client navigation evolved to seven hash-routed views, including Usage; the navigation contract is defined by [ADR 003](adr-003-dashboard-ui-navigation-model.md).
+- The log-watcher fallback remains a deferred compatibility path and is not currently implemented; current behavior is documented in the [dashboard README](../../../servers/dashboard/README.md).
+
 ## Context
 
 CrewLoop needs a real-time dashboard that shows which skill is active when an agent runs. The user primarily uses three agents: Kimi Code, Codex CLI, and OpenCode. Each exposes a different instrumentation surface:

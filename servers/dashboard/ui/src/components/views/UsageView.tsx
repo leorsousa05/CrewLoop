@@ -14,6 +14,7 @@ import {
   type UsageViewModel,
 } from '../../lib/usage';
 import { Icon } from '../ui/Icon';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const RANGE_OPTIONS: Array<{ value: UsageRange; label: string; shortLabel: string }> = [
   { value: '7d', label: '7 days', shortLabel: '7D' },
@@ -49,34 +50,13 @@ export function UsageContent({ range, onRangeChange, controller }: UsageContentP
   const triggerRef = useRef<HTMLButtonElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { onKeyDown: onDialogTrapKeyDown } = useFocusTrap({
+    open: resetOpen,
+    containerRef: dialogRef,
+    initialFocusRef: cancelRef,
+    restoreFocusRef: triggerRef,
+  });
   const model = useMemo(() => controller.data ? buildUsageViewModel(controller.data) : null, [controller.data]);
-
-  useEffect(() => {
-    if (!resetOpen) return;
-    cancelRef.current?.focus();
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !controller.resetting) {
-        event.preventDefault();
-        setResetOpen(false);
-        triggerRef.current?.focus();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-      const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled)') ?? []);
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [controller.resetting, resetOpen]);
 
   function closeReset() {
     if (controller.resetting) return;
@@ -146,7 +126,7 @@ export function UsageContent({ range, onRangeChange, controller }: UsageContentP
         {controller.stale && (
           <StatusBanner tone="warning" title="Stale usage data">
             The refresh failed. The last successful comparison remains visible.{' '}
-            <button type="button" onClick={controller.refresh} className="underline text-text-primary">Retry</button>
+            <button type="button" onClick={controller.refresh} className="min-h-11 underline text-text-primary">Retry</button>
           </StatusBanner>
         )}
 
@@ -219,6 +199,16 @@ export function UsageContent({ range, onRangeChange, controller }: UsageContentP
             aria-modal="true"
             aria-labelledby="reset-usage-title"
             aria-describedby="reset-usage-description"
+            tabIndex={-1}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' && !controller.resetting) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeReset();
+                return;
+              }
+              onDialogTrapKeyDown(event);
+            }}
             className="relative w-full max-w-md rounded-lg border border-border-strong bg-surface p-5 shadow-modal animate-modal-in"
           >
             <h2 id="reset-usage-title" className="font-display text-heading">Clear usage history?</h2>

@@ -137,6 +137,60 @@ Monetary values are labelled **Estimated API-equivalent USD**. Provider-reported
 | OpenCode | Final assistant message event | Uses stable message identity and provider-reported cost when supplied |
 | AGY | `AfterModel` response metadata | Unavailable when final positive usage metadata is absent |
 
+## Continuous token benchmark
+
+The fixed benchmark compares the baseline and candidate CrewLoop optimization policies across six synthetic scenarios. It validates policy identity, scenario coverage, token measurement quality, execution metrics, measured cost per correctly completed task, and required quality gates before returning `adopt_candidate` or `keep_baseline`. A candidate must not regress cost per completed task; missing cost evidence fails closed.
+
+Benchmark reports also include a deterministic scenario breakdown for total/input/output tokens, duration, success rate, and cost per completed task. This breakdown is diagnostic evidence for regression tracking; it does not change the aggregate adoption gate or activate a policy.
+
+Verified host execution records can be projected into the existing benchmark-run contract with the provider-neutral `projectTaskExecutionRecord` adapter. Records without verified token usage, duration, or tool-call measurements return a bounded unavailable result and are not converted into synthetic zeroes.
+
+Use `buildTokenBenchmarkDatasetFromExecutionRecords` to collect a local batch of validated execution records into a benchmark dataset. The collector preserves input order, lets the existing dataset validator handle identical or conflicting duplicates, and returns every unavailable record index without exposing a partial dataset. Baseline/candidate coverage and adoption decisions remain the responsibility of the existing corpus comparator.
+
+The CLI can consume those collections directly. Each `--baseline-records` or `--candidate-records` file must contain a `label`, a `{ "id", "version" }` policy, a known `source`, and a `records` array of `TaskExecutionRecord` values:
+
+```json
+{
+  "label": "execution-candidate",
+  "policy": { "id": "token-optimizer", "version": "candidate-v1" },
+  "source": "codex",
+  "records": []
+}
+```
+
+Run the record mode from the repository root with:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline-records path/to/baseline-records.json \
+  --candidate-records path/to/candidate-records.json \
+  --format markdown
+```
+
+The two record files must be supplied together. Missing required measurements fail closed with record indexes and reason codes; no partial dataset or synthetic zero is compared.
+
+To reproduce the checked-in sanitized six-scenario record-mode benchmark from the repository root:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline-records src/telemetry/fixtures/execution-baseline.json \
+  --candidate-records src/telemetry/fixtures/execution-candidate.json \
+  --format markdown
+```
+
+The command is launched from the repository root; npm resolves the fixture arguments from the dashboard workspace directory. This deterministic fixture run should report `adopt_candidate`, 100% measured coverage, a 25% total-token reduction, and a 25% cost-per-completed-task reduction. The fixtures are synthetic evidence for local validation, not production provider telemetry.
+
+Run the same gate used by CI from the repository root:
+
+```bash
+npm run benchmark:tokens --workspace=@archznn/crewloop-dashboard -- \
+  --baseline src/telemetry/fixtures/baseline.json \
+  --candidate src/telemetry/fixtures/candidate.json \
+  --format markdown
+```
+
+A successful command exits with code `0` and reports `adopt_candidate`. To verify the negative path, replace `candidate.json` with `candidate-fail.json`; it must report `keep_baseline` and exit with code `1`. The benchmark only recommends adoption: it never activates or persists a policy automatically.
+
 The database contains normalized numeric counts, product/model metadata, timestamps, immutable cost snapshots, and hashed session identifiers. It never stores prompts, commands, tool input/output, transcript lines, raw usage JSON, filesystem paths, or credentials.
 
 ## UI shortcuts
@@ -187,6 +241,24 @@ npm run typecheck
 npm run build
 npm test
 ```
+
+The package test command includes the server suite, UI suite, and browser-free acceptance-preflight CLI contract checks.
+
+To reproduce the automated browser checkpoint from the acceptance matrix, run the production server and connect the preflight to an already-running local Chrome CDP endpoint:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229
+```
+
+The command creates an isolated browser target, emits one JSON result for each of the 112 supported combinations, and exits non-zero on render, overflow, or accessible-name failures. It is automated evidence only; the manual screen-reader and visual walkthrough remains required.
+
+For the bounded interaction checkpoint, add `--interaction-smoke`:
+
+```bash
+npm run acceptance:browser -- --url http://127.0.0.1:7890/ --cdp http://127.0.0.1:9229 --summary --interaction-smoke
+```
+
+The additional summary covers mobile overlay `Tab`/`Shift+Tab` focus containment and restoration, keyboard access to the empty session selector, reduced-motion persistence, hash history, and external font requests. It remains separate from the manual visual, contrast, keyboard, async-state, and screen-reader walkthrough.
 
 ## Known limitations
 

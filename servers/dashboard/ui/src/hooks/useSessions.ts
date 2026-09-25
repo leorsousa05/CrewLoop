@@ -4,23 +4,25 @@ import type { ClientSession, ClientWebSocketMessage } from '../../../src/types';
 export interface SessionsState {
   sessions: Map<string, ClientSession>;
   selectedSessionId: string | null;
+  announcement: string;
 }
 
-function defaultSelected(
+export function defaultSelected(
   sessions: Map<string, ClientSession>,
   activeSessionId: string | undefined,
   current: string | null
 ): string | null {
   if (current && sessions.has(current)) return current;
   if (activeSessionId && sessions.has(activeSessionId)) return activeSessionId;
-  const first = sessions.keys().next().value;
-  return first || null;
+  return Array.from(sessions.values())
+    .sort((a, b) => (b.lastActivity - a.lastActivity) || a.id.localeCompare(b.id))[0]?.id || null;
 }
 
 export function useSessions() {
   const [state, setState] = useState<SessionsState>({
     sessions: new Map(),
     selectedSessionId: null,
+    announcement: '',
   });
 
   const selectSession = useCallback((id: string | null) => {
@@ -41,11 +43,14 @@ export function useSessions() {
         const s = msg.session;
         sessions.set(s.id, s);
         if (msg.isActive) activeSessionId = s.id;
+      } else if (msg.type === 'remove') {
+        sessions.delete(msg.sessionId);
       }
 
       return {
         sessions,
         selectedSessionId: defaultSelected(sessions, activeSessionId, prev.selectedSessionId),
+        announcement: msg.type === 'remove' ? `Session ${msg.sessionId} was removed.` : prev.announcement,
       };
     });
   }, []);
@@ -60,5 +65,6 @@ export function useSessions() {
     selectSession,
     handleMessage,
     sortedSessions,
+    announcement: state.announcement,
   };
 }

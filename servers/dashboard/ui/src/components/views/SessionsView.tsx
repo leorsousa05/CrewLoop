@@ -55,17 +55,21 @@ export function SessionsView({ sessions, selectedSessionId, filterOptions, onSel
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      <header className="flex items-baseline justify-between gap-3 px-4 md:px-5 py-3 border-b border-border-default flex-shrink-0">
+        <h1 className="font-display text-display-lg text-text-primary">Sessions</h1>
+        <span className="text-caption text-text-muted" aria-live="polite">{sorted.length} sessions</span>
+      </header>
       <FilterBar options={filterOptions} resultCount={sorted.length} />
-      <div className="flex items-center gap-2 px-4 md:px-5 py-2 border-b border-border-default flex-shrink-0">
+      <div className="flex items-center gap-2 px-4 md:px-5 py-2 border-b border-border-default flex-shrink-0 overflow-x-auto">
         <Icon name="ArrowsDownUp" className="w-4 h-4 text-text-muted" />
         <span className="text-caption uppercase tracking-wide text-text-muted">Sort</span>
-        <div role="group" aria-label="Sort sessions" className="flex items-center ml-1 rounded-lg border border-border-default overflow-hidden">
+        <div role="group" aria-label="Sort sessions" className="flex items-center ml-1 rounded-lg border border-border-default overflow-hidden flex-shrink-0">
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => onSortChange(opt.key)}
               aria-pressed={sort === opt.key}
-              className={`px-2.5 py-1 text-label transition-colors ${
+              className={`px-2.5 py-1 min-h-11 sm:min-h-0 text-label transition-colors ${
                 sort === opt.key
                   ? 'bg-accent-subtle text-accent-strong'
                   : 'text-text-secondary hover:bg-elevated'
@@ -87,15 +91,6 @@ export function SessionsView({ sessions, selectedSessionId, filterOptions, onSel
             return (
               <div
                 key={s.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => onSelectSession(s.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelectSession(s.id);
-                  }
-                }}
                 className={`group flex items-center gap-3 w-full text-left p-3 rounded-lg border border-l-2 transition-colors cursor-pointer ${
                   active
                     ? 'bg-elevated border-border-default border-l-accent'
@@ -103,18 +98,13 @@ export function SessionsView({ sessions, selectedSessionId, filterOptions, onSel
                 }`}
               >
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    togglePin(s.id);
-                  }}
-                  aria-label={pinned ? 'Unpin session' : 'Pin session'}
-                  className={`p-1 rounded hover:bg-base transition-colors ${
-                    pinned ? 'text-warning' : 'text-text-muted group-hover:text-text-secondary'
-                  }`}
+                  type="button"
+                  aria-pressed={active}
+                  aria-label={`Select ${s.activeSkill?.name || s.id}, ${s.lifecycle} session`}
+                  onClick={() => onSelectSession(s.id)}
+                  className="flex items-center gap-3 flex-1 min-w-0 min-h-11 text-left"
                 >
-                  <Icon name="Star" weight={pinned ? 'fill' : 'regular'} className="w-4 h-4" />
-                </button>
-                <span className={`w-2.5 h-2.5 rounded-full ${lifecycleColor(s.lifecycle)}`} />
+                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${lifecycleColor(s.lifecycle)}`} />
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-body text-text-primary font-mono truncate">
                     {truncate(s.activeSkill?.name || s.id, 40)}
@@ -123,7 +113,18 @@ export function SessionsView({ sessions, selectedSessionId, filterOptions, onSel
                     {formatTime(s.startTime)} · {duration} · {s.events.length} events
                   </span>
                 </div>
-                <span className="text-micro uppercase text-text-muted">{s.source}</span>
+                <span className="text-micro uppercase text-text-muted hidden sm:block flex-shrink-0">{s.source}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => togglePin(s.id)}
+                  aria-label={pinned ? 'Unpin session' : 'Pin session'}
+                  className={`touch-target rounded hover:bg-base transition-colors flex-shrink-0 ${
+                    pinned ? 'text-warning' : 'text-text-muted group-hover:text-text-secondary'
+                  }`}
+                >
+                  <Icon name="Star" weight={pinned ? 'fill' : 'regular'} className="w-4 h-4" />
+                </button>
               </div>
             );
           })}
@@ -133,7 +134,7 @@ export function SessionsView({ sessions, selectedSessionId, filterOptions, onSel
               {hasActiveFilters ? (
                 <>
                   <p className="text-body">Nothing matches these filters.</p>
-                  <button onClick={resetFilters} className="btn-ghost text-label">
+                  <button type="button" onClick={resetFilters} className="btn-ghost min-h-11 text-label">
                     Clear filters
                   </button>
                 </>

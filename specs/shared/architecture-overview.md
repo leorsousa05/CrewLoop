@@ -127,7 +127,7 @@ Copy mode materializes both local and shared content. `--symlink` creates a real
 
 ## 3. Dashboard
 
-The CrewLoop dashboard accepts normalized events from multiple agent hook sources and presents them as a unified real-time session view.
+The CrewLoop dashboard is a localhost-only, seven-view operational surface. It accepts normalized events from five supported agent products and presents them as a unified real-time session view with minimized durable usage telemetry.
 
 ### Supported sources
 

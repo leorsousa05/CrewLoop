@@ -445,6 +445,17 @@ function generateOpenCodePlugin(): string {
   return `// CREWLOOP-PLUGIN v1 — do not edit; regenerate with \`crewloop install\`
 const { spawn } = require('node:child_process');
 
+function getInvocationId(input, output) {
+  const candidate = input?.callID
+    || input?.callId
+    || input?.toolCallID
+    || input?.toolCallId
+    || input?.id
+    || output?.callID
+    || output?.callId;
+  return typeof candidate === 'string' ? candidate : undefined;
+}
+
 function sendEvent(payload) {
   try {
     const child = spawn('crewloop-shim', ['opencode'], {
@@ -465,6 +476,7 @@ export const CrewLoopPlugin = async ({ directory }) => {
         event_type: 'tool_start',
         cwd: input.cwd || directory,
         session_id: input.sessionID,
+        invocation_id: getInvocationId(input),
       });
     },
     'tool.execute.after': async (input, output) => {
@@ -473,6 +485,7 @@ export const CrewLoopPlugin = async ({ directory }) => {
         event_type: 'tool_end',
         cwd: input.cwd || directory,
         session_id: input.sessionID,
+        invocation_id: getInvocationId(input, output),
         success: output?.success !== false,
         duration_ms: output?.duration,
       });

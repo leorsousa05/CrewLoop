@@ -67,4 +67,61 @@ describe('projectInvocations', () => {
     assert.strictEqual(invocations[0].eventType, 'tool_end');
     assert.strictEqual(invocations[0].status, 'error');
   });
+
+  it('pairs events by invocation_id when event ids differ and tools are concurrent', () => {
+    const firstStart = makeEvent({
+      id: 'event-start-a',
+      invocation_id: 'call-a',
+      event_type: 'tool_start',
+      tool: 'Read',
+      timestamp: 1000,
+      detail: 'a',
+    });
+    const secondStart = makeEvent({
+      id: 'event-start-b',
+      invocation_id: 'call-b',
+      event_type: 'tool_start',
+      tool: 'Read',
+      timestamp: 1100,
+      detail: 'b',
+    });
+    const firstEnd = makeEvent({
+      id: 'event-end-a',
+      invocation_id: 'call-a',
+      event_type: 'tool_end',
+      tool: 'Read',
+      status: 'success',
+      timestamp: 1200,
+    });
+    const secondEnd = makeEvent({
+      id: 'event-end-b',
+      invocation_id: 'call-b',
+      event_type: 'tool_end',
+      tool: 'Read',
+      status: 'error',
+      timestamp: 1300,
+    });
+
+    const invocations = projectInvocations([secondEnd, firstEnd, secondStart, firstStart]);
+    assert.deepEqual(
+      invocations.map((invocation) => [invocation.id, invocation.detail, invocation.status]),
+      [
+        ['call-b', 'b', 'error'],
+        ['call-a', 'a', 'success'],
+      ]
+    );
+  });
+
+  it('honors a client projection limit without exceeding server-retained events', () => {
+    const events = Array.from({ length: 3 }, (_, index) => makeEvent({
+      id: `end-${index}`,
+      event_type: 'tool_end',
+      tool: 'Read',
+      timestamp: index + 1,
+      status: 'success',
+    })).reverse();
+
+    assert.deepStrictEqual(projectInvocations(events, 2).map((invocation) => invocation.startTime), [3, 2]);
+    assert.strictEqual(projectInvocations(events, 1000).length, 3);
+  });
 });
