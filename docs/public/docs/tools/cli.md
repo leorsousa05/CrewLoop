@@ -4,12 +4,12 @@ sidebar_position: 1
 
 # CLI Reference
 
-`@archznn/crewloop-cli` is the TypeScript CLI that installs CrewLoop skills into your agent's skill directory and configures hooks so tool-use events are forwarded to the real-time dashboard.
+The `crewloop` command, shipped inside the `@archznn/crewloop-skills` package, is the TypeScript CLI that installs CrewLoop skills into your agent's skill directory and configures hooks so tool-use events are forwarded to the real-time dashboard.
 
 ## Install
 
 ```bash
-npm install -g @archznn/crewloop-cli
+npm install -g @archznn/crewloop-skills
 ```
 
 ## Commands
@@ -68,6 +68,18 @@ crewloop dashboard
 crewloop dashboard --port 8080
 crewloop dashboard --host 0.0.0.0
 ```
+
+### `crewloop validate-specs`
+
+Validates the project's `specs/` tree against CrewLoop spec conventions (placement, frontmatter, required sections, acceptance-criteria mapping, links, and the 10-entry cap on `project-state.md` Recent decisions). Read-only; exits `0` when clean, `1` on errors, `2` on usage errors or a missing `specs/` folder.
+
+```bash
+crewloop validate-specs
+crewloop validate-specs --changed specs/features/01-cli/spec-001-example.md
+crewloop validate-specs --json
+```
+
+With `--changed`, only errors in the listed files fail; errors in other files, such as legacy specs, are reported as warnings. CrewLoop Plan, Review, and Ship run it automatically when the CLI is available.
 
 ## Supported agents
 

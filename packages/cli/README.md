@@ -1,11 +1,13 @@
-# @archznn/crewloop-cli
+# CrewLoop CLI
+
+Source of the `crewloop` command. This workspace (`@archznn/crewloop-cli`) is private: the CLI ships inside the published `@archznn/crewloop-skills` package.
 
 CLI for installing [CrewLoop](https://leorsousa05.github.io/CrewLoop/) skills into your agent's skills directory.
 
 ## Install
 
 ```bash
-npm install -g @archznn/crewloop-cli
+npm install -g @archznn/crewloop-skills
 ```
 
 Requires Node.js 18 or newer.
@@ -75,6 +77,15 @@ Start the dashboard:
 crewloop dashboard --port 8080
 ```
 
+Validate the project's `specs/` tree against CrewLoop spec conventions (read-only; exit `0` clean, `1` errors, `2` usage or missing `specs/`):
+
+```bash
+crewloop validate-specs
+crewloop validate-specs --changed specs/features/01-cli/spec-001-example.md --json
+```
+
+With `--changed`, only errors in the listed files fail; errors elsewhere (for example legacy specs) are reported as warnings.
+
 Link skill payloads for local development:
 
 ```bash
@@ -135,7 +146,7 @@ Unknown flags and commands fail loudly with a usage hint instead of being silent
 
 ## Publishing
 
-`@archznn/crewloop-cli` is published automatically by the GitHub Actions workflow in `.github/workflows/publish-npm.yml` whenever a `v*.*.*` tag is pushed. The `@archznn/crewloop-skills` package is published first, then the CLI.
+The CLI is not published on its own. The GitHub Actions workflow in `.github/workflows/publish-npm.yml` publishes `@archznn/crewloop-skills` whenever a `v*.*.*` tag on `main` matches the root `package.json` version; that package includes `packages/cli/dist/` and exposes the `crewloop` binary.
 
 ## License
 

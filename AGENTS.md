@@ -44,7 +44,7 @@ crewloop/
 │   ├── public/
 │   └── src/
 ├── packages/
-│   └── cli/                         # @archznn/crewloop-cli (TypeScript)
+│   └── cli/                         # CLI source (private workspace, ships in @archznn/crewloop-skills)
 │       ├── src/
 │       │   ├── cli.ts               # Entry point and command parser
 │       │   ├── agents.ts            # Supported agent definitions
@@ -201,7 +201,7 @@ Rules — no exceptions:
 2. **`crewloop:plan` creates a single-file feature spec** in `specs/features/<domain>/spec-NN-name.md` for every change — including 1-line bug fixes.
 3. **CrewLoop Design acts before CrewLoop Code** whenever the change involves a visual interface.
 4. **CrewLoop Code never does git operations** and never reviews its own code.
-5. **CrewLoop Review never writes code** and never runs git operations.
+5. **CrewLoop Review never writes code** and never runs git operations. Review runs in an isolated context when the host supports subagents (CrewLoop Code dispatches it to a fresh subagent); otherwise the report declares `same-context (not isolated)`.
 6. **CrewLoop Ship is the only skill** that commits, creates branches, pushes, and opens PRs.
 7. **Skills auto-route based on the transition contract.** Present navigation options only when the user interrupts with `stop`, `pause`, `volta`, `voltar`, or `re-analyze`.
 8. **Sub-skills assist core skills** — supporting skills return to their invoker; `crewloop:docs` returns to `crewloop:plan` by default.
@@ -248,6 +248,7 @@ There is no top-level build. Run all commands from their respective package dire
 | Task | Command | Directory |
 |------|---------|-----------|
 | Validate SKILL.md files | `python scripts/validate-skills.py` | repo root |
+| Validate specs tree | `node packages/cli/bin/crewloop.js validate-specs` (after building the CLI) | repo root |
 | Build CLI | `npm run build` | `packages/cli/` |
 | Test CLI | `npm test` | `packages/cli/` |
 | Build dashboard | `npm run build` | `servers/dashboard/` |
@@ -259,7 +260,7 @@ There is no top-level build. Run all commands from their respective package dire
 
 Dashboard runs on `http://127.0.0.1:7890` by default. Port and host are configurable via `CREWLOOP_DASHBOARD_PORT` and `CREWLOOP_DASHBOARD_HOST`.
 
-**Deploy:** Publishing is automated via GitHub Actions on `v*.*.*` semantic version tags. `@archznn/crewloop-skills` is published first, then `@archznn/crewloop-cli`.
+**Deploy:** Publishing is automated via GitHub Actions. A root `package.json` version bump merged into `main` makes `release-tag` create the `v*.*.*` tag, and `publish-npm` then publishes `@archznn/crewloop-skills`, which bundles the `crewloop` CLI and the dashboard. The `packages/cli` workspace is private and not published on its own.
 
 ---
 

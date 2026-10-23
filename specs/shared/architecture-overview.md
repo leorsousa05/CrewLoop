@@ -266,17 +266,18 @@ The docs site uses the **same design tokens as the dashboard**, verbatim, define
 
 ## 5. npm Distribution
 
-CrewLoop is distributed through npm as two public packages under the `@archznn` scope.
+CrewLoop is distributed through npm as one public package under the `@archznn` scope.
 
 | Package | Location | Contents |
 |---------|----------|----------|
-| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/`, `references/`, `assets/`, and `servers/dashboard/` |
-| `@archznn/crewloop-cli` | `packages/cli/package.json` | `crewloop` CLI installer |
+| `@archznn/crewloop-skills` | Repository root `package.json` | `skills/`, `references/`, `assets/`, `servers/dashboard/`, and the `crewloop` CLI (`packages/cli/dist/`) |
+
+The `packages/cli` workspace (`@archznn/crewloop-cli`) is private; the standalone npm package of that name is frozen at 0.4.0 and must not be used for installation.
 
 ### Installation
 
 ```bash
-npm install -g @archznn/crewloop-cli
+npm install -g @archznn/crewloop-skills
 crewloop install
 ```
 
@@ -284,7 +285,7 @@ Selective install: `crewloop install --skill crewloop-plan --skill crewloop-code
 
 ### Publishing
 
-Automated via GitHub Actions (`.github/workflows/publish-npm.yml`) when a semantic-version tag is pushed: validates tag vs both `package.json` versions, publishes `@archznn/crewloop-skills` first, waits for visibility, then publishes `@archznn/crewloop-cli`. Required secret: `NPM_TOKEN`.
+Automated via GitHub Actions: a root version bump merged into `main` makes `.github/workflows/release-tag.yml` create the `v*.*.*` tag; `.github/workflows/publish-npm.yml` then verifies the tag against the root `package.json` version, builds all workspaces, publishes `@archznn/crewloop-skills`, and waits for visibility. Pushing a matching tag manually also triggers it. Required secret: `NPM_TOKEN`.
 
 ```bash
 git tag v0.2.0

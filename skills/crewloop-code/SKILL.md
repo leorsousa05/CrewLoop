@@ -58,7 +58,16 @@ When Plan requests benchmark evidence, keep one task-local `TaskExecutionRecord`
 2. **Check subagents** — If the spec frontmatter has `subagents.approved: true`, spawn subagents for parallel components.
 3. **Implement & Test** — Follow contracts, write tests, execute verification commands named in Done When.
 4. **Update spec** — Tick the Done When checkboxes that your tests prove. Never edit requirements, acceptance criteria, or constraints without routing back to `crewloop:plan`.
-5. **BUILD completion** — Run the full verification suite and load `crewloop:review` automatically. (Final `status: completed` marking is the Shipper's job, after review PASS.)
+5. **BUILD completion** — Run the full verification suite and hand off to `crewloop:review` through an isolated review context (see below). (Final `status: completed` marking is the Shipper's job, after review PASS.)
+
+### Isolated Review Dispatch
+
+The context that wrote the code never reviews it. When the host exposes a subagent/task capability, dispatch `crewloop:review` to a fresh subagent context instead of loading it here. This dispatch is always allowed and does not need `subagents.approved`.
+
+- **Compact handoff only:** the active feature spec path, the changed-file list, the Plan risk/profile, and the verification commands you ran with their pass/fail outcome. Exclude your reasoning, self-assessment, and conversation history; Review re-verifies every claim.
+- **Route on the returned verdict:** PASS → `crewloop:ship`; FAIL → fix in this context, then dispatch a fresh review subagent for the re-review.
+- **Fallback:** when no subagent capability exists (`no_subagent_capability`) or the dispatch is denied (`subagent_denied`), load `crewloop:review` in this context and pass the fallback reason so the report declares `same-context (not isolated)`. Do not retry a denied dispatch.
+- **No report or a malformed report** (missing verdict or Review Context): re-dispatch once to a fresh subagent; if it fails again, stop and route to `crewloop:plan` without claiming a PASS.
 
 ---
 
@@ -80,7 +89,7 @@ Spawn subagents in parallel only if the spec frontmatter explicitly sets `subage
 When BUILD succeeds:
 1. Tick all Done When checkboxes proven by tests.
 2. Run the complete verification suite (typecheck, build, tests) one final time.
-3. Load `crewloop:review` directly. (In AFK, return to `crewloop:plan`).
+3. Hand off to `crewloop:review` via the Isolated Review Dispatch (same-context only as the declared fallback). (In AFK, return to `crewloop:plan`).
 
 ---
 

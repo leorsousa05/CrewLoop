@@ -17,7 +17,7 @@ crewloop/
 │       └── skill-template.md        # Template for new SKILL.md files
 ├── docs/                            # Vite + React + Tailwind docs site
 ├── packages/
-│   └── cli/                         # @archznn/crewloop-cli (TypeScript)
+│   └── cli/                         # CLI source (private workspace, ships in @archznn/crewloop-skills)
 │       ├── src/
 │       │   ├── cli.ts               # CLI entry point
 │       │   ├── agents.ts            # Supported agent definitions

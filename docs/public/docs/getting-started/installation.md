@@ -15,7 +15,7 @@ CrewLoop is distributed via npm. The CLI installs all skills into your agent's s
 ## Step 1 — Install the CLI
 
 ```bash
-npm install -g @archznn/crewloop-cli
+npm install -g @archznn/crewloop-skills
 ```
 
 ## Step 2 — Install the skills

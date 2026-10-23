@@ -23,7 +23,7 @@ CrewLoop is a documentation-first framework of role-based AI skills. Each skill 
 Install the CLI globally and load the full crew:
 
 ```bash
-npm install -g @archznn/crewloop-cli
+npm install -g @archznn/crewloop-skills
 crewloop install
 ```
 

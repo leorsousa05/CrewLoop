@@ -40,7 +40,7 @@ def main():
     title = 'CrewLoop'
     tagline = 'An AI agent crew that runs the complete software development flow.'
     # Draw a clean, rounded pill background for the CTA area
-    cta = 'npm install -g @archznn/crewloop-cli'
+    cta = 'npm install -g @archznn/crewloop-skills'
     temp_draw = ImageDraw.Draw(Image.new('RGBA', (1, 1)))
     bbox = temp_draw.textbbox((0, 0), cta, font=cta_font)
     text_w = bbox[2] - bbox[0]
@@ -70,7 +70,7 @@ def main():
     draw.text((80, 220), tagline, font=tag_font, fill='#E5E7EB')
 
     # CTA as plain text over the dark overlay area
-    cta = 'npm install -g @archznn/crewloop-cli'
+    cta = 'npm install -g @archznn/crewloop-skills'
     draw.text((pill_x + padding_x, pill_y + padding_y - 2), cta, font=cta_font, fill='#FFFFFF')
 
     bg.convert('RGB').save('assets/images/crewloop-hero.png', 'PNG')

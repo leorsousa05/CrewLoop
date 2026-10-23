@@ -42,7 +42,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToDocs }) =>
   const [activeModalImg, setActiveModalImg] = useState<{ src: string; title: string; desc: string } | null>(null);
   const [selectedSkillForModal, setSelectedSkillForModal] = useState<SkillDetails | null>(null);
   const [cliCommandText, setCliCommandText] = useState('');
-  const fullCliCommand = 'npm i -g @archznn/crewloop-cli && crewloop install';
+  const fullCliCommand = 'npm i -g @archznn/crewloop-skills && crewloop install';
 
   // Typewriter for the install command — content motion, not decoration.
   // Reduced-motion users get the full command instantly (design-ui.md §6/§10).

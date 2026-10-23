@@ -36,6 +36,14 @@ Read [conventions.md](../../references/conventions.md), [workflow.md](../../refe
 
 ## WORKFLOW
 
+### Isolated Review Context
+
+Review runs in a fresh subagent context that did not produce the diff whenever the host supports subagents; `crewloop:code` dispatches it with a compact handoff (spec path, changed files, risk/profile, verification commands with pass/fail). Code's reported results are leads to re-verify, never evidence.
+
+- Record the context in the report: `isolated`, or `same-context (not isolated)` with the bounded reason `no_subagent_capability` or `subagent_denied`.
+- A same-context review of a `high`-risk change adds the non-blocking finding `independent_review_unavailable` so the user and Ship see the gap.
+- Every re-review after a correction round runs in a fresh subagent again when subagents are available.
+
 ### Automatic Verification Gate
 
 Apply [automatic-verification.md](references/automatic-verification.md), the selected profile's verification emphasis from [execution-profiles.md](../../references/execution-profiles.md), and the continuous benchmark gate from [continuous-optimization.md](../../references/continuous-optimization.md) before issuing a verdict. For optimizer-policy changes, require matching fixed-corpus baseline/candidate coverage, the configured quality and cost gates, measured cost per correctly completed task at or below baseline, and an explicit `adopt_candidate` recommendation; a cost regression, `keep_baseline`, or unavailable required evidence is a FAIL for the candidate. Map acceptance criteria to the smallest relevant commands, inspect tracked and untracked files, scan secrets/AI artifacts/destructive commands, and classify every check as passed, failed, unavailable, or not applicable. Required unavailable evidence fails closed. A FAIL gets at most one bounded correction round through Code; a repeated failure returns to Plan. Keep the report sanitized and perform no writes or Git operations.
@@ -60,6 +68,7 @@ When a benchmark `TaskExecutionRecord` is present, validate it as evidence at th
    | :--- | :--- |
    | **Verdict** | [PASS / FAIL] |
    | **Risk Assessment** | [Low / Medium / High] |
+   | **Review Context** | [isolated / same-context (not isolated): no_subagent_capability or subagent_denied] |
 
    ### Summary
    | Check | Verdict | Notes |

@@ -24,9 +24,9 @@ export const TerminalSimulator: React.FC = () => {
   const simulationSteps: TerminalStep[] = [
     {
       stepId: 0,
-      command: 'npm i -g @archznn/crewloop-cli && crewloop install',
+      command: 'npm i -g @archznn/crewloop-skills && crewloop install',
       logs: [
-        { id: '1', type: 'header', text: 'npm install -g @archznn/crewloop-cli' },
+        { id: '1', type: 'header', text: 'npm install -g @archznn/crewloop-skills' },
         { id: '2', type: 'output', text: 'added 42 packages in 1.4s' },
         { id: '3', type: 'output', text: '' },
         { id: '4', type: 'header', text: 'crewloop install' },

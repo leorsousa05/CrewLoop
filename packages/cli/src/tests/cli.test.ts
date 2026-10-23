@@ -26,7 +26,7 @@ describe('cli', () => {
     assert.ok(help.includes('doctor'));
     assert.ok(help.includes('dashboard'));
     assert.ok(help.includes('version'));
-    assert.ok(!help.includes('validate'));
+    assert.ok(help.includes('validate-specs'));
   });
 
   it('returns 1 for unknown commands', async () => {

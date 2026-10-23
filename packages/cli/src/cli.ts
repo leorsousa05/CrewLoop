@@ -14,6 +14,7 @@ import { runList } from './commands/list';
 import { runAgents } from './commands/agents';
 import { runDoctorCommand } from './commands/doctor';
 import { runDashboard } from './commands/dashboard';
+import { runValidateSpecs } from './commands/validate-specs';
 
 export { parseArgs, CliUsageError, CliUnknownCommandError } from './args';
 export type { CliOptions, CommandContext, CommandName } from './args';
@@ -101,6 +102,8 @@ export async function run(argv: string[]): Promise<number> {
         );
       case 'dashboard':
         return await runDashboard(options, createContext(resolvePackageRoot()));
+      case 'validate-specs':
+        return runValidateSpecs(options, createContext(''));
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -4,6 +4,7 @@ export type CommandName =
   | 'agents'
   | 'doctor'
   | 'dashboard'
+  | 'validate-specs'
   | 'version'
   | 'help';
 
@@ -13,6 +14,7 @@ const COMMAND_NAMES: readonly CommandName[] = [
   'agents',
   'doctor',
   'dashboard',
+  'validate-specs',
   'version',
   'help',
 ];
@@ -33,6 +35,9 @@ export interface CliOptions {
   port?: number;
   host?: string;
   verbose?: boolean;
+  root?: string;
+  changed?: string[];
+  json?: boolean;
   helpTopic?: CommandName;
 }
 
@@ -82,6 +87,10 @@ const COMMAND_FLAGS: Record<CommandName, CommandFlags> = {
   dashboard: {
     values: new Set(['--port', '--host']),
     booleans: new Set(),
+  },
+  'validate-specs': {
+    values: new Set(['--root', '--changed']),
+    booleans: new Set(['--json']),
   },
   version: NO_FLAGS,
   help: NO_FLAGS,
@@ -184,6 +193,13 @@ export function parseArgs(argv: string[]): CliOptions {
         case '--host':
           result.host = value;
           break;
+        case '--root':
+          result.root = value;
+          break;
+        case '--changed':
+          if (!result.changed) result.changed = [];
+          result.changed.push(value);
+          break;
       }
       continue;
     }
@@ -207,6 +223,9 @@ export function parseArgs(argv: string[]): CliOptions {
           break;
         case '--verbose':
           result.verbose = true;
+          break;
+        case '--json':
+          result.json = true;
           break;
       }
       continue;

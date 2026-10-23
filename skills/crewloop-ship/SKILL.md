@@ -44,7 +44,8 @@ Read [conventions.md](../../references/conventions.md) and [workflow.md](../../r
 5. **Close the Spec Loop (after push):**
    - Mark the feature spec `status: completed` and `completed: YYYY-MM-DD` in `specs/features/<domain>/spec-NN-name.md`. The spec **stays** in `features/` as the source of truth — never archive completed feature specs.
    - Append a 10-20 line summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` (what was done, decisions, tests run).
-   - Update `specs/memory/project-state.md` (module status, last chat, next task).
+   - Update `specs/memory/project-state.md` (module status, last chat, next task). Insert the new decision at the top of Recent decisions; while it holds more than 10 dated entries, move the oldest entries, verbatim and oldest first, to the bottom of `specs/memory/decisions/decision-log.md` until 10 remain.
+   - When the `crewloop` CLI is available, run `crewloop validate-specs --changed <each spec/memory file you touched>` and fix every error before committing.
    - If this change was an approved RFC, move it from `specs/changes/` to `specs/shared/adrs/` (or, if rejected, to `specs/archive/` with a reason in `specs/archive/README.md`).
 6. **Execution & Handoff:**
    - Stage target task files only (leave unrelated pre-existing modifications unstaged).

@@ -2,10 +2,10 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { getHelpTopic, listHelpTopics, printCommandHelp, printHelp } from '../help';
 
-const COMMANDS = ['install', 'list', 'agents', 'doctor', 'dashboard', 'version', 'help'] as const;
+const COMMANDS = ['install', 'list', 'agents', 'doctor', 'dashboard', 'validate-specs', 'version', 'help'] as const;
 
 describe('help', () => {
-  it('top-level help lists all seven commands', () => {
+  it('top-level help lists all eight commands', () => {
     const help = printHelp();
     for (const command of COMMANDS) {
       assert.ok(help.includes(command), `help should include ${command}`);
@@ -64,8 +64,20 @@ describe('help', () => {
     assert.ok(help.includes('--host'));
   });
 
+  it('validate-specs help documents its flags and an example', () => {
+    const help = printHelp('validate-specs');
+    for (const flag of ['--root', '--changed', '--json']) {
+      assert.ok(help.includes(flag), `validate-specs help should include ${flag}`);
+    }
+    assert.ok(help.includes('crewloop validate-specs --changed'));
+    assert.ok(printHelp().includes('crewloop validate-specs --changed'));
+  });
+
   it('does not include unplanned commands', () => {
+    // validate-specs is planned by spec-064; other validation commands are not.
     const help = printHelp();
-    assert.ok(!help.includes('validate'));
+    const commandLines = help.split('Hooks:')[0];
+    assert.ok(!/^\s+validate\s/m.test(commandLines));
+    assert.ok(!help.includes('uninstall'));
   });
 });

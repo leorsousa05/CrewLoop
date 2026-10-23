@@ -10,10 +10,24 @@ import {
 
 describe('args parser', () => {
   it('parses every public command', () => {
-    for (const command of ['install', 'list', 'agents', 'doctor', 'dashboard', 'version', 'help']) {
+    for (const command of ['install', 'list', 'agents', 'doctor', 'dashboard', 'validate-specs', 'version', 'help']) {
       const args = parseArgs(['node', 'crewloop', command]);
       assert.strictEqual(args.command, command);
     }
+  });
+
+  it('parses validate-specs flags', () => {
+    const args = parseArgs([
+      'node', 'crewloop', 'validate-specs', '--root', '/repo', '--changed', 'a.md', '--changed', 'b.md', '--json',
+    ]);
+    assert.deepStrictEqual(args, { command: 'validate-specs', root: '/repo', changed: ['a.md', 'b.md'], json: true });
+  });
+
+  it('rejects invalid validate-specs flags', () => {
+    assert.throws(() => parseArgs(['node', 'crewloop', 'validate-specs', '--bogus']), CliUsageError);
+    assert.throws(() => parseArgs(['node', 'crewloop', 'validate-specs', '--root']), /--root requires a value/);
+    assert.throws(() => parseArgs(['node', 'crewloop', 'validate-specs', '--changed']), /--changed requires a value/);
+    assert.throws(() => parseArgs(['node', 'crewloop', 'install', '--json']), CliUsageError);
   });
 
   it('returns help when no command is given', () => {

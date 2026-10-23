@@ -8,6 +8,7 @@ Use this protocol for the pending change after Code reports its verification. Th
 2. Inspect the relevant package scripts and existing validation tools. Run the smallest relevant set that proves the mapped criteria; do not run unrelated suites only to create activity.
 3. Mark each check `passed`, `failed`, `unavailable`, or `not_applicable` based on the observed result.
 4. Treat a required `unavailable` check as a gate failure unless the spec explicitly defines an observable alternative. A missing dependency, skipped test, or unrun command is never a pass.
+5. When the `crewloop` CLI is available, run `crewloop validate-specs --changed <each changed file>`. Any remaining error marks the `schema` check `failed`; warnings (including errors in files outside the diff, which the command downgrades) are reported but do not block. When the CLI is unavailable, record this optional check as `unavailable`; it does not block PASS unless the spec requires it. A structurally valid spec tree is not evidence that acceptance criteria are met.
 
 ## Pending File and Safety Scans
 
@@ -44,8 +45,13 @@ interface VerificationFinding {
   category: string;
 }
 
+type ReviewContext = 'isolated' | 'same_context';
+type IsolationFallbackReason = 'no_subagent_capability' | 'subagent_denied';
+
 interface VerificationReport {
   schemaVersion: 1;
+  reviewContext: ReviewContext;
+  isolationFallbackReason: IsolationFallbackReason | null; // null when isolated
   checks: Array<{ check: VerificationCheck; status: VerificationStatus; required: boolean }>;
   findings: VerificationFinding[];
   correctionRound: 0 | 1;

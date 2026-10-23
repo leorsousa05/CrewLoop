@@ -10,28 +10,20 @@ CrewLoop packages are published to npm automatically by GitHub Actions on semant
 
 | Package | Published |
 |---------|----------|
-| `@archznn/crewloop-skills` | First |
-| `@archznn/crewloop-cli` | After skills are live on npm |
+| `@archznn/crewloop-skills` | Only package published; it bundles the `crewloop` CLI and the dashboard |
 
 ## How to release
 
-1. Update `version` in `package.json` (root) and `packages/cli/package.json`. Keep them aligned.
-2. Update the CLI dependency: `"@archznn/crewloop-skills": "^<new-version>"` in `packages/cli/package.json`.
-3. Push a semantic version tag:
-
-```bash
-git tag v0.8.0
-git push origin v0.8.0
-```
+1. Bump `version` in the root `package.json` (the private `packages/cli` workspace version is not published).
+2. Merge the bump into `main`. The `release-tag` workflow creates the `v<version>` tag automatically when it does not exist yet; pushing a matching tag manually also works.
 
 ## What the workflow does
 
-On a `v*.*.*` tag:
+On a `v*.*.*` tag (or after `release-tag` succeeds):
 
-1. Validates that the tag matches both `package.json` versions.
-2. Publishes `@archznn/crewloop-skills`.
+1. Verifies that the tag matches the root `package.json` version and points to a commit on `main`.
+2. Builds all workspaces and publishes `@archznn/crewloop-skills`, which includes the `crewloop` CLI (`packages/cli/dist/`) and the dashboard.
 3. Waits for the new version to be visible on the npm registry.
-4. Publishes `@archznn/crewloop-cli`.
 
 ## Required secret
 

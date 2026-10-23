@@ -6,15 +6,16 @@
 
 ## What this package does
 
-`@archznn/crewloop-cli` is the TypeScript CLI that installs CrewLoop skills into an agent's skill directory and configures agent-specific hooks so that tool-use events are forwarded to the CrewLoop dashboard.
+`@archznn/crewloop-cli` is the private workspace for the TypeScript CLI that installs CrewLoop skills into an agent's skill directory and configures agent-specific hooks so that tool-use events are forwarded to the CrewLoop dashboard. It is not published on its own; the CLI ships inside `@archznn/crewloop-skills`.
 
-Seven commands are exposed:
+Eight commands are exposed:
 
 - `crewloop install` — copies skills to the agent's skill directory and writes hook configuration to the agent's config file.
 - `crewloop list` — lists all available skills.
 - `crewloop agents` — lists supported agents, hook support, and config paths (read-only).
 - `crewloop doctor` — diagnoses package, dashboard, shim, and hook setup (read-only).
 - `crewloop dashboard` — starts the dashboard server.
+- `crewloop validate-specs` — validates the project's `specs/` tree (read-only); `--changed` scopes failures to the listed files.
 - `crewloop version` — prints the package version.
 - `crewloop help [command]` — prints top-level or command-specific help.
 
@@ -33,6 +34,8 @@ Seven commands are exposed:
 | `src/commands/agents.ts` | Supported-agent table |
 | `src/commands/doctor.ts` | Read-only diagnostics with injectable `DoctorContext` |
 | `src/commands/dashboard.ts` | Dashboard startup |
+| `src/commands/validate-specs.ts` | Spec validation output and exit codes |
+| `src/specs-validator.ts` | Pure spec-tree rules, project-state cap, and `--changed` scoping |
 | `src/agents.ts` | Supported agent definitions: config path, hook format, agent ID |
 | `src/installer.ts` | Skill copy/install logic — copies SKILL.md files to the target directory |
 | `src/hooks.ts` | Hook configuration — reads and writes agent config files using the Strategy pattern |

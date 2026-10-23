@@ -63,6 +63,21 @@ const HELP_TOPICS: HelpTopic[] = [
     examples: ['  crewloop dashboard', '  crewloop dashboard --port 8080'],
   },
   {
+    name: 'validate-specs',
+    usage: 'crewloop validate-specs [--root <dir>] [--changed <path>]... [--json]',
+    summary: 'Validate the specs/ tree against CrewLoop spec conventions (read-only)',
+    options: [
+      '  --root <dir>         Project root containing specs/ (default: current directory)',
+      '  --changed <path>     Only errors in these files fail (repeatable); others become warnings',
+      '  --json               Print a JSON report',
+    ],
+    examples: [
+      '  crewloop validate-specs',
+      '  crewloop validate-specs --changed specs/features/01-cli/spec-001-example.md',
+      '  crewloop validate-specs --json',
+    ],
+  },
+  {
     name: 'version',
     usage: 'crewloop version',
     summary: 'Show version',
@@ -115,6 +130,7 @@ Commands:
   agents               List supported agents and hook paths
   doctor               Diagnose CLI, dashboard, and hook setup
   dashboard            Start the real-time skill dashboard
+  validate-specs       Validate the specs/ tree (read-only)
   version              Show version
   help                 Show this help message
 
@@ -148,6 +164,7 @@ Examples:
   crewloop agents
   crewloop doctor
   crewloop dashboard --port 8080
+  crewloop validate-specs --changed specs/features/01-cli/spec-001-example.md
   crewloop --version
 `;
 }
