@@ -1,7 +1,13 @@
 """Regression tests for CrewLoop's non-blocking Plan/Design workflow."""
 
+import os
 from pathlib import Path
+import shutil
+import subprocess
+import tempfile
 import unittest
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +23,12 @@ VALIDATION_WORKFLOW = ROOT / ".github" / "workflows" / "validate.yml"
 AUTOMATIC_VERIFICATION = ROOT / "skills" / "crewloop-review" / "references" / "automatic-verification.md"
 AGENTS = ROOT / "AGENTS.md"
 DECISIONS_README = ROOT / "specs" / "memory" / "decisions" / "README.md"
+PUBLISH_WORKFLOW = ROOT / ".github" / "workflows" / "publish-npm.yml"
+
+
+def publish_step(name: str) -> dict:
+    workflow = yaml.safe_load(PUBLISH_WORKFLOW.read_text(encoding="utf-8"))
+    return next(step for step in workflow["jobs"]["publish"]["steps"] if step.get("name") == name)
 
 
 class AutomatedWorkflowTest(unittest.TestCase):
@@ -161,6 +173,63 @@ class AutomatedWorkflowTest(unittest.TestCase):
         self.assertIn("keeps at most 10 dated entries", self.workflow)
         self.assertIn("decision-log.md", self.workflow)
         self.assertIn("keeps at most 10 dated entries", self.decisions_readme)
+
+
+class PublishVisibilityWaitTest(unittest.TestCase):
+    """spec-066: the post-publish visibility check never fails a successful publish."""
+
+    def test_wait_step_bypasses_cache_and_uses_bounded_window(self) -> None:
+        script = publish_step("Wait for package to be available")["run"]
+        self.assertIn("npm view @archznn/crewloop-skills@\"$VERSION\" version --prefer-online", script)
+        self.assertIn('attempts="${WAIT_ATTEMPTS:-30}"', script)
+        self.assertIn('sleep "${WAIT_SECONDS:-10}"', script)
+        self.assertIn("::warning::npm publish succeeded", script)
+        self.assertNotIn("exit 1", script)
+
+    def test_publish_step_is_unchanged(self) -> None:
+        step = publish_step("Publish package")
+        self.assertEqual(step["run"], "npm publish --access public")
+        self.assertEqual(step["env"], {"NODE_AUTH_TOKEN": "${{ secrets.NPM_TOKEN }}"})
+
+    def run_wait(self, visible_on_call: int, attempts: int) -> tuple[subprocess.CompletedProcess, list[str]]:
+        temp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, temp, True)
+        calls = temp / "calls.log"
+        stub = temp / "npm"
+        stub.write_text(
+            "#!/usr/bin/env bash\n"
+            f'echo "$*" >> "{calls}"\n'
+            f'n=$(wc -l < "{calls}")\n'
+            # Like real `npm view`, exit 1 (404) while the version is not yet visible.
+            f'if [ "$n" -ge {visible_on_call} ]; then echo "9.9.9"; else echo "E404" >&2; exit 1; fi\n',
+            encoding="utf-8",
+        )
+        stub.chmod(0o755)
+        env = {
+            **os.environ,
+            "PATH": f"{temp}{os.pathsep}{os.environ['PATH']}",
+            "VERSION": "9.9.9",
+            "WAIT_ATTEMPTS": str(attempts),
+            "WAIT_SECONDS": "0",
+        }
+        script = publish_step("Wait for package to be available")["run"]
+        result = subprocess.run(["bash", "-e", "-c", script], env=env, capture_output=True, text=True, timeout=60)
+        return result, calls.read_text(encoding="utf-8").splitlines() if calls.exists() else []
+
+    @unittest.skipIf(os.name == "nt", "runs the workflow bash script; covered on Linux CI")
+    def test_succeeds_when_version_becomes_visible(self) -> None:
+        result, calls = self.run_wait(visible_on_call=3, attempts=30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("@archznn/crewloop-skills@9.9.9 is available on npm", result.stdout)
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(all("--prefer-online" in call for call in calls))
+
+    @unittest.skipIf(os.name == "nt", "runs the workflow bash script; covered on Linux CI")
+    def test_warns_without_failing_when_never_visible(self) -> None:
+        result, calls = self.run_wait(visible_on_call=999, attempts=3)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(any(line.startswith("::warning::") for line in result.stdout.splitlines()))
 
 
 if __name__ == "__main__":

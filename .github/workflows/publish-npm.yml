@@ -113,18 +113,20 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
 
+      # Informational: `npm publish` above is the publish gate. Registry visibility can lag
+      # by minutes, so a still-invisible version is a warning, not a failure.
       - name: Wait for package to be available
         env:
           VERSION: ${{ needs.validate.outputs.version }}
         run: |
-          for i in $(seq 1 12); do
-            published=$(npm view @archznn/crewloop-skills@"$VERSION" version 2>/dev/null || true)
+          attempts="${WAIT_ATTEMPTS:-30}"
+          for i in $(seq 1 "$attempts"); do
+            published=$(npm view @archznn/crewloop-skills@"$VERSION" version --prefer-online 2>/dev/null || true)
             if [ "$published" = "$VERSION" ]; then
               echo "@archznn/crewloop-skills@$VERSION is available on npm"
               exit 0
             fi
-            echo "Waiting for @archznn/crewloop-skills@$VERSION... ($i/12)"
-            sleep 5
+            echo "Waiting for @archznn/crewloop-skills@$VERSION... ($i/$attempts)"
+            sleep "${WAIT_SECONDS:-10}"
           done
-          echo "Timeout waiting for @archznn/crewloop-skills@$VERSION"
-          exit 1
+          echo "::warning::npm publish succeeded, but @archznn/crewloop-skills@$VERSION was not visible on the registry after $attempts attempts"

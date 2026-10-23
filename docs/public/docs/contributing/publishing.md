@@ -23,7 +23,7 @@ On a `v*.*.*` tag (or after `release-tag` succeeds):
 
 1. Verifies that the tag matches the root `package.json` version and points to a commit on `main`.
 2. Builds all workspaces and publishes `@archznn/crewloop-skills`, which includes the `crewloop` CLI (`packages/cli/dist/`) and the dashboard.
-3. Waits for the new version to be visible on the npm registry.
+3. Checks that the new version is visible on the npm registry (up to about 5 minutes, bypassing the npm cache). A version that is still not visible produces a warning, not a failure: the `npm publish` result is the publish gate.
 
 ## Required secret
 
