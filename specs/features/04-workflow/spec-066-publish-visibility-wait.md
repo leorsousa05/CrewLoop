@@ -3,9 +3,9 @@
 ---
 name: spec-066-publish-visibility-wait
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-10-23
-completed: null
+completed: 2026-10-23
 supersedes: []
 ---
 
