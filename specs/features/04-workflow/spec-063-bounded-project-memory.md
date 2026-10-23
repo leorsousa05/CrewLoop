@@ -3,9 +3,9 @@
 ---
 name: spec-063-bounded-project-memory
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-10-23
-completed: null
+completed: 2026-10-23
 supersedes: []
 ---
 

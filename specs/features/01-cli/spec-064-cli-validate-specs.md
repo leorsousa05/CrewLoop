@@ -3,9 +3,9 @@
 ---
 name: spec-064-cli-validate-specs
 domain: 01-cli
-status: active
+status: completed
 created: 2026-10-23
-completed: null
+completed: 2026-10-23
 supersedes: [spec-062-deterministic-spec-validator]
 ---
 
