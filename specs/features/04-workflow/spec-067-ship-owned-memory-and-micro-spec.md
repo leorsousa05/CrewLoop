@@ -31,6 +31,7 @@ Remove the duplicated memory bookkeeping (Plan and Ship both write a chat-log an
 4. **Micro-spec template.** Add `specs/templates/micro-spec.md` with the frontmatter and the four sections.
 5. **Contradiction resolved.** Plan's anti-pattern reads that routing to `crewloop:code` without a feature spec is forbidden for every task (a micro-spec suffices for low-risk fixes). Plan step 7 picks full spec or micro-spec; the full edge-case matrix applies to full specs only. Plan step 8's "failure scenario per public entry point" and "non-goals/constraints" checks apply to full specs; micro-specs are checked against Requirement 3's minimums.
 6. **Consistent references.** Every repository document that states Plan writes memory, or that the full section list is required for 1-line fixes, is updated to match: `AGENTS.md`, `references/workflow.md`, `specs/memory/project-state.md` header line, and docs site pages `docs/public/docs/core/crewloop-plan.md`, `docs/public/docs/concepts/specs.md`, `docs/public/docs/tools/workflow-test.md`.
+7. **Contract test follows the new ownership.** The spec-063 contract test in `scripts/tests/test_automated_workflow.py` asserts the 10-entry rotation in Ship only, and asserts that Plan has no rotation instruction, forbids chat-log/Recent decisions writes, and keeps the single Blockers-line exception.
 
 ## Behavior / Flow
 
@@ -41,7 +42,7 @@ Remove the duplicated memory bookkeeping (Plan and Ship both write a chat-log an
 
 ## Constraints
 
-- Text-only change: SKILL.md files, references, templates, AGENTS.md, project memory header, docs-site markdown. No TypeScript, Python, or CLI behavior changes.
+- Text-only change: SKILL.md files, references, templates, AGENTS.md, project memory header, docs-site markdown, plus the Python contract test that encodes the memory rules. No TypeScript, CLI, or validator behavior changes.
 - Do not touch: context-selection, execution profiles, model routing, execution budgets/stop conditions, continuous-optimization, the Review dispatch, or skill read lists. These belong to later phases and to the continuous-optimization gate.
 - Do not edit installed skill copies outside the repository (e.g. `~/.claude/skills/`); they refresh via `crewloop install`.
 - Do not rewrite unrelated stale content in the touched docs pages (e.g. `crewloop:hub` references); change only the memory/spec statements.
@@ -68,7 +69,7 @@ Remove the duplicated memory bookkeeping (Plan and Ship both write a chat-log an
 - AC-04: Given `references/conventions.md`, when read, then it defines the micro-spec (applicability, four sections, minimums) and links `specs/templates/micro-spec.md`, and no longer contains the "Lightweight specs" rule.
 - AC-05: Given `skills/crewloop-plan/SKILL.md`, when read, then the anti-pattern no longer contains "non-trivial", step 7 offers full spec or micro-spec, and step 8 applies the matrix/constraints checks to full specs only.
 - AC-06: Given the repository docs listed in Requirement 6, when searched, then none states that Plan updates `project-state.md`/chat-logs at session end, and `specs.md` mentions the micro-spec.
-- AC-07: Given all SKILL.md files and the specs tree, when validated, then both validators pass.
+- AC-07: Given all SKILL.md files and the specs tree, when validated, then both validators and the Python workflow contract tests pass, and the contract test asserts Ship-only rotation (Requirement 7).
 
 ## Done When
 
@@ -78,4 +79,4 @@ Remove the duplicated memory bookkeeping (Plan and Ship both write a chat-log an
 - [x] AC-04 — proven by `grep -n -i "micro-spec\|Lightweight specs" references/conventions.md`
 - [x] AC-05 — proven by `grep -n -i "non-trivial\|micro-spec" skills/crewloop-plan/SKILL.md`
 - [x] AC-06 — proven by `grep -rn -i "chat-log at session end\|crewloop:plan during discovery\|crewloop:plan. updates" AGENTS.md references docs/public/docs specs/README.md specs/memory specs/shared` (excluding `chat-logs/`) returning nothing, and `grep -n -i "micro-spec" docs/public/docs/concepts/specs.md`
-- [x] AC-07 — proven by `python scripts/validate-skills.py` and `node packages/cli/bin/crewloop.js validate-specs --changed specs/features/04-workflow/spec-067-ship-owned-memory-and-micro-spec.md --changed specs/memory/project-state.md` both exiting 0
+- [x] AC-07 — proven by `python scripts/validate-skills.py` and `node packages/cli/bin/crewloop.js validate-specs --changed specs/features/04-workflow/spec-067-ship-owned-memory-and-micro-spec.md --changed specs/memory/project-state.md` and `python -m unittest scripts.tests.test_validate_skills scripts.tests.test_automated_workflow` all exiting 0

@@ -11,3 +11,4 @@
 - Deferred (later phases, need a decision on the benchmark gate first): conditional reads, quick lane, lean reviewer reads, spec approval checkpoint. `token-optimization-fixed-v1` exists only as scenario IDs; there are no executable task definitions.
 - Non-blocking leftovers: `docs/public/docs/concepts/specs.md` tree comment and bug-fix row, `docs/public/docs/contributing/conventions.md`, and `specs/shared/conventions.md` don't name the micro-spec yet.
 - Shipped on branch `fix/ship-owned-memory-micro-spec` without a version bump.
+- CI follow-up: the spec-063 contract test still required the rotation instruction in Plan. It now checks rotation in Ship only, and a new spec-067 test asserts Ship-only ownership. The spec AC-07 Done When now includes `python -m unittest scripts.tests...` (37 OK, 2 bash-only skipped on Windows). Isolated review: PASS.
