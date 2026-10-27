@@ -2,21 +2,22 @@
 
 > Always-read file. Updated by `crewloop:ship` when a task closes (`crewloop:plan` only adds a Blockers line for a stopped task).
 
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-27
 
 ## Module status
 
 | Module | Status | Last chat |
 |--------|--------|-----------|
-| Skills (6 core + docs) | ✅ Complete | 2026-10-23 |
+| Skills (6 core + docs) | ✅ Complete | 2026-10-27 |
 | CLI (`packages/cli/`) | ✅ Complete | 2026-10-23 |
 | Dashboard (`servers/dashboard/`) | ✅ Complete | 2026-08-10 |
 | Docs site (`docs/`) | ✅ Complete | 2026-10-23 |
-| Specs system | ✅ Complete | 2026-10-23 |
+| Specs system | ✅ Complete | 2026-10-27 |
 | Helper scripts | ✅ Complete | 2026-07-06 |
 
 ## Recent decisions
 
+- 2026-10-27: Spec 067 makes `crewloop:ship` the single owner of task-closing memory (Plan and Docs no longer write chat-logs or project-state; Plan only adds one Blockers line for a `[STOPPED]` task) and makes the micro-spec official with a template for low-risk fixes, resolving the "every task" vs "non-trivial" contradiction. Text-only; outside the continuous-optimization gate. Skill and spec validation passed; second isolated review PASS.
 - 2026-10-23: Spec 066 makes the post-publish npm visibility check informational: it polls with `--prefer-online` for up to ~5 minutes and warns instead of failing, because 0.22.2 and 0.23.0 published successfully but went red when the registry took ~100 s to show them. Contract tests pass on Windows and Linux; stub-npm behavioral tests pass on Linux and fail against the old step.
 - 2026-10-23: Specs 061, 063, 064 and 065 completed (062 superseded by 064). Review now runs in an isolated subagent context when the host supports it; `crewloop validate-specs` ships in the CLI (scoped with `--changed`, enforced in CI and called by Plan/Review/Ship); Recent decisions is capped at 10 with older entries in `decisions/decision-log.md`; install docs point to `@archznn/crewloop-skills`. CLI 132, dashboard 357 server + 92 UI + 5 preflight tests, both benchmarks, and skill/spec validation passed on Windows and on a clean Linux Node 22 install.
 - 2026-09-25: Spec 059 fixes dashboard acceptance-checker tests that incorrectly assumed the checked-in matrix remained incomplete. Fixtures now normalize all run-record fields and both matrix states. Workspace build/tests, both token benchmarks, acceptance checks, Python skill validation, and two consecutive browser preflights passed. The first browser preflight was 111/112; the optional workspace typecheck stalled and was interrupted. Refresh the manual matrix run record to the exact release candidate before publishing.
@@ -26,7 +27,6 @@
 - 2026-09-03: Spec 055 adds deterministic per-scenario token, duration, success-rate, and cost comparisons to the existing benchmark result and Markdown report. Aggregate adoption gates remain unchanged and recommendation-only. Focused benchmark/CLI tests passed `37/37`; the complete dashboard suite passed `357` server tests, `92` UI tests, and `5` preflight contract tests; typecheck and both fixed benchmarks passed. Python-based skill validation was unavailable because no interpreter is configured, and no `SKILL.md` file changed.
 - 2026-09-03: Spec 056 reconciles the active dashboard documentation with the current feature-spec retention contract. Specs 021 and 022 remain completed under `specs/features/04-workflow/`; README, published Ship docs, Spec 032, and the acceptance evidence map no longer require archiving normal completed features. Only Specs 031 and 032 remain active because the manual dashboard matrix is still open; no runtime files changed.
 - 2026-09-03: Spec 057 reconciles Spec 031's checklist with existing automated evidence. Focus, semantic-row, reduced-motion, and external-resource criteria are recorded as proven; visual hierarchy, complete event-state coverage, and full visual/contrast review remain manual. Specs 031 and 032 remain the only active specs, and no runtime files changed.
-- 2026-09-03: Spec 058 adds the opt-in, read-only `check:dashboard-acceptance` helper. It validates the run record, all 112 view cells, and all 12 interaction rows without fabricating manual results. Checker tests passed `5/5`; workspace tests passed `97` CLI, `357` server, `92` UI, and `5` preflight tests. The real matrix correctly returns `INCOMPLETE` with exit code `1`; the manual dashboard gate remains open.
 - Older decisions live in [decisions/decision-log.md](decisions/decision-log.md); read it only when a task touches a recorded topic.
 - See `specs/shared/adrs/adr-001..010-*.md` for the architectural history.
 
@@ -36,4 +36,4 @@
 
 ## Next task suggested
 
-- Regenerate `assets/images/crewloop-hero.png` with `scripts/generate_hero.py` on the machine that produced the original (the CTA text now says `@archznn/crewloop-skills`), deprecate the frozen `@archznn/crewloop-cli` package on npm, and update `scripts/npm-publish-dry-run.sh`, which still dry-runs the private CLI workspace. Keep both benchmark fixture sets synchronized with optimizer-policy changes; future architecture changes go through `specs/changes/rfc-NNN-*.md`.
+- Decide how to handle the continuous-optimization gate for the remaining "lanes" phases (conditional reads, quick lane, lean reviewer reads): either materialize the `token-optimization-fixed-v1` corpus (six executable tasks with fixed acceptance checks) or amend the gate through an RFC. Still pending from before: regenerate `assets/images/crewloop-hero.png`, deprecate `@archznn/crewloop-cli`, and update `scripts/npm-publish-dry-run.sh`.

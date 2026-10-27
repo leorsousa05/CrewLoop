@@ -3,9 +3,9 @@
 ---
 name: spec-067-ship-owned-memory-and-micro-spec
 domain: 04-workflow
-status: active
+status: completed
 created: 2026-10-27
-completed: null
+completed: 2026-10-27
 supersedes: []
 ---
 
