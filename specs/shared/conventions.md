@@ -9,7 +9,7 @@
 - ADRs: `specs/shared/adrs/adr-NNN-name.md` for accepted irreversible decisions.
 - Completed feature specs stay in `features/` (source of truth). Dead/rejected proposals go to `specs/archive/` with a reason in `specs/archive/README.md`.
 - Specs reference `shared/` content by link, never by copying.
-- `specs/memory/project-state.md` is read on every session and updated at session end.
+- `specs/memory/project-state.md` is read on every session and updated by CrewLoop Ship when a task closes.
 
 ## Commit conventions
 

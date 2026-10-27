@@ -45,8 +45,7 @@ Before taking any action, you MUST read the global conventions in [conventions.m
    - **Structure:** Features (`- **Name:** what it does.`), Quick start / install, runnable code examples, option tables.
    - **Visuals & Alerts:** Use GitHub alerts (`> [!NOTE]`), comparative tables, and collapsible `<details>` panels for long configs.
 4. **Validate Quality:** Verify no missing descriptions, non-runnable code snippets, or leftover default boilerplate.
-5. **Update Memory:** Append a short summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` when the session is documentation-only.
-6. **Auto-route when done:** Return to the invoking skill or default to `crewloop:plan`.
+5. **Auto-route when done:** Return to the invoking skill or default to `crewloop:plan`. Do not write chat-logs; `crewloop:ship` closes task memory.
 
 ---
 

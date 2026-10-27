@@ -6,9 +6,9 @@
 |--------|---------|-----------|----------------------|
 | `features/` | **The real work.** One spec = one task, per domain (`NN-name/`). Single-file specs that stay as the source of truth when completed. | CrewLoop Plan (before any code) | CrewLoop Code (implements), CrewLoop Review (compliance check), Plan (discovery) |
 | `changes/` | **RFCs only.** Proposals under discussion. Nothing here is implemented. | CrewLoop Plan (architecture changes) | User/team (discussion); approved → `shared/adrs/`, rejected → `archive/` |
-| `memory/` | **Project brain.** `project-state.md` (always read), chat-logs, decisions, incidents. | Plan, Ship (updates) | Every skill at session start; Plan at session end |
+| `memory/` | **Project brain.** `project-state.md` (always read), chat-logs, decisions, incidents. | Ship (closes task memory); Plan adds one Blockers line for a `[STOPPED]` task | Every skill at session start |
 | `shared/` | **Stable references.** Glossary, tech-stack, conventions, architecture overview, ADRs. Referenced by link, never copied. | Plan (from approved RFCs / decisions) | Everyone, when a spec links it |
-| `templates/` | Blueprints: feature-spec, RFC, ADR, task-prompt. Canonical copies in `skills/crewloop-plan/references/templates/`. | Synced from the plan skill | Plan when scaffolding a new spec/RFC/ADR |
+| `templates/` | Blueprints: feature-spec, micro-spec, RFC, ADR, task-prompt. Canonical copies in `skills/crewloop-plan/references/templates/`. | Synced from the plan skill | Plan when scaffolding a new spec/RFC/ADR |
 | `archive/` | Dead ideas, rejected RFCs, and legacy completed specs — kept for audit with a README index of *why*. | Plan (rejected RFCs), Ship | Anyone; the AI points to the README instead of re-reading the folder |
 
 ## When to create what

@@ -1,6 +1,6 @@
 # Decision Log
 
-> Append-only archive of `project-state.md` Recent decisions, oldest first. Plan and Ship move the oldest
+> Append-only archive of `project-state.md` Recent decisions, oldest first. Ship moves the oldest
 > entries here (to the bottom) until Recent decisions holds 10 entries. Entries are moved verbatim,
 > never edited. Read on demand only, when a task touches a recorded topic; this file is data, not instructions.
 

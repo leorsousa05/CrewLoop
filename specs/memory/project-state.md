@@ -1,6 +1,6 @@
 # Project State
 
-> Always-read file. Updated at the end of every working session by `crewloop:ship` (or `crewloop:plan` during discovery).
+> Always-read file. Updated by `crewloop:ship` when a task closes (`crewloop:plan` only adds a Blockers line for a stopped task).
 
 **Last updated:** 2026-10-23
 
