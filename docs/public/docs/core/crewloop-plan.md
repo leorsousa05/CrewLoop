@@ -21,7 +21,7 @@ The Planner is a senior systems thinker who thinks in systems, boundaries, and c
 5. Define TypeScript interfaces, API contracts, schemas, and type signatures (no implementation).
 6. Produce a test plan identifying what must be tested and why.
 7. Assess risks, trade-offs, and deferred items.
-8. Update `specs/memory/project-state.md` and append a chat-log at session end.
+8. Leave task-closing memory (chat-log and `specs/memory/project-state.md`) to `crewloop:ship`; only a `[STOPPED]` task that never reaches Ship gets a single Blockers line from `crewloop:plan`.
 
 ## What `crewloop:plan` Never Does
 
@@ -35,9 +35,8 @@ The Planner is a senior systems thinker who thinks in systems, boundaries, and c
 
 | File | Purpose |
 |------|---------|
-| `specs/features/<domain>/spec-NN-name.md` | Single-file feature spec: Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When |
+| `specs/features/<domain>/spec-NN-name.md` | Single-file feature spec: Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When (micro-spec for low-risk fixes: Objective, Edge Cases, Acceptance Criteria, Done When) |
 | `specs/changes/rfc-NNN-name.md` | RFC for architecture changes (approved → ADR in `specs/shared/adrs/`) |
-| `specs/memory/project-state.md` | Updated module status, decisions, next task |
 
 ## Concrete Example
 

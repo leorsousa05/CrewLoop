@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Specs
 
-A **spec** is the source of truth for a task. Every task, including 1-line bug fixes, gets a single-file feature spec before any code is written. No exceptions.
+A **spec** is the source of truth for a task. Every task, including 1-line bug fixes, gets a single-file feature spec before any code is written. No exceptions. Low-risk bug fixes and small tweaks may use a **micro-spec** (`specs/templates/micro-spec.md`): Objective with its scope limit, at least one failure scenario under Edge Cases, Acceptance Criteria, and Done When.
 
 ## Why specs exist
 
@@ -86,4 +86,4 @@ flowchart LR
 
 ## Project memory
 
-`specs/memory/project-state.md` is read at the start of every session and updated at session end. It records module status, recent decisions, blockers, and the suggested next task — the single file that prevents the agent from losing the plot between sessions.
+`specs/memory/project-state.md` is read at the start of every session and updated by `crewloop:ship` when a task closes. It records module status, recent decisions, blockers, and the suggested next task — the single file that prevents the agent from losing the plot between sessions.

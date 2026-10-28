@@ -198,7 +198,7 @@ User request → CrewLoop Plan → CrewLoop Design (if UI) → CrewLoop Code ⇄
 Rules — no exceptions:
 
 1. **`crewloop:plan` is the first mandatory delivery phase.** Every session starts here; it never routes directly to `crewloop:design` or `crewloop:code` without first creating a spec.
-2. **`crewloop:plan` creates a single-file feature spec** in `specs/features/<domain>/spec-NN-name.md` for every change — including 1-line bug fixes.
+2. **`crewloop:plan` creates a single-file feature spec** in `specs/features/<domain>/spec-NN-name.md` for every change — including 1-line bug fixes, which may use the micro-spec (`specs/templates/micro-spec.md`).
 3. **CrewLoop Design acts before CrewLoop Code** whenever the change involves a visual interface.
 4. **CrewLoop Code never does git operations** and never reviews its own code.
 5. **CrewLoop Review never writes code** and never runs git operations. Review runs in an isolated context when the host supports subagents (CrewLoop Code dispatches it to a fresh subagent); otherwise the report declares `same-context (not isolated)`.
@@ -235,9 +235,9 @@ Every change — no exceptions — gets a feature spec before any code or docume
 
 See `specs/README.md` for the folder map (who writes/reads `features/`, `changes/`, `memory/`, `shared/`, `templates/`, `archive/` and when) and `references/conventions.md` §Spec Folder Structure for the canonical tree and rules.
 
-In short: **one spec = one task**, written as a single file in `specs/features/<domain>/spec-NN-name.md` (Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When). Completed feature specs **stay** in `features/` as the source of truth. Architecture changes start as RFCs in `specs/changes/`; approved RFCs become ADRs in `specs/shared/adrs/`, rejected ones go to `specs/archive/` with a reason in its README.
+In short: **one spec = one task**, written as a single file in `specs/features/<domain>/spec-NN-name.md` (Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria, Done When; low-risk fixes may use the four-section micro-spec). Completed feature specs **stay** in `features/` as the source of truth. Architecture changes start as RFCs in `specs/changes/`; approved RFCs become ADRs in `specs/shared/adrs/`, rejected ones go to `specs/archive/` with a reason in its README.
 
-**Critical:** `specs/memory/project-state.md` is read at the start of every session and updated at session end. Never place spec files directly in `specs/` — always in a subfolder above.
+**Critical:** `specs/memory/project-state.md` is read at the start of every session and updated by CrewLoop Ship when a task closes (Ship is the single owner of chat-logs and project-state updates). Never place spec files directly in `specs/` — always in a subfolder above.
 
 ---
 

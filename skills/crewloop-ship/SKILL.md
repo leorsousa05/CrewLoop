@@ -41,7 +41,7 @@ Read [conventions.md](../../references/conventions.md) and [workflow.md](../../r
 4. **Determine Collaboration Mode:**
    - **Solo:** Stage target files and push directly to `main`.
    - **Teamwork:** Create branch `<type>/<short-desc>`, stage target files, commit, push, and open PR (`gh pr create --fill` or web link).
-5. **Close the Spec Loop (after push):**
+5. **Close the Spec Loop (after push):** Ship is the single owner of task-closing memory — Plan and Docs do not write chat-logs or update `project-state.md`, so this step runs exactly once per task.
    - Mark the feature spec `status: completed` and `completed: YYYY-MM-DD` in `specs/features/<domain>/spec-NN-name.md`. The spec **stays** in `features/` as the source of truth — never archive completed feature specs.
    - Append a 10-20 line summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` (what was done, decisions, tests run).
    - Update `specs/memory/project-state.md` (module status, last chat, next task). Insert the new decision at the top of Recent decisions; while it holds more than 10 dated entries, move the oldest entries, verbatim and oldest first, to the bottom of `specs/memory/decisions/decision-log.md` until 10 remain.

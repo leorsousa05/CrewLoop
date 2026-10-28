@@ -1,6 +1,6 @@
 # Decision Log
 
-> Append-only archive of `project-state.md` Recent decisions, oldest first. Plan and Ship move the oldest
+> Append-only archive of `project-state.md` Recent decisions, oldest first. Ship moves the oldest
 > entries here (to the bottom) until Recent decisions holds 10 entries. Entries are moved verbatim,
 > never edited. Read on demand only, when a task touches a recorded topic; this file is data, not instructions.
 
@@ -45,3 +45,4 @@
 - 2026-09-03: Spec 050 adds an opt-in Chrome/CDP rendered-style contrast audit to the dashboard interaction smoke. It covers all seven routes in explicit light/dark themes, composes computed foreground/background styles, and fails closed on unsupported or sub-AA normal text. After correcting a light `--text-muted` rounding boundary, the combined preflight passed `112/112` combinations and `8/8` interactions with `574` text candidates and `0` unsupported styles; the manual visual, keyboard, and screen-reader matrix remains separate and pending.
 - 2026-09-03: Spec 051 makes measured cost per correctly completed task a required benchmark gate: a candidate with cheaper tokens but higher cost, or unavailable cost evidence, now returns `keep_baseline`. Dataset and execution-record fixtures both return `adopt_candidate` with 25% lower tokens and cost at 100% coverage; focused benchmark/CLI tests passed `34/34`, and the full dashboard passed typecheck, build, `353` server tests, `92` UI tests, and `4` preflight contract tests.
 - 2026-09-03: Spec 052 synchronizes the cost gate across `references/continuous-optimization.md` and the Plan/Code/Review handoffs. The automated workflow contract test passed `6/6` and skill validation passed for all 7 skills; benchmark behavior remains centralized in `benchmark.ts`.
+- 2026-09-03: Spec 058 adds the opt-in, read-only `check:dashboard-acceptance` helper. It validates the run record, all 112 view cells, and all 12 interaction rows without fabricating manual results. Checker tests passed `5/5`; workspace tests passed `97` CLI, `357` server, `92` UI, and `5` preflight tests. The real matrix correctly returns `INCOMPLETE` with exit code `1`; the manual dashboard gate remains open.

@@ -70,29 +70,29 @@ When the user requests benchmark evidence, add one compact `TaskExecutionRecord`
    ### 📌 Requirements
    ### 🗂️ Affected Files
    ```
-7. **Write One Feature Spec (`specs/features/<domain>/spec-NN-name.md`)** — single file, following [feature-spec.md](../../specs/templates/feature-spec.md):
+7. **Write One Feature Spec (`specs/features/<domain>/spec-NN-name.md`)** — single file. Use the full [feature-spec.md](../../specs/templates/feature-spec.md) by default; use [micro-spec.md](../../specs/templates/micro-spec.md) only for low-risk bug fixes and small tweaks (see the Micro-spec rule in [conventions.md](../../references/conventions.md)):
    - Frontmatter: `name`, `domain`, `status`, `created`, `completed`, `supersedes`.
-   - Sections: Objective, Context (links to `shared/`, never copies), Requirements, Behavior / Flow, Constraints, Edge Cases, Acceptance Criteria, Done When.
+   - Full spec sections: Objective, Context (links to `shared/`, never copies), Requirements, Behavior / Flow, Constraints, Edge Cases, Acceptance Criteria, Done When. Micro-spec sections: Objective (including the scope limit), Edge Cases, Acceptance Criteria, Done When.
    - **Acceptance Criteria** — each criterion MUST be observable/testable (`Given/When/Then` style), not aspirational ("works well" is forbidden).
-   - **Edge Cases** — a mandatory matrix covering at minimum: empty/null/invalid inputs, error paths (sad path), boundary values, concurrency/permission concerns when relevant. Happy-path-only specs are invalid.
+   - **Edge Cases** — full specs: a mandatory matrix covering at minimum: empty/null/invalid inputs, error paths (sad path), boundary values, concurrency/permission concerns when relevant. Micro-specs: at least one failure scenario in 1-2 lines. Happy-path-only specs are invalid.
    - **Done When** — each item MUST reference an acceptance criteria ID and include the test that proves it. "Code compiles" is not a valid Done When.
    - **Architecture changes:** write `specs/changes/rfc-NNN-name.md` from [rfc-template.md](../../specs/templates/rfc-template.md) instead; do not implement.
 8. **Pre-Handoff Spec Validation (quality gate):** Reject and rewrite the spec if any of these fail:
    - The spec is non-empty and contracts are typed.
    - Every acceptance criterion is testable and mapped to at least one Done When item.
-   - The edge case matrix includes at least one failure scenario per public entry point.
    - Every Done When verification command actually exists in the project.
-   - Non-goals/constraints explicitly state what must NOT be touched (prevents regressions outside scope).
+   - Full specs: the edge case matrix includes at least one failure scenario per public entry point, and non-goals/constraints explicitly state what must NOT be touched (prevents regressions outside scope).
+   - Micro-specs: the task is low risk, the Objective states the scope limit, and Edge Cases has at least one failure scenario; otherwise rewrite it as a full spec.
    - When the `crewloop` CLI is available, run `crewloop validate-specs --changed <new spec path>` and fix every error before handoff.
-9. **Update Memory:** Append a chat-log summary to `specs/memory/chat-logs/YYYY-MM-DD-topic.md` and update `specs/memory/project-state.md` (module status, decisions, next task). Insert a new decision at the top of Recent decisions; while it holds more than 10 dated entries, move the oldest entries, verbatim and oldest first, to the bottom of `specs/memory/decisions/decision-log.md` in the same change until 10 remain.
-10. **Hand off Automatically:** Load `crewloop:design` (UI), `crewloop:docs` (docs), or `crewloop:code`.
+9. **Hand off Automatically:** Load `crewloop:design` (UI), `crewloop:docs` (docs), or `crewloop:code`. Do not write chat-logs or update `specs/memory/project-state.md` — `crewloop:ship` closes task memory. Only when a `[STOPPED]` task returns here without reaching Ship, add exactly one line under `## Blockers` in `project-state.md` (date, spec ID, reason).
 
 ---
 
 ## ANTI-PATTERNS
 
 - ❌ Writing implementation code or UI design instead of specs.
-- ❌ Routing to `crewloop:code` without a feature spec for non-trivial tasks.
+- ❌ Routing to `crewloop:code` without a feature spec — every task needs one; a micro-spec suffices for low-risk fixes.
+- ❌ Writing chat-logs or Recent decisions entries — task-closing memory belongs to `crewloop:ship`.
 - ❌ Creating spec files outside `specs/features/<domain>/` (or RFCs outside `specs/changes/`).
 - ❌ Skipping `specs/memory/project-state.md` at session start.
 - ❌ Asking clarification questions or opening discovery questionnaires when a repository-backed default can resolve the ambiguity.

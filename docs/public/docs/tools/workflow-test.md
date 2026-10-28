@@ -83,8 +83,8 @@ flowchart TD
 - **Inputs**: Project memory (`specs/memory/project-state.md`) and the task request.
 - **Verification Steps**:
   1. Verify a single-file feature spec `specs/features/<domain>/spec-NN-name.md` is created.
-  2. Confirm it contains Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria (AC-01…), and Done When.
-  3. Ensure `crewloop:plan` updates `specs/memory/project-state.md`.
+  2. Confirm it contains Objective, Context, Requirements, Behavior/Flow, Constraints, Edge Cases, Acceptance Criteria (AC-01…), and Done When (or, for a low-risk fix, the micro-spec's Objective, Edge Cases, Acceptance Criteria, and Done When).
+  3. Ensure `crewloop:plan` does not write chat-logs or update `specs/memory/project-state.md` (task-closing memory belongs to `crewloop:ship`).
   4. Verify the output follows the `CrewLoop Plan CLI Output` format.
 
 ### Deliverables & Boundary Verification
